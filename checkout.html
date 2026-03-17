@@ -189,10 +189,6 @@
                     <label class="field-label" for="f-tel">WhatsApp <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
                     <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" autocomplete="tel" />
                 </div>
-                <div>
-                    <label class="field-label" for="f-cpf">CPF <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
-                    <input id="f-cpf" type="text" class="fc" placeholder="000.000.000-00" oninput="maskCPF(this)" maxlength="14" />
-                </div>
             </div>
         </div>
 
@@ -493,13 +489,6 @@ function maskTel(el) {
     else if (v.length>6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/,'($1) $2-$3');
     else if (v.length>2) v = v.replace(/^(\d{2})(\d*)$/,'($1) $2');
     else if (v.length>0) v = '('+v;
-    el.value = v;
-}
-function maskCPF(el) {
-    let v = el.value.replace(/\D/g,'').slice(0,11);
-    if (v.length>9) v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d*)$/,'$1.$2.$3-$4');
-    else if (v.length>6) v = v.replace(/^(\d{3})(\d{3})(\d*)$/,'$1.$2.$3');
-    else if (v.length>3) v = v.replace(/^(\d{3})(\d*)$/,'$1.$2');
     el.value = v;
 }
 function maskCard(el) {
