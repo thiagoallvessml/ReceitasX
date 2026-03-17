@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
   INSERT INTO perfis (id, nome, updated_at)
-  VALUES (new.id, split_part(new.email, '@', 1), NOW())
+  VALUES (new.id, COALESCE(new.raw_user_meta_data->>'nome', split_part(new.email, '@', 1)), NOW())
   ON CONFLICT (id) DO NOTHING;
   RETURN new;
 END;
