@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -244,12 +244,32 @@ async function submitForm(e) {
             const confirm = document.getElementById('f-confirm').value;
             if (senha !== confirm) throw new Error('As senhas não coincidem.');
             if (!nome) throw new Error('Informe seu nome.');
+            console.log('[SIGNUP] Iniciando cadastro para:', email, '| nome:', nome);
             const { data, error } = await sb.auth.signUp({
                 email, password: senha,
                 options: { data: { nome } }
             });
-            if (error) throw error;
-            // Sem verificação de e-mail — entra direto
+            console.log('[SIGNUP] Resposta Supabase data:', JSON.stringify(data?.user?.id), 'error:', error?.message);
+            if (error) {
+                console.error('[SIGNUP] Erro completo:', error.status, error.message, JSON.stringify(error));
+                throw error;
+            }
+            console.log('[SIGNUP] User criado com id:', data?.user?.id, '| meta:', JSON.stringify(data?.user?.user_metadata));
+
+            // Criar perfil manualmente como backup (caso o trigger falhe)
+            if (data?.user?.id) {
+                try {
+                    const { error: perfErr } = await sb.from('perfis').upsert({
+                        id:         data.user.id,
+                        nome:       nome,
+                        updated_at: new Date().toISOString(),
+                    }, { onConflict: 'id' });
+                    console.log('[SIGNUP] Perfil upsert resultado:', perfErr ? perfErr.message : 'OK');
+                } catch(pe) {
+                    console.warn('[SIGNUP] Perfil upsert excecao:', pe);
+                }
+            }
+
             window.location.replace('index.html');
         }
     } catch (err) {
