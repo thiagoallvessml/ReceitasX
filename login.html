@@ -244,12 +244,13 @@ async function submitForm(e) {
             const confirm = document.getElementById('f-confirm').value;
             if (senha !== confirm) throw new Error('As senhas não coincidem.');
             if (!nome) throw new Error('Informe seu nome.');
-            const { error } = await sb.auth.signUp({
+            const { data, error } = await sb.auth.signUp({
                 email, password: senha,
                 options: { data: { nome } }
             });
             if (error) throw error;
-            showOk('Conta criada! Verifique seu e-mail para confirmar e depois faça login.');
+            // Sem verificação de e-mail — entra direto
+            window.location.replace('index.html');
         }
     } catch (err) {
         const msgs = {
