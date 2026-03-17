@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Entrar - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#0a0a0a" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        input { background-color:#111 !important; color:#f1f5f9 !important; border-color:#1E1E1E !important; }
+        input::placeholder { color:#334155 !important; }
+        input:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* Glow BG */
+        .bg-glow { position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0; }
+        .bg-glow::before { content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(37,244,244,.09) 0%,transparent 65%); }
+        .bg-glow::after  { content:'';position:absolute;bottom:-30%;right:-10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(37,244,244,.05) 0%,transparent 65%); }
+
+        /* Card */
+        .login-card { background:#111;border:1px solid #1E1E1E;border-radius:1.25rem;padding:2.25rem 2rem;width:100%;max-width:400px;margin:0 auto;position:relative;z-index:1;box-shadow:0 24px 64px rgba(0,0,0,.7); }
+
+        /* Tabs */
+        .auth-tabs { display:flex;background:#0a0a0a;border-radius:.65rem;padding:.2rem;gap:.2rem;margin-bottom:1.5rem; }
+        .auth-tab  { flex:1;padding:.55rem;border-radius:.5rem;border:none;background:transparent;color:#475569;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .auth-tab.active { background:#1A1A1A;color:#f1f5f9;box-shadow:0 1px 4px rgba(0,0,0,.4); }
+
+        /* Field */
+        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:.3rem;display:block; }
+        .fc { width:100%;padding:.75rem 1rem;border-radius:.7rem;border:1px solid #1E1E1E !important;background:#111 !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#334155 !important; }
+        .fc.error { border-color:rgba(248,113,113,.5) !important; }
+
+        /* Input icon wrap */
+        .input-wrap { position:relative; }
+        .input-wrap .iico { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#334155;font-size:1rem;pointer-events:none; }
+        .input-wrap input { padding-left:2.6rem !important; }
+        .input-wrap .eye  { position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:#334155;font-size:1rem;cursor:pointer;background:none;border:none;padding:0; }
+        .input-wrap .eye:hover { color:#64748b; }
+
+        /* Btn */
+        .btn-auth { width:100%;display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem;border-radius:.75rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,244,244,.3);transition:opacity .15s,box-shadow .2s; }
+        .btn-auth:hover { opacity:.9; }
+        .btn-auth:disabled { opacity:.45;cursor:not-allowed; }
+        .btn-auth .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* Google btn */
+        .btn-google { width:100%;display:flex;align-items:center;justify-content:center;gap:.55rem;padding:.8rem;border-radius:.75rem;border:1px solid #1E1E1E;background:#111;color:#f1f5f9;font-weight:600;font-size:.88rem;cursor:pointer;transition:border-color .15s,background .15s; }
+        .btn-google:hover { border-color:rgba(37,244,244,.3);background:#141414; }
+
+        /* Divider */
+        .divider { display:flex;align-items:center;gap:.75rem;color:#334155;font-size:.72rem;margin:.85rem 0; }
+        .divider::before,.divider::after { content:'';flex:1;border-top:1px solid #1E1E1E; }
+
+        /* Error msg */
+        .err-msg { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:.65rem;padding:.65rem .9rem;font-size:.78rem;color:#f87171;display:none;margin-bottom:.85rem; }
+        .err-msg.show { display:flex;align-items:center;gap:.4rem; }
+        .err-msg .material-symbols-outlined { font-size:.9rem;flex-shrink:0; }
+
+        /* Success msg */
+        .ok-msg { background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:.65rem;padding:.65rem .9rem;font-size:.78rem;color:#34d399;display:none;margin-bottom:.85rem; }
+        .ok-msg.show { display:flex;align-items:center;gap:.4rem; }
+
+        /* Spinner */
+        .spinner { width:1rem;height:1rem;border:2px solid rgba(10,10,10,.3);border-top-color:#0a0a0a;border-radius:50%;animation:spin .6s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+        .login-card { animation:fadeUp .35s ease both; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<div class="bg-glow"></div>
+
+<!-- Logo -->
+<div style="position:relative;z-index:1;text-align:center;margin-bottom:1.5rem">
+    <div style="display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.25rem;background:#111;border:1px solid #1E1E1E;border-radius:9999px;margin-bottom:.65rem">
+        <span class="material-symbols-outlined" style="color:#25f4f4;font-size:1.2rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">kitchen</span>
+        <span style="font-size:.95rem;font-weight:800;color:#f1f5f9">ReceitasX</span>
+    </div>
+    <p style="font-size:.82rem;color:#475569">O app de precificação para empreendedoras de alimentos</p>
+</div>
+
+<!-- Card -->
+<div class="login-card">
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"   onclick="setTab('login')">Entrar</button>
+        <button class="auth-tab"         id="tab-signup"  onclick="setTab('signup')">Criar Conta</button>
+    </div>
+
+    <!-- Errors / Success -->
+    <div id="err-msg" class="err-msg">
+        <span class="material-symbols-outlined">error</span>
+        <span id="err-txt"></span>
+    </div>
+    <div id="ok-msg" class="ok-msg">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span id="ok-txt"></span>
+    </div>
+
+    <!-- Form -->
+    <form id="auth-form" onsubmit="submitForm(event)" style="display:flex;flex-direction:column;gap:.75rem">
+
+        <!-- Nome (apenas signup) -->
+        <div id="field-nome" style="display:none">
+            <label class="field-label" for="f-nome">Nome</label>
+            <div class="input-wrap">
+                <span class="iico material-symbols-outlined">person</span>
+                <input id="f-nome" type="text" class="fc" placeholder="Seu nome" autocomplete="given-name" />
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="field-label" for="f-email">E-mail</label>
+            <div class="input-wrap">
+                <span class="iico material-symbols-outlined">email</span>
+                <input id="f-email" type="email" class="fc" placeholder="seu@email.com" autocomplete="email" required />
+            </div>
+        </div>
+
+        <!-- Senha -->
+        <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem">
+                <span class="field-label" style="margin-bottom:0">Senha</span>
+                <button type="button" id="link-forgot" style="font-size:.72rem;color:#25f4f4;background:none;border:none;cursor:pointer;padding:0;display:none" onclick="enviarReset()">Esqueci minha senha</button>
+            </div>
+            <div class="input-wrap">
+                <span class="iico material-symbols-outlined">lock</span>
+                <input id="f-senha" type="password" class="fc" placeholder="••••••••" autocomplete="current-password" required minlength="6" />
+                <button type="button" class="eye" onclick="toggleSenha()">
+                    <span class="material-symbols-outlined" id="eye-ico">visibility</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Confirmar senha (apenas signup) -->
+        <div id="field-confirm" style="display:none">
+            <label class="field-label" for="f-confirm">Confirmar Senha</label>
+            <div class="input-wrap">
+                <span class="iico material-symbols-outlined">lock_reset</span>
+                <input id="f-confirm" type="password" class="fc" placeholder="••••••••" autocomplete="new-password" />
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-auth" id="btn-submit" style="margin-top:.25rem">
+            <span class="material-symbols-outlined" id="btn-ico">login</span>
+            <span id="btn-txt">Entrar</span>
+        </button>
+
+    </form>
+
+    <div class="divider">ou acesse com e-mail acima</div>
+
+    <p style="font-size:.7rem;color:#334155;text-align:center;margin-top:1.1rem;line-height:1.5">
+        Ao continuar, você aceita nossos <a href="#" style="color:#25f4f4">Termos de Uso</a> e <a href="#" style="color:#25f4f4">Política de Privacidade</a>.
+    </p>
+
+</div>
+
+<script>
+/* ─── TAB ────────────────────────────────────────────────────────── */
+let currentTab = 'login';
+
+function setTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-login').classList.toggle('active', tab==='login');
+    document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+    document.getElementById('field-nome').style.display    = tab==='signup' ? 'block' : 'none';
+    document.getElementById('field-confirm').style.display = tab==='signup' ? 'block' : 'none';
+    document.getElementById('link-forgot').style.display   = tab==='login'  ? 'block' : 'none';
+    document.getElementById('btn-ico').textContent         = tab==='login'  ? 'login' : 'person_add';
+    document.getElementById('btn-txt').textContent         = tab==='login'  ? 'Entrar' : 'Criar Conta';
+    document.getElementById('f-senha').autocomplete        = tab==='login'  ? 'current-password' : 'new-password';
+    clearMessages();
+}
+
+function toggleSenha() {
+    const inp = document.getElementById('f-senha');
+    const ico = document.getElementById('eye-ico');
+    if (inp.type==='password') { inp.type='text'; ico.textContent='visibility_off'; }
+    else { inp.type='password'; ico.textContent='visibility'; }
+}
+
+function clearMessages() {
+    document.getElementById('err-msg').className = 'err-msg';
+    document.getElementById('ok-msg').className  = 'ok-msg';
+}
+function showErr(msg) {
+    document.getElementById('err-txt').textContent = msg;
+    document.getElementById('err-msg').className = 'err-msg show';
+    document.getElementById('ok-msg').className  = 'ok-msg';
+}
+function showOk(msg) {
+    document.getElementById('ok-txt').textContent = msg;
+    document.getElementById('ok-msg').className = 'ok-msg show';
+    document.getElementById('err-msg').className = 'err-msg';
+}
+
+function setLoading(on) {
+    const btn = document.getElementById('btn-submit');
+    const ico = document.getElementById('btn-ico');
+    const txt = document.getElementById('btn-txt');
+    btn.disabled = on;
+    if (on) {
+        ico.style.display = 'none';
+        txt.insertAdjacentHTML('beforebegin','<div class="spinner" id="spin"></div>');
+        txt.textContent = 'Aguarde...';
+    } else {
+        document.getElementById('spin')?.remove();
+        ico.style.display = '';
+        txt.textContent = currentTab==='login' ? 'Entrar' : 'Criar Conta';
+    }
+}
+
+/* ─── SUBMIT ─────────────────────────────────────────────────────── */
+async function submitForm(e) {
+    e.preventDefault();
+    clearMessages();
+    const email = document.getElementById('f-email').value.trim();
+    const senha = document.getElementById('f-senha').value;
+    setLoading(true);
+
+    try {
+        if (currentTab === 'login') {
+            const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+            if (error) throw error;
+            window.location.replace('index.html');
+        } else {
+            const nome    = document.getElementById('f-nome').value.trim();
+            const confirm = document.getElementById('f-confirm').value;
+            if (senha !== confirm) throw new Error('As senhas não coincidem.');
+            if (!nome) throw new Error('Informe seu nome.');
+            const { error } = await sb.auth.signUp({
+                email, password: senha,
+                options: { data: { nome } }
+            });
+            if (error) throw error;
+            showOk('Conta criada! Verifique seu e-mail para confirmar e depois faça login.');
+        }
+    } catch (err) {
+        const msgs = {
+            'Invalid login credentials': 'E-mail ou senha incorretos.',
+            'Email not confirmed': 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.',
+            'User already registered': 'Este e-mail já está cadastrado. Tente fazer login.',
+            'Password should be at least 6 characters': 'A senha precisa ter no mínimo 6 caracteres.',
+            'Unable to validate email address: invalid format': 'E-mail inválido.',
+            'Signup requires a valid password': 'Digite uma senha válida.',
+        };
+        showErr(msgs[err.message] || err.message);
+    } finally {
+        setLoading(false);
+    }
+}
+
+/* ─── GOOGLE ─────────────────────────────────────────────────────── */
+async function loginGoogle() {
+    const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/index.html' }
+    });
+    if (error) showErr(error.message);
+}
+
+/* ─── RESET SENHA ────────────────────────────────────────────────── */
+async function enviarReset() {
+    const email = document.getElementById('f-email').value.trim();
+    if (!email) { showErr('Digite seu e-mail primeiro.'); return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/perfil.html'
+    });
+    if (error) showErr(error.message);
+    else showOk('Link de redefinição enviado! Verifique seu e-mail.');
+}
+
+/* ─── INIT: se já logado, redireciona ───────────────────────────── */
+(async () => {
+    const session = await getSession();
+    if (session) window.location.replace('index.html');
+    // Mostrar link esqueci senha no login
+    document.getElementById('link-forgot').style.display = 'block';
+})();
+</script>
+</body>
+</html>

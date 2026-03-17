@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Checkout · Acesso Vitalício - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#0a0a0a","card-dark":"#141414","border-dark":"#1E1E1E" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; color:#f1f5f9; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        input,select { background-color:#111 !important; color:#f1f5f9 !important; border-color:#1E1E1E !important; }
+        input::placeholder { color:#334155 !important; }
+        input:focus,select:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#64748b;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* layout */
+        .checkout-grid { display:grid;grid-template-columns:1fr;gap:1.5rem;max-width:900px;margin:0 auto;padding:1.5rem; }
+        @media(min-width:720px) { .checkout-grid { grid-template-columns:1fr 380px; } }
+
+        /* card base */
+        .ck-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden; }
+        .ck-head { display:flex;align-items:center;gap:.65rem;padding:.85rem 1.15rem;border-bottom:1px solid #1E1E1E; }
+        .ck-head-num { width:1.6rem;height:1.6rem;border-radius:50%;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:#25f4f4;flex-shrink:0; }
+        .ck-head h3 { font-size:.88rem;font-weight:700; }
+        .ck-body { padding:1.1rem 1.15rem; }
+
+        /* field */
+        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:.3rem;display:block; }
+        .fc { width:100%;padding:.72rem .9rem;border-radius:.65rem;border:1px solid #1E1E1E !important;background:#111 !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#334155 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.5) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fc.error { border-color:rgba(248,113,113,.5) !important; }
+        .field-err { font-size:.68rem;color:#f87171;margin-top:.25rem;display:none; }
+        .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:.65rem; }
+        .select-wrap { position:relative; }
+        .select-wrap select { -webkit-appearance:none;appearance:none; }
+        .select-wrap .chev { position:absolute;right:.85rem;top:50%;transform:translateY(-50%);pointer-events:none;color:#475569;font-size:1rem; }
+
+        /* cupom */
+        .cupom-row { display:flex;gap:.5rem; }
+        .cupom-input { flex:1; }
+        .btn-aplicar { padding:.72rem 1.1rem;border-radius:.65rem;border:1px solid rgba(37,244,244,.35);background:transparent;color:#25f4f4;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s; }
+        .btn-aplicar:hover { background:rgba(37,244,244,.08);border-color:#25f4f4; }
+        .btn-aplicar:disabled { opacity:.4;cursor:not-allowed; }
+        .cupom-feedback { display:flex;align-items:center;gap:.4rem;font-size:.75rem;margin-top:.5rem;font-weight:600; }
+        .cupom-feedback.ok  { color:#34d399; }
+        .cupom-feedback.err { color:#f87171; }
+        .cupom-feedback .material-symbols-outlined { font-size:.9rem; }
+
+        /* pagamento tabs */
+        .pay-tabs { display:flex;gap:.5rem;margin-bottom:1.1rem; }
+        .pay-tab { flex:1;display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.75rem .5rem;border-radius:.75rem;border:1px solid #1E1E1E;background:transparent;color:#475569;cursor:pointer;font-size:.72rem;font-weight:700;transition:all .15s;position:relative; }
+        .pay-tab:hover { border-color:rgba(37,244,244,.3);color:#94a3b8; }
+        .pay-tab.active { border-color:rgba(37,244,244,.5);background:rgba(37,244,244,.06);color:#25f4f4; }
+        .pay-tab .material-symbols-outlined { font-size:1.35rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .pay-tab .check { position:absolute;top:.35rem;right:.35rem;width:1rem;height:1rem;border-radius:50%;background:#25f4f4;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s; }
+        .pay-tab.active .check { opacity:1; }
+        .pay-tab .check .material-symbols-outlined { font-size:.65rem;color:#0a0a0a;font-variation-settings:'FILL' 1,'wght' 800,'GRAD' 0,'opsz' 24; }
+
+        /* cartão fields */
+        .card-fields { display:flex;flex-direction:column;gap:.65rem;animation:fadeIn .2s ease both; }
+        .number-wrap { position:relative; }
+        .number-wrap .card-ico { position:absolute;right:.85rem;top:50%;transform:translateY(-50%);display:flex;gap:.3rem; }
+        .number-wrap .card-ico .material-symbols-outlined { font-size:1rem;color:#334155;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .number-wrap input { padding-right:3.5rem !important; }
+
+        /* pix section */
+        .pix-box { background:#0f0f0f;border:1px solid #1E1E1E;border-radius:.75rem;padding:1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem;animation:fadeIn .2s ease both; }
+        .qr-placeholder { width:140px;height:140px;border-radius:.75rem;background:linear-gradient(135deg,#1a1a1a,#111);border:1px solid #2A2A2A;display:flex;align-items:center;justify-content:center; }
+        .qr-placeholder .material-symbols-outlined { font-size:3rem;color:#1E1E1E;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .pix-code-wrap { width:100%;background:#111;border:1px solid #1E1E1E;border-radius:.65rem;padding:.7rem 1rem;display:flex;align-items:center;gap:.5rem; }
+        .pix-code { flex:1;font-size:.7rem;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace; }
+        .btn-copy { display:flex;align-items:center;gap:.3rem;padding:.4rem .8rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.72rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0; }
+        .btn-copy:hover { border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .btn-copy .material-symbols-outlined { font-size:.85rem; }
+
+        /* order summary */
+        .order-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden;position:sticky;top:5rem; }
+        .order-head { padding:.85rem 1.15rem;border-bottom:1px solid #1E1E1E;font-size:.88rem;font-weight:700; }
+        .order-body { padding:1.1rem 1.15rem;display:flex;flex-direction:column;gap:.85rem; }
+        .order-product { display:flex;gap:.75rem;align-items:center; }
+        .order-product-ico { width:3rem;height:3rem;border-radius:.65rem;background:linear-gradient(135deg,rgba(37,244,244,.1),rgba(37,244,244,.04));border:1px solid rgba(37,244,244,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .order-product-ico .material-symbols-outlined { font-size:1.4rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .order-product-name { font-size:.85rem;font-weight:700; }
+        .order-product-sub  { font-size:.72rem;color:#475569;margin-top:.15rem; }
+        .order-divider { border:none;border-top:1px solid #1E1E1E; }
+        .order-row { display:flex;justify-content:space-between;align-items:center;font-size:.82rem; }
+        .order-row.total { font-size:.95rem;font-weight:800; }
+        .order-row .label { color:#64748b; }
+        .order-row .val { font-weight:600; }
+        .order-row.discount .val { color:#34d399; }
+        .order-row.total .val { color:#25f4f4;font-size:1.2rem; }
+        .order-row.old-price .val { color:#475569;text-decoration:line-through;font-weight:400; }
+
+        /* btn comprar */
+        .btn-comprar { width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.9rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:1rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,244,244,.3);transition:opacity .15s,transform .15s,box-shadow .2s;margin-top:.35rem; }
+        .btn-comprar:hover { opacity:.92;box-shadow:0 6px 32px rgba(37,244,244,.45); }
+        .btn-comprar:active { transform:scale(.97); }
+        .btn-comprar:disabled { opacity:.45;cursor:not-allowed;transform:none; }
+        .btn-comprar .material-symbols-outlined { font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* trust badges */
+        .trust-badges { display:flex;justify-content:center;gap:1.25rem;flex-wrap:wrap;padding:.85rem 1.15rem;border-top:1px solid #111; }
+        .trust-badge { display:flex;align-items:center;gap:.3rem;font-size:.65rem;color:#334155;font-weight:600; }
+        .trust-badge .material-symbols-outlined { font-size:.85rem;color:#334155;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* sucesso */
+        .sucesso-wrap { display:none;flex-direction:column;align-items:center;text-align:center;padding:3rem 1.5rem;gap:1.25rem; }
+        .sucesso-ico { width:4.5rem;height:4.5rem;border-radius:50%;background:rgba(37,244,244,.1);border:2px solid rgba(37,244,244,.4);display:flex;align-items:center;justify-content:center; }
+        .sucesso-ico .material-symbols-outlined { font-size:2.5rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* loading spinner */
+        .spinner { width:1.1rem;height:1.1rem;border:2px solid rgba(10,10,10,.3);border-top-color:#0a0a0a;border-radius:50%;animation:spin .6s linear infinite;display:none; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+    </style>
+</head>
+<body>
+
+<!-- ══ Header ═══════════════════════════════════════════════════════ -->
+<header style="position:sticky;top:0;z-index:40;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1A1A1A">
+    <div style="max-width:900px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <div style="flex:1">
+            <span style="font-size:.9rem;font-weight:700">ReceitasX</span>
+            <span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.7rem;color:#475569;margin-left:.5rem">
+                <span class="material-symbols-outlined" style="font-size:.75rem;color:#34d399;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">lock</span>
+                Checkout Seguro
+            </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:#34d399;font-weight:600">
+            <span class="material-symbols-outlined" style="font-size:.85rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">https</span>
+            SSL Seguro
+        </div>
+    </div>
+</header>
+
+<!-- ══ Checkout Grid ═════════════════════════════════════════════════ -->
+<div class="checkout-grid">
+
+    <!-- ── Coluna Esquerda ─────────────────────────────────────────── -->
+    <div style="display:flex;flex-direction:column;gap:1.15rem">
+
+        <!-- 1. Dados Pessoais -->
+        <div class="ck-card">
+            <div class="ck-head">
+                <div class="ck-head-num">1</div>
+                <h3>Seus Dados</h3>
+            </div>
+            <div class="ck-body" style="display:flex;flex-direction:column;gap:.7rem">
+                <div class="grid-2">
+                    <div>
+                        <label class="field-label" for="f-nome">Nome</label>
+                        <input id="f-nome" type="text" class="fc" placeholder="Seu nome" autocomplete="given-name" />
+                        <p class="field-err" id="err-nome">Informe seu nome.</p>
+                    </div>
+                    <div>
+                        <label class="field-label" for="f-sobrenome">Sobrenome</label>
+                        <input id="f-sobrenome" type="text" class="fc" placeholder="Sobrenome" autocomplete="family-name" />
+                    </div>
+                </div>
+                <div>
+                    <label class="field-label" for="f-email">E-mail</label>
+                    <input id="f-email" type="email" class="fc" placeholder="seu@email.com" autocomplete="email" />
+                    <p class="field-err" id="err-email">Informe um e-mail válido.</p>
+                </div>
+                <div>
+                    <label class="field-label" for="f-tel">WhatsApp</label>
+                    <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" autocomplete="tel" />
+                </div>
+                <div>
+                    <label class="field-label" for="f-cpf">CPF</label>
+                    <input id="f-cpf" type="text" class="fc" placeholder="000.000.000-00" oninput="maskCPF(this)" maxlength="14" />
+                    <p class="field-err" id="err-cpf">Informe um CPF válido.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Cupom de Desconto -->
+        <div class="ck-card">
+            <div class="ck-head">
+                <div class="ck-head-num">2</div>
+                <h3>Cupom de Desconto</h3>
+            </div>
+            <div class="ck-body">
+                <div class="cupom-row">
+                    <input id="f-cupom" type="text" class="fc cupom-input" placeholder="Digite seu cupom..." autocomplete="off" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter') aplicarCupom()" />
+                    <button class="btn-aplicar" onclick="aplicarCupom()" id="btn-aplicar">Aplicar</button>
+                </div>
+                <div id="cupom-feedback" class="cupom-feedback" style="display:none"></div>
+            </div>
+        </div>
+
+        <!-- 3. Pagamento -->
+        <div class="ck-card">
+            <div class="ck-head">
+                <div class="ck-head-num">3</div>
+                <h3>Forma de Pagamento</h3>
+            </div>
+            <div class="ck-body">
+                <!-- Tabs -->
+                <div class="pay-tabs">
+                    <button class="pay-tab active" id="tab-pix" onclick="selectPay('pix')">
+                        <div class="check"><span class="material-symbols-outlined">check</span></div>
+                        <span class="material-symbols-outlined">qr_code_2</span>
+                        Pix
+                    </button>
+                    <button class="pay-tab" id="tab-cartao" onclick="selectPay('cartao')">
+                        <div class="check"><span class="material-symbols-outlined">check</span></div>
+                        <span class="material-symbols-outlined">credit_card</span>
+                        Cartão de Crédito
+                    </button>
+                </div>
+
+                <!-- PIX -->
+                <div id="pix-section" class="pix-box">
+                    <p style="font-size:.82rem;color:#64748b">Escaneie o QR Code ou copie o código Pix:<br/>O acesso é liberado automaticamente após o pagamento.</p>
+                    <div class="qr-placeholder">
+                        <span class="material-symbols-outlined">qr_code_2</span>
+                    </div>
+                    <div class="pix-code-wrap">
+                        <span class="pix-code" id="pix-code">00020126580014br.gov.bcb.pix0136a629532e-7693-4846-b8a5...</span>
+                        <button class="btn-copy" onclick="copiarPix()">
+                            <span class="material-symbols-outlined" id="copy-ico">content_copy</span>
+                            Copiar
+                        </button>
+                    </div>
+                    <p style="font-size:.72rem;color:#334155">O código Pix expira em <strong style="color:#f1f5f9">15 minutos</strong></p>
+                </div>
+
+                <!-- CARTÃO -->
+                <div id="cartao-section" class="card-fields" style="display:none">
+                    <div>
+                        <label class="field-label" for="f-card-num">Número do Cartão</label>
+                        <div class="number-wrap">
+                            <input id="f-card-num" type="text" class="fc" placeholder="0000 0000 0000 0000" maxlength="19" oninput="maskCard(this)" />
+                            <div class="card-ico">
+                                <span class="material-symbols-outlined">credit_card</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="field-label" for="f-card-nome">Nome no Cartão</label>
+                        <input id="f-card-nome" type="text" class="fc" placeholder="NOME COMO NO CARTÃO" oninput="this.value=this.value.toUpperCase()" />
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <label class="field-label" for="f-card-val">Validade</label>
+                            <input id="f-card-val" type="text" class="fc" placeholder="MM/AA" maxlength="5" oninput="maskExp(this)" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="f-card-cvv">CVV</label>
+                            <input id="f-card-cvv" type="text" class="fc" placeholder="123" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="field-label" for="f-parcelas">Parcelamento</label>
+                        <div class="select-wrap">
+                            <select id="f-parcelas" class="fc" onchange="updateParcelas()">
+                                <option value="1">1x de R$ 46,90 (sem juros)</option>
+                                <option value="2">2x de R$ 23,45 (sem juros)</option>
+                                <option value="3">3x de R$ 15,63 (sem juros)</option>
+                            </select>
+                            <span class="chev material-symbols-outlined">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Coluna Direita: Order Summary ───────────────────────────── -->
+    <div>
+        <div class="order-card" id="order-card">
+            <div class="order-head">Resumo do Pedido</div>
+            <div class="order-body">
+
+                <!-- Produto -->
+                <div class="order-product">
+                    <div class="order-product-ico">
+                        <span class="material-symbols-outlined">workspace_premium</span>
+                    </div>
+                    <div>
+                        <p class="order-product-name">ReceitasX — Acesso Vitalício</p>
+                        <p class="order-product-sub">Acesso completo · Sem mensalidades</p>
+                    </div>
+                </div>
+
+                <hr class="order-divider" />
+
+                <!-- Preços -->
+                <div style="display:flex;flex-direction:column;gap:.5rem">
+                    <div class="order-row old-price">
+                        <span class="label">Preço original</span>
+                        <span class="val">R$ 97,00</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Desconto</span>
+                        <span class="val" style="color:#34d399">- R$ 50,10</span>
+                    </div>
+                    <div class="order-row discount" id="row-cupom" style="display:none">
+                        <span class="label">Cupom <span id="cupom-aplicado" style="color:#25f4f4;font-weight:700"></span></span>
+                        <span class="val" id="val-cupom-desc">- R$ 0,00</span>
+                    </div>
+                </div>
+
+                <hr class="order-divider" />
+
+                <div class="order-row total">
+                    <span class="label" style="color:#f1f5f9">Total</span>
+                    <span class="val" id="total-val">R$ 46,90</span>
+                </div>
+
+                <!-- Parcelamento info -->
+                <p style="font-size:.7rem;color:#334155;text-align:center" id="parcelas-info">ou em até 3x de R$ 15,63 sem juros</p>
+
+                <!-- Botão comprar -->
+                <button class="btn-comprar" id="btn-comprar" onclick="finalizarCompra()">
+                    <div class="spinner" id="spinner"></div>
+                    <span class="material-symbols-outlined" id="btn-ico">lock</span>
+                    <span id="btn-txt">Finalizar Compra</span>
+                </button>
+
+            </div>
+
+            <!-- Trust badges -->
+            <div class="trust-badges">
+                <div class="trust-badge"><span class="material-symbols-outlined">lock</span> Compra Segura</div>
+                <div class="trust-badge"><span class="material-symbols-outlined">verified_user</span> 7 dias de garantia</div>
+                <div class="trust-badge"><span class="material-symbols-outlined">bolt</span> Acesso imediato</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══ Tela de Sucesso ═══════════════════════════════════════════════ -->
+<div id="sucesso-wrap" class="sucesso-wrap">
+    <div class="sucesso-ico">
+        <span class="material-symbols-outlined">check_circle</span>
+    </div>
+    <div>
+        <p style="font-size:1.5rem;font-weight:800;margin-bottom:.4rem">Compra Confirmada! 🎉</p>
+        <p style="color:#64748b;font-size:.9rem;line-height:1.6">Seu acesso vitalício foi ativado com sucesso.<br/>Verifique seu e-mail para mais detalhes.</p>
+    </div>
+    <div style="background:#141414;border:1px solid rgba(37,244,244,.2);border-radius:.85rem;padding:1.1rem 1.5rem;text-align:center;max-width:340px;width:100%">
+        <p style="font-size:.72rem;font-weight:700;color:#25f4f4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Código de Acesso</p>
+        <p style="font-size:1.2rem;font-weight:900;color:#f1f5f9;letter-spacing:.1em" id="cod-acesso">—</p>
+    </div>
+    <button onclick="location.href='index.html'" style="display:flex;align-items:center;gap:.4rem;padding:.8rem 2rem;border-radius:9999px;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.9rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,244,244,.3)">
+        <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">rocket_launch</span>
+        Começar a usar o ReceitasX
+    </button>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ─── ESTADO ─────────────────────────────────────────────────────── */
+const PRECO_BASE  = 46.90;
+const PRECO_ORIG  = 97.00;
+let precoFinal    = PRECO_BASE;
+let cupomAplicado = null;
+let metodoPag     = 'pix';
+
+// Cupons válidos: { codigo: { tipo:'%'|'R$', valor } }
+const CUPONS = {
+    'BEMVINDA10': { tipo:'%',  valor:10,  label:'10% OFF' },
+    'LANCAMENTO': { tipo:'%',  valor:20,  label:'20% OFF' },
+    'AMIGA5'    : { tipo:'R$', valor:5,   label:'R$ 5,00 OFF' },
+    'DESCONTO15' : { tipo:'%', valor:15,  label:'15% OFF' },
+};
+
+/* ─── MASKS ──────────────────────────────────────────────────────── */
+function maskTel(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,11);
+    if (v.length>10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3');
+    else if (v.length>6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/,'($1) $2-$3');
+    else if (v.length>2) v = v.replace(/^(\d{2})(\d*)$/,'($1) $2');
+    else if (v.length>0) v = '('+v;
+    el.value = v;
+}
+function maskCPF(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,11);
+    if (v.length>9) v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d*)$/,'$1.$2.$3-$4');
+    else if (v.length>6) v = v.replace(/^(\d{3})(\d{3})(\d*)$/,'$1.$2.$3');
+    else if (v.length>3) v = v.replace(/^(\d{3})(\d*)$/,'$1.$2');
+    el.value = v;
+}
+function maskCard(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,16);
+    v = v.replace(/(\d{4})(?=\d)/g,'$1 ');
+    el.value = v;
+}
+function maskExp(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,4);
+    if (v.length>2) v = v.slice(0,2)+'/'+v.slice(2);
+    el.value = v;
+}
+
+/* ─── PAGAMENTO TABS ─────────────────────────────────────────────── */
+function selectPay(m) {
+    metodoPag = m;
+    document.getElementById('tab-pix').classList.toggle('active', m==='pix');
+    document.getElementById('tab-cartao').classList.toggle('active', m==='cartao');
+    document.getElementById('pix-section').style.display    = m==='pix'    ? 'flex' : 'none';
+    document.getElementById('cartao-section').style.display = m==='cartao' ? 'flex' : 'none';
+    updateBtnTxt();
+}
+function updateBtnTxt() {
+    const t = document.getElementById('btn-txt');
+    if (metodoPag === 'pix') t.textContent = 'Gerar Pix';
+    else t.textContent = 'Finalizar Compra';
+}
+
+/* ─── CUPOM ──────────────────────────────────────────────────────── */
+function aplicarCupom() {
+    const codigo = document.getElementById('f-cupom').value.trim().toUpperCase();
+    const fb     = document.getElementById('cupom-feedback');
+    if (!codigo) { showFeedback('error','Informe um código de cupom.'); return; }
+
+    const cupom = CUPONS[codigo];
+    if (!cupom) {
+        cupomAplicado = null;
+        precoFinal = PRECO_BASE;
+        showFeedback('error','Cupom inválido ou expirado.');
+        document.getElementById('row-cupom').style.display = 'none';
+        updateTotal();
+        return;
+    }
+
+    let desc = cupom.tipo === '%' ? PRECO_BASE * (cupom.valor/100) : cupom.valor;
+    desc = Math.min(desc, PRECO_BASE);
+    precoFinal = Math.max(0, PRECO_BASE - desc);
+    cupomAplicado = { codigo, desc, label:cupom.label };
+
+    showFeedback('ok', `✅ Cupom "${codigo}" aplicado — ${cupom.label}`);
+    document.getElementById('row-cupom').style.display   = 'flex';
+    document.getElementById('cupom-aplicado').textContent = codigo;
+    document.getElementById('val-cupom-desc').textContent = '- ' + fmtR(desc);
+    document.getElementById('f-cupom').disabled = true;
+    document.getElementById('btn-aplicar').disabled = true;
+    updateTotal();
+}
+
+function showFeedback(tipo, msg) {
+    const el = document.getElementById('cupom-feedback');
+    el.style.display = 'flex';
+    el.className     = 'cupom-feedback ' + tipo;
+    el.innerHTML     = `<span class="material-symbols-outlined">${tipo==='ok'?'check_circle':'cancel'}</span>${msg}`;
+}
+
+/* ─── TOTAL ──────────────────────────────────────────────────────── */
+function fmtR(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function updateTotal() {
+    document.getElementById('total-val').textContent = fmtR(precoFinal);
+    updateParcelas();
+}
+function updateParcelas() {
+    const sel = document.getElementById('f-parcelas');
+    const n   = parseInt(sel?.value || 1);
+    const por = precoFinal / 3;
+    document.getElementById('parcelas-info').textContent =
+        `ou em até 3x de ${fmtR(por)} sem juros`;
+
+    // Atualizar opções do select com valor atualizado
+    if (sel) {
+        sel.options[0].text = `1x de ${fmtR(precoFinal)} (sem juros)`;
+        sel.options[1].text = `2x de ${fmtR(precoFinal/2)} (sem juros)`;
+        sel.options[2].text = `3x de ${fmtR(precoFinal/3)} (sem juros)`;
+    }
+}
+
+/* ─── VALIDAÇÃO ──────────────────────────────────────────────────── */
+function validar() {
+    let ok = true;
+    const nome  = document.getElementById('f-nome').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const cpf   = document.getElementById('f-cpf').value.replace(/\D/g,'');
+
+    if (!nome) {
+        document.getElementById('f-nome').classList.add('error');
+        document.getElementById('err-nome').style.display='block'; ok=false;
+    } else {
+        document.getElementById('f-nome').classList.remove('error');
+        document.getElementById('err-nome').style.display='none';
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('f-email').classList.add('error');
+        document.getElementById('err-email').style.display='block'; ok=false;
+    } else {
+        document.getElementById('f-email').classList.remove('error');
+        document.getElementById('err-email').style.display='none';
+    }
+    if (cpf.length !== 11) {
+        document.getElementById('f-cpf').classList.add('error');
+        document.getElementById('err-cpf').style.display='block'; ok=false;
+    } else {
+        document.getElementById('f-cpf').classList.remove('error');
+        document.getElementById('err-cpf').style.display='none';
+    }
+    return ok;
+}
+
+/* ─── FINALIZAR ──────────────────────────────────────────────────── */
+function finalizarCompra() {
+    if (!validar()) return;
+
+    const btn     = document.getElementById('btn-comprar');
+    const spinner = document.getElementById('spinner');
+    const bico    = document.getElementById('btn-ico');
+    const btxt    = document.getElementById('btn-txt');
+
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    bico.style.display    = 'none';
+    btxt.textContent      = 'Processando...';
+
+    // Simulação de 2.2s
+    setTimeout(() => {
+        document.querySelector('.checkout-grid').style.display = 'none';
+        const sw = document.getElementById('sucesso-wrap');
+        sw.style.display = 'flex';
+        const cod = 'RX-' + Math.random().toString(36).substring(2,8).toUpperCase();
+        document.getElementById('cod-acesso').textContent = cod;
+
+        // Salvar acesso no localStorage
+        localStorage.setItem('receitasx_acesso', JSON.stringify({
+            tipo:'vitalicio', codigo:cod,
+            data: new Date().toISOString(),
+            email: document.getElementById('f-email').value.trim(),
+        }));
+    }, 2200);
+}
+
+/* ─── PIX COPIAR ─────────────────────────────────────────────────── */
+function copiarPix() {
+    const code = document.getElementById('pix-code').textContent;
+    navigator.clipboard.writeText(code).catch(()=>{});
+    document.getElementById('copy-ico').textContent = 'check';
+    showToast('Código Pix copiado!');
+    setTimeout(()=>{ document.getElementById('copy-ico').textContent='content_copy'; },2000);
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type==='error'?'cancel':'check_circle';
+    document.getElementById('toast-icon').style.color = type==='error'?'#f87171':'#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+updateParcelas();
+</script>
+</body>
+</html>

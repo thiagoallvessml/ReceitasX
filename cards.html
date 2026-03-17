@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cards - PrecificaX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .nav-card {
+            transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+        }
+        .nav-card:hover {
+            border-color: rgba(37, 244, 244, 0.4);
+            box-shadow: 0 0 0 1px rgba(37, 244, 244, 0.1);
+        }
+        .nav-card:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen p-6 space-y-8">
+    <!-- ── Operacional ──────────────────────────────────────── -->
+    <section>
+        <div class="flex items-center gap-2 mb-4 px-1">
+            <span class="material-symbols-outlined text-primary text-sm">precision_manufacturing</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Operacional</h2>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            <!-- Gestão Insumos -->
+            <a href="gestao-insumos.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">package_2</span>
+                <span class="text-xs font-medium text-center">Gestão Insumos</span>
+            </a>
+            <!-- Equipamentos -->
+            <a href="equipamentos.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">construction</span>
+                <span class="text-xs font-medium text-center">Equipamentos</span>
+            </a>
+            <!-- Receitas -->
+            <a href="receitas.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">menu_book</span>
+                <span class="text-xs font-medium text-center">Receitas</span>
+            </a>
+            <!-- Produtos -->
+            <a href="gestao-produtos.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">shopping_basket</span>
+                <span class="text-xs font-medium text-center">Produtos</span>
+            </a>
+            <!-- Combos -->
+            <a href="combos.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">layers</span>
+                <span class="text-xs font-medium text-center">Combos</span>
+            </a>
+            <!-- Precificação -->
+            <a href="precificacao.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">sell</span>
+                <span class="text-xs font-medium text-center">Precificação</span>
+            </a>
+        </div>
+    </section>
+    <!-- ── Financeiro ───────────────────────────────────────── -->
+    <section>
+        <div class="flex items-center gap-2 mb-4 px-1">
+            <span class="material-symbols-outlined text-primary text-sm">payments</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Financeiro</h2>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            <!-- Despesas -->
+            <a href="despesas.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">receipt_long</span>
+                <span class="text-xs font-medium text-center">Despesas</span>
+            </a>
+        </div>
+    </section>
+    <!-- ── Gestão & Estoque ─────────────────────────────────── -->
+    <section>
+        <div class="flex items-center gap-2 mb-4 px-1">
+            <span class="material-symbols-outlined text-primary text-sm">inventory_2</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Gestão & Estoque</h2>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            <!-- Cadastrar -->
+            <a href="gerenciar-insumos.html"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">add_circle</span>
+                <span class="text-xs font-medium text-center">Cadastrar</span>
+            </a>
+        </div>
+    </section>
+    <!-- ── Sistema ──────────────────────────────────────────── -->
+    <section>
+        <div class="flex items-center gap-2 mb-4 px-1">
+            <span class="material-symbols-outlined text-primary text-sm">settings_suggest</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Sistema</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Configurações -->
+            <a href="configuracoes.html"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">settings</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Configurações</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ajustes gerais e empresa</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Indique e Ganhe -->
+            <a href="indique-ganhe.html"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">redeem</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Indique e Ganhe</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ganhe descontos no plano</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Meu Perfil -->
+            <a href="perfil.html"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Meu Perfil</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua conta e segurança</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+        </div>
+    </section>
+</body>
+</html>

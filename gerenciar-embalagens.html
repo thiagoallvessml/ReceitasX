@@ -1,0 +1,567 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gerenciar Embalagens - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+        input, select, textarea { background-color: #1E1E1E !important; color: #f1f5f9 !important; border-color: #2A2A2A !important; }
+        input::placeholder, textarea::placeholder { color: #475569 !important; }
+        input:focus, select:focus, textarea:focus { border-color: rgba(37,244,244,0.5) !important; box-shadow: 0 0 0 3px rgba(37,244,244,0.07) !important; outline: none !important; }
+
+        /* search */
+        .search-box { width:100%; padding:.65rem 1rem .65rem 2.6rem; border-radius:.65rem; border:1px solid #2A2A2A; background:#1E1E1E; color:#f1f5f9; font-size:.875rem; outline:none; transition:border-color .2s; }
+
+        /* chip */
+        .chip { padding:.3rem .85rem; border-radius:9999px; font-size:.72rem; font-weight:600; border:1px solid #2A2A2A; background:transparent; color:#64748b; cursor:pointer; transition:all .15s; white-space:nowrap; }
+        .chip:hover { border-color:rgba(37,244,244,.4); color:#25f4f4; }
+        .chip.active { background:rgba(37,244,244,.12); border-color:rgba(37,244,244,.5); color:#25f4f4; }
+
+        /* stats grid: 2 col mobile, row desktop */
+        .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:.625rem; }
+        @media(min-width:640px) { .stats-grid { display:flex; flex-direction:row; gap:.75rem; } .stats-grid .stat-card { flex:1; } }
+        .stat-card { background:#1E1E1E; border:1px solid #2A2A2A; border-radius:.875rem; padding:1rem 1.25rem; flex:1; min-width:0; }
+
+        /* back btn */
+        .btn-back { display:flex; align-items:center; gap:.3rem; color:#94a3b8; font-size:.85rem; cursor:pointer; transition:color .15s; background:none; border:none; padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* action btn */
+        .action-btn { width:1.9rem; height:1.9rem; border-radius:.45rem; border:1px solid #2A2A2A; background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#64748b; transition:all .15s; flex-shrink:0; }
+        .action-btn:hover { color:#25f4f4; border-color:rgba(37,244,244,.4); background:rgba(37,244,244,.06); }
+        .action-btn.delete:hover { color:#f87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.06); }
+        .action-btn .material-symbols-outlined { font-size:.95rem; }
+
+        /* FAB */
+        .fab { position:fixed; bottom:1.5rem; right:1.5rem; display:flex; align-items:center; gap:.45rem; padding:.7rem 1.2rem; border-radius:9999px; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; font-weight:700; font-size:.85rem; border:none; cursor:pointer; box-shadow:0 4px 24px rgba(37,244,244,.35); transition:box-shadow .2s,transform .15s; z-index:30; }
+        .fab:hover { box-shadow:0 6px 32px rgba(37,244,244,.5); }
+        .fab:active { transform:scale(.96); }
+        .fab .material-symbols-outlined { font-size:1.1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* btn-new header */
+        .btn-new { display:flex; align-items:center; gap:.4rem; padding:.55rem 1rem; border-radius:.6rem; border:none; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; font-size:.82rem; font-weight:700; cursor:pointer; white-space:nowrap; box-shadow:0 3px 16px rgba(37,244,244,.22); transition:opacity .2s,box-shadow .2s; }
+        .btn-new:hover { opacity:.9; box-shadow:0 5px 24px rgba(37,244,244,.38); }
+        .btn-new .material-symbols-outlined { font-size:1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* sort btn */
+        .sort-btn { display:flex; align-items:center; gap:.3rem; padding:.45rem .7rem; border-radius:.55rem; border:1px solid #2A2A2A; background:transparent; color:#64748b; font-size:.75rem; cursor:pointer; transition:all .15s; }
+        .sort-btn:hover { color:#25f4f4; border-color:rgba(37,244,244,.4); }
+        .sort-btn.desc .material-symbols-outlined { transform:rotate(180deg); }
+        .sort-btn .material-symbols-outlined { font-size:.9rem; transition:transform .2s; }
+
+        /* card mobile */
+        .embal-card { background:#1E1E1E; border:1px solid #2A2A2A; border-radius:.875rem; padding:1rem; display:flex; flex-direction:column; gap:.65rem; transition:border-color .2s,box-shadow .2s; }
+        .embal-card:hover { border-color:rgba(37,244,244,.2); box-shadow:0 4px 20px rgba(0,0,0,.4); }
+        .card-header { display:flex; align-items:flex-start; gap:.75rem; }
+        .card-icon { width:2.5rem; height:2.5rem; border-radius:.6rem; background:rgba(168,85,247,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .card-icon .material-symbols-outlined { font-size:1.2rem; color:#a855f7; }
+        .card-kv { display:flex; flex-wrap:wrap; gap:.5rem .75rem; }
+        .kv { display:flex; flex-direction:column; }
+        .kv-lbl { font-size:.6rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#64748b; }
+        .kv-val { font-size:.82rem; font-weight:600; color:#f1f5f9; }
+        .card-actions { display:flex; gap:.5rem; border-top:1px solid #2A2A2A; padding-top:.65rem; }
+        .btn-detail { flex:1; display:flex; align-items:center; justify-content:center; gap:.3rem; padding:.5rem; border-radius:.55rem; border:1px solid #2A2A2A; background:transparent; color:#94a3b8; font-size:.75rem; font-weight:600; cursor:pointer; transition:all .15s; }
+        .btn-detail:hover { border-color:rgba(37,244,244,.4); color:#25f4f4; background:rgba(37,244,244,.05); }
+        .btn-detail .material-symbols-outlined { font-size:.9rem; }
+        .btn-edit-card { flex:1; display:flex; align-items:center; justify-content:center; gap:.3rem; padding:.5rem; border-radius:.55rem; border:none; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; font-size:.75rem; font-weight:700; cursor:pointer; transition:opacity .15s; }
+        .btn-edit-card:hover { opacity:.88; }
+        .btn-edit-card .material-symbols-outlined { font-size:.9rem; }
+
+        /* table desktop */
+        .tbl { width:100%; border-collapse:collapse; font-size:.82rem; }
+        .tbl thead th { padding:.65rem 1rem; text-align:left; font-size:.62rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#64748b; border-bottom:1px solid #2A2A2A; white-space:nowrap; }
+        .tbl tbody tr { border-bottom:1px solid #1a1a1a; transition:background .12s; }
+        .tbl tbody tr:hover { background:rgba(37,244,244,.03); }
+        .tbl tbody td { padding:.75rem 1rem; vertical-align:middle; }
+
+        /* empty */
+        .empty-state { display:flex; flex-direction:column; align-items:center; padding:4rem 1rem; color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3.5rem; margin-bottom:1rem; color:#2A2A2A; }
+
+        /* toast */
+        #toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px); background:#1E1E1E; border:1px solid rgba(37,244,244,.35); color:#f1f5f9; padding:.65rem 1.2rem; border-radius:.75rem; font-size:.85rem; font-weight:500; display:flex; align-items:center; gap:.5rem; z-index:200; opacity:0; transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s; box-shadow:0 8px 32px rgba(0,0,0,.5); white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+        /* delete modal */
+        .del-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:120; opacity:0; pointer-events:none; transition:opacity .25s; padding:1rem; }
+        .del-modal-bg.open { opacity:1; pointer-events:auto; }
+        .del-modal { background:#1E1E1E; border:1px solid #2A2A2A; border-radius:1rem; padding:1.5rem; max-width:360px; width:100%; animation:fadeUp .2s ease both; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+        /* â”€â”€ Modal Cadastrar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        .modal-sheet-bg { position:fixed; inset:0; background:rgba(0,0,0,.65); display:flex; align-items:stretch; justify-content:flex-end; z-index:110; opacity:0; pointer-events:none; transition:opacity .3s; }
+        .modal-sheet-bg.open { opacity:1; pointer-events:auto; }
+        .modal-sheet { background:#141414; border-left:1px solid #2A2A2A; width:100%; max-width:480px; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .38s cubic-bezier(.4,0,.2,1); overflow:hidden; }
+        .modal-sheet-bg.open .modal-sheet { transform:translateX(0); }
+        @media(max-width:600px) { .modal-sheet { max-width:100%; border-left:none; border-radius:1.1rem 1.1rem 0 0; border-top:1px solid #2A2A2A; height:96%; align-self:flex-end; } .modal-sheet-bg { align-items:flex-end; } }
+        .ms-head { display:flex; align-items:center; gap:.75rem; padding:1rem 1.25rem; border-bottom:1px solid #2A2A2A; flex-shrink:0; background:#141414; }
+        .ms-body { flex:1; overflow-y:auto; padding:1.25rem; display:flex; flex-direction:column; gap:1.1rem; }
+        .ms-foot { padding:.85rem 1.25rem; border-top:1px solid #2A2A2A; flex-shrink:0; background:#141414; display:flex; gap:.65rem; }
+
+        /* form controls */
+        .field-label { font-size:.64rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#25f4f4; margin-bottom:.35rem; display:block; }
+        .fc { width:100%; padding:.7rem .9rem; border-radius:.7rem; border:1px solid #2A2A2A !important; background:#1E1E1E !important; color:#f1f5f9 !important; font-size:.875rem; outline:none; transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#475569 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.55) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fc.error { border-color:rgba(248,113,113,.6) !important; }
+        textarea.fc { resize:none; min-height:72px; }
+        .select-wrap { position:relative; }
+        .select-wrap select { -webkit-appearance:none; appearance:none; }
+        .select-wrap .chev { position:absolute; right:.85rem; top:50%; transform:translateY(-50%); pointer-events:none; color:#64748b; font-size:1rem; }
+        select.select-placeholder { color:#475569 !important; }
+        select.select-placeholder.filled { color:#f1f5f9 !important; }
+
+        /* save/cancel */
+        .btn-save { flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem; padding:.8rem; border-radius:.75rem; border:none; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; font-weight:700; font-size:.9rem; cursor:pointer; box-shadow:0 3px 16px rgba(37,244,244,.22); transition:opacity .2s; }
+        .btn-save:hover { opacity:.9; }
+        .btn-cancel { padding:.8rem 1.25rem; border-radius:.75rem; border:1px solid #2A2A2A; background:transparent; color:#94a3b8; font-weight:600; font-size:.9rem; cursor:pointer; transition:all .15s; }
+        .btn-cancel:hover { border-color:rgba(37,244,244,.35); color:#25f4f4; }
+        .iconbox { width:2.25rem; height:2.25rem; border-radius:.55rem; background:rgba(168,85,247,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .iconbox .material-symbols-outlined { font-size:1.1rem; color:#a855f7; }
+
+        @media(min-width:1024px) {
+            .layout-desktop { display:grid; grid-template-columns:220px 1fr; gap:1.5rem; }
+            .sidebar { display:block !important; }
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
+
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Embalagens</h1>
+        <!-- busca desktop -->
+        <div class="hidden md:flex" style="position:relative;width:220px">
+            <span class="material-symbols-outlined" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-size:1rem;color:#475569;pointer-events:none">search</span>
+            <input id="search-desktop" type="search" class="search-box" style="padding-left:2.3rem;border-radius:.6rem" placeholder="Buscar embalagem..." oninput="syncSearch(this.value)" />
+        </div>
+        <button class="btn-new hidden md:flex" onclick="openCadastrar()">
+            <span class="material-symbols-outlined">add</span>
+            Nova Embalagem
+        </button>
+    </div>
+</header>
+
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<main class="max-w-7xl mx-auto px-4 py-5">
+
+    <!-- Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-1">Total</p>
+            <p class="text-2xl font-bold" id="stat-total">0</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-1">Custo mÃ©dio</p>
+            <p class="text-2xl font-bold" style="color:#25f4f4" id="stat-custo">R$ 0</p>
+        </div>
+    </div>
+
+    <!-- Busca + filtros mobile -->
+    <div class="md:hidden mb-3" style="position:relative">
+        <span class="material-symbols-outlined" style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);font-size:1.05rem;color:#475569;pointer-events:none">search</span>
+        <input id="search-mobile" type="search" class="search-box" style="padding-left:2.55rem" placeholder="Buscar embalagem..." oninput="syncSearch(this.value)" />
+    </div>
+
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
+        <button id="sort-btn" class="sort-btn ml-auto" onclick="toggleSort()">
+            <span class="material-symbols-outlined">sort_by_alpha</span>
+            <span class="hidden sm:inline text-xs">A-Z</span>
+        </button>
+    </div>
+
+
+        <div>
+            <!-- Tabela desktop -->
+            <div class="hidden md:block bg-card-dark border border-border-dark rounded-xl overflow-hidden">
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th>Embalagem</th>
+                            <th>Quantidade/Pacote</th>
+                            <th>Custo</th>
+                            <th>Custo/Un</th>
+                            <th>Fornecedor</th>
+                            <th style="text-align:right">AÃ§Ãµes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr id="table-empty"><td colspan="5" style="text-align:center;color:#475569;padding:3rem">Nenhuma embalagem encontrada</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Cards mobile -->
+            <div id="cards-list" class="md:hidden grid gap-3"></div>
+
+            <!-- Empty state mobile -->
+            <div id="empty-state" class="empty-state md:hidden hidden">
+                <span class="material-symbols-outlined">package_2</span>
+                <p class="font-semibold text-slate-400 text-lg">Nenhuma embalagem</p>
+                <p class="text-sm mt-1">Adicione sua primeira embalagem!</p>
+                <button class="btn-new mt-5" onclick="openCadastrar()">
+                    <span class="material-symbols-outlined">add</span>
+                    Nova Embalagem
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- â•â• FAB â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<button class="fab md:hidden" onclick="openCadastrar()">
+    <span class="material-symbols-outlined">add</span>
+    Nova Embalagem
+</button>
+
+<!-- â•â• Modal Cadastrar â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="modal-cadastrar" class="modal-sheet-bg" role="dialog" aria-modal="true">
+  <div class="modal-sheet">
+    <div class="ms-head">
+      <div class="iconbox">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span>
+      </div>
+      <div style="flex:1">
+        <p id="modal-title" class="font-bold text-sm">Nova Embalagem</p>
+        <p class="text-xs text-slate-400">Preencha os dados da embalagem</p>
+      </div>
+      <button onclick="closeCadastrar()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center" aria-label="Fechar">
+        <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+      </button>
+    </div>
+
+    <div class="ms-body">
+      <input type="hidden" id="f-id" value="" />
+
+      <!-- Nome -->
+      <div>
+        <label class="field-label" for="f-nome">Nome da Embalagem</label>
+        <input id="f-nome" type="text" class="fc" placeholder="Ex: Caixinha de Acetato 500ml" autocomplete="off" />
+        <p id="f-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome.</p>
+      </div>
+
+      <!-- Quantidade + Custo -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+        <div>
+          <label class="field-label" for="f-qtd">Quantidade/Pacote</label>
+          <input id="f-qtd" type="number" min="1" class="fc" placeholder="Ex: 50" />
+        </div>
+        <div>
+          <label class="field-label" for="f-custo">Custo R$</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
+            <input id="f-custo" type="number" min="0" step="0.01" class="fc" placeholder="0,00" style="padding-left:2.2rem" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Fornecedor -->
+      <div>
+        <label class="field-label" for="f-fornecedor">Fornecedor <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+        <input id="f-fornecedor" type="text" class="fc" placeholder="Ex: Amazon, Mercado Livre..." />
+      </div>
+
+      <!-- ObservaÃ§Ãµes -->
+      <div>
+        <label class="field-label" for="f-obs">ObservaÃ§Ãµes <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+        <textarea id="f-obs" class="fc" placeholder="Notas adicionais..."></textarea>
+      </div>
+    </div>
+
+    <div class="ms-foot">
+      <button type="button" class="btn-cancel" onclick="closeCadastrar()">Cancelar</button>
+      <button type="button" class="btn-save" id="btn-salvar" onclick="salvarEmbalagem()">
+        <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+        <span id="btn-salvar-txt">Salvar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- â•â• Modal Excluir â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="modal-excluir" class="del-modal-bg">
+  <div class="del-modal">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <div style="width:2.5rem;height:2.5rem;border-radius:.6rem;background:rgba(248,113,113,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span class="material-symbols-outlined" style="color:#f87171">delete</span>
+      </div>
+      <div>
+        <p class="font-bold">Excluir Embalagem</p>
+        <p class="text-xs text-slate-400 mt-0.5">Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
+      </div>
+    </div>
+    <p class="text-sm text-slate-300 mb-5">Deseja excluir <strong id="del-nome" class="text-white"></strong>?</p>
+    <div style="display:flex;gap:.65rem">
+      <button onclick="closeExcluir()" class="btn-cancel" style="flex:1">Cancelar</button>
+      <button onclick="confirmarExcluir()" style="flex:1;padding:.75rem;border-radius:.7rem;border:none;background:rgba(248,113,113,.15);color:#f87171;font-weight:700;font-size:.9rem;cursor:pointer;border:1px solid rgba(248,113,113,.3)">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="toast" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">AÃ§Ã£o realizada!</span>
+</div>
+
+<!-- â•â• Script â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<script>
+/* â”€â”€â”€ ESTADO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+let embalagens   = [];
+let searchQuery  = '';
+let sortAZ       = true;
+let pendingDelId = null;
+let userId       = null;
+
+/* â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function fmtR(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+/* â”€â”€â”€ SUPABASE: CARREGAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+async function loadEmbalagens() {
+    try {
+        const { data, error } = await sb.from('embalagens').select('*').order('nome', { ascending: true });
+        if (error) throw error;
+        embalagens = data || [];
+        renderList();
+    } catch (err) {
+        showToast('Erro ao carregar: ' + err.message, 'error');
+    }
+}
+
+/* â”€â”€â”€ STATS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function updateStats(list) {
+    document.getElementById('stat-total').textContent = list.length;
+    const avg = list.length ? list.reduce((s,e) => s + (e.preco||0), 0) / list.length : 0;
+    document.getElementById('stat-custo').textContent = 'R$ ' + avg.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+/* â”€â”€â”€ FILTRO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function getFiltered() {
+    return embalagens
+        .filter(e => (e.nome||'').toLowerCase().includes(searchQuery.toLowerCase()))
+        .sort((a,b) => sortAZ ? (a.nome||'').localeCompare(b.nome||'') : (b.nome||'').localeCompare(a.nome||''));
+}
+
+/* â”€â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function renderList() {
+    const list  = getFiltered();
+    const tbody = document.getElementById('table-body');
+    const cards = document.getElementById('cards-list');
+    const empty = document.getElementById('empty-state');
+    updateStats(list);
+
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#475569;padding:3rem">Nenhuma embalagem encontrada</td></tr>`;
+        cards.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+
+    tbody.innerHTML = list.map(e => `
+    <tr>
+        <td>
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <div style="width:2rem;height:2rem;border-radius:.45rem;background:rgba(37,244,244,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <span class="material-symbols-outlined" style="font-size:.95rem;color:#25f4f4">package_2</span>
+                </div>
+                <span class="font-medium">${e.nome}</span>
+            </div>
+        </td>
+        <td class="text-slate-300">â€”</td>
+        <td class="font-semibold" style="color:#25f4f4">${fmtR(e.preco)}</td>
+        <td class="text-slate-400">â€”</td>
+        <td class="text-slate-400 text-xs">â€”</td>
+        <td>
+            <div style="display:flex;gap:.4rem;justify-content:flex-end">
+                <button class="action-btn" title="Editar" onclick="editarEmbalagem(${e.id})">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="action-btn delete" title="Excluir" onclick="openExcluir(${e.id})">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+        </td>
+    </tr>`).join('');
+
+    cards.innerHTML = list.map(e => `
+    <div class="embal-card">
+        <div class="card-header">
+            <div class="card-icon" style="background:rgba(37,244,244,.08)">
+                <span class="material-symbols-outlined" style="color:#25f4f4">package_2</span>
+            </div>
+            <div style="flex:1;min-width:0">
+                <p class="font-semibold text-sm leading-snug truncate">${e.nome}</p>
+            </div>
+            <button class="action-btn delete" onclick="openExcluir(${e.id})">
+                <span class="material-symbols-outlined">delete</span>
+            </button>
+        </div>
+        <div class="card-kv">
+            <div class="kv"><span class="kv-lbl">Custo</span><span class="kv-val" style="color:#25f4f4">${fmtR(e.preco)}</span></div>
+        </div>
+        <div class="card-actions">
+            <button class="btn-detail" onclick="editarEmbalagem(${e.id})">
+                <span class="material-symbols-outlined">edit</span> Editar
+            </button>
+        </div>
+    </div>`).join('');
+}
+
+/* â”€â”€â”€ AÃ‡Ã•ES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function syncSearch(val) {
+    searchQuery = val;
+    document.getElementById('search-mobile').value  = val;
+    document.getElementById('search-desktop').value = val;
+    renderList();
+}
+function toggleSort() {
+    sortAZ = !sortAZ;
+    document.getElementById('sort-btn').classList.toggle('desc', !sortAZ);
+    renderList();
+}
+
+/* â”€â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function resetCadastrar() {
+    document.getElementById('f-id').value         = '';
+    document.getElementById('f-nome').value        = '';
+    document.getElementById('f-qtd').value         = '';
+    document.getElementById('f-custo').value       = '';
+    document.getElementById('f-fornecedor').value  = '';
+    document.getElementById('f-obs').value         = '';
+    document.getElementById('f-nome').classList.remove('error');
+    document.getElementById('f-nome-err').style.display = 'none';
+}
+
+function openCadastrar(id) {
+    resetCadastrar();
+    if (id) {
+        const e = embalagens.find(x => x.id === id);
+        if (!e) return;
+        document.getElementById('f-id').value        = e.id;
+        document.getElementById('f-nome').value      = e.nome || '';
+        document.getElementById('f-custo').value     = e.preco || '';
+        document.getElementById('modal-title').textContent    = 'Editar Embalagem';
+        document.getElementById('btn-salvar-txt').textContent = 'Atualizar';
+    } else {
+        document.getElementById('modal-title').textContent    = 'Nova Embalagem';
+        document.getElementById('btn-salvar-txt').textContent = 'Salvar';
+    }
+    document.getElementById('modal-cadastrar').classList.add('open');
+    setTimeout(() => document.getElementById('f-nome').focus(), 80);
+}
+function closeCadastrar() { document.getElementById('modal-cadastrar').classList.remove('open'); }
+
+async function salvarEmbalagem() {
+    const nome = document.getElementById('f-nome').value.trim();
+    if (!nome) {
+        document.getElementById('f-nome').classList.add('error');
+        document.getElementById('f-nome-err').style.display = 'block';
+        document.getElementById('f-nome').focus();
+        return;
+    }
+    document.getElementById('f-nome').classList.remove('error');
+    document.getElementById('f-nome-err').style.display = 'none';
+
+    const payload = {
+        nome,
+        preco:   parseFloat(document.getElementById('f-custo').value) || 0,
+        user_id: userId,
+    };
+    const idVal = document.getElementById('f-id').value;
+    try {
+        if (idVal) {
+            const { data, error } = await sb.from('embalagens').update(payload).eq('id', parseInt(idVal)).select().single();
+            if (error) throw error;
+            embalagens = embalagens.map(e => e.id === parseInt(idVal) ? data : e);
+            showToast(`"${nome}" atualizada!`);
+        } else {
+            const { data, error } = await sb.from('embalagens').insert(payload).select().single();
+            if (error) throw error;
+            embalagens.unshift(data);
+            showToast(`"${nome}" cadastrada!`);
+        }
+        renderList();
+        closeCadastrar();
+    } catch (err) {
+        showToast('Erro ao salvar: ' + err.message, 'error');
+    }
+}
+function editarEmbalagem(id) { openCadastrar(id); }
+
+/* â”€â”€â”€ EXCLUIR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function openExcluir(id) {
+    const e = embalagens.find(x => x.id === id);
+    if (!e) return;
+    pendingDelId = id;
+    document.getElementById('del-nome').textContent = e.nome;
+    document.getElementById('modal-excluir').classList.add('open');
+}
+function closeExcluir() { document.getElementById('modal-excluir').classList.remove('open'); pendingDelId = null; }
+async function confirmarExcluir() {
+    if (!pendingDelId) return;
+    const e = embalagens.find(x => x.id === pendingDelId);
+    try {
+        const { error } = await sb.from('embalagens').delete().eq('id', pendingDelId);
+        if (error) throw error;
+        embalagens = embalagens.filter(x => x.id !== pendingDelId);
+        renderList(); closeExcluir();
+        showToast(`"${e?.nome}" excluÃ­da!`, 'error');
+    } catch (err) {
+        showToast('Erro ao excluir: ' + err.message, 'error');
+    }
+}
+
+/* â”€â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'cancel' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCadastrar(); closeExcluir(); } });
+
+(async () => {
+    const user = await getUser();
+    if (!user) return;
+    userId = user.id;
+    await loadEmbalagens();
+})();
+</script>
+</body>
+</html>

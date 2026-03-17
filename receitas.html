@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Receitas - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1A1A1A",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+        /* ── Inputs ── */
+        input, select { background-color: #1E1E1E !important; color: #f1f5f9 !important; border-color: #2A2A2A !important; }
+        input::placeholder { color: #475569 !important; }
+        input:focus, select:focus { border-color: rgba(37,244,244,0.5) !important; box-shadow: 0 0 0 3px rgba(37,244,244,0.07) !important; outline: none !important; }
+
+        /* ── Header back ── */
+        .btn-back { display:flex; align-items:center; gap:.3rem; color:#94a3b8; cursor:pointer; transition:color .15s; background:none; border:none; padding:0; font-size:.85rem; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* ── Search ── */
+        .search-box { width:100%; padding:.65rem 1rem .65rem 2.55rem; border-radius:.65rem; border:1px solid #2A2A2A; background:#1E1E1E; color:#f1f5f9; font-size:.875rem; outline:none; transition:border-color .2s; }
+        .search-box:focus { border-color:rgba(37,244,244,.5); }
+
+        /* ── Chip ── */
+        .chip { padding:.3rem .85rem; border-radius:9999px; font-size:.72rem; font-weight:600; border:1px solid #2A2A2A; background:transparent; color:#64748b; cursor:pointer; transition:all .15s; white-space:nowrap; }
+        .chip:hover { border-color:rgba(37,244,244,.4); color:#25f4f4; }
+        .chip.active { background:rgba(37,244,244,.12); border-color:rgba(37,244,244,.5); color:#25f4f4; }
+
+        /* ── Recipe card ── */
+        .recipe-card {
+            background: #1A1A1A;
+            border: 1px solid #2A2A2A;
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: border-color .2s, box-shadow .2s, transform .15s;
+        }
+        .recipe-card:hover {
+            border-color: rgba(37,244,244,.25);
+            box-shadow: 0 8px 32px rgba(0,0,0,.5);
+            transform: translateY(-2px);
+        }
+
+        /* gradient covers */
+        .card-cover {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-cover .cover-icon {
+            font-size: 3rem;
+            color: rgba(255,255,255,.35);
+            font-variation-settings: 'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48;
+        }
+
+        /* gradient presets */
+        .grad-1 { background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%); }
+        .grad-2 { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+        .grad-3 { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
+        .grad-4 { background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%); }
+        .grad-5 { background: linear-gradient(135deg, #84cc16 0%, #22d3ee 100%); }
+        .grad-6 { background: linear-gradient(135deg, #f97316 0%, #facc15 100%); }
+
+        /* ── Card body ── */
+        .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: .75rem; }
+
+        .card-meta { display:flex; gap:.75rem; font-size:.75rem; color:#64748b; }
+        .card-meta span { display:flex; align-items:center; gap:.25rem; }
+        .card-meta .material-symbols-outlined { font-size:.9rem; }
+
+        /* ── Stat grid ── */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+        .stat-cell {
+            background: #111;
+            border-radius: .5rem;
+            padding: .5rem .65rem;
+        }
+        .stat-cell .lbl {
+            font-size: .55rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            margin-bottom: .2rem;
+        }
+        .stat-cell .val { font-size: .85rem; font-weight: 700; }
+
+        /* stat colors */
+        .stat-preco  .lbl { color: #25f4f4; } .stat-preco  .val { color: #f1f5f9; }
+        .stat-custo  .lbl { color: #64748b; } .stat-custo  .val { color: #f1f5f9; }
+        .stat-lucro  .lbl { color: #4ade80; } .stat-lucro  .val { color: #4ade80; }
+        .stat-margem .lbl { color: #fbbf24; } .stat-margem .val { color: #fbbf24; }
+        .stat-markup .lbl { color: #a78bfa; } .stat-markup .val { color: #a78bfa; }
+
+        /* ── Card actions ── */
+        .card-actions { display:flex; gap:.5rem; padding:.75rem 1rem; border-top:1px solid #222; }
+        .btn-detail {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:.35rem;
+            padding:.6rem .5rem; border-radius:.65rem; border:1px solid #2A2A2A;
+            background:transparent; color:#94a3b8; font-size:.78rem; font-weight:600;
+            cursor:pointer; transition:all .15s;
+        }
+        .btn-detail:hover { border-color:rgba(37,244,244,.4); color:#25f4f4; background:rgba(37,244,244,.05); }
+        .btn-detail .material-symbols-outlined { font-size:.95rem; }
+
+        .btn-edit {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:.35rem;
+            padding:.6rem .5rem; border-radius:.65rem; border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-size:.78rem; font-weight:700; cursor:pointer;
+            transition:opacity .15s, box-shadow .2s;
+            box-shadow: 0 2px 12px rgba(37,244,244,.2);
+        }
+        .btn-edit:hover { opacity:.9; box-shadow:0 4px 20px rgba(37,244,244,.35); }
+        .btn-edit .material-symbols-outlined { font-size:.95rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── Btn cadastrar (header) ── */
+        .btn-new {
+            display:flex; align-items:center; gap:.45rem;
+            padding:.6rem 1rem; border-radius:.65rem; border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-size:.82rem; font-weight:700; cursor:pointer; white-space:nowrap;
+            transition:opacity .2s, box-shadow .2s;
+            box-shadow: 0 3px 16px rgba(37,244,244,.25);
+        }
+        .btn-new:hover { opacity:.9; box-shadow:0 5px 24px rgba(37,244,244,.4); }
+        .btn-new .material-symbols-outlined { font-size:1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── FAB mobile ── */
+        .fab {
+            position:fixed; bottom:1.5rem; right:1.5rem;
+            display:flex; align-items:center; gap:.45rem;
+            padding:.72rem 1.15rem; border-radius:9999px;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-weight:700; font-size:.85rem; border:none; cursor:pointer;
+            box-shadow:0 4px 24px rgba(37,244,244,.35);
+            transition:box-shadow .2s, transform .15s;
+            z-index:30;
+        }
+        .fab:hover { box-shadow:0 6px 32px rgba(37,244,244,.5); }
+        .fab:active { transform:scale(.96); }
+        .fab .material-symbols-outlined { font-size:1.1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── Empty ── */
+        .empty-state { display:flex; flex-direction:column; align-items:center; padding:4rem 1rem; color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3.5rem; margin-bottom:1rem; color:#2A2A2A; }
+
+        /* ── Toast ── */
+        #toast {
+            position:fixed; bottom:1.5rem; left:50%;
+            transform:translateX(-50%) translateY(80px);
+            background:#1E1E1E; border:1px solid rgba(37,244,244,.35);
+            color:#f1f5f9; padding:.65rem 1.2rem; border-radius:.75rem;
+            font-size:.85rem; font-weight:500;
+            display:flex; align-items:center; gap:.5rem;
+            z-index:50; opacity:0;
+            transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+            box-shadow:0 8px 32px rgba(0,0,0,.5); white-space:nowrap;
+        }
+        #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+        /* ── Page anim ── */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        .page-enter { animation:fadeUp .35s ease both; }
+
+        /* ── Stat separador ── */
+        .stat-divider { grid-column:1/-1; border:none; border-top:1px solid #222; margin:.15rem 0; }
+
+        /* ══════════════════════════════════════
+           MODAL SHEET — Cadastrar Receita
+        ══════════════════════════════════════ */
+        .msheet-bg {
+            position:fixed; inset:0; background:rgba(0,0,0,.65);
+            display:flex; align-items:stretch; justify-content:flex-end;
+            z-index:110; opacity:0; pointer-events:none;
+            transition:opacity .3s;
+        }
+        .msheet-bg.open { opacity:1; pointer-events:auto; }
+        .msheet {
+            background:#141414; border-left:1px solid #2A2A2A;
+            width:100%; max-width:560px;
+            display:flex; flex-direction:column;
+            transform:translateX(100%);
+            transition:transform .38s cubic-bezier(.4,0,.2,1);
+            overflow:hidden;
+        }
+        .msheet-bg.open .msheet { transform:translateX(0); }
+        @media(max-width:600px) {
+            .msheet { max-width:100%; border-left:none; border-radius:1.1rem 1.1rem 0 0;
+                border-top:1px solid #2A2A2A; height:96%; align-self:flex-end; }
+            .msheet-bg { align-items:flex-end; }
+        }
+        .msheet-head {
+            display:flex; align-items:center; gap:.75rem;
+            padding:1rem 1.25rem; border-bottom:1px solid #2A2A2A; flex-shrink:0;
+            background:#141414;
+        }
+        .msheet-body { flex:1; overflow-y:auto; padding:1.25rem; scroll-behavior:smooth; }
+        .msheet-foot {
+            padding:.85rem 1.25rem; border-top:1px solid #2A2A2A; flex-shrink:0;
+            background:#141414; display:flex; gap:.65rem;
+        }
+
+        /* form field */
+        .fl { font-size:.64rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#25f4f4; margin-bottom:.35rem; display:block; }
+        .fi { width:100%; padding:.65rem .9rem; border-radius:.65rem; border:1px solid #2A2A2A !important; background:#1E1E1E !important; color:#f1f5f9 !important; font-size:.875rem; outline:none; transition:border-color .2s,box-shadow .2s; }
+        .fi::placeholder { color:#475569 !important; }
+        .fi:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fi.err { border-color:rgba(248,113,113,.5) !important; }
+        textarea.fi { resize:none; min-height:72px; }
+
+        /* section header */
+        .section-hd {
+            display:flex; align-items:center; gap:.6rem;
+            margin-bottom:.85rem;
+        }
+        .section-hd .ico {
+            width:2rem; height:2rem; border-radius:.5rem;
+            background:rgba(37,244,244,.1);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .section-hd .ico .material-symbols-outlined { font-size:1.05rem; color:#25f4f4; }
+        .section-hd h3 { font-size:.85rem; font-weight:700; }
+        .btn-add-row {
+            display:flex; align-items:center; gap:.35rem;
+            padding:.35rem .75rem; border-radius:.55rem; border:1px dashed rgba(37,244,244,.35);
+            background:transparent; color:#25f4f4; font-size:.75rem; font-weight:600;
+            cursor:pointer; transition:all .15s; margin-left:auto;
+        }
+        .btn-add-row:hover { background:rgba(37,244,244,.07); border-color:rgba(37,244,244,.6); }
+        .btn-add-row .material-symbols-outlined { font-size:.95rem; }
+
+        /* ingredient row */
+        .ing-row {
+            background:#1A1A1A; border:1px solid #2A2A2A; border-radius:.75rem;
+            padding:.85rem; margin-bottom:.5rem;
+            display:flex; flex-direction:column; gap:.65rem;
+            animation:fadeUp .22s ease both;
+        }
+        /* header: select ingrediente + botão delete */
+        .ing-row-head { display:flex; align-items:center; gap:.5rem; }
+        .ing-row-head .fi-sel { flex:1; }
+        .ing-row-head .btn-del {
+            width:2rem; height:2rem; border-radius:.45rem; border:1px solid #2A2A2A;
+            background:transparent; color:#64748b; display:flex; align-items:center;
+            justify-content:center; cursor:pointer; flex-shrink:0; transition:all .15s;
+        }
+        .ing-row-head .btn-del:hover { color:#f87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.06); }
+        .ing-row-head .btn-del .material-symbols-outlined { font-size:.9rem; }
+        /* grid: peso | unidade */
+        .ing-fields { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+        .ing-field { display:flex; flex-direction:column; gap:.28rem; }
+        .ing-lbl { font-size:.62rem; font-weight:600; color:#64748b; letter-spacing:.03em; }
+        /* custo */
+        .ing-custo { font-size:.72rem; color:#64748b; }
+        .ing-custo span { color:#25f4f4; font-weight:600; }
+
+        /* embal/equip row simples */
+        .simple-row {
+            display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;
+            animation:fadeUp .22s ease both;
+        }
+        .simple-row .fi { flex:1; }
+        .simple-row .fi-qty { width:80px; flex-shrink:0; }
+        .simple-row .fi-price { width:100px; flex-shrink:0; }
+        .simple-row .btn-del {
+            width:2rem; height:2rem; border-radius:.45rem; border:1px solid #2A2A2A;
+            background:transparent; color:#64748b; display:flex; align-items:center;
+            justify-content:center; cursor:pointer; flex-shrink:0; transition:all .15s;
+        }
+        .simple-row .btn-del:hover { color:#f87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.06); }
+        .simple-row .btn-del .material-symbols-outlined { font-size:.9rem; }
+
+        /* warning */
+        .warn-row { display:flex; align-items:center; gap:.4rem; color:#64748b; font-size:.78rem; padding:.5rem .7rem; border-radius:.6rem; background:rgba(255,255,255,.03); border:1px dashed #2A2A2A; }
+        .warn-row .material-symbols-outlined { font-size:1rem; }
+
+        /* prévia de custos */
+        .preview-box { background:#111; border:1px solid #2A2A2A; border-radius:.875rem; overflow:hidden; }
+        .preview-head { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem; border-bottom:1px solid #1E1E1E; }
+        .preview-head p { font-size:.75rem; font-weight:700; color:#f1f5f9; }
+        .preview-refresh { background:transparent; border:none; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:.25rem; font-size:.72rem; transition:color .15s; }
+        .preview-refresh:hover { color:#25f4f4; }
+        .preview-refresh .material-symbols-outlined { font-size:.95rem; }
+        .preview-body { padding:.75rem 1rem; display:flex; flex-direction:column; gap:.4rem; }
+        .cost-row { display:flex; justify-content:space-between; font-size:.8rem; }
+        .cost-row .lbl { color:#64748b; }
+        .cost-row .val { font-weight:600; color:#f1f5f9; }
+        .cost-row.total { padding-top:.5rem; border-top:1px solid #222; }
+        .cost-row.total .lbl { color:#f1f5f9; font-weight:700; font-size:.85rem; }
+        .cost-row.total .val { color:#25f4f4; font-size:.85rem; }
+        .unit-box { background:#1A1A1A; border-top:1px solid #222; padding:.65rem 1rem; display:flex; justify-content:space-between; align-items:center; }
+        .unit-box p { font-size:.78rem; }
+        .unit-box .lbl { color:#64748b; }
+        .unit-box .val { color:#4ade80; font-weight:700; }
+
+        /* footer buttons */
+        .btn-save {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem;
+            padding:.8rem; border-radius:.75rem; border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-weight:700; font-size:.9rem; cursor:pointer;
+            box-shadow:0 3px 16px rgba(37,244,244,.22);
+            transition:opacity .2s,box-shadow .2s;
+        }
+        .btn-save:hover { opacity:.9; box-shadow:0 5px 24px rgba(37,244,244,.38); }
+        .btn-cancel {
+            padding:.8rem 1.25rem; border-radius:.75rem;
+            border:1px solid #2A2A2A; background:transparent;
+            color:#94a3b8; font-weight:600; font-size:.9rem; cursor:pointer;
+            transition:all .15s;
+        }
+        .btn-cancel:hover { border-color:rgba(37,244,244,.35); color:#25f4f4; }
+        .iconbox { width:2.25rem; height:2.25rem; border-radius:.55rem; background:rgba(37,244,244,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .iconbox .material-symbols-outlined { font-size:1.1rem; color:#25f4f4; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
+
+<!-- ══ Header ═══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Receitas</h1>
+
+        <!-- search desktop -->
+        <div class="hidden md:flex" style="position:relative;width:240px">
+            <span class="material-symbols-outlined" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-size:1rem;color:#475569;pointer-events:none">search</span>
+            <input id="search-desktop" type="search" class="search-box" style="padding-left:2.3rem;border-radius:.6rem" placeholder="Buscar receita..." oninput="syncSearch(this.value)" />
+        </div>
+
+        <button class="btn-new hidden md:flex" onclick="openCadastrar()">
+            <span class="material-symbols-outlined">add</span>
+            Cadastrar Receita
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-7xl mx-auto px-4 py-5 space-y-4 page-enter">
+
+    <!-- Stats strip -->
+    <div class="flex gap-3 overflow-x-auto pb-1">
+        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[100px]">
+            <p class="text-xs text-slate-500 mb-0.5">Total</p>
+            <p class="text-2xl font-bold" id="stat-total">0</p>
+        </div>
+        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[120px]">
+            <p class="text-xs text-slate-500 mb-0.5">Custo médio</p>
+            <p class="text-2xl font-bold" style="color:#f87171" id="stat-custo">R$ 0</p>
+        </div>
+        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[120px]">
+            <p class="text-xs text-slate-500 mb-0.5">Lucro médio</p>
+            <p class="text-2xl font-bold" style="color:#4ade80" id="stat-lucro">R$ 0</p>
+        </div>
+        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[110px]">
+            <p class="text-xs text-slate-500 mb-0.5">Margem média</p>
+            <p class="text-2xl font-bold" style="color:#fbbf24" id="stat-margem">0%</p>
+        </div>
+    </div>
+
+    <!-- Search mobile -->
+    <div class="md:hidden" style="position:relative">
+        <span class="material-symbols-outlined" style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);font-size:1.05rem;color:#475569;pointer-events:none">search</span>
+        <input id="search-mobile" type="search" class="search-box" style="padding-left:2.55rem" placeholder="Buscar receita..." oninput="syncSearch(this.value)" />
+    </div>
+
+    <!-- Filter chips -->
+    <div style="display:flex;gap:.5rem;overflow-x:auto;padding-bottom:2px">
+        <button class="chip active" data-filter="todas" onclick="setFilter('todas',this)">Todas</button>
+        <button class="chip" data-filter="gourmet"  onclick="setFilter('gourmet',this)">Gourmet</button>
+        <button class="chip" data-filter="classica"  onclick="setFilter('classica',this)">Clássica</button>
+        <button class="chip" data-filter="fitness"   onclick="setFilter('fitness',this)">Fitness</button>
+        <button class="chip" data-filter="vegana"    onclick="setFilter('vegana',this)">Vegana</button>
+    </div>
+
+    <!-- Cards grid -->
+    <div id="recipe-grid" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+
+    <!-- Empty -->
+    <div id="empty-state" class="empty-state hidden">
+        <span class="material-symbols-outlined">menu_book</span>
+        <p class="font-semibold text-slate-400 text-lg">Nenhuma receita encontrada</p>
+        <p class="text-sm mt-1">Cadastre sua primeira receita!</p>
+        <button class="btn-new mt-5" onclick="openCadastrar()">
+            <span class="material-symbols-outlined">add</span>
+            Cadastrar Receita
+        </button>
+    </div>
+
+</main>
+
+<!-- ══ FAB mobile ════════════════════════════════════════════════════ -->
+<button class="fab md:hidden" onclick="openCadastrar()">
+    <span class="material-symbols-outlined">add</span>
+    Cadastrar Receita
+</button>
+
+<!-- ══ Modal Cadastrar Receita ══════════════════════════════════════ -->
+<div id="msheet-bg" class="msheet-bg" role="dialog" aria-modal="true">
+  <div class="msheet">
+
+    <!-- Cabeçalho -->
+    <div class="msheet-head">
+      <div class="iconbox">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">menu_book</span>
+      </div>
+      <div style="flex:1">
+        <p id="msheet-title" class="font-bold text-sm">Cadastrar Receita</p>
+        <p class="text-xs text-slate-400">Preencha as informações da receita</p>
+      </div>
+      <button onclick="closeModal()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;" aria-label="Fechar">
+        <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+      </button>
+    </div>
+
+    <!-- Corpo -->
+    <div class="msheet-body">
+      <form id="form-receita" novalidate onsubmit="salvarReceita(event)" style="display:flex;flex-direction:column;gap:1.4rem">
+
+        <!-- ─ Informações Básicas ─ -->
+        <section>
+          <p class="fl" style="font-size:.7rem;margin-bottom:.75rem">Informações Básicas</p>
+          <div style="display:flex;flex-direction:column;gap:.85rem">
+            <div>
+              <label class="fl" for="r-nome">Nome da receita</label>
+              <input id="r-nome" type="text" class="fi" placeholder="Ex: Ninho com Nutella" autocomplete="off" />
+              <p id="r-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome da receita.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+              <div>
+                <label class="fl" for="r-rend">Rendimento (un)</label>
+                <input id="r-rend" type="number" min="1" class="fi" placeholder="Ex: 10" />
+              </div>
+              <div>
+                <label class="fl" for="r-tempo">Preparo (min)</label>
+                <input id="r-tempo" type="number" min="1" class="fi" placeholder="Ex: 45" />
+              </div>
+            </div>
+            <div>
+              <label class="fl" for="r-desc">Descrição <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+              <textarea id="r-desc" class="fi" placeholder="Descreva a receita..."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Ingredientes ─ -->
+        <section>
+          <div class="section-hd">
+            <div class="ico"><span class="material-symbols-outlined">inventory_2</span></div>
+            <h3>Ingredientes</h3>
+            <button type="button" class="btn-add-row" onclick="addIngrediente()">
+              <span class="material-symbols-outlined">add_circle</span> Adicionar
+            </button>
+          </div>
+          <div id="ing-list"></div>
+          <div id="ing-warn" class="warn-row">
+            <span class="material-symbols-outlined">info</span>
+            Adicione pelo menos um ingrediente
+          </div>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Embalagens ─ -->
+        <section>
+          <div class="section-hd">
+            <div class="ico"><span class="material-symbols-outlined">package_2</span></div>
+            <h3>Embalagens</h3>
+            <button type="button" class="btn-add-row" onclick="addEmbalagem()">
+              <span class="material-symbols-outlined">add_circle</span> Adicionar
+            </button>
+          </div>
+          <div id="embal-list"></div>
+          <p id="embal-empty" class="text-xs text-slate-600" style="padding:.25rem .1rem">Nenhuma embalagem adicionada</p>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Equipamentos ─ -->
+        <section>
+          <div class="section-hd">
+            <div class="ico"><span class="material-symbols-outlined">kitchen</span></div>
+            <h3>Equipamentos</h3>
+            <button type="button" class="btn-add-row" onclick="addEquipamento()">
+              <span class="material-symbols-outlined">add_circle</span> Adicionar
+            </button>
+          </div>
+          <div id="equip-list"></div>
+          <p id="equip-empty" class="text-xs text-slate-600" style="padding:.25rem .1rem">Nenhum equipamento adicionado</p>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Prévia de Custos ─ -->
+        <section>
+          <div class="section-hd" style="margin-bottom:.65rem">
+            <div class="ico"><span class="material-symbols-outlined">assessment</span></div>
+            <h3>Prévia de Custos</h3>
+          </div>
+          <div class="preview-box">
+            <div class="preview-head">
+              <p>Composição de Custos</p>
+              <button type="button" class="preview-refresh" onclick="calcPrevia()">
+                <span class="material-symbols-outlined">refresh</span> Atualizar
+              </button>
+            </div>
+            <div class="preview-body">
+              <div class="cost-row"><span class="lbl">Custo Ingredientes:</span><span class="val" id="cv-ing">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Embalagens:</span><span class="val" id="cv-emb">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Equipamentos:</span><span class="val" id="cv-eqp">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Mão de Obra:</span><span class="val" id="cv-mob">R$ 0,00</span></div>
+              <div class="cost-row total"><span class="lbl">Custo Total da Receita:</span><span class="val" id="cv-tot">R$ 0,00</span></div>
+            </div>
+            <div class="unit-box">
+              <div style="display:flex;flex-direction:column;gap:.15rem">
+                <p class="font-bold text-sm">Custo Unitário</p>
+                <p class="text-xs text-slate-500">Custo por Unidade: <span class="val" id="cv-unit">R$ 0,00</span></p>
+              </div>
+              <div style="text-align:right">
+                <p class="text-xs text-slate-500">Rendimento</p>
+                <p class="font-bold" id="cv-rend">1 un</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </form>
+    </div><!-- /msheet-body -->
+
+    <!-- Rodapé -->
+    <div class="msheet-foot">
+      <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button type="submit" form="form-receita" class="btn-save">
+        <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+        Salvar Receita
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Toast ═════════════════════════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Ação realizada!</span>
+</div>
+
+<!-- ══ Script ════════════════════════════════════════════════════════ -->
+<script>
+/* ─── DADOS ──────────────────────────────────────────────────────── */
+const GRADIENTS = ['grad-1','grad-2','grad-3','grad-4','grad-5','grad-6'];
+
+let receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [
+    { id:1, nome:'Mini Pudins',       categoria:'gourmet',  unidades:9,  tempo:60, precoTotal:90.00, custoTotal:44.55, grad:'grad-1' },
+    { id:2, nome:'Abacaxi Cremoso',   categoria:'gourmet',  unidades:12, tempo:60, precoTotal:84.00, custoTotal:62.87, grad:'grad-2' },
+    { id:3, nome:'Goiaba Cremoso',    categoria:'gourmet',  unidades:12, tempo:60, precoTotal:72.00, custoTotal:54.28, grad:'grad-3' },
+    { id:4, nome:'Coco com Abacaxi',  categoria:'classica', unidades:10, tempo:45, precoTotal:60.00, custoTotal:38.00, grad:'grad-4' },
+    { id:5, nome:'Morango Fitness',   categoria:'fitness',  unidades:8,  tempo:30, precoTotal:48.00, custoTotal:28.00, grad:'grad-5' },
+    { id:6, nome:'Brigadeiro Vegano', categoria:'vegana',   unidades:20, tempo:50, precoTotal:80.00, custoTotal:45.00, grad:'grad-6' },
+];
+
+let searchQuery = '';
+let currentFilter = 'todas';
+function save() { localStorage.setItem('receitasx_receitas', JSON.stringify(receitas)); }
+
+/* ─── CÁLCULOS ───────────────────────────────────────────────────── */
+function calc(r) {
+    const precoUnit  = r.precoTotal / r.unidades;
+    const custoUnit  = r.custoTotal / r.unidades;
+    const lucroTotal = r.precoTotal - r.custoTotal;
+    const lucroUnit  = lucroTotal   / r.unidades;
+    const margem     = (lucroTotal  / r.precoTotal) * 100;
+    const markup     = r.precoTotal / r.custoTotal;
+    return { precoUnit, custoUnit, lucroTotal, lucroUnit, margem, markup };
+}
+
+function fmt(v, prefix='R$ ') {
+    return prefix + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+/* ─── STATS ──────────────────────────────────────────────────────── */
+function updateStats(list) {
+    document.getElementById('stat-total').textContent = list.length;
+    if (!list.length) {
+        document.getElementById('stat-custo').textContent  = 'R$ 0';
+        document.getElementById('stat-lucro').textContent  = 'R$ 0';
+        document.getElementById('stat-margem').textContent = '0%';
+        return;
+    }
+    const avgCusto  = list.reduce((s,r)=>s+r.custoTotal,0)/list.length;
+    const avgLucro  = list.reduce((s,r)=>s+(r.precoTotal-r.custoTotal),0)/list.length;
+    const avgMargem = list.reduce((s,r)=>s+calc(r).margem,0)/list.length;
+    document.getElementById('stat-custo').textContent  = fmt(avgCusto);
+    document.getElementById('stat-lucro').textContent  = fmt(avgLucro);
+    document.getElementById('stat-margem').textContent = avgMargem.toFixed(0)+'%';
+}
+
+/* ─── RENDER ─────────────────────────────────────────────────────── */
+function getFiltered() {
+    return receitas.filter(r => {
+        const mF = currentFilter === 'todas' || r.categoria === currentFilter;
+        const mS = r.nome.toLowerCase().includes(searchQuery.toLowerCase());
+        return mF && mS;
+    });
+}
+
+function catLabel(c) {
+    return {gourmet:'Receita Gourmet',classica:'Receita Clássica',fitness:'Receita Fitness',vegana:'Receita Vegana'}[c] || c;
+}
+
+function renderCards() {
+    const list  = getFiltered();
+    const grid  = document.getElementById('recipe-grid');
+    const empty = document.getElementById('empty-state');
+    updateStats(list);
+
+    if (!list.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    grid.innerHTML = list.map(r => {
+        const c = calc(r);
+        const margemOk = c.margem >= 30;
+        return `
+        <div class="recipe-card">
+            <div class="card-cover ${r.grad}">
+                <span class="material-symbols-outlined cover-icon" style="font-variation-settings:'FILL' 1,'wght' 200,'GRAD' 0,'opsz' 48">restaurant</span>
+            </div>
+            <div class="card-body">
+                <div>
+                    <h2 class="font-bold text-base leading-snug">${r.nome}</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">${catLabel(r.categoria)}</p>
+                </div>
+                <div class="card-meta">
+                    <span><span class="material-symbols-outlined">grid_view</span>${r.unidades} un</span>
+                    <span><span class="material-symbols-outlined">schedule</span>${r.tempo} min</span>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-cell stat-preco">
+                        <p class="lbl">Preço Total</p>
+                        <p class="val">${fmt(r.precoTotal)}</p>
+                    </div>
+                    <div class="stat-cell stat-preco">
+                        <p class="lbl">Preço Unit.</p>
+                        <p class="val">${fmt(c.precoUnit)}</p>
+                    </div>
+                    <div class="stat-cell stat-custo">
+                        <p class="lbl">Custo Total</p>
+                        <p class="val">${fmt(r.custoTotal)}</p>
+                    </div>
+                    <div class="stat-cell stat-custo">
+                        <p class="lbl">Custo Unit.</p>
+                        <p class="val">${fmt(c.custoUnit)}</p>
+                    </div>
+                    <div class="stat-cell stat-lucro">
+                        <p class="lbl">Lucro Total</p>
+                        <p class="val">${fmt(c.lucroTotal)}</p>
+                    </div>
+                    <div class="stat-cell stat-lucro">
+                        <p class="lbl">Lucro Unit.</p>
+                        <p class="val">${fmt(c.lucroUnit)}</p>
+                    </div>
+                    <div class="stat-cell stat-margem">
+                        <p class="lbl">Margem</p>
+                        <p class="val">${c.margem.toFixed(0)}%</p>
+                    </div>
+                    <div class="stat-cell stat-markup">
+                        <p class="lbl">Markup</p>
+                        <p class="val">${c.markup.toFixed(1)}x</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="btn-detail" onclick="verDetalhes(${r.id})">
+                    <span class="material-symbols-outlined">visibility</span> Ver Detalhes
+                </button>
+                <button class="btn-edit" onclick="editarReceita(${r.id})">
+                    <span class="material-symbols-outlined">edit</span> Editar
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ─── AÇÕES ──────────────────────────────────────────────────────── */
+function setFilter(val, btn) {
+    currentFilter = val;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards();
+}
+
+function syncSearch(val) {
+    searchQuery = val;
+    document.getElementById('search-mobile').value  = val;
+    document.getElementById('search-desktop').value = val;
+    renderCards();
+}
+
+function verDetalhes(id) {
+    showToast('Em breve: detalhes da receita!');
+}
+
+function editarReceita(id) {
+    showToast('Em breve: edição de receita!');
+}
+
+/* ══════════════════════════════════════════════
+   MODAL CADASTRAR RECEITA
+══════════════════════════════════════════════ */
+const insumos   = JSON.parse(localStorage.getItem('receitasx_insumos')    || '[]');
+let embCatalogo = JSON.parse(localStorage.getItem('receitasx_embalagens') || '[]');
+let eqpCatalogo = JSON.parse(localStorage.getItem('receitasx_equipamentos')|| '[]');
+let ingRows   = [];
+let embalRows = [];
+let equipRows = [];
+let ingIdSeq  = 0;
+let embalIdSeq = 0;
+let equipIdSeq = 0;
+
+function openCadastrar() {
+    // recarrega catálogos em tempo real
+    embCatalogo = JSON.parse(localStorage.getItem('receitasx_embalagens')  || '[]');
+    eqpCatalogo = JSON.parse(localStorage.getItem('receitasx_equipamentos')|| '[]');
+    ingRows = []; embalRows = []; equipRows = [];
+    ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
+    document.getElementById('form-receita').reset();
+    document.getElementById('ing-list').innerHTML   = '';
+    document.getElementById('embal-list').innerHTML = '';
+    document.getElementById('equip-list').innerHTML = '';
+    document.getElementById('ing-warn').style.display    = 'flex';
+    document.getElementById('embal-empty').style.display = 'block';
+    document.getElementById('equip-empty').style.display = 'block';
+    calcPrevia();
+    document.getElementById('msheet-bg').classList.add('open');
+    setTimeout(() => document.getElementById('r-nome').focus(), 80);
+}
+
+function closeModal() {
+    document.getElementById('msheet-bg').classList.remove('open');
+}
+
+/* ─── INGREDIENTES ─ */
+function addIngrediente() {
+    const id    = ++ingIdSeq;
+    const opts  = insumos.length
+        ? insumos.map(i => `<option value="${i.id}" data-custo="${i.custo||0}" data-peso="${i.peso||0}" data-unidade="${i.unidade}">${i.nome} (${i.peso||'?'} ${i.unidade})</option>`).join('')
+        : '<option value="" disabled>Nenhum insumo cadastrado</option>';
+    const html = `
+    <div class="ing-row" id="ing-${id}">
+      <div class="ing-row-head">
+        <select class="fi fi-sel" data-ingid="${id}" onchange="onIngSelect(${id})" style="-webkit-appearance:none;appearance:none;flex:1">
+          <option value="" disabled selected style="color:#475569">Selecione o ingrediente...</option>
+          ${opts}
+        </select>
+        <button type="button" class="btn-del" onclick="removeIng(${id})">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="ing-fields">
+        <div class="ing-field">
+          <label class="ing-lbl">Peso usada na Receita</label>
+          <input type="number" min="0" step="0.001" class="fi" placeholder="Ex: 250" data-qty="${id}" oninput="updateIngCusto(${id})" />
+        </div>
+        <div class="ing-field">
+          <label class="ing-lbl">Un. Medida usada na Receita</label>
+          <select class="fi ing-unit-sel" id="ing-un-${id}" data-unsel="${id}" onchange="updateIngCusto(${id})" style="-webkit-appearance:none;appearance:none;color:#475569">
+            <option value="" disabled selected>Selecione...</option>
+            <option value="g">g (grama)</option>
+            <option value="kg">kg (quilograma)</option>
+            <option value="ml">ml (mililitro)</option>
+            <option value="l">l (litro)</option>
+            <option value="un">un (unidade)</option>
+          </select>
+        </div>
+      </div>
+      <p class="ing-custo" id="ing-custo-${id}">Custo: <span>R$ 0,00</span></p>
+    </div>`;
+    const list = document.getElementById('ing-list');
+    list.insertAdjacentHTML('beforeend', html);
+    document.getElementById('ing-warn').style.display = 'none';
+    ingRows.push(id);
+    calcPrevia();
+}
+
+function removeIng(id) {
+    document.getElementById(`ing-${id}`)?.remove();
+    ingRows = ingRows.filter(x => x !== id);
+    if (!ingRows.length) document.getElementById('ing-warn').style.display = 'flex';
+    calcPrevia();
+}
+
+/* Chamado ao selecionar o ingrediente: preenche unidade padrão */
+function onIngSelect(id) {
+    const sel = document.querySelector(`[data-ingid="${id}"]`);
+    const opt = sel?.selectedOptions[0];
+    const unInsumo = opt?.dataset.unidade || '';
+    const unSel = document.getElementById(`ing-un-${id}`);
+    if (unSel && unInsumo) {
+        unSel.value = unInsumo;
+        unSel.style.color = '#f1f5f9'; // ativa cor normal
+    }
+    updateIngCusto(id);
+}
+
+/* Tabela de conversão para gramas/ml base */
+function toBase(qty, unit) {
+    // retorna valor em unidade base (g → g, kg → g; ml → ml, l → ml; un → un)
+    const map = { g:1, kg:1000, ml:1, l:1000, un:1 };
+    return qty * (map[unit] ?? 1);
+}
+function toBaseUnit(unit) {
+    return { g:'g', kg:'g', ml:'ml', l:'ml', un:'un' }[unit] ?? unit;
+}
+
+function updateIngCusto(id) {
+    const sel      = document.querySelector(`[data-ingid="${id}"]`);
+    const qty      = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+    const unSel    = document.getElementById(`ing-un-${id}`);
+    const unUsada  = unSel?.value || '';
+    const opt      = sel?.selectedOptions[0];
+    const custoPkg = parseFloat(opt?.dataset.custo  || 0);  // custo da embalagem
+    const pesoInsumo  = parseFloat(opt?.dataset.peso    || 0);  // peso da embalagem
+    const unInsumo    = opt?.dataset.unidade || '';           // unidade da embalagem
+
+    let custo = 0;
+    if (custoPkg > 0 && pesoInsumo > 0 && unUsada) {
+        // Converte tudo para a unidade base do insumo
+        const baseInsumo = toBase(pesoInsumo, unInsumo);  // embalagem em base
+        const baseUsado  = toBase(qty, unUsada);           // quantidade usada em base
+        // só faz sentido se mesma família (g/kg ou ml/l ou un)
+        if (toBaseUnit(unUsada) === toBaseUnit(unInsumo) || unInsumo === 'un') {
+            custo = (baseUsado / baseInsumo) * custoPkg;
+        } else {
+            custo = 0; // conversão impossível (ex: g ↔ ml)
+        }
+    } else if (custoPkg > 0 && unUsada === 'un') {
+        custo = custoPkg * qty;
+    }
+
+    const el = document.getElementById(`ing-custo-${id}`);
+    if (el) el.innerHTML = `Custo: <span>${fmtR(custo)}</span>`;
+    calcPrevia();
+}
+
+/* ─── EMBALAGENS ─ */
+function addEmbalagem() {
+    const id   = ++embalIdSeq;
+    const opts = embCatalogo.length
+        ? embCatalogo.map(e => {
+            const custoUn = e.qtd > 0 ? (e.custo / e.qtd) : 0;
+            return `<option value="${e.id}" data-custo-un="${custoUn.toFixed(4)}" data-nome="${e.nome}">${e.nome} (R$ ${custoUn.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}/un)</option>`;
+          }).join('')
+        : '<option value="" disabled>Nenhuma embalagem cadastrada</option>';
+
+    const html = `
+    <div class="ing-row" id="emb-${id}">
+      <div class="ing-row-head">
+        <select class="fi fi-sel" data-embid="${id}" onchange="updateEmbCusto(${id})" style="-webkit-appearance:none;appearance:none;flex:1">
+          <option value="" disabled selected style="color:#475569">Selecione a embalagem...</option>
+          ${opts}
+        </select>
+        <button type="button" class="btn-del" onclick="removeEmb(${id})">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="ing-fields">
+        <div class="ing-field">
+          <label class="ing-lbl">Quantidade usada</label>
+          <input type="number" min="0" step="1" class="fi" placeholder="Ex: 1" data-emb-qty="${id}" oninput="updateEmbCusto(${id})" />
+        </div>
+        <div class="ing-field">
+          <label class="ing-lbl">Custo</label>
+          <div class="fi" style="background:#111 !important;display:flex;align-items:center;color:#25f4f4;font-weight:700;font-size:.82rem" id="emb-custo-dsp-${id}">R$ 0,00</div>
+        </div>
+      </div>
+      <p class="ing-custo" id="emb-custo-${id}">Custo: <span>R$ 0,00</span></p>
+    </div>`;
+    document.getElementById('embal-list').insertAdjacentHTML('beforeend', html);
+    document.getElementById('embal-empty').style.display = 'none';
+    embalRows.push(id);
+    calcPrevia();
+}
+
+function updateEmbCusto(id) {
+    const sel      = document.querySelector(`[data-embid="${id}"]`);
+    const qty      = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
+    const opt      = sel?.selectedOptions[0];
+    const custoUn  = parseFloat(opt?.dataset.custoUn || 0);
+    const total    = custoUn * qty;
+    const dsp      = document.getElementById(`emb-custo-dsp-${id}`);
+    if (dsp) dsp.textContent = fmtR(total);
+    const el = document.getElementById(`emb-custo-${id}`);
+    if (el) el.innerHTML = `Custo: <span>${fmtR(total)}</span>`;
+    calcPrevia();
+}
+
+function removeEmb(id) {
+    document.getElementById(`emb-${id}`)?.remove();
+    embalRows = embalRows.filter(x => x !== id);
+    if (!embalRows.length) document.getElementById('embal-empty').style.display = 'block';
+    calcPrevia();
+}
+
+/* ─── EQUIPAMENTOS ─ */
+function addEquipamento() {
+    const id   = ++equipIdSeq;
+    const opts = eqpCatalogo.length
+        ? eqpCatalogo.map(e => {
+            const ch = e.custoH ?? calcEqpCustoH(e);
+            const tipo = e.tipo === 'eletrico' ? '⚡' : '🔥';
+            return `<option value="${e.id}" data-custo-h="${ch.toFixed(4)}">${tipo} ${e.nome} (${fmtR(ch)}/h)</option>`;
+          }).join('')
+        : '<option value="" disabled>Nenhum equipamento cadastrado</option>';
+
+    const html = `
+    <div class="ing-row" id="eqp-${id}">
+      <div class="ing-row-head">
+        <select class="fi fi-sel" data-eqpid="${id}" onchange="updateEqpCusto(${id})" style="-webkit-appearance:none;appearance:none;flex:1">
+          <option value="" disabled selected style="color:#475569">Selecione o equipamento...</option>
+          ${opts}
+        </select>
+        <button type="button" class="btn-del" onclick="removeEqp(${id})">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="ing-fields">
+        <div class="ing-field">
+          <label class="ing-lbl">Tempo de uso (min)</label>
+          <input type="number" min="0" step="1" class="fi" placeholder="Ex: 30" data-eqp-min="${id}" oninput="updateEqpCusto(${id})" />
+        </div>
+        <div class="ing-field">
+          <label class="ing-lbl">Custo</label>
+          <div class="fi" style="background:#111 !important;display:flex;align-items:center;color:#25f4f4;font-weight:700;font-size:.82rem" id="eqp-custo-dsp-${id}">R$ 0,00</div>
+        </div>
+      </div>
+      <p class="ing-custo" id="eqp-custo-${id}">Custo: <span>R$ 0,00</span></p>
+    </div>`;
+    document.getElementById('equip-list').insertAdjacentHTML('beforeend', html);
+    document.getElementById('equip-empty').style.display = 'none';
+    equipRows.push(id);
+    calcPrevia();
+}
+
+function calcEqpCustoH(e) {
+    if (e.tipo === 'eletrico') return ((e.watts||0)/1000) * (e.kwh||0.92);
+    return ((e.consumo||0) / (e.bocas||1)) * (e.precoGas||0);
+}
+
+function updateEqpCusto(id) {
+    const sel    = document.querySelector(`[data-eqpid="${id}"]`);
+    const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
+    const opt    = sel?.selectedOptions[0];
+    const custoH = parseFloat(opt?.dataset.custoH || 0);
+    const total  = (mins / 60) * custoH;
+    const dsp    = document.getElementById(`eqp-custo-dsp-${id}`);
+    if (dsp) dsp.textContent = fmtR(total);
+    const el = document.getElementById(`eqp-custo-${id}`);
+    if (el) el.innerHTML = `Custo: <span>${fmtR(total)}</span>`;
+    calcPrevia();
+}
+
+function removeEqp(id) {
+    document.getElementById(`eqp-${id}`)?.remove();
+    equipRows = equipRows.filter(x => x !== id);
+    if (!equipRows.length) document.getElementById('equip-empty').style.display = 'block';
+    calcPrevia();
+}
+
+/* ─── PRÉVIA ─ */
+function fmtR(v) {
+    return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function calcPrevia() {
+    // ── ingredientes com conversão de unidade ──
+    let costIng = 0;
+    document.querySelectorAll('[data-ingid]').forEach(sel => {
+        const id       = sel.dataset.ingid;
+        const qty      = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+        const unSel    = document.getElementById(`ing-un-${id}`);
+        const unUsada  = unSel?.value || '';
+        const opt      = sel.selectedOptions[0];
+        const custoPkg = parseFloat(opt?.dataset.custo   || 0);
+        const pesoPkg  = parseFloat(opt?.dataset.peso    || 0);
+        const unInsumo = opt?.dataset.unidade || '';
+
+        if (custoPkg > 0 && pesoPkg > 0 && unUsada) {
+            const basePkg  = toBase(pesoPkg, unInsumo);
+            const baseUsed = toBase(qty, unUsada);
+            if (toBaseUnit(unUsada) === toBaseUnit(unInsumo)) {
+                costIng += (baseUsed / basePkg) * custoPkg;
+            }
+            // unidades incompatíveis (ex: g ↔ ml) → não soma
+        } else if (custoPkg > 0 && unUsada === 'un') {
+            costIng += custoPkg * qty;
+        }
+    });
+
+    // ── embalagens: custo unitário × quantidade ──
+    let costEmb = 0;
+    document.querySelectorAll('[data-embid]').forEach(sel => {
+        const id      = sel.dataset.embid;
+        const qty     = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
+        const opt     = sel.selectedOptions[0];
+        const custoUn = parseFloat(opt?.dataset.custoUn || 0);
+        costEmb += custoUn * qty;
+    });
+
+    // ── equipamentos: (min/60) × custo/h ──
+    let costEqp = 0;
+    document.querySelectorAll('[data-eqpid]').forEach(sel => {
+        const id     = sel.dataset.eqpid;
+        const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
+        const opt    = sel.selectedOptions[0];
+        const custoH = parseFloat(opt?.dataset.custoH || 0);
+        costEqp += (mins / 60) * custoH;
+    });
+
+    const total = costIng + costEmb + costEqp;
+    const rend  = parseInt(document.getElementById('r-rend')?.value) || 1;
+    const unit  = total / rend;
+
+    document.getElementById('cv-ing').textContent  = fmtR(costIng);
+    document.getElementById('cv-emb').textContent  = fmtR(costEmb);
+    document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
+    document.getElementById('cv-mob').textContent  = fmtR(0);
+    document.getElementById('cv-tot').textContent  = fmtR(total);
+    document.getElementById('cv-unit').textContent = fmtR(unit);
+    document.getElementById('cv-rend').textContent = rend + ' un';
+}
+
+
+/* ─── SALVAR ─ */
+function salvarReceita(e) {
+    e.preventDefault();
+    const nome = document.getElementById('r-nome').value.trim();
+    if (!nome) {
+        document.getElementById('r-nome').classList.add('err');
+        document.getElementById('r-nome-err').style.display = 'block';
+        document.getElementById('r-nome').focus();
+        return;
+    }
+    const rend      = parseInt(document.getElementById('r-rend').value) || 1;
+    const tempo     = parseInt(document.getElementById('r-tempo').value) || 0;
+
+    // custo total
+    let custoTotal = 0;
+    document.querySelectorAll('[data-ingid]').forEach(sel => {
+        const id    = sel.dataset.ingid;
+        const qty   = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+        const custo = parseFloat(sel.selectedOptions[0]?.dataset.custo || 0);
+        custoTotal += custo * qty;
+    });
+    document.querySelectorAll('[data-embid]').forEach(sel => {
+        const id      = sel.dataset.embid;
+        const qty     = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
+        const custoUn = parseFloat(sel.selectedOptions[0]?.dataset.custoUn || 0);
+        custoTotal += custoUn * qty;
+    });
+    document.querySelectorAll('[data-eqpid]').forEach(sel => {
+        const id     = sel.dataset.eqpid;
+        const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
+        const custoH = parseFloat(sel.selectedOptions[0]?.dataset.custoH || 0);
+        custoTotal += (mins / 60) * custoH;
+    });
+
+    const grad  = GRADIENTS[receitas.length % GRADIENTS.length];
+    const newId = Math.max(0, ...receitas.map(r => r.id)) + 1;
+    receitas.push({ id:newId, nome, categoria:'gourmet', unidades:rend, tempo, precoTotal:0, custoTotal, grad });
+    save();
+    renderCards();
+    closeModal();
+    showToast(`"${nome}" cadastrada!`);
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t    = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const text = document.getElementById('toast-msg');
+    icon.textContent = type === 'error' ? 'error' : 'check_circle';
+    icon.style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    text.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+if (!localStorage.getItem('receitasx_receitas')) save();
+renderCards();
+</script>
+</body>
+</html>

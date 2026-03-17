@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cadastrar Insumo - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "primary-dim": "rgba(37,244,244,0.12)",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* ── Custom select ── */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none;
+        }
+        .select-wrapper { position: relative; }
+        .select-wrapper .chevron {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #64748b;
+        }
+        /* select cinza quando placeholder selecionado */
+        select.select-placeholder { color: #475569 !important; }
+        select.select-placeholder.filled { color: #f1f5f9 !important; }
+
+        /* ── Field label ── */
+        .field-label {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #25f4f4;
+            margin-bottom: 0.4rem;
+        }
+
+        /* ── Input / Select base ── */
+        input, select, textarea {
+            background-color: #1E1E1E !important;
+            color: #f1f5f9 !important;
+            border-color: #2A2A2A !important;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #2A2A2A !important;
+            background-color: #1E1E1E !important;
+            color: #f1f5f9 !important;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control::placeholder { color: #475569 !important; }
+        .form-control:focus {
+            border-color: rgba(37,244,244,0.55) !important;
+            box-shadow: 0 0 0 3px rgba(37,244,244,0.08);
+        }
+
+        /* ── Btn primary ── */
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #25f4f4 0%, #0dc8c8 100%);
+            color: #0a0a0a;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(37,244,244,0.25);
+        }
+        .btn-primary:hover {
+            opacity: 0.92;
+            box-shadow: 0 6px 28px rgba(37,244,244,0.38);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+
+        /* ── Btn ghost ── */
+        .btn-ghost {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            background: transparent;
+            color: #94a3b8; /* slate-400 */
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid #2A2A2A;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .btn-ghost:hover {
+            border-color: rgba(37,244,244,0.35);
+            color: #25f4f4;
+            background: rgba(37,244,244,0.04);
+        }
+
+        /* ── Back button ── */
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: color 0.15s;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .btn-back:hover { color: #25f4f4; }
+
+        /* ── Categoria link ── */
+        .link-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #25f4f4;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            transition: opacity 0.15s;
+            white-space: nowrap;
+        }
+        .link-primary:hover { opacity: 0.75; }
+
+        /* ── Card header icon ── */
+        .icon-box {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.65rem;
+            background: rgba(37,244,244,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-box .material-symbols-outlined {
+            font-size: 1.3rem;
+            color: #25f4f4;
+        }
+
+        /* ── Price prefix ── */
+        .input-prefix-wrapper { position: relative; }
+        .input-prefix-wrapper .prefix {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.88rem;
+            font-weight: 500;
+            pointer-events: none;
+        }
+        .input-prefix-wrapper .form-control { padding-left: 2.5rem; }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1E1E1E;
+            border: 1px solid rgba(37,244,244,0.35);
+            color: #f1f5f9;
+            padding: 0.65rem 1.2rem;
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 50;
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* ── Modal ── */
+        .modal-bg {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.65);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 99;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
+            padding: 1rem;
+        }
+        .modal-bg.open { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: #1E1E1E;
+            border: 1px solid #2A2A2A;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 26rem;
+            transform: translateY(16px) scale(0.97);
+            transition: transform 0.28s cubic-bezier(.34,1.38,.64,1);
+        }
+        .modal-bg.open .modal-card { transform: translateY(0) scale(1); }
+
+        /* ── Divider ── */
+        .divider { border: none; border-top: 1px solid #2A2A2A; }
+
+        /* ── Smooth fade-in page ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .page-enter { animation: fadeUp 0.4s ease both; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen">
+
+    <!-- ══ Top bar ══════════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+        <div class="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+            <button class="btn-back" onclick="history.back()" title="Voltar">
+                <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+            </button>
+            <h1 class="text-base font-semibold">Gerenciar Insumos</h1>
+        </div>
+    </header>
+
+    <!-- ══ Main ═════════════════════════════════════════════════════ -->
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-5 page-enter">
+
+        <!-- Card hero -->
+        <div class="flex items-center gap-3 p-4 rounded-2xl bg-card-dark border border-border-dark">
+            <div class="icon-box">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">add_box</span>
+            </div>
+            <div>
+                <p class="font-bold text-sm">Cadastrar Insumo</p>
+                <p class="text-xs text-slate-400 mt-0.5">Adicione novos ingredientes ao estoque</p>
+            </div>
+        </div>
+
+        <!-- Form card -->
+        <form id="form-insumo" class="bg-card-dark border border-border-dark rounded-2xl p-5 space-y-5" novalidate onsubmit="handleSubmit(event)">
+
+            <!-- Nome -->
+            <div>
+                <p class="field-label">Nome do Insumo</p>
+                <input
+                    id="nome"
+                    type="text"
+                    class="form-control"
+                    placeholder="Ex: Leite Condensado"
+                    autocomplete="off"
+                    required
+                />
+                <p id="nome-error" class="text-red-400 text-xs mt-1 hidden">Informe o nome do insumo.</p>
+            </div>
+
+            <!-- Peso da Embalagem -->
+            <div>
+                <p class="field-label">Peso da Embalagem <span class="text-slate-500 normal-case font-normal">(Compra)</span></p>
+                <div style="display:flex;gap:0.5rem">
+                    <input
+                        id="peso-embalagem"
+                        type="number"
+                        step="0.001"
+                        min="0"
+                        class="form-control"
+                        placeholder="Ex: 1000"
+                        style="flex:1"
+                    />
+                    <div class="select-wrapper" style="width:110px;flex-shrink:0">
+                        <select id="peso-unidade" class="form-control select-placeholder" style="padding-right:2rem" onchange="updateSelectColor(this)">
+                            <option value="" disabled selected>Unidade</option>
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="l">l</option>
+                        </select>
+                        <span class="chevron material-symbols-outlined" style="font-size:1.1rem">expand_more</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Peso total da embalagem no momento da compra</p>
+            </div>
+
+            <!-- Custo -->
+            <div>
+                <p class="field-label">Custo</p>
+                <div class="input-prefix-wrapper">
+                    <span class="prefix">R$</span>
+                    <input
+                        id="custo"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="form-control"
+                        placeholder="0,00"
+                    />
+                </div>
+            </div>
+
+            <!-- Fornecedor -->
+
+            <div>
+                <p class="field-label">Fornecedor <span class="text-slate-500 normal-case font-normal">(opcional)</span></p>
+                <input
+                    id="fornecedor"
+                    type="text"
+                    class="form-control"
+                    placeholder="Ex: Distribuidora São Paulo"
+                    autocomplete="off"
+                />
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-3 pt-1">
+                <button type="submit" class="btn-primary" id="btn-salvar">
+                    <span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+                    Salvar Insumo
+                </button>
+                <button type="button" class="btn-ghost" onclick="resetForm()">
+                    <span class="material-symbols-outlined" style="font-size:1rem">restart_alt</span>
+                    Limpar campos
+                </button>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- ══ Toast ════════════════════════════════════════════════════ -->
+    <div id="toast" role="status" aria-live="polite">
+        <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+        <span id="toast-msg">Ação realizada!</span>
+    </div>
+
+    <!-- ══ Scripts ══════════════════════════════════════════════════ -->
+    <script>
+        /* ── Toast ─────────────────────────────────────── */
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon  = document.getElementById('toast-icon');
+            const text  = document.getElementById('toast-msg');
+
+            icon.textContent = type === 'error' ? 'error' : 'check_circle';
+            icon.style.color = type === 'error' ? '#f87171' : '#25f4f4';
+            text.textContent = msg;
+
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        /* ── Form validation & submit ──────────────────── */
+        /* ── Select color ────────────────────────────── */
+        function updateSelectColor(sel) {
+            sel.classList.toggle('filled', sel.value !== '');
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            let valid = true;
+
+            // Nome
+            const nome = document.getElementById('nome');
+            const nomeErr = document.getElementById('nome-error');
+            if (!nome.value.trim()) {
+                nomeErr.classList.remove('hidden');
+                nome.classList.add('!border-red-500');
+                valid = false;
+            } else {
+                nomeErr.classList.add('hidden');
+                nome.classList.remove('!border-red-500');
+            }
+
+            if (!valid) {
+                showToast('Preencha os campos obrigatórios.', 'error');
+                return;
+            }
+
+            // Simula salvamento
+            const btn = document.getElementById('btn-salvar');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin 0.8s linear infinite">progress_activity</span> Salvando…`;
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.1rem">save</span> Salvar Insumo`;
+                showToast(`Insumo "${nome.value.trim()}" cadastrado com sucesso!`);
+                resetForm();
+            }, 1200);
+        }
+
+        /* ── Reset ─────────────────────────────────────── */
+        function resetForm() {
+            document.getElementById('form-insumo').reset();
+            document.getElementById('nome').classList.remove('!border-red-500');
+            document.getElementById('nome-error').classList.add('hidden');
+        }
+
+        /* ── Spin keyframe (inline) ────────────────────── */
+        const style = document.createElement('style');
+        style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
+    </script>
+
+</body>
+</html>

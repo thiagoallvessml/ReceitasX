@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gerenciar Insumos - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+        /* ── inputs override ── */
+        input, select { background-color: #1E1E1E !important; color: #f1f5f9 !important; border-color: #2A2A2A !important; }
+        input::placeholder { color: #475569 !important; }
+        input:focus, select:focus { border-color: rgba(37,244,244,0.5) !important; box-shadow: 0 0 0 3px rgba(37,244,244,0.07) !important; outline: none !important; }
+
+        /* ── search ── */
+        .search-box {
+            width: 100%; padding: 0.65rem 1rem 0.65rem 2.6rem;
+            border-radius: 0.65rem; border: 1px solid #2A2A2A;
+            background: #1E1E1E; color: #f1f5f9; font-size: 0.875rem;
+            outline: none; transition: border-color .2s, box-shadow .2s;
+        }
+
+        /* ── chip ── */
+        .chip {
+            padding: 0.3rem 0.85rem; border-radius: 9999px;
+            font-size: 0.72rem; font-weight: 600;
+            border: 1px solid #2A2A2A; background: transparent;
+            color: #64748b; cursor: pointer; transition: all .15s; white-space: nowrap;
+        }
+        .chip:hover { border-color: rgba(37,244,244,0.4); color: #25f4f4; }
+        .chip.active { background: rgba(37,244,244,0.12); border-color: rgba(37,244,244,0.5); color: #25f4f4; }
+
+        /* ── stats grid: 2 col mobile, row desktop ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.625rem;
+        }
+        @media (min-width: 640px) {
+            .stats-grid {
+                display: flex;
+                flex-direction: row;
+                gap: 0.75rem;
+            }
+            .stats-grid .stat-card { flex: 1; }
+        }
+
+        /* ── stat card ── */
+        .stat-card {
+            background: #1E1E1E; border: 1px solid #2A2A2A;
+            border-radius: 0.875rem; padding: 1rem 1.25rem;
+            flex: 1; min-width: 0;
+        }
+
+        /* ── back btn ── */
+        .btn-back {
+            display:flex; align-items:center; gap:0.3rem;
+            color:#94a3b8; font-size:0.85rem; cursor:pointer;
+            transition:color .15s; background:none; border:none; padding:0;
+        }
+        .btn-back:hover { color: #25f4f4; }
+
+        /* ── action btn ── */
+        .action-btn {
+            width:1.9rem; height:1.9rem; border-radius:.45rem;
+            border:1px solid #2A2A2A; background:transparent;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; color:#64748b; transition:all .15s; flex-shrink:0;
+        }
+        .action-btn:hover { color:#25f4f4; border-color:rgba(37,244,244,0.4); background:rgba(37,244,244,0.06); }
+        .action-btn.delete:hover { color:#f87171; border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.06); }
+        .action-btn .material-symbols-outlined { font-size:.95rem; }
+
+        /* ── FAB ── */
+        .fab {
+            position:fixed; bottom:1.5rem; right:1.5rem;
+            display:flex; align-items:center; gap:.45rem;
+            padding:.7rem 1.2rem; border-radius:9999px;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8);
+            color:#0a0a0a; font-weight:700; font-size:.85rem;
+            border:none; cursor:pointer;
+            box-shadow:0 4px 24px rgba(37,244,244,0.35);
+            transition:box-shadow .2s, transform .15s, opacity .2s;
+            z-index:30; text-decoration:none;
+        }
+        .fab:hover { box-shadow:0 6px 32px rgba(37,244,244,.5); opacity:.92; }
+        .fab:active { transform:scale(.96); }
+        .fab .material-symbols-outlined { font-size:1.1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── badge ── */
+        .badge { font-size:.62rem; font-weight:700; padding:.12rem .45rem; border-radius:9999px; letter-spacing:.04em; }
+        .badge-g   { background:rgba(37,244,244,.12);  color:#25f4f4; }
+        .badge-ml  { background:rgba(139,92,246,.15);  color:#a78bfa; }
+        .badge-un  { background:rgba(251,191,36,.12);  color:#fbbf24; }
+        .badge-kg  { background:rgba(16,185,129,.12);  color:#34d399; }
+
+        /* ══════════════════════════════════════════
+           MOBILE — cards empilhados
+        ══════════════════════════════════════════ */
+        .insumo-card {
+            background:#1E1E1E; border:1px solid #2A2A2A; border-radius:.875rem;
+            padding:.9rem 1rem; display:flex; align-items:center; gap:.75rem;
+            transition:border-color .15s, box-shadow .15s;
+        }
+        .insumo-card:hover { border-color:rgba(37,244,244,.22); box-shadow:0 2px 16px rgba(0,0,0,.3); }
+        .insumo-icon {
+            width:2.4rem; height:2.4rem; border-radius:.6rem;
+            background:rgba(37,244,244,.10);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .insumo-icon .material-symbols-outlined { font-size:1.15rem; color:#25f4f4; }
+
+        /* ══════════════════════════════════════════
+           DESKTOP — tabela
+        ══════════════════════════════════════════ */
+        @media (min-width: 768px) {
+            /* esconde cards mobile, mostra tabela */
+            #mobile-list  { display: none !important; }
+            #desktop-table { display: block !important; }
+
+            .tbl-wrap {
+                background:#1E1E1E; border:1px solid #2A2A2A;
+                border-radius:1rem; overflow:hidden;
+            }
+            table { width:100%; border-collapse:collapse; }
+            thead tr { background:#161616; border-bottom:1px solid #2A2A2A; }
+            thead th {
+                padding:.7rem 1rem; text-align:left;
+                font-size:.65rem; font-weight:700; letter-spacing:.07em;
+                text-transform:uppercase; color:#64748b; white-space:nowrap;
+            }
+            thead th.th-right { text-align:right; }
+            tbody tr { border-bottom:1px solid #1f1f1f; transition:background .12s; }
+            tbody tr:last-child { border-bottom:none; }
+            tbody tr:hover { background:rgba(255,255,255,.025); }
+            tbody td { padding:.75rem 1rem; font-size:.875rem; vertical-align:middle; }
+            tbody td.td-right { text-align:right; }
+
+            .td-name { font-weight:600; display:flex; align-items:center; gap:.5rem; }
+            .td-custo { color:#25f4f4; font-weight:600; font-size:.85rem; }
+            .td-sub { font-size:.75rem; color:#64748b; margin-top:.15rem; }
+            .td-actions { display:flex; gap:.35rem; justify-content:flex-end; }
+        }
+
+        @media (max-width: 767px) {
+            #desktop-table { display: none !important; }
+            #mobile-list   { display: block !important; }
+        }
+
+        /* ── sidebar de filtros no desktop ── */
+        @media (min-width: 1024px) {
+            .layout-grid { display:grid; grid-template-columns:200px 1fr; gap:1.25rem; align-items:start; }
+            .sidebar-filters { display:flex; flex-direction:column; gap:.5rem; position:sticky; top:4.5rem; }
+            .sidebar-filters .chip { border-radius:.65rem; text-align:left; padding:.5rem .85rem; }
+            .inline-chips { display:none !important; }
+        }
+        @media (max-width: 1023px) {
+            .sidebar-filters { display:none !important; }
+            .inline-chips   { display:flex !important; }
+        }
+
+        /* ── empty state ── */
+        .empty-state { display:flex; flex-direction:column; align-items:center; padding:3rem 1rem; color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem; margin-bottom:.75rem; color:#334155; }
+
+        /* ── modal ── */
+        .modal-bg {
+            position:fixed; inset:0; background:rgba(0,0,0,.65);
+            display:flex; align-items:center; justify-content:center;
+            z-index:99; opacity:0; pointer-events:none;
+            transition:opacity .25s; padding:1rem;
+        }
+        .modal-bg.open { opacity:1; pointer-events:auto; }
+        .modal-card {
+            background:#1E1E1E; border:1px solid #2A2A2A; border-radius:1rem; padding:1.5rem;
+            width:100%; max-width:22rem;
+            transform:translateY(16px) scale(.97);
+            transition:transform .28s cubic-bezier(.34,1.38,.64,1);
+        }
+        .modal-bg.open .modal-card { transform:translateY(0) scale(1); }
+
+        /* ── toast ── */
+        #toast {
+            position:fixed; bottom:1.5rem; left:50%;
+            transform:translateX(-50%) translateY(80px);
+            background:#1E1E1E; border:1px solid rgba(37,244,244,.35);
+            color:#f1f5f9; padding:.65rem 1.2rem; border-radius:.75rem;
+            font-size:.85rem; font-weight:500;
+            display:flex; align-items:center; gap:.5rem;
+            z-index:50; opacity:0;
+            transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+            box-shadow:0 8px 32px rgba(0,0,0,.5); white-space:nowrap;
+        }
+        #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+        /* ── Modal Cadastrar (sheet lateral) ── */
+        .modal-sheet-bg {
+            position:fixed; inset:0; background:rgba(0,0,0,.6);
+            display:flex; align-items:center; justify-content:flex-end;
+            z-index:100; opacity:0; pointer-events:none;
+            transition:opacity .3s;
+        }
+        .modal-sheet-bg.open { opacity:1; pointer-events:auto; }
+        .modal-sheet {
+            background:#1A1A1A; border-left:1px solid #2A2A2A;
+            width:100%; max-width:480px; height:100%;
+            display:flex; flex-direction:column;
+            transform:translateX(100%);
+            transition:transform .35s cubic-bezier(.4,0,.2,1);
+            overflow:hidden;
+        }
+        .modal-sheet-bg.open .modal-sheet { transform:translateX(0); }
+        .modal-sheet-header {
+            display:flex; align-items:center; gap:.75rem;
+            padding:1rem 1.25rem; border-bottom:1px solid #2A2A2A;
+            flex-shrink:0;
+        }
+        .modal-sheet-body { flex:1; overflow-y:auto; padding:1.25rem; }
+        @media (max-width: 520px) {
+            .modal-sheet { max-width:100%; border-left:none;
+                border-top:1px solid #2A2A2A; height:92%; border-radius:1rem 1rem 0 0; align-self:flex-end; }
+            .modal-sheet-bg { align-items:flex-end; }
+        }
+        /* form controls inside modal */
+        .field-label { font-size:.67rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#25f4f4; margin-bottom:.35rem; display:block; }
+        .fc { width:100%; padding:.7rem .9rem; border-radius:.7rem; border:1px solid #2A2A2A !important; background:#1E1E1E !important; color:#f1f5f9 !important; font-size:.875rem; outline:none; transition:border-color .2s, box-shadow .2s; }
+        .fc::placeholder { color:#475569 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.55) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fc.error { border-color:rgba(248,113,113,.6) !important; }
+        select.select-placeholder { color: #475569 !important; }
+        select.select-placeholder.filled { color: #f1f5f9 !important; }
+        .select-wrap { position:relative; }
+        .select-wrap select { -webkit-appearance:none; appearance:none; }
+        .select-wrap .chev { position:absolute; right:.85rem; top:50%; transform:translateY(-50%); pointer-events:none; color:#64748b; font-size:1rem; }
+        .prefix-wrap { position:relative; }
+        .prefix-wrap .prefix { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:#64748b; font-size:.85rem; pointer-events:none; }
+        .prefix-wrap .fc { padding-left:2.4rem; }
+        .btn-prim { display:flex; align-items:center; justify-content:center; gap:.45rem; width:100%; padding:.8rem 1rem; border-radius:.75rem; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; font-weight:700; font-size:.9rem; border:none; cursor:pointer; transition:opacity .2s, box-shadow .2s; box-shadow:0 4px 20px rgba(37,244,244,.22); }
+        .btn-prim:hover { opacity:.9; box-shadow:0 6px 28px rgba(37,244,244,.35); }
+        .btn-ghost2 { display:flex; align-items:center; justify-content:center; gap:.4rem; width:100%; padding:.8rem 1rem; border-radius:.75rem; background:transparent; color:#94a3b8; font-weight:600; font-size:.9rem; border:1px solid #2A2A2A; cursor:pointer; transition:all .15s; }
+        .btn-ghost2:hover { border-color:rgba(37,244,244,.35); color:#25f4f4; }
+        .icon-box-sm { width:2.25rem; height:2.25rem; border-radius:.55rem; background:rgba(37,244,244,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .icon-box-sm .material-symbols-outlined { font-size:1.1rem; color:#25f4f4; }
+
+        .divider { border:none; border-top:1px solid #2A2A2A; }
+
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .page-enter { animation:fadeUp .35s ease both; }
+
+        /* sort icon flip */
+        #sort-btn.desc .material-symbols-outlined { transform:scaleY(-1); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
+
+<!-- ══ Header ═══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Gerenciar Insumos</h1>
+
+        <!-- search desktop inline -->
+        <div class="hidden md:flex" style="position:relative;width:260px">
+            <span class="material-symbols-outlined" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-size:1rem;color:#475569;pointer-events:none">search</span>
+            <input id="search-desktop" type="search" class="search-box" style="padding-left:2.3rem;border-radius:.6rem" placeholder="Buscar insumo..." oninput="syncSearch(this.value)" />
+        </div>
+
+        <button id="sort-btn" class="action-btn" title="Ordenar A→Z" onclick="toggleSort()">
+            <span class="material-symbols-outlined">sort</span>
+        </button>
+        <button onclick="openCadastrar()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs cursor-pointer border-none" style="background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a">
+            <span class="material-symbols-outlined" style="font-size:.95rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">add</span>
+            Novo Insumo
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-7xl mx-auto px-4 py-5 space-y-4 page-enter">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-0.5">Total</p>
+            <p class="text-2xl font-bold" id="stat-total">0</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-0.5">Grama (g)</p>
+            <p class="text-2xl font-bold" style="color:#25f4f4" id="stat-g">0</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-0.5">ML</p>
+            <p class="text-2xl font-bold" style="color:#a78bfa" id="stat-ml">0</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-0.5">Unidade</p>
+            <p class="text-2xl font-bold" style="color:#fbbf24" id="stat-un">0</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs text-slate-500 mb-0.5">Custo médio</p>
+            <p class="text-2xl font-bold" style="color:#34d399" id="stat-custo">R$ 0</p>
+        </div>
+    </div>
+
+
+    <!-- search mobile -->
+    <div class="md:hidden" style="position:relative">
+        <span class="material-symbols-outlined" style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);font-size:1.05rem;color:#475569;pointer-events:none">search</span>
+        <input id="search-mobile" type="search" class="search-box" placeholder="Buscar insumo..." oninput="syncSearch(this.value)" />
+    </div>
+
+    <!-- inline chips (tablet/mobile) -->
+    <div class="inline-chips" style="display:flex;gap:.5rem;overflow-x:auto;padding-bottom:2px">
+        <button class="chip active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
+        <button class="chip" data-filter="g"   onclick="setFilter('g',this)">Grama (g)</button>
+        <button class="chip" data-filter="ml"  onclick="setFilter('ml',this)">ML</button>
+        <button class="chip" data-filter="un"  onclick="setFilter('un',this)">Un</button>
+        <button class="chip" data-filter="kg"  onclick="setFilter('kg',this)">kg</button>
+    </div>
+
+    <!-- layout desktop: sidebar + conteúdo -->
+    <div class="layout-grid">
+
+        <!-- ── Sidebar filtros (desktop ≥ 1024px) ── -->
+        <aside class="sidebar-filters">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 px-1">Filtrar por</p>
+            <button class="chip active" data-filter="todos" onclick="setFilter('todos',this)">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;margin-right:.3rem">grid_view</span>Todos
+            </button>
+            <button class="chip" data-filter="g"  onclick="setFilter('g',this)">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;margin-right:.3rem">scale</span>Grama (g)
+            </button>
+            <button class="chip" data-filter="ml" onclick="setFilter('ml',this)">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;margin-right:.3rem">water_drop</span>ML
+            </button>
+            <button class="chip" data-filter="un" onclick="setFilter('un',this)">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;margin-right:.3rem">tag</span>Unidade (un)
+            </button>
+            <button class="chip" data-filter="kg" onclick="setFilter('kg',this)">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;margin-right:.3rem">fitness_center</span>kg
+            </button>
+        </aside>
+
+        <!-- ── Conteúdo ── -->
+        <div>
+            <!-- Mobile: cards -->
+            <div id="mobile-list" class="space-y-2"></div>
+
+            <!-- Desktop: tabela -->
+            <div id="desktop-table" style="display:none">
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:36px"></th>
+                                <th>Nome</th>
+                                <th>Peso (Embalagem)</th>
+                                <th class="th-right">Custo</th>
+                                <th>Fornecedor</th>
+                                <th class="th-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Empty state -->
+            <div id="empty-state" class="empty-state hidden">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <p class="font-semibold text-slate-400">Nenhum insumo encontrado</p>
+                <p class="text-sm mt-1">Tente outro termo ou cadastre um novo insumo.</p>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ══ FAB (mobile) ═════════════════════════════════════════════════ -->
+<button onclick="openCadastrar()" class="fab md:hidden">
+    <span class="material-symbols-outlined">add</span>
+    Novo Insumo
+</button>
+
+<!-- ══ Modal Cadastrar Insumo ══════════════════════════════════════ -->
+<div id="modal-cadastrar" class="modal-sheet-bg" role="dialog" aria-modal="true" aria-labelledby="cadastrar-title">
+    <div class="modal-sheet">
+
+        <!-- Header -->
+        <div class="modal-sheet-header">
+            <div class="icon-box-sm">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">add_box</span>
+            </div>
+            <div style="flex:1">
+                <p id="cadastrar-title" class="font-bold text-sm" id="modal-form-title">Cadastrar Insumo</p>
+                <p class="text-xs text-slate-400">Adicione novos ingredientes ao estoque</p>
+            </div>
+            <button onclick="closeCadastrar()" class="action-btn" aria-label="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Body / Form -->
+        <div class="modal-sheet-body">
+            <form id="form-cadastrar" novalidate onsubmit="salvarInsumo(event)" style="display:flex;flex-direction:column;gap:1.1rem">
+
+                <!-- Nome -->
+                <div>
+                    <label class="field-label" for="f-nome">Nome do Insumo</label>
+                    <input id="f-nome" type="text" class="fc" placeholder="Ex: Leite Condensado" autocomplete="off" required />
+                    <p id="f-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome do insumo.</p>
+                </div>
+
+                <!-- Peso da Embalagem -->
+                <div>
+                    <label class="field-label">Peso da Embalagem <span style="color:#475569;text-transform:none;font-weight:400">(Compra)</span></label>
+                    <div style="display:flex;gap:.5rem">
+                        <input id="f-peso" type="number" step="0.001" min="0" class="fc" placeholder="Ex: 1000" style="flex:1" />
+                        <div class="select-wrap" style="width:100px;flex-shrink:0">
+                            <select id="f-unidade" class="fc select-placeholder" style="padding-right:2rem" onchange="updateSelectColor(this)">
+                                <option value="" disabled selected>Unidade</option>
+                                <option value="g">g</option>
+                                <option value="kg">kg</option>
+                                <option value="ml">ml</option>
+                                <option value="l">l</option>
+                                <option value="un">un</option>
+                            </select>
+                            <span class="chev material-symbols-outlined">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custo -->
+                <div>
+                    <label class="field-label" for="f-custo">Custo</label>
+                    <div class="prefix-wrap">
+                        <span class="prefix">R$</span>
+                        <input id="f-custo" type="number" step="0.01" min="0" class="fc" placeholder="0,00" />
+                    </div>
+                </div>
+
+                <!-- Fornecedor -->
+                <div>
+                    <label class="field-label" for="f-fornecedor">Fornecedor <span style="color:#475569;text-transform:none;font-weight:400">(opcional)</span></label>
+                    <input id="f-fornecedor" type="text" class="fc" placeholder="Ex: Distribuidora São Paulo" autocomplete="off" />
+                </div>
+
+                <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+                <!-- Actions -->
+                <div style="display:flex;flex-direction:column;gap:.65rem">
+                    <button type="submit" class="btn-prim" id="btn-salvar-modal">
+                        <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+                        Salvar Insumo
+                    </button>
+                    <button type="button" class="btn-ghost2" onclick="resetCadastrar()">
+                        <span class="material-symbols-outlined" style="font-size:.95rem">restart_alt</span>
+                        Limpar campos
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Modal Excluir ════════════════════════════════════════════════ -->
+<div id="modal-delete" class="modal-bg" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="flex items-center gap-3 mb-4">
+            <div style="width:2.25rem;height:2.25rem;border-radius:.6rem;background:rgba(248,113,113,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#f87171">delete</span>
+            </div>
+            <div>
+                <p class="font-bold text-sm">Excluir Insumo</p>
+                <p class="text-xs text-slate-400 mt-0.5" id="delete-msg">Tem certeza?</p>
+            </div>
+        </div>
+        <hr class="divider mb-4" />
+        <div class="flex gap-3">
+            <button class="flex-1 py-2 rounded-xl border border-border-dark text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors bg-transparent cursor-pointer" onclick="closeDeleteModal()">Cancelar</button>
+            <button class="flex-1 py-2 rounded-xl text-sm font-bold cursor-pointer border-none transition-opacity hover:opacity-80" style="background:rgba(248,113,113,.18);color:#f87171" onclick="confirmDelete()">Excluir</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Ação realizada!</span>
+</div>
+
+<!-- ══ Script ═══════════════════════════════════════════════════════ -->
+<script>
+/* ─── ESTADO ─────────────────────────────────────────────────────── */
+let insumos       = [];
+let currentFilter = 'todos';
+let sortAZ        = true;
+let searchQuery   = '';
+let pendingDeleteId = null;
+let editingId     = null;
+let userId        = null;
+
+/* ─── HELPERS ────────────────────────────────────────────────────── */
+function badgeCls(u) { return {g:'badge-g',ml:'badge-ml',un:'badge-un',kg:'badge-kg'}[u]||'badge-g'; }
+function fmtCusto(v) {
+    if (v == null || v === '') return '—';
+    return 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function setLoading(on) {
+    document.getElementById('btn-salvar-modal').disabled = on;
+}
+
+/* ─── SUPABASE: CARREGAR ─────────────────────────────────────────── */
+async function loadInsumos() {
+    try {
+        const { data, error } = await sb.from('insumos')
+            .select('*')
+            .order('nome', { ascending: true });
+        if (error) throw error;
+        insumos = data || [];
+        renderList();
+    } catch (err) {
+        showToast('Erro ao carregar insumos: ' + err.message, 'error');
+    }
+}
+
+/* ─── STATS ──────────────────────────────────────────────────────── */
+function updateStats() {
+    document.getElementById('stat-total').textContent = insumos.length;
+    document.getElementById('stat-g').textContent  = insumos.filter(i=>i.unidade==='g').length;
+    document.getElementById('stat-ml').textContent = insumos.filter(i=>i.unidade==='ml').length;
+    document.getElementById('stat-un').textContent = insumos.filter(i=>i.unidade==='un').length;
+    const custos = insumos.filter(i=>i.preco!=null);
+    const avg = custos.length ? custos.reduce((s,i)=>s+Number(i.preco),0)/custos.length : 0;
+    document.getElementById('stat-custo').textContent = 'R$ ' + avg.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+/* ─── FILTER ─────────────────────────────────────────────────────── */
+function getFiltered() {
+    let list = insumos.filter(i => {
+        const mF = currentFilter==='todos' || i.unidade===currentFilter;
+        const q  = searchQuery.toLowerCase();
+        const mS = (i.nome||'').toLowerCase().includes(q);
+        return mF && mS;
+    });
+    if (sortAZ) list.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+    else        list.sort((a,b)=>(b.nome||'').localeCompare(a.nome||'','pt-BR'));
+    return list;
+}
+
+/* ─── RENDER ─────────────────────────────────────────────────────── */
+function renderList() {
+    const list = getFiltered();
+    updateStats();
+
+    const mobileEl  = document.getElementById('mobile-list');
+    const tableBody = document.getElementById('table-body');
+    const emptyEl   = document.getElementById('empty-state');
+
+    if (list.length === 0) {
+        mobileEl.innerHTML = '';
+        tableBody.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+    }
+    emptyEl.classList.add('hidden');
+
+    /* ── Mobile cards ── */
+    mobileEl.innerHTML = list.map(item => {
+        const sub = [(item.peso_emb||'') +' '+(item.unidade||''), fmtCusto(item.preco)].filter(Boolean).join(' • ');
+        return `<div class="insumo-card">
+            <div class="insumo-icon"><span class="material-symbols-outlined">grocery</span></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                    <p class="font-semibold text-sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(item.nome)}</p>
+                    <span class="badge ${badgeCls(item.unidade)}">${item.unidade||'—'}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</p>
+            </div>
+            <div style="display:flex;gap:.35rem">
+                <button class="action-btn" onclick="editarInsumo(${item.id})"><span class="material-symbols-outlined">edit</span></button>
+                <button class="action-btn delete" onclick="openDel(${item.id},'${esc(item.nome).replace(/'/g,"\\'")}')"><span class="material-symbols-outlined">delete</span></button>
+            </div>
+        </div>`;
+    }).join('');
+
+    /* ── Desktop rows ── */
+    tableBody.innerHTML = list.map(item => `
+        <tr>
+            <td>
+                <div class="insumo-icon" style="width:2rem;height:2rem;border-radius:.45rem">
+                    <span class="material-symbols-outlined" style="font-size:1rem">grocery</span>
+                </div>
+            </td>
+            <td>
+                <div class="td-name">
+                    ${esc(item.nome)}
+                    <span class="badge ${badgeCls(item.unidade)}">${item.unidade||'—'}</span>
+                </div>
+            </td>
+            <td style="color:#94a3b8;font-size:.8rem">${item.peso_emb||'—'} ${item.unidade||''}</td>
+            <td class="td-right td-custo">${fmtCusto(item.preco)}</td>
+            <td style="color:#94a3b8;font-size:.8rem"><span style="color:#334155">—</span></td>
+            <td class="td-right">
+                <div class="td-actions">
+                    <button class="action-btn" title="Editar" onclick="editarInsumo(${item.id})"><span class="material-symbols-outlined">edit</span></button>
+                    <button class="action-btn delete" title="Excluir" onclick="openDel(${item.id},'${esc(item.nome).replace(/'/g,"\\'")}')"><span class="material-symbols-outlined">delete</span></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/* ─── SELECT COLOR ───────────────────────────────────────────────── */
+function updateSelectColor(sel) {
+    sel.classList.toggle('filled', sel.value !== '');
+}
+
+/* ─── AÇÕES ──────────────────────────────────────────────────────── */
+function setFilter(val, btn) {
+    currentFilter = val;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll(`[data-filter="${val}"]`).forEach(c => c.classList.add('active'));
+    renderList();
+}
+
+function syncSearch(val) {
+    searchQuery = val;
+    document.getElementById('search-mobile').value  = val;
+    document.getElementById('search-desktop').value = val;
+    renderList();
+}
+
+function toggleSort() {
+    sortAZ = !sortAZ;
+    const btn = document.getElementById('sort-btn');
+    btn.classList.toggle('desc', !sortAZ);
+    btn.title = sortAZ ? 'A → Z' : 'Z → A';
+    renderList();
+}
+
+/* ─── MODAL CADASTRAR ───────────────────────────────────────────── */
+function openCadastrar(id = null) {
+    editingId = id;
+    const title = document.getElementById('cadastrar-title');
+    const btn   = document.getElementById('btn-salvar-modal');
+    if (id != null) {
+        const item = insumos.find(i => i.id === id);
+        if (item) {
+            document.getElementById('f-nome').value      = item.nome || '';
+            document.getElementById('f-peso').value      = item.peso_emb || '';
+            document.getElementById('f-unidade').value   = item.unidade || '';
+            document.getElementById('f-custo').value     = item.preco ?? '';
+            document.getElementById('f-fornecedor').value= '';
+            updateSelectColor(document.getElementById('f-unidade'));
+        }
+        title.textContent = 'Editar Insumo';
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">edit</span> Salvar Alterações';
+    } else {
+        resetCadastrar();
+        title.textContent = 'Cadastrar Insumo';
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">save</span> Salvar Insumo';
+    }
+    document.getElementById('modal-cadastrar').classList.add('open');
+    setTimeout(() => document.getElementById('f-nome').focus(), 80);
+}
+
+function closeCadastrar() {
+    document.getElementById('modal-cadastrar').classList.remove('open');
+    editingId = null;
+}
+
+function resetCadastrar() {
+    document.getElementById('form-cadastrar').reset();
+    document.getElementById('f-nome').classList.remove('error');
+    document.getElementById('f-nome-err').style.display = 'none';
+}
+
+async function salvarInsumo(e) {
+    e.preventDefault();
+    const nome = document.getElementById('f-nome').value.trim();
+    const nomeErr = document.getElementById('f-nome-err');
+    if (!nome) {
+        document.getElementById('f-nome').classList.add('error');
+        nomeErr.style.display = 'block';
+        document.getElementById('f-nome').focus();
+        return;
+    }
+    document.getElementById('f-nome').classList.remove('error');
+    nomeErr.style.display = 'none';
+
+    const payload = {
+        nome,
+        peso_emb:  parseFloat(document.getElementById('f-peso').value)  || 0,
+        unidade:   document.getElementById('f-unidade').value || 'g',
+        preco:     parseFloat(document.getElementById('f-custo').value) || 0,
+        user_id:   userId,
+    };
+
+    setLoading(true);
+    try {
+        if (editingId != null) {
+            const { data, error } = await sb.from('insumos').update(payload).eq('id', editingId).select().single();
+            if (error) throw error;
+            insumos = insumos.map(i => i.id === editingId ? data : i);
+            showToast(`"${nome}" atualizado!`);
+        } else {
+            const { data, error } = await sb.from('insumos').insert(payload).select().single();
+            if (error) throw error;
+            insumos.unshift(data);
+            showToast(`"${nome}" cadastrado!`);
+        }
+        renderList();
+        closeCadastrar();
+    } catch (err) {
+        showToast('Erro ao salvar: ' + err.message, 'error');
+    } finally {
+        setLoading(false);
+    }
+}
+
+function editarInsumo(id) { openCadastrar(id); }
+
+function openDel(id, nome) {
+    pendingDeleteId = id;
+    document.getElementById('delete-msg').textContent = `Excluir "${nome}" permanentemente?`;
+    document.getElementById('modal-delete').classList.add('open');
+}
+function closeDeleteModal() {
+    pendingDeleteId = null;
+    document.getElementById('modal-delete').classList.remove('open');
+}
+async function confirmDelete() {
+    if (pendingDeleteId == null) return;
+    const item = insumos.find(i => i.id === pendingDeleteId);
+    try {
+        const { error } = await sb.from('insumos').delete().eq('id', pendingDeleteId);
+        if (error) throw error;
+        insumos = insumos.filter(i => i.id !== pendingDeleteId);
+        closeDeleteModal();
+        renderList();
+        showToast(`"${item?.nome}" removido.`, 'error');
+    } catch (err) {
+        showToast('Erro ao excluir: ' + err.message, 'error');
+    }
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type==='error' ? 'cancel' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type==='error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+document.getElementById('modal-delete').addEventListener('click', function(e){ if(e.target===this) closeDeleteModal(); });
+document.getElementById('modal-cadastrar').addEventListener('click', function(e){ if(e.target===this) closeCadastrar(); });
+document.addEventListener('keydown', e => {
+    if(e.key==='Escape') { closeCadastrar(); closeDeleteModal(); }
+});
+
+(async () => {
+    const user = await getUser();
+    if (!user) return; // auth-guard já redireciona
+    userId = user.id;
+    await loadInsumos();
+})();
+</script>
+</body>
+</html>

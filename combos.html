@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Combos - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        input,select,textarea { background-color:#1E1E1E !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder,textarea::placeholder { color:#475569 !important; }
+        input:focus,select:focus,textarea:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* header */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .btn-icon { width:2.2rem;height:2.2rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#64748b;transition:all .15s; }
+        .btn-icon:hover { color:#25f4f4;border-color:rgba(37,244,244,.4); }
+        .btn-icon .material-symbols-outlined { font-size:1.1rem; }
+
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.05rem;pointer-events:none; }
+        .search-box { width:100%;padding:.7rem 1rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.875rem;outline:none;transition:border-color .2s; }
+        .search-box:focus { border-color:rgba(37,244,244,.45); }
+
+        /* combos grid */
+        .combos-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
+        @media(min-width:540px)  { .combos-grid { grid-template-columns:1fr 1fr; } }
+        @media(min-width:900px)  { .combos-grid { grid-template-columns:1fr 1fr 1fr; } }
+
+        /* combo card */
+        .combo-card {
+            background:#1A1A1A;
+            border:1px solid #2A2A2A;
+            border-radius:1rem;
+            overflow:hidden;
+            transition:border-color .2s,box-shadow .2s;
+            display:flex;
+            flex-direction:column;
+        }
+        .combo-card:hover { border-color:rgba(37,244,244,.2);box-shadow:0 6px 28px rgba(0,0,0,.5); }
+
+        /* card image area */
+        .combo-img-wrap {
+            position:relative;
+            width:100%;
+            height:180px;
+            overflow:hidden;
+            background:#111;
+        }
+        .combo-img-wrap img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+        .combo-img-placeholder {
+            width:100%;
+            height:100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg,#1a1a1a,#2a2a2a);
+        }
+        .combo-img-placeholder .material-symbols-outlined {
+            font-size:3.5rem;
+            color:#333;
+            font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24;
+        }
+        .card-img-actions {
+            position:absolute;
+            top:.6rem;
+            right:.6rem;
+            display:flex;
+            gap:.35rem;
+        }
+        .img-action-btn {
+            width:2.1rem;
+            height:2.1rem;
+            border-radius:.5rem;
+            border:none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            transition:all .15s;
+        }
+        .img-action-btn.edit-btn { background:rgba(30,30,30,.85);color:#94a3b8; }
+        .img-action-btn.edit-btn:hover { background:#1E1E1E;color:#25f4f4; }
+        .img-action-btn.del-btn  { background:rgba(30,30,30,.85);color:#94a3b8; }
+        .img-action-btn.del-btn:hover  { background:rgba(248,113,113,.15);color:#f87171; }
+        .img-action-btn .material-symbols-outlined { font-size:.95rem; }
+
+        /* card body */
+        .combo-body { padding:.85rem .9rem; }
+        .combo-name { font-size:.97rem;font-weight:700;color:#f1f5f9;margin-bottom:.15rem; }
+        .combo-meta { font-size:.75rem;color:#64748b;margin-bottom:.8rem; }
+
+        /* metrics grid */
+        .metrics-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:.45rem;
+            margin-bottom:.75rem;
+        }
+        .metric-box {
+            border-radius:.6rem;
+            padding:.55rem .7rem;
+            display:flex;
+            flex-direction:column;
+            gap:.12rem;
+            border:1px solid #2A2A2A;
+            background:#141414;
+        }
+        .metric-label {
+            font-size:.62rem;
+            font-weight:700;
+            letter-spacing:.07em;
+            text-transform:uppercase;
+        }
+        .metric-value {
+            font-size:.92rem;
+            font-weight:700;
+            line-height:1.1;
+        }
+
+        /* metric colors */
+        .metric-preco  .metric-label { color:#60a5fa; }
+        .metric-preco  .metric-value { color:#60a5fa; }
+        .metric-custo  .metric-label { color:#94a3b8; }
+        .metric-custo  .metric-value { color:#f1f5f9; }
+        .metric-lucro  .metric-label { color:#4ade80; }
+        .metric-lucro  .metric-value { color:#4ade80; }
+        .metric-margem .metric-label { color:#fbbf24; }
+        .metric-margem .metric-value { color:#fbbf24; }
+        .metric-lunit  .metric-label { color:#2dd4bf; }
+        .metric-lunit  .metric-value { color:#2dd4bf; }
+        .metric-markup .metric-label { color:#a78bfa; }
+        .metric-markup .metric-value { color:#a78bfa; }
+
+        /* detail button */
+        .btn-detail {
+            width:100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:.45rem;
+            padding:.7rem;
+            border-radius:.65rem;
+            border:1px solid rgba(37,244,244,.25);
+            background:rgba(37,244,244,.07);
+            color:#25f4f4;
+            font-size:.82rem;
+            font-weight:700;
+            cursor:pointer;
+            transition:all .18s;
+        }
+        .btn-detail:hover { background:rgba(37,244,244,.14);border-color:rgba(37,244,244,.5); }
+        .btn-detail .material-symbols-outlined { font-size:.95rem; }
+
+        /* empty */
+        .empty { display:flex;flex-direction:column;align-items:center;padding:5rem 1rem;color:#475569;gap:.5rem; }
+        .empty .material-symbols-outlined { font-size:3.5rem;color:#2A2A2A; }
+
+        /* FAB */
+        .fab { position:fixed;bottom:1.5rem;right:1.5rem;display:flex;align-items:center;gap:.45rem;padding:.7rem 1.2rem;border-radius:9999px;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.85rem;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(37,244,244,.35);transition:box-shadow .2s,transform .15s;z-index:30; }
+        .fab:hover { box-shadow:0 6px 32px rgba(37,244,244,.5); transform:scale(1.03); }
+        .fab:active { transform:scale(.96); }
+        .fab .material-symbols-outlined { font-size:1.1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── MODAL NOVO COMBO (full-screen 2 colunas) ─────────────────── */
+        .modal-full-bg { position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:110;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;padding:1rem; }
+        .modal-full-bg.open { opacity:1;pointer-events:auto; }
+        .modal-full { background:#111;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:960px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;transform:translateY(20px);transition:transform .35s cubic-bezier(.4,0,.2,1);animation:fadeUp .3s ease both; }
+        .modal-full-bg.open .modal-full { transform:translateY(0); }
+
+        .mf-head { display:flex;align-items:center;gap:.75rem;padding:.9rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0;background:#0d0d0d; }
+
+        /* Desktop: 2 colunas lado a lado */
+        .mf-body { flex:1;overflow:hidden;display:flex; }
+        .mf-col { flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1.1rem; }
+        .mf-col-left { border-right:1px solid #2A2A2A; }
+        .mf-col-right { background:#0d0d0d; }
+
+        /* Mobile: coluna única scrollável */
+        @media(max-width:700px) {
+            .modal-full-bg { padding:0; align-items:flex-end; }
+            .modal-full {
+                max-height:96dvh;
+                border-radius:1.1rem 1.1rem 0 0;
+                display:flex;
+                flex-direction:column;
+            }
+            .mf-head { flex-shrink:0; }
+            .mf-body {
+                flex:1;
+                min-height:0;
+                flex-direction:column;
+                overflow-y:auto;
+                -webkit-overflow-scrolling:touch;
+            }
+            .mf-col { overflow-y:visible; flex:none; padding:1rem; }
+            .mf-col-left { border-right:none; border-bottom:1px solid #2A2A2A; }
+            .mf-col-right { background:#111; }
+        }
+
+        /* form fields */
+        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#25f4f4;margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem; }
+        .field-label .material-symbols-outlined { font-size:.85rem; }
+        .fc { width:100%;padding:.75rem .9rem;border-radius:.7rem;border:1px solid #2A2A2A !important;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#475569 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.55) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fc.error { border-color:rgba(248,113,113,.6) !important; }
+        .iconbox { width:2.1rem;height:2.1rem;border-radius:.5rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .iconbox .material-symbols-outlined { font-size:1rem;color:#25f4f4;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* image upload */
+        .img-upload-box { border:2px dashed #2A2A2A;border-radius:.9rem;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;cursor:pointer;transition:border-color .2s,background .2s;background:#1A1A1A;overflow:hidden;position:relative; }
+        .img-upload-box:hover { border-color:rgba(37,244,244,.45);background:#1E1E1E; }
+        .img-upload-box img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
+        .img-upload-box .upload-overlay { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;background:rgba(0,0,0,.5);opacity:0;transition:opacity .2s; }
+        .img-upload-box:hover .upload-overlay { opacity:1; }
+        .img-upload-box .ico-placeholder { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem; }
+        .img-upload-box .material-symbols-outlined { font-size:2rem;color:#475569; }
+
+        /* section header */
+        .sec-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem; }
+        .sec-title { font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4;display:flex;align-items:center;gap:.4rem; }
+        .sec-title .material-symbols-outlined { font-size:.95rem; }
+        .btn-add-prod { display:flex;align-items:center;gap:.3rem;padding:.35rem .8rem;border-radius:9999px;border:1px solid rgba(37,244,244,.4);background:rgba(37,244,244,.08);color:#25f4f4;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s; }
+        .btn-add-prod:hover { background:rgba(37,244,244,.15);border-color:#25f4f4; }
+        .btn-add-prod .material-symbols-outlined { font-size:.85rem; }
+
+        /* composição items */
+        .comp-item { display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:.7rem;border:1px solid #2A2A2A;background:#1A1A1A;animation:fadeUp .18s ease both; }
+        .comp-thumb { width:2.4rem;height:2.4rem;border-radius:.5rem;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden; }
+        .comp-thumb img { width:100%;height:100%;object-fit:cover; }
+        .comp-thumb .material-symbols-outlined { font-size:1.25rem;color:#333;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24; }
+        .comp-info { flex:1;min-width:0; }
+        .comp-name { font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .comp-cost { font-size:.7rem;color:#64748b;margin-top:.05rem; }
+        .qty-ctrl { display:flex;align-items:center;gap:.3rem; }
+        .qty-btn { width:1.6rem;height:1.6rem;border-radius:50%;border:1px solid #2A2A2A;background:#111;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
+        .qty-btn:hover { border-color:rgba(37,244,244,.5);color:#25f4f4; }
+        .qty-btn .material-symbols-outlined { font-size:.85rem; }
+        .qty-val { width:1.8rem;text-align:center;font-size:.82rem;font-weight:700;color:#f1f5f9;background:transparent;border:none;outline:none; }
+        .btn-del-item { width:1.6rem;height:1.6rem;border-radius:.4rem;border:none;background:transparent;color:#64748b;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
+        .btn-del-item:hover { color:#f87171;background:rgba(248,113,113,.1); }
+        .btn-del-item .material-symbols-outlined { font-size:.9rem; }
+
+        /* price input big */
+        .price-big-wrap { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.9rem;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.5rem; }
+        .price-big-prefix { font-size:1rem;font-weight:700;color:#64748b; }
+        .price-big-input { flex:1;background:transparent!important;border:none!important;outline:none;font-size:1.75rem;font-weight:800;color:#f1f5f9!important;box-shadow:none!important; }
+        .price-big-input:focus { border:none!important;box-shadow:none!important; }
+
+        /* metrics row */
+        .m2-grid { display:grid;grid-template-columns:1fr 1fr;gap:.5rem; }
+        .m-box { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.7rem;padding:.65rem .8rem; }
+        .m-label { font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748b;margin-bottom:.15rem; }
+        .m-val { font-size:.95rem;font-weight:800;color:#f1f5f9; }
+
+        /* lucro box destaque */
+        .lucro-box { background:linear-gradient(135deg,rgba(37,244,244,.08),rgba(37,244,244,.04));border:1px solid rgba(37,244,244,.2);border-radius:.9rem;padding:.9rem 1rem;position:relative;overflow:hidden; }
+        .lucro-box-top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem; }
+        .lucro-label { font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4; }
+        .margem-badge { font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#25f4f4; }
+        .lucro-val { font-size:1.6rem;font-weight:900;color:#25f4f4;line-height:1; }
+        .margem-val { font-size:1.1rem;font-weight:800;color:#25f4f4; }
+        .progress-bar-bg { height:5px;background:rgba(37,244,244,.15);border-radius:9999px;margin-top:.75rem;overflow:hidden; }
+        .progress-bar-fill { height:100%;border-radius:9999px;background:linear-gradient(90deg,#25f4f4,#0dc8c8);transition:width .4s ease; }
+
+        /* margem indicator */
+        .margem-indicator { display:flex;align-items:center;gap:.5rem;padding:.6rem .85rem;border-radius:.65rem;font-size:.78rem;font-weight:600; }
+        .margem-indicator.great { background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:#34d399; }
+        .margem-indicator.ok    { background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fbbf24; }
+        .margem-indicator.bad   { background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#f87171; }
+        .margem-indicator .material-symbols-outlined { font-size:1rem; }
+
+        /* marketplace rows */
+        .mkt-row { display:flex;align-items:center;gap:.65rem;padding:.7rem .9rem;border-radius:.7rem;border:1px solid #2A2A2A;background:#1A1A1A; }
+        .mkt-icon { width:2rem;height:2rem;border-radius:.45rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .mkt-icon .material-symbols-outlined { font-size:1.1rem; }
+        .mkt-info { flex:1;min-width:0; }
+        .mkt-name { font-size:.82rem;font-weight:700;color:#f1f5f9; }
+        .mkt-taxa { font-size:.7rem;color:#64748b;margin-top:.05rem; }
+        .mkt-taxa .neg { color:#f87171; }
+        .mkt-right { text-align:right;flex-shrink:0; }
+        .mkt-liquido { font-size:.75rem;color:#64748b;margin-bottom:.1rem; }
+        .mkt-val { font-size:.9rem;font-weight:800;color:#25f4f4; }
+        .mkt-badge { font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:.35rem; }
+
+        /* save button */
+        .btn-salvar-combo { width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.9rem;border-radius:.8rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.3);transition:opacity .2s,transform .15s;margin-top:.5rem; }
+        .btn-salvar-combo:hover { opacity:.92; }
+        .btn-salvar-combo:active { transform:scale(.98); }
+        .btn-salvar-combo .material-symbols-outlined { font-size:1.1rem; }
+
+        /* Product picker modal */
+        .picker-modal-bg { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:150;opacity:0;pointer-events:none;transition:opacity .2s;display:flex;align-items:center;justify-content:center;padding:1rem; }
+        .picker-modal-bg.open { opacity:1;pointer-events:auto; }
+        .picker-modal { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;animation:fadeUp .2s ease both; }
+        .picker-head { padding:.85rem 1rem;border-bottom:1px solid #2A2A2A;display:flex;align-items:center;justify-content:space-between; }
+        .picker-body { flex:1;overflow-y:auto;padding:.75rem; }
+        .picker-item { display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border-radius:.6rem;cursor:pointer;transition:all .12s;border:1px solid transparent; }
+        .picker-item:hover { background:rgba(37,244,244,.06); }
+        .picker-item.sel { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.3); }
+        .picker-chk { width:1.15rem;height:1.15rem;border-radius:.3rem;border:2px solid #3A3A3A;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#111; }
+        .picker-item.sel .picker-chk { background:#25f4f4;border-color:#25f4f4; }
+        .picker-chk .material-symbols-outlined { font-size:.75rem;color:#000;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24;display:none; }
+        .picker-item.sel .picker-chk .material-symbols-outlined { display:block; }
+        .picker-item-thumb { width:2rem;height:2rem;border-radius:.4rem;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden; }
+        .picker-item-thumb img { width:100%;height:100%;object-fit:cover; }
+        .picker-item-thumb .material-symbols-outlined { font-size:1rem;color:#333;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24; }
+        .picker-item-name { flex:1;font-size:.82rem;font-weight:600;color:#f1f5f9; }
+        .picker-item-cost { font-size:.72rem;color:#64748b; }
+        .picker-foot { padding:.75rem 1rem;border-top:1px solid #2A2A2A;display:flex;gap:.5rem;align-items:center; }
+        .picker-sel-count { flex:1;font-size:.75rem;color:#64748b; }
+        .btn-picker-confirm { display:flex;align-items:center;gap:.35rem;padding:.55rem 1.1rem;border-radius:.6rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .2s; }
+        .btn-picker-confirm:hover { opacity:.88; }
+        .btn-picker-confirm .material-symbols-outlined { font-size:.9rem; }
+
+        /* del modal */
+        .del-modal-bg { position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:130;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem; }
+        .del-modal-bg.open { opacity:1;pointer-events:auto; }
+        .del-modal { background:#1E1E1E;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;max-width:360px;width:100%;animation:fadeUp .2s ease both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+
+        /* detail modal */
+        .detail-modal-bg { position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:130;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem; }
+        .detail-modal-bg.open { opacity:1;pointer-events:auto; }
+        .detail-modal { background:#1E1E1E;border:1px solid #2A2A2A;border-radius:1rem;max-width:440px;width:100%;animation:fadeUp .2s ease both;overflow:hidden;max-height:90vh;display:flex;flex-direction:column; }
+        .detail-header { padding:1.1rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;align-items:center;gap:.75rem; }
+        .detail-body { padding:1.25rem;overflow-y:auto;display:flex;flex-direction:column;gap:.85rem; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* dropdown */
+        .dropdown { position:relative; }
+        .dropdown-menu { position:absolute;right:0;top:2.5rem;background:#1E1E1E;border:1px solid #2A2A2A;border-radius:.75rem;min-width:180px;padding:.35rem;z-index:50;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none; }
+        .dropdown-menu.open { display:block;animation:fadeUp .15s ease both; }
+        .dd-item { display:flex;align-items:center;gap:.5rem;padding:.55rem .75rem;border-radius:.5rem;font-size:.82rem;color:#94a3b8;cursor:pointer;transition:all .12s;background:transparent;border:none;width:100%;text-align:left; }
+        .dd-item:hover { background:rgba(37,244,244,.07);color:#25f4f4; }
+        .dd-item .material-symbols-outlined { font-size:.95rem; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Combos</h1>
+        <!-- botão novo desktop -->
+        <button onclick="openModal()" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-black" style="background:linear-gradient(135deg,#25f4f4,#0dc8c8);box-shadow:0 3px 16px rgba(37,244,244,.22)">
+            <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">add</span>
+            Novo Combo
+        </button>
+        <!-- dropdown -->
+        <div class="dropdown">
+            <button class="btn-icon" onclick="toggleDd()">
+                <span class="material-symbols-outlined">more_vert</span>
+            </button>
+            <div id="dd-menu" class="dropdown-menu">
+                <button class="dd-item" onclick="openModal();closeDd()">
+                    <span class="material-symbols-outlined">add_circle</span> Novo Combo
+                </button>
+                <button class="dd-item" onclick="exportarCSV();closeDd()">
+                    <span class="material-symbols-outlined">download</span> Exportar CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-6xl mx-auto px-4 py-4">
+
+    <!-- Busca -->
+    <div class="search-wrap mb-4">
+        <span class="material-symbols-outlined ico">search</span>
+        <input id="search" type="search" class="search-box" placeholder="Procurar combo..." oninput="render()" />
+    </div>
+
+    <!-- Contagem -->
+    <p id="count-label" class="text-xs text-slate-500 mb-3"></p>
+
+    <!-- Grid -->
+    <div id="combos-grid" class="combos-grid"></div>
+
+    <!-- Empty -->
+    <div id="empty-state" class="empty hidden">
+        <span class="material-symbols-outlined">layers</span>
+        <p class="font-semibold text-slate-400">Nenhum combo encontrado</p>
+        <p class="text-sm">Crie o primeiro combo agrupando produtos!</p>
+        <button onclick="openModal()" class="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-black" style="background:linear-gradient(135deg,#25f4f4,#0dc8c8)">
+            <span class="material-symbols-outlined" style="font-size:1rem">add</span> Novo Combo
+        </button>
+    </div>
+</main>
+
+<!-- ══ FAB mobile ═══════════════════════════════════════════════════ -->
+<button class="fab md:hidden" onclick="openModal()">
+    <span class="material-symbols-outlined">add</span>
+    Novo Combo
+</button>
+
+<!-- ══ Modal Novo/Editar Combo (2 colunas) ════════════════════════ -->
+<div id="modal-combo" class="modal-full-bg">
+  <div class="modal-full">
+
+    <!-- cabeçalho -->
+    <div class="mf-head">
+      <div class="iconbox"><span class="material-symbols-outlined">layers</span></div>
+      <div style="flex:1">
+        <p id="modal-title" class="font-bold text-sm">Novo Combo</p>
+        <p class="text-xs text-slate-400">Agrupe produtos e precifique seu combo</p>
+      </div>
+      <button onclick="closeModal()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;padding:.25rem">
+        <span class="material-symbols-outlined" style="font-size:1.35rem">close</span>
+      </button>
+    </div>
+
+    <!-- body 2 colunas -->
+    <div class="mf-body">
+
+      <!-- ── COLUNA ESQUERDA ─────── -->
+      <div class="mf-col mf-col-left">
+        <input type="hidden" id="f-id" />
+
+        <!-- Seção: Informações Básicas -->
+        <div>
+          <p class="field-label"><span class="material-symbols-outlined">info</span> Informações Básicas</p>
+
+          <!-- Upload imagem -->
+          <div class="img-upload-box" id="img-upload-box" onclick="document.getElementById('f-img-file').click()">
+            <img id="img-preview" src="" alt="" style="display:none" />
+            <div class="upload-overlay">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#fff">add_photo_alternate</span>
+              <span style="font-size:.72rem;color:#ccc">Trocar imagem</span>
+            </div>
+            <div class="ico-placeholder" id="img-placeholder">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24;color:#475569">add_photo_alternate</span>
+              <span style="font-size:.75rem;color:#64748b">Adicionar imagem do combo</span>
+            </div>
+          </div>
+          <input type="file" id="f-img-file" accept="image/*" style="display:none" onchange="handleImgUpload(event)" />
+          <input type="hidden" id="f-img" />
+
+          <!-- URL imagem -->
+          <div style="margin-top:.75rem">
+            <p style="font-size:.68rem;color:#64748b;margin-bottom:.35rem">URL da Imagem <span style="color:#475569">(Opcional)</span></p>
+            <input id="f-img-url" type="url" class="fc" placeholder="https://..." oninput="applyImgUrl()" />
+          </div>
+
+          <!-- Nome -->
+          <div style="margin-top:.75rem">
+            <p style="font-size:.68rem;color:#64748b;margin-bottom:.35rem">Nome do Combo <span style="color:#f87171">*</span></p>
+            <input id="f-nome" type="text" class="fc" placeholder="Combo" autocomplete="off" />
+            <p id="f-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome.</p>
+          </div>
+        </div>
+
+        <!-- Seção: Composição -->
+        <div>
+          <div class="sec-header">
+            <span class="sec-title"><span class="material-symbols-outlined">layers</span> Composição do Combo</span>
+            <button class="btn-add-prod" onclick="openPicker()">
+              <span class="material-symbols-outlined">add</span> ADICIONAR
+            </button>
+          </div>
+          <div id="comp-list" style="display:flex;flex-direction:column;gap:.45rem;min-height:2rem">
+            <p id="comp-empty" class="text-xs text-slate-500" style="padding:.5rem 0">Adicione ao menos um produto.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COLUNA DIREITA ─────── -->
+      <div class="mf-col mf-col-right">
+        <p class="field-label"><span class="material-symbols-outlined">payments</span> Precificação e Métricas</p>
+
+        <!-- Preço de Venda -->
+        <div>
+          <p style="font-size:.68rem;color:#64748b;margin-bottom:.4rem">Preço de Venda do Combo <span style="color:#f87171">*</span></p>
+          <div class="price-big-wrap">
+            <span class="price-big-prefix">R$</span>
+            <input id="f-preco" type="number" min="0" step="0.01" class="price-big-input" placeholder="0" oninput="calcMetrics()" />
+          </div>
+        </div>
+
+        <!-- Custo Total + Qtd -->
+        <div class="m2-grid">
+          <div class="m-box">
+            <p class="m-label">Custo Total</p>
+            <p class="m-val" id="m-custo">R$ 0,00</p>
+          </div>
+          <div class="m-box">
+            <p class="m-label">Qtd. Itens</p>
+            <p class="m-val" id="m-qtd">0 un</p>
+          </div>
+        </div>
+
+        <!-- Lucro Total + Margem destaque -->
+        <div class="lucro-box">
+          <div class="lucro-box-top">
+            <div><p class="lucro-label">Lucro Total Bruto</p><p class="lucro-val" id="m-lucro">R$ 0,00</p></div>
+            <div style="text-align:right"><p class="margem-badge">Margem</p><p class="margem-val" id="m-margem">0%</p></div>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="m-bar" style="width:0%"></div></div>
+        </div>
+
+        <!-- Custo Médio + Markup -->
+        <div class="m2-grid">
+          <div class="m-box">
+            <p class="m-label">Custo Médio/Un</p>
+            <p class="m-val" id="m-cmedio">R$ 0,00</p>
+          </div>
+          <div class="m-box">
+            <p class="m-label">Markup</p>
+            <p class="m-val" id="m-markup">0x</p>
+          </div>
+        </div>
+
+        <!-- Indicador de margem -->
+        <div id="m-indicator" class="margem-indicator bad" style="display:none">
+          <span class="material-symbols-outlined" id="m-ind-icon">warning</span>
+          <span id="m-ind-txt">Defina o preço de venda.</span>
+        </div>
+
+        <!-- Lucro por Marketplace -->
+        <div>
+          <p class="field-label" style="margin-bottom:.6rem"><span class="material-symbols-outlined">storefront</span> Lucro por Marketplace</p>
+          <div style="display:flex;flex-direction:column;gap:.45rem" id="mkt-rows"></div>
+        </div>
+
+        <!-- Salvar -->
+        <button class="btn-salvar-combo" onclick="salvar()">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+          <span id="btn-salvar-txt">Salvar Combo</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Picker de Produtos (multi-seleção) ═══════════════════════════ -->
+<div id="modal-picker" class="picker-modal-bg">
+  <div class="picker-modal">
+    <div class="picker-head">
+      <p class="font-bold text-sm">Adicionar Produtos</p>
+      <button onclick="closePicker()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex">
+        <span class="material-symbols-outlined" style="font-size:1.2rem">close</span>
+      </button>
+    </div>
+    <div class="picker-body" id="picker-items"></div>
+    <div class="picker-foot">
+      <span class="picker-sel-count" id="picker-count">Nenhum selecionado</span>
+      <button class="btn-picker-confirm" onclick="confirmPicker()">
+        <span class="material-symbols-outlined">check</span> Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal Excluir ════════════════════════════════════════════════ -->
+<div id="modal-del" class="del-modal-bg">
+  <div class="del-modal">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <div style="width:2.5rem;height:2.5rem;border-radius:.6rem;background:rgba(248,113,113,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span class="material-symbols-outlined" style="color:#f87171">delete</span>
+      </div>
+      <div>
+        <p class="font-bold">Excluir Combo</p>
+        <p class="text-xs text-slate-400 mt-0.5">Esta ação não pode ser desfeita.</p>
+      </div>
+    </div>
+    <p class="text-sm text-slate-300 mb-5">Deseja excluir <strong id="del-nome" class="text-white"></strong>?</p>
+    <div style="display:flex;gap:.65rem">
+      <button onclick="closeDel()" class="btn-cancel" style="flex:1">Cancelar</button>
+      <button onclick="confirmarDel()" style="flex:1;padding:.75rem;border-radius:.7rem;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.15);color:#f87171;font-weight:700;font-size:.9rem;cursor:pointer">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal Detalhes ═══════════════════════════════════════════════ -->
+<div id="modal-detail" class="detail-modal-bg">
+  <div class="detail-modal">
+    <div class="detail-header">
+      <div class="iconbox"><span class="material-symbols-outlined">layers</span></div>
+      <div style="flex:1">
+        <p id="detail-nome" class="font-bold text-sm">Combo</p>
+        <p id="detail-meta" class="text-xs text-slate-400"></p>
+      </div>
+      <button onclick="closeDetail()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center">
+        <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+      </button>
+    </div>
+    <div class="detail-body">
+      <!-- métricas -->
+      <div class="metrics-grid">
+        <div class="metric-box metric-preco">
+          <span class="metric-label">Preço</span>
+          <span class="metric-value" id="det-preco"></span>
+        </div>
+        <div class="metric-box metric-custo">
+          <span class="metric-label">Custo</span>
+          <span class="metric-value" id="det-custo"></span>
+        </div>
+        <div class="metric-box metric-lucro">
+          <span class="metric-label">Lucro</span>
+          <span class="metric-value" id="det-lucro"></span>
+        </div>
+        <div class="metric-box metric-margem">
+          <span class="metric-label">Margem</span>
+          <span class="metric-value" id="det-margem"></span>
+        </div>
+        <div class="metric-box metric-lunit">
+          <span class="metric-label">L. Unit.</span>
+          <span class="metric-value" id="det-lunit"></span>
+        </div>
+        <div class="metric-box metric-markup">
+          <span class="metric-label">Markup</span>
+          <span class="metric-value" id="det-markup"></span>
+        </div>
+      </div>
+      <!-- produtos incluídos -->
+      <div>
+        <p class="field-label mb-2">Produtos incluídos</p>
+        <div id="det-produtos" style="display:flex;flex-direction:column;gap:.35rem"></div>
+      </div>
+      <!-- obs -->
+      <div id="det-obs-wrap" style="display:none">
+        <p class="field-label mb-1">Observações</p>
+        <p id="det-obs" class="text-sm text-slate-300"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Salvo!</span>
+</div>
+
+<script>
+/* ─── DADOS ──────────────────────────────────────────────────────── */
+let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || 'null') || [
+    { id:1, nome:'Abacaxi Cremoso',   preco:7.00,  custo:2.50 },
+    { id:2, nome:'Blue Ice',          preco:6.50,  custo:2.20 },
+    { id:3, nome:'Chocolate Trufado', preco:9.00,  custo:3.80 },
+    { id:4, nome:'Goiaba Cremoso',    preco:6.00,  custo:2.00 },
+    { id:5, nome:'Ninho com Nutella', preco:9.00,  custo:3.50 },
+    { id:6, nome:'Pudim',             preco:7.80,  custo:2.90 },
+];
+
+let combos = JSON.parse(localStorage.getItem('receitasx_combos') || 'null') || [
+    {
+        id:1,
+        nome:'Combo4',
+        preco:22.00,
+        img:'',
+        obs:'',
+        itens:[ { prodId:1, qty:1 }, { prodId:3, qty:1 } ]
+    },
+    {
+        id:2,
+        nome:'Combo Família',
+        preco:35.00,
+        img:'',
+        obs:'Ideal para famílias. Geladinhos variados.',
+        itens:[ { prodId:2, qty:2 }, { prodId:5, qty:2 } ]
+    },
+    {
+        id:3,
+        nome:'Combo Duplo Ninho',
+        preco:17.00,
+        img:'',
+        obs:'',
+        itens:[ { prodId:5, qty:1 }, { prodId:6, qty:1 } ]
+    },
+];
+
+let pendingDelId = null;
+let selectedItems = {}; // { prodId: qty }
+
+function save() { localStorage.setItem('receitasx_combos', JSON.stringify(combos)); }
+if (!localStorage.getItem('receitasx_combos')) save();
+
+/* ─── HELPERS ────────────────────────────────────────────────────── */
+function fmtR(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtPct(v) { return v.toFixed(0) + '%'; }
+function fmtMkp(v) { return v.toFixed(1) + 'x'; }
+
+function calcCusto(combo) {
+    let total = 0;
+    (combo.itens || []).forEach(item => {
+        const p = produtos.find(x => x.id === item.prodId);
+        if (p) total += (p.custo || 0) * (item.qty || 1);
+    });
+    return total;
+}
+
+function calcLucro(combo) { return (combo.preco||0) - calcCusto(combo); }
+function calcMargem(combo) {
+    const preco = combo.preco || 0;
+    if (!preco) return 0;
+    return (calcLucro(combo) / preco) * 100;
+}
+function calcMarkup(combo) {
+    const custo = calcCusto(combo);
+    if (!custo) return 0;
+    return (combo.preco || 0) / custo;
+}
+function totalUnits(combo) {
+    return (combo.itens||[]).reduce((s,i)=>s+(i.qty||1),0);
+}
+function lucroUnit(combo) {
+    const units = totalUnits(combo);
+    if (!units) return 0;
+    return calcLucro(combo) / units;
+}
+
+/* ─── RENDER ─────────────────────────────────────────────────────── */
+function render() {
+    const q    = (document.getElementById('search').value || '').toLowerCase();
+    const list = combos.filter(c => c.nome.toLowerCase().includes(q));
+
+    const grid  = document.getElementById('combos-grid');
+    const empty = document.getElementById('empty-state');
+    const lbl   = document.getElementById('count-label');
+
+    lbl.textContent = `${list.length} combo${list.length!==1?'s':''} encontrado${list.length!==1?'s':''}`;
+
+    if (!list.length) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+
+    grid.innerHTML = list.map(c => {
+        const custo  = calcCusto(c);
+        const lucro  = calcLucro(c);
+        const margem = calcMargem(c);
+        const markup = calcMarkup(c);
+        const lunit  = lucroUnit(c);
+        const nProds = (c.itens||[]).length;
+        const nUnits = totalUnits(c);
+
+        return `
+        <div class="combo-card" id="card-${c.id}">
+          <div class="combo-img-wrap">
+            ${c.img
+                ? `<img src="${c.img}" alt="${c.nome}" />`
+                : `<div class="combo-img-placeholder"><span class="material-symbols-outlined">layers</span></div>`
+            }
+            <div class="card-img-actions">
+              <button class="img-action-btn edit-btn" onclick="openModal(${c.id})" title="Editar">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button class="img-action-btn del-btn" onclick="openDel(${c.id})" title="Excluir">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+          <div class="combo-body">
+            <p class="combo-name">${c.nome}</p>
+            <p class="combo-meta">${nUnits} un · ${nProds} produto${nProds!==1?'s':''}</p>
+            <div class="metrics-grid">
+              <div class="metric-box metric-preco">
+                <span class="metric-label">Preço</span>
+                <span class="metric-value">${fmtR(c.preco)}</span>
+              </div>
+              <div class="metric-box metric-custo">
+                <span class="metric-label">Custo</span>
+                <span class="metric-value">${fmtR(custo)}</span>
+              </div>
+              <div class="metric-box metric-lucro">
+                <span class="metric-label">Lucro</span>
+                <span class="metric-value">${fmtR(lucro)}</span>
+              </div>
+              <div class="metric-box metric-margem">
+                <span class="metric-label">Margem</span>
+                <span class="metric-value">${fmtPct(margem)}</span>
+              </div>
+              <div class="metric-box metric-lunit">
+                <span class="metric-label">L. Unit.</span>
+                <span class="metric-value">${fmtR(lunit)}</span>
+              </div>
+              <div class="metric-box metric-markup">
+                <span class="metric-label">Markup</span>
+                <span class="metric-value">${fmtMkp(markup)}</span>
+              </div>
+            </div>
+            <button class="btn-detail" onclick="openDetail(${c.id})">
+              <span class="material-symbols-outlined">open_in_new</span>
+              Ver Detalhes
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+/* ─── MARKETPLACES (lidos do localStorage) ───────────────────────── */
+const MKT_ICONS = { default:'storefront', casa:'message', ifood:'storefront', rappi:'delivery_dining' };
+const MKT_COLORS = ['#25f4f4','#ea580c','#7c3aed','#16a34a','#db2777'];
+
+function getMarketplaces() {
+    const stored = JSON.parse(localStorage.getItem('receitasx_marketplaces') || 'null');
+    if (stored && stored.length) return stored.map((m,i) => ({
+        ...m,
+        taxa: m.taxa / 100,  // converte % para decimal
+        icon: MKT_ICONS[m.id] || MKT_ICONS.default,
+        iconColor: MKT_COLORS[i % MKT_COLORS.length],
+        iconBg: 'rgba(37,244,244,.1)',
+    }));
+    return [
+        { id:'casa',  nome:'Porta de Casa', taxa:0,    icon:'message',    iconColor:'#25f4f4', iconBg:'rgba(37,244,244,.12)' },
+        { id:'ifood', nome:'iFood',         taxa:0.28, icon:'storefront', iconColor:'#ea580c', iconBg:'rgba(234,88,12,.12)'  },
+    ];
+}
+
+/* ─── COMPOSIÇÃO INTERATIVA ──────────────────────────────────────── */
+function renderComp() {
+    const list = document.getElementById('comp-list');
+    const empty = document.getElementById('comp-empty');
+    const keys = Object.keys(selectedItems);
+    if (!keys.length) {
+        list.innerHTML = '';
+        list.appendChild(empty);
+        empty.style.display = '';
+        calcMetrics();
+        return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = keys.map(id => {
+        const p = produtos.find(x => x.id === parseInt(id));
+        if (!p) return '';
+        const qty = selectedItems[id];
+        return `
+        <div class="comp-item" id="ci-${p.id}">
+          <div class="comp-thumb">
+            ${p.img ? `<img src="${p.img}" alt="${p.nome}" />` : `<span class="material-symbols-outlined">icecream</span>`}
+          </div>
+          <div class="comp-info">
+            <p class="comp-name">${p.nome}</p>
+            <p class="comp-cost">Custo unit: ${fmtR(p.custo||0)}</p>
+          </div>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${p.id},-1)"><span class="material-symbols-outlined">remove</span></button>
+            <input class="qty-val" type="number" min="1" max="99" value="${qty}" onchange="changeQtyDirect(${p.id},this.value)" />
+            <button class="qty-btn" onclick="changeQty(${p.id},1)"><span class="material-symbols-outlined">add</span></button>
+          </div>
+          <button class="btn-del-item" onclick="removeItem(${p.id})"><span class="material-symbols-outlined">delete</span></button>
+        </div>`;
+    }).join('');
+    calcMetrics();
+}
+
+function changeQty(prodId, delta) {
+    const cur = selectedItems[prodId] || 1;
+    const next = Math.max(1, cur + delta);
+    selectedItems[prodId] = next;
+    renderComp();
+}
+function changeQtyDirect(prodId, val) {
+    selectedItems[prodId] = Math.max(1, parseInt(val)||1);
+    calcMetrics();
+}
+function removeItem(prodId) {
+    delete selectedItems[prodId];
+    renderComp();
+}
+
+/* ─── PICKER MODAL (multi-seleção) ──────────────────────────────── */
+let pickerSel = {}; // seleção temporária: { prodId: true }
+
+function openPicker() {
+    pickerSel = {};
+    updatePickerCount();
+    const body = document.getElementById('picker-items');
+    if (!produtos.length) {
+        body.innerHTML = '<p class="text-xs text-slate-500" style="padding:.75rem">Nenhum produto cadastrado ainda.</p>';
+    } else {
+        body.innerHTML = produtos.map(p => `
+        <div class="picker-item" id="pi-${p.id}" onclick="togglePickerItem(${p.id})">
+          <div class="picker-chk"><span class="material-symbols-outlined">check</span></div>
+          <div class="picker-item-thumb">
+            ${p.img ? `<img src="${p.img}" alt="${p.nome}">` : `<span class="material-symbols-outlined">icecream</span>`}
+          </div>
+          <span class="picker-item-name">${p.nome}</span>
+          <span class="picker-item-cost">Custo: ${fmtR(p.custo||0)}</span>
+        </div>`).join('');
+    }
+    document.getElementById('modal-picker').classList.add('open');
+}
+
+function togglePickerItem(prodId) {
+    if (pickerSel[prodId]) {
+        delete pickerSel[prodId];
+        document.getElementById('pi-'+prodId)?.classList.remove('sel');
+    } else {
+        pickerSel[prodId] = true;
+        document.getElementById('pi-'+prodId)?.classList.add('sel');
+    }
+    updatePickerCount();
+}
+
+function updatePickerCount() {
+    const n = Object.keys(pickerSel).length;
+    document.getElementById('picker-count').textContent =
+        n === 0 ? 'Nenhum selecionado' : n + ' produto' + (n > 1 ? 's' : '') + ' selecionado' + (n > 1 ? 's' : '');
+}
+
+function closePicker() {
+    document.getElementById('modal-picker').classList.remove('open');
+    pickerSel = {};
+}
+
+function confirmPicker() {
+    Object.keys(pickerSel).forEach(id => {
+        const pid = parseInt(id);
+        if (selectedItems[pid] === undefined) selectedItems[pid] = 1;
+        else selectedItems[pid]++;
+    });
+    document.getElementById('modal-picker').classList.remove('open');
+    pickerSel = {};
+    renderComp();
+}
+
+/* ─── MÉTRICAS AO VIVO ───────────────────────────────────────────── */
+function calcMetrics() {
+    const preco = parseFloat(document.getElementById('f-preco').value) || 0;
+    let custo = 0, totalQty = 0;
+    Object.entries(selectedItems).forEach(([id, qty]) => {
+        const p = produtos.find(x => x.id === parseInt(id));
+        if (p) { custo += (p.custo||0) * qty; totalQty += qty; }
+    });
+    const lucro  = preco - custo;
+    const margem = preco ? (lucro / preco) * 100 : 0;
+    const markup = custo ? preco / custo : 0;
+    const cmedio = totalQty ? custo / totalQty : 0;
+
+    document.getElementById('m-custo').textContent  = fmtR(custo);
+    document.getElementById('m-qtd').textContent    = totalQty + ' un';
+    document.getElementById('m-lucro').textContent  = fmtR(lucro);
+    document.getElementById('m-margem').textContent = margem.toFixed(1) + '%';
+    document.getElementById('m-bar').style.width    = Math.min(100, Math.max(0, margem)) + '%';
+    document.getElementById('m-cmedio').textContent = fmtR(cmedio);
+    document.getElementById('m-markup').textContent = markup.toFixed(2) + 'x';
+
+    // indicador de margem
+    const ind = document.getElementById('m-indicator');
+    if (preco > 0) {
+        ind.style.display = '';
+        let cls, icon, txt;
+        if (margem >= 35)      { cls='great'; icon='check_circle'; txt='Margem excelente! Acima de 35%.'; }
+        else if (margem >= 20) { cls='ok';    icon='info';         txt='Margem razoável. Tente aumentar o preço.'; }
+        else                   { cls='bad';   icon='warning';      txt='Margem abaixo do ideal. Revise os custos.'; }
+        ind.className = 'margem-indicator ' + cls;
+        document.getElementById('m-ind-icon').textContent = icon;
+        document.getElementById('m-ind-txt').textContent  = txt;
+    } else {
+        ind.style.display = 'none';
+    }
+
+    // marketplace rows
+    const mktEl = document.getElementById('mkt-rows');
+    mktEl.innerHTML = getMarketplaces().map(m => {
+        const taxa    = m.taxa * preco;
+        const liqLuc  = lucro - taxa;
+        const liqMarg = preco ? (liqLuc / preco) * 100 : 0;
+        const badgeColor = liqMarg >= 20 ? 'rgba(37,244,244,.15)' : 'rgba(248,113,113,.15)';
+        const badgeTxt   = liqMarg >= 20 ? '#25f4f4' : '#f87171';
+        return `
+        <div class="mkt-row">
+          <div class="mkt-icon" style="background:${m.iconBg}">
+            <span class="material-symbols-outlined" style="color:${m.iconColor}">${m.icon}</span>
+          </div>
+          <div class="mkt-info">
+            <p class="mkt-name">${m.nome}</p>
+            <p class="mkt-taxa">Taxa: ${(m.taxa*100).toFixed(1)}%&nbsp;&nbsp;·&nbsp;&nbsp;<span class="neg">-${fmtR(taxa)}</span></p>
+          </div>
+          <div class="mkt-right">
+            <p class="mkt-liquido">Lucro Líq.</p>
+            <p class="mkt-val">${fmtR(liqLuc)}</p>
+          </div>
+          <span class="mkt-badge" style="background:${badgeColor};color:${badgeTxt}">${liqMarg.toFixed(1)}%</span>
+        </div>`;
+    }).join('');
+}
+
+/* ─── RESET / OPEN / CLOSE MODAL ────────────────────────────────── */
+function resetModal() {
+    document.getElementById('f-id').value    = '';
+    document.getElementById('f-nome').value  = '';
+    document.getElementById('f-preco').value = '';
+    document.getElementById('f-img').value   = '';
+    document.getElementById('f-img-url').value = '';
+    document.getElementById('f-nome-err').style.display = 'none';
+    document.getElementById('f-nome').classList.remove('error');
+    document.getElementById('img-preview').style.display = 'none';
+    document.getElementById('img-placeholder').style.display = '';
+    selectedItems = {};
+    renderComp();
+}
+
+function openModal(id) {
+    resetModal();
+    if (id) {
+        const c = combos.find(x => x.id === id);
+        if (!c) return;
+        document.getElementById('f-id').value    = c.id;
+        document.getElementById('f-nome').value  = c.nome;
+        document.getElementById('f-preco').value = c.preco || '';
+        if (c.img) {
+            document.getElementById('f-img').value = c.img;
+            document.getElementById('img-preview').src = c.img;
+            document.getElementById('img-preview').style.display = 'block';
+            document.getElementById('img-placeholder').style.display = 'none';
+        }
+        (c.itens||[]).forEach(i => { selectedItems[i.prodId] = i.qty||1; });
+        document.getElementById('modal-title').textContent    = 'Editar Combo';
+        document.getElementById('btn-salvar-txt').textContent = 'Atualizar Combo';
+    } else {
+        document.getElementById('modal-title').textContent    = 'Novo Combo';
+        document.getElementById('btn-salvar-txt').textContent = 'Salvar Combo';
+    }
+    renderComp();
+    calcMetrics();
+    document.getElementById('modal-combo').classList.add('open');
+    setTimeout(() => document.getElementById('f-nome').focus(), 80);
+}
+function closeModal() { document.getElementById('modal-combo').classList.remove('open'); }
+
+function applyImgUrl() {
+    const url = document.getElementById('f-img-url').value.trim();
+    if (url) {
+        document.getElementById('f-img').value = url;
+        document.getElementById('img-preview').src = url;
+        document.getElementById('img-preview').style.display = 'block';
+        document.getElementById('img-placeholder').style.display = 'none';
+    }
+}
+
+function handleImgUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const src = ev.target.result;
+        document.getElementById('f-img').value = src;
+        document.getElementById('img-preview').src = src;
+        document.getElementById('img-preview').style.display = 'block';
+        document.getElementById('img-placeholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function salvar() {
+    const nome = document.getElementById('f-nome').value.trim();
+    if (!nome) {
+        document.getElementById('f-nome').classList.add('error');
+        document.getElementById('f-nome-err').style.display = 'block';
+        document.getElementById('f-nome').focus();
+        return;
+    }
+    document.getElementById('f-nome').classList.remove('error');
+    document.getElementById('f-nome-err').style.display = 'none';
+
+
+    const data = {
+        nome,
+        preco: parseFloat(document.getElementById('f-preco').value) || 0,
+        obs:   '',
+        img:   document.getElementById('f-img').value,
+        itens,
+    };
+
+    const idVal = document.getElementById('f-id').value;
+    if (idVal) {
+        const idx = combos.findIndex(x => x.id === parseInt(idVal));
+        if (idx !== -1) combos[idx] = { ...combos[idx], ...data };
+        showToast(`"${nome}" atualizado!`);
+    } else {
+        const newId = Math.max(0, ...combos.map(x => x.id)) + 1;
+        combos.push({ id: newId, ...data });
+        showToast(`"${nome}" cadastrado!`);
+    }
+    save(); render(); closeModal();
+}
+
+/* ─── DELETE ─────────────────────────────────────────────────────── */
+function openDel(id) {
+    const c = combos.find(x => x.id === id);
+    if (!c) return;
+    pendingDelId = id;
+    document.getElementById('del-nome').textContent = c.nome;
+    document.getElementById('modal-del').classList.add('open');
+}
+function closeDel() { document.getElementById('modal-del').classList.remove('open'); pendingDelId = null; }
+function confirmarDel() {
+    if (!pendingDelId) return;
+    const c = combos.find(x => x.id === pendingDelId);
+    combos = combos.filter(x => x.id !== pendingDelId);
+    save(); render(); closeDel();
+    showToast(`"${c?.nome}" excluído!`, 'error');
+}
+
+/* ─── DETAIL ─────────────────────────────────────────────────────── */
+function openDetail(id) {
+    const c = combos.find(x => x.id === id);
+    if (!c) return;
+
+    const custo  = calcCusto(c);
+    const lucro  = calcLucro(c);
+    const margem = calcMargem(c);
+    const markup = calcMarkup(c);
+    const lunit  = lucroUnit(c);
+    const nUnits = totalUnits(c);
+    const nProds = (c.itens||[]).length;
+
+    document.getElementById('detail-nome').textContent = c.nome;
+    document.getElementById('detail-meta').textContent = `${nUnits} un · ${nProds} produto${nProds!==1?'s':''}`;
+    document.getElementById('det-preco').textContent  = fmtR(c.preco);
+    document.getElementById('det-custo').textContent  = fmtR(custo);
+    document.getElementById('det-lucro').textContent  = fmtR(lucro);
+    document.getElementById('det-margem').textContent = fmtPct(margem);
+    document.getElementById('det-lunit').textContent  = fmtR(lunit);
+    document.getElementById('det-markup').textContent = fmtMkp(markup);
+
+    const prodsEl = document.getElementById('det-produtos');
+    prodsEl.innerHTML = (c.itens||[]).map(item => {
+        const p = produtos.find(x=>x.id===item.prodId);
+        if (!p) return '';
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .7rem;border-radius:.5rem;background:#1A1A1A;border:1px solid #2A2A2A">
+            <span style="font-size:.82rem;font-weight:600;">${p.nome}</span>
+            <span style="font-size:.75rem;color:#64748b">${item.qty||1}x · ${fmtR(p.preco)}</span>
+        </div>`;
+    }).join('');
+
+    const obsWrap = document.getElementById('det-obs-wrap');
+    if (c.obs) {
+        obsWrap.style.display = '';
+        document.getElementById('det-obs').textContent = c.obs;
+    } else {
+        obsWrap.style.display = 'none';
+    }
+
+    document.getElementById('modal-detail').classList.add('open');
+}
+function closeDetail() { document.getElementById('modal-detail').classList.remove('open'); }
+
+/* ─── DROPDOWN ───────────────────────────────────────────────────── */
+function toggleDd() { document.getElementById('dd-menu').classList.toggle('open'); }
+function closeDd()  { document.getElementById('dd-menu').classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.dropdown')) closeDd(); });
+
+/* ─── EXPORT CSV ─────────────────────────────────────────────────── */
+function exportarCSV() {
+    const head = 'Nome,Preço,Custo,Lucro,Margem,Markup,Produtos';
+    const rows = combos.map(c => {
+        const custo  = calcCusto(c).toFixed(2);
+        const lucro  = calcLucro(c).toFixed(2);
+        const margem = calcMargem(c).toFixed(1) + '%';
+        const markup = calcMarkup(c).toFixed(2) + 'x';
+        const prods  = (c.itens||[]).map(i=>{ const p=produtos.find(x=>x.id===i.prodId); return p?`${i.qty}x ${p.nome}`:''; }).join('; ');
+        return `"${c.nome}","${c.preco}","${custo}","${lucro}","${margem}","${markup}","${prods}"`;
+    });
+    const csv  = [head, ...rows].join('\n');
+    const a    = document.createElement('a');
+    a.href     = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFF' + csv);
+    a.download = 'combos_receitasx.csv';
+    a.click();
+    showToast('CSV exportado!');
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'delete' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ─── KEYBOARD ───────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal(); closeDel(); closeDetail(); }
+});
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+render();
+</script>
+</body>
+</html>

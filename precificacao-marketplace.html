@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Precificação por Marketplace - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        input,select { background-color:#1E1E1E !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder { color:#475569 !important; }
+        input:focus,select:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* header */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* tabs */
+        .mkt-tab { display:flex;align-items:center;gap:.45rem;padding:.45rem 1rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap; }
+        .mkt-tab:hover { border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .mkt-tab.active { background:#25f4f4;border-color:#25f4f4;color:#0a0a0a; }
+        .mkt-tab .material-symbols-outlined { font-size:1rem; }
+        .btn-criar-cat { display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:9999px;border:2px dashed rgba(37,244,244,.4);background:transparent;color:#25f4f4;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap; }
+        .btn-criar-cat:hover { background:rgba(37,244,244,.08);border-color:#25f4f4; }
+        .btn-criar-cat .material-symbols-outlined { font-size:1rem; }
+
+        /* canal banner */
+        .canal-banner { background:linear-gradient(135deg,rgba(37,244,244,.07),rgba(37,244,244,.03));border:1px solid rgba(37,244,244,.2);border-radius:.85rem;padding:.85rem 1.1rem;display:flex;align-items:center;justify-content:space-between; }
+        .canal-label { font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#25f4f4;margin-bottom:.2rem; }
+        .canal-nome { font-size:1rem;font-weight:700;color:#f1f5f9; }
+        .canal-ico { width:2.5rem;height:2.5rem;border-radius:.6rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .canal-ico .material-symbols-outlined { font-size:1.25rem; }
+
+        /* produtos grid */
+        .prod-grid { display:grid;grid-template-columns:1fr;gap:.85rem; }
+        @media(min-width:640px)  { .prod-grid { grid-template-columns:1fr 1fr; } }
+        @media(min-width:1024px) { .prod-grid { grid-template-columns:1fr 1fr 1fr; } }
+
+        /* product pricing card */
+        .pp-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.75rem;transition:border-color .2s,box-shadow .2s; }
+        .pp-card:hover { border-color:rgba(37,244,244,.18);box-shadow:0 4px 24px rgba(0,0,0,.4); }
+
+        /* card top */
+        .pp-top { display:flex;align-items:center;gap:.75rem; }
+        .pp-thumb { width:3rem;height:3rem;border-radius:.65rem;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden; }
+        .pp-thumb img { width:100%;height:100%;object-fit:cover; }
+        .pp-thumb .material-symbols-outlined { font-size:1.5rem;color:#2A2A2A;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24; }
+        .pp-name { font-size:.92rem;font-weight:700;color:#f1f5f9;flex:1;min-width:0;line-height:1.2; }
+
+        /* custo info */
+        .pp-custo-row { display:flex;align-items:center;gap:.5rem;flex-wrap:wrap; }
+        .pp-custo-lbl { font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b; }
+        .pp-custo-val { font-size:.82rem;font-weight:700;color:#94a3b8; }
+        .badge-receita { display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:.35rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);color:#25f4f4;cursor:help; }
+        .badge-receita .material-symbols-outlined { font-size:.7rem; }
+        .pp-lz-row { display:flex;align-items:center;gap:.4rem; }
+        .pp-lz-lbl { font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#f87171; }
+        .pp-lz-val { font-size:.78rem;font-weight:700;color:#f87171; }
+        .pp-lz-hint { font-size:.6rem;color:#475569; }
+
+        /* divider */
+        .pp-div { border:none;border-top:1px solid #2A2A2A;margin:0; }
+
+        /* price section */
+        .pp-price-lbl { font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.45rem; }
+        .pp-price-row { display:flex;align-items:center;gap:.65rem; }
+        .pp-input-wrap { display:flex;align-items:center;gap:.4rem;background:#111;border:1px solid #2A2A2A;border-radius:.65rem;padding:.55rem .8rem;flex:1;transition:border-color .2s; }
+        .pp-input-wrap:focus-within { border-color:rgba(37,244,244,.5); }
+        .pp-pfx { font-size:.82rem;font-weight:700;color:#64748b;flex-shrink:0; }
+        .pp-input { flex:1;background:transparent!important;border:none!important;outline:none;font-size:1.15rem;font-weight:800;color:#f1f5f9!important;box-shadow:none!important;padding:0!important;min-width:0; }
+        .pp-metrics { display:flex;flex-direction:column;gap:.2rem;flex-shrink:0;text-align:right; }
+        .pp-lucro-lbl { font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b; }
+        .pp-lucro-val { font-size:.95rem;font-weight:800;color:#25f4f4; }
+        .pp-margem-badge { font-size:.65rem;font-weight:700;padding:.18rem .5rem;border-radius:.35rem;display:inline-block; }
+
+        /* save button */
+        .btn-salvar { display:flex;align-items:center;gap:.45rem;padding:.6rem 1.1rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.85rem;cursor:pointer;box-shadow:0 3px 16px rgba(37,244,244,.25);transition:opacity .2s; }
+        .btn-salvar:hover { opacity:.9; }
+        .btn-salvar .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* criar categoria modal */
+        .modal-bg { position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:110;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem; }
+        .modal-bg.open { opacity:1;pointer-events:auto; }
+        .modal-box { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;max-width:380px;width:100%;animation:fadeUp .2s ease both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        .fc { width:100%;padding:.7rem .9rem;border-radius:.7rem;border:1px solid #2A2A2A !important;background:#111 !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s; }
+        .fc:focus { border-color:rgba(37,244,244,.5) !important; }
+        .fc::placeholder { color:#475569 !important; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Precificação por Marketplace</h1>
+        <button class="btn-salvar" onclick="salvar()">
+            <span class="material-symbols-outlined">save</span>
+            Salvar
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-6xl mx-auto px-4 py-5" style="display:flex;flex-direction:column;gap:1.25rem">
+
+    <!-- Tabs Marketplace -->
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap" id="tabs-wrap">
+        <!-- Gerado por JS -->
+    </div>
+
+    <!-- Canal Banner -->
+    <div class="canal-banner" id="canal-banner">
+        <div>
+            <p class="canal-label">Canal Selecionado</p>
+            <p class="canal-nome" id="canal-nome-txt">—</p>
+        </div>
+        <div class="canal-ico" id="canal-ico" style="background:rgba(37,244,244,.1)">
+            <span class="material-symbols-outlined" style="color:#25f4f4">storefront</span>
+        </div>
+    </div>
+
+    <!-- Produtos -->
+    <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+            <h2 class="text-base font-bold">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#25f4f4;margin-right:.25rem">store</span>
+                Produtos
+            </h2>
+            <span class="text-xs text-slate-500" id="prod-count"></span>
+        </div>
+        <div class="prod-grid" id="prod-grid"></div>
+        <div id="empty-state" class="hidden" style="display:flex;flex-direction:column;align-items:center;padding:4rem 1rem;color:#475569;gap:.5rem">
+            <span class="material-symbols-outlined" style="font-size:3rem;color:#2A2A2A">inventory_2</span>
+            <p class="font-semibold text-slate-400">Nenhum produto cadastrado</p>
+            <p class="text-sm">Cadastre produtos em Gestão de Produtos</p>
+        </div>
+    </div>
+
+</main>
+
+<!-- ══ Modal Criar Categoria ════════════════════════════════════════ -->
+<div id="modal-cat" class="modal-bg">
+  <div class="modal-box">
+    <p class="font-bold mb-1">Criar Categoria / Canal</p>
+    <p class="text-xs text-slate-400 mb-4">Adicione um canal de venda personalizado com sua taxa.</p>
+    <div style="display:flex;flex-direction:column;gap:.65rem">
+      <div>
+        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Nome do Canal</p>
+        <input id="cat-nome" type="text" class="fc" placeholder="Ex: WhatsApp, Loja Própria..." autocomplete="off" />
+      </div>
+      <div>
+        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Taxa (%)</p>
+        <input id="cat-taxa" type="number" min="0" max="100" step="0.1" class="fc" placeholder="0" />
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.25rem">
+        <button onclick="closeModalCat()" style="flex:1;padding:.7rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-size:.85rem;font-weight:600;cursor:pointer">Cancelar</button>
+        <button onclick="criarCategoria()" style="flex:1;padding:.7rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-size:.85rem;font-weight:700;cursor:pointer">Criar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Salvo!</span>
+</div>
+
+<script>
+/* ─── DADOS ──────────────────────────────────────────────────────── */
+const PREC_KEY = 'receitasx_precificacao'; // { mktId: { prodId: preco } }
+const MKT_KEY  = 'receitasx_marketplaces';
+
+// Marketplaces
+const MKT_DEFAULTS = [
+    { id:'casa',  nome:'Porta de Casa', taxa:0,  icon:'message',    color:'#25f4f4', bg:'rgba(37,244,244,.1)'  },
+    { id:'ifood', nome:'iFood',         taxa:28, icon:'storefront', color:'#ea580c', bg:'rgba(234,88,12,.1)'   },
+];
+const MKT_ICONS   = { casa:'message', ifood:'storefront', default:'store' };
+const MKT_COLORS  = ['#25f4f4','#ea580c','#7c3aed','#16a34a','#db2777','#0891b2'];
+
+function loadMkts() {
+    const stored = JSON.parse(localStorage.getItem(MKT_KEY) || 'null');
+    if (!stored || !stored.length) return MKT_DEFAULTS;
+    return stored.map((m,i) => ({
+        ...m,
+        icon:  MKT_ICONS[m.id] || MKT_ICONS.default,
+        color: MKT_COLORS[i % MKT_COLORS.length],
+        bg:    'rgba(37,244,244,.1)',
+    }));
+}
+
+let marketplaces  = loadMkts();
+let currentMktIdx = 0;
+
+// Produtos
+let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || 'null') || [
+    { id:1, nome:'Abacaxi Cremoso',   preco:6.50, custo:2.50, img:'' },
+    { id:2, nome:'Blue Ice',          preco:6.50, custo:2.20, img:'' },
+    { id:3, nome:'Chocolate Trufado', preco:8.99, custo:3.80, img:'' },
+    { id:4, nome:'Goiaba Cremoso',    preco:6.50, custo:2.00, img:'' },
+    { id:5, nome:'Mini pudins',       preco:4.95, custo:2.95, img:'' },
+    { id:6, nome:'Ninho com Nutella', preco:8.00, custo:3.50, img:'' },
+    { id:7, nome:'Pudim',             preco:8.00, custo:2.90, img:'' },
+    { id:8, nome:'Tortuguita',        preco:7.50, custo:2.73, img:'' },
+];
+
+// Precificação salva: { mktId: { prodId: preco } }
+let precificacao = JSON.parse(localStorage.getItem(PREC_KEY) || '{}');
+
+/* ─── HELPERS ────────────────────────────────────────────────────── */
+function fmtR(v) {
+    return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function getMkt() { return marketplaces[currentMktIdx]; }
+function getTaxaDec(mkt) { return (mkt.taxa || 0) / 100; }
+function getPrecoProd(mktId, prodId) {
+    return precificacao[mktId]?.[prodId] ?? null;
+}
+
+/* ─── TABS ───────────────────────────────────────────────────────── */
+function renderTabs() {
+    const wrap = document.getElementById('tabs-wrap');
+    wrap.innerHTML = marketplaces.map((m, i) => `
+    <button class="mkt-tab ${i===currentMktIdx?'active':''}" onclick="selectMkt(${i})">
+      <span class="material-symbols-outlined">${m.icon}</span>
+      ${m.nome}
+    </button>`).join('') +
+    `<button class="btn-criar-cat" onclick="openModalCat()">
+      <span class="material-symbols-outlined">add_circle</span>
+      Criar Categoria
+    </button>`;
+}
+
+function selectMkt(i) {
+    currentMktIdx = i;
+    renderTabs();
+    renderBanner();
+    renderGrid();
+}
+
+/* ─── BANNER ─────────────────────────────────────────────────────── */
+function renderBanner() {
+    const m = getMkt();
+    const taxa = m.taxa ?? 0;
+    document.getElementById('canal-nome-txt').textContent =
+        `Taxa ${m.nome}: ${taxa.toFixed(2)}%`;
+    const ico = document.getElementById('canal-ico');
+    ico.style.background = m.bg || 'rgba(37,244,244,.1)';
+    ico.innerHTML = `<span class="material-symbols-outlined" style="color:${m.color||'#25f4f4'}">${m.icon}</span>`;
+}
+
+/* ─── GRID ───────────────────────────────────────────────────────── */
+function renderGrid() {
+    const m       = getMkt();
+    const taxaDec = getTaxaDec(m);
+    const grid    = document.getElementById('prod-grid');
+    const empty   = document.getElementById('empty-state');
+
+    document.getElementById('prod-count').textContent = `${produtos.length} ite${produtos.length!==1?'ns':'m'}`;
+
+    if (!produtos.length) {
+        grid.innerHTML = ''; empty.classList.remove('hidden'); return;
+    }
+    empty.classList.add('hidden');
+
+    grid.innerHTML = produtos.map(p => {
+        const custo      = p.custo || 0;
+        const lucroZero  = taxaDec < 1 ? custo / (1 - taxaDec) : custo;
+        const savedPreco = getPrecoProd(m.id, p.id);
+        const preco      = savedPreco !== null ? savedPreco : (p.preco || lucroZero);
+        const taxa       = taxaDec * preco;
+        const lucro      = preco - custo - taxa;
+        const margem     = preco > 0 ? (lucro / preco) * 100 : 0;
+        const mBg        = margem >= 35 ? 'rgba(52,211,153,.15)' : margem >= 20 ? 'rgba(251,191,36,.12)' : 'rgba(248,113,113,.15)';
+        const mTxt       = margem >= 35 ? '#34d399' : margem >= 20 ? '#fbbf24' : '#f87171';
+        const formattedPreco = preco.toFixed(2).replace('.', ',');
+
+        return `
+        <div class="pp-card" id="ppc-${p.id}">
+          <!-- Top -->
+          <div class="pp-top">
+            <div class="pp-thumb">
+              ${p.img ? `<img src="${p.img}" alt="${p.nome}" />` : `<span class="material-symbols-outlined">icecream</span>`}
+            </div>
+            <div style="flex:1;min-width:0">
+              <p class="pp-name">${p.nome}</p>
+              <div class="pp-custo-row" style="margin-top:.3rem">
+                <span class="pp-custo-lbl">Custo unit.</span>
+                <span class="pp-custo-val">${fmtR(custo)}</span>
+                ${custo > 0 ? `<span class="badge-receita"><span class="material-symbols-outlined">description</span>receita</span>` : ''}
+              </div>
+              <div class="pp-lz-row" style="margin-top:.2rem">
+                <span class="pp-lz-lbl">Lucro Zero</span>
+                <span class="pp-lz-val">${fmtR(lucroZero)}</span>
+                <span class="pp-lz-hint">= custo + taxa</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="pp-div" />
+
+          <!-- Preço de Venda -->
+          <div>
+            <p class="pp-price-lbl">Preço de Venda</p>
+            <div class="pp-price-row">
+              <div class="pp-input-wrap">
+                <span class="pp-pfx">R$</span>
+                <input
+                  class="pp-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="${formattedPreco.replace(',','.')}"
+                  id="inp-${m.id}-${p.id}"
+                  oninput="onPrecoChange('${m.id}', ${p.id}, this.value)"
+                />
+              </div>
+              <div class="pp-metrics" id="metrics-${m.id}-${p.id}">
+                <div>
+                  <p class="pp-lucro-lbl">Lucro</p>
+                  <p class="pp-lucro-val" id="lv-${m.id}-${p.id}">${fmtR(lucro)}</p>
+                </div>
+                <div>
+                  <p class="pp-lucro-lbl">Margem</p>
+                  <span class="pp-margem-badge" id="mv-${m.id}-${p.id}" style="background:${mBg};color:${mTxt}">${margem.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+/* ─── EVENTO PREÇO ───────────────────────────────────────────────── */
+function onPrecoChange(mktId, prodId, val) {
+    const preco   = parseFloat(val) || 0;
+    const m       = marketplaces.find(x => x.id === mktId);
+    const p       = produtos.find(x => x.id === prodId);
+    if (!m || !p) return;
+
+    const taxaDec = getTaxaDec(m);
+    const custo   = p.custo || 0;
+    const taxa    = taxaDec * preco;
+    const lucro   = preco - custo - taxa;
+    const margem  = preco > 0 ? (lucro / preco) * 100 : 0;
+    const mBg     = margem >= 35 ? 'rgba(52,211,153,.15)' : margem >= 20 ? 'rgba(251,191,36,.12)' : 'rgba(248,113,113,.15)';
+    const mTxt    = margem >= 35 ? '#34d399' : margem >= 20 ? '#fbbf24' : '#f87171';
+
+    const lvEl = document.getElementById(`lv-${mktId}-${prodId}`);
+    const mvEl = document.getElementById(`mv-${mktId}-${prodId}`);
+    if (lvEl) { lvEl.textContent = fmtR(lucro); lvEl.style.color = lucro >= 0 ? '#25f4f4' : '#f87171'; }
+    if (mvEl) { mvEl.textContent = margem.toFixed(1)+'%'; mvEl.style.background = mBg; mvEl.style.color = mTxt; }
+
+    // guardar em memória
+    if (!precificacao[mktId]) precificacao[mktId] = {};
+    precificacao[mktId][prodId] = preco;
+}
+
+/* ─── SALVAR ─────────────────────────────────────────────────────── */
+function salvar() {
+    // Coleta todos os inputs visíveis
+    const m = getMkt();
+    produtos.forEach(p => {
+        const inp = document.getElementById(`inp-${m.id}-${p.id}`);
+        if (inp) onPrecoChange(m.id, p.id, inp.value);
+    });
+    localStorage.setItem(PREC_KEY, JSON.stringify(precificacao));
+
+    // Sincroniza preço principal do produto se for "Porta de Casa" (taxa 0)
+    if (m.taxa === 0) {
+        const stored = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+        stored.forEach(p => {
+            const inp = document.getElementById(`inp-${m.id}-${p.id}`);
+            if (inp) p.preco = parseFloat(inp.value) || p.preco;
+        });
+        if (stored.length) localStorage.setItem('receitasx_produtos', JSON.stringify(stored));
+    }
+
+    showToast('Precificação salva!');
+}
+
+/* ─── MODAL CRIAR CATEGORIA ──────────────────────────────────────── */
+function openModalCat()  { document.getElementById('modal-cat').classList.add('open'); setTimeout(()=>document.getElementById('cat-nome').focus(),60); }
+function closeModalCat() { document.getElementById('modal-cat').classList.remove('open'); }
+function criarCategoria() {
+    const nome = document.getElementById('cat-nome').value.trim();
+    const taxa = parseFloat(document.getElementById('cat-taxa').value) || 0;
+    if (!nome) { document.getElementById('cat-nome').focus(); return; }
+
+    const newMkt = { id:'mkt_'+Date.now(), nome, taxa };
+    marketplaces.push({
+        ...newMkt,
+        icon:  MKT_ICONS.default,
+        color: MKT_COLORS[(marketplaces.length) % MKT_COLORS.length],
+        bg:    'rgba(37,244,244,.1)',
+    });
+
+    // Salvar também no receitasx_marketplaces
+    const stored = JSON.parse(localStorage.getItem(MKT_KEY) || 'null') || MKT_DEFAULTS.map(m=>({id:m.id,nome:m.nome,taxa:m.taxa}));
+    stored.push({ id:newMkt.id, nome, taxa });
+    localStorage.setItem(MKT_KEY, JSON.stringify(stored));
+
+    document.getElementById('cat-nome').value = '';
+    document.getElementById('cat-taxa').value = '';
+    closeModalCat();
+    currentMktIdx = marketplaces.length - 1;
+    renderTabs();
+    renderBanner();
+    renderGrid();
+    showToast(`"${nome}" criado!`);
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type==='error'?'error':'check_circle';
+    document.getElementById('toast-icon').style.color = type==='error'?'#f87171':'#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalCat(); });
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+renderTabs();
+renderBanner();
+renderGrid();
+</script>
+</body>
+</html>

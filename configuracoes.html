@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Configurações - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* inputs globais */
+        input,select,textarea { background-color:#1E1E1E !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder,textarea::placeholder { color:#475569 !important; }
+        input:focus,select:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* btn back */
+        .btn-back { display:flex; align-items:center; gap:.3rem; color:#94a3b8; font-size:.85rem; cursor:pointer; transition:color .15s; background:none; border:none; padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* card / section */
+        .cfg-card { background:#1A1A1A; border:1px solid #2A2A2A; border-radius:1rem; padding:1.25rem; }
+
+        /* section title */
+        .sec-title { display:flex; align-items:center; gap:.5rem; font-size:1rem; font-weight:700; color:#f1f5f9; margin-bottom:1rem; }
+        .sec-title .material-symbols-outlined { font-size:1.2rem; color:#25f4f4; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* sub title inside card */
+        .card-sub { display:flex; align-items:center; gap:.4rem; font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#64748b; margin-bottom:1rem; }
+        .card-sub .material-symbols-outlined { font-size:.95rem; color:#25f4f4; }
+
+        /* field */
+        .field-label { font-size:.64rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#25f4f4; margin-bottom:.35rem; display:block; }
+        .fc { width:100%; padding:.75rem 1rem; border-radius:.75rem; border:1px solid #2A2A2A !important; background:#141414 !important; color:#f1f5f9 !important; font-size:.95rem; outline:none; transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#475569 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.55) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fc-prefix { position:relative; }
+        .fc-prefix .prefix { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:#64748b; font-size:.85rem; font-weight:600; pointer-events:none; }
+        .fc-prefix input { padding-left:2.5rem !important; }
+
+        /* hint box */
+        .hint { display:flex; align-items:flex-start; gap:.5rem; background:rgba(37,244,244,.05); border:1px solid rgba(37,244,244,.15); border-radius:.65rem; padding:.7rem .9rem; font-size:.75rem; color:#94a3b8; margin-top:.85rem; }
+        .hint .material-symbols-outlined { font-size:1rem; color:#25f4f4; flex-shrink:0; margin-top:.05rem; }
+        .hint-warn { background:rgba(251,146,60,.05); border-color:rgba(251,146,60,.2); }
+        .hint-warn .material-symbols-outlined { color:#fb923c; }
+
+        /* badge margem */
+        .badge-low  { display:inline-flex; align-items:center; gap:.25rem; font-size:.72rem; font-weight:700; padding:.3rem .7rem; border-radius:.45rem; background:rgba(248,113,113,.15); color:#f87171; border:1px solid rgba(248,113,113,.25); }
+        .badge-mid  { display:inline-flex; align-items:center; gap:.25rem; font-size:.72rem; font-weight:700; padding:.3rem .7rem; border-radius:.45rem; background:rgba(251,191,36,.12); color:#fbbf24; border:1px solid rgba(251,191,36,.25); }
+        .badge-high { display:inline-flex; align-items:center; gap:.25rem; font-size:.72rem; font-weight:700; padding:.3rem .7rem; border-radius:.45rem; background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+        .badge-low .material-symbols-outlined,
+        .badge-mid .material-symbols-outlined,
+        .badge-high .material-symbols-outlined { font-size:.85rem; }
+
+        /* margem grid */
+        .margem-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.65rem; margin-top:.65rem; }
+        .margem-item { display:flex; flex-direction:column; gap:.4rem; }
+        .margem-lbl { font-size:.65rem; color:#64748b; }
+        .margem-input-wrap { position:relative; }
+        .margem-input-wrap input { width:100%; padding:.6rem .6rem .6rem .75rem; border-radius:.6rem; border:1px solid #2A2A2A !important; background:#141414 !important; color:#f1f5f9 !important; font-size:.9rem; font-weight:600; outline:none; transition:border-color .2s; }
+        .margem-input-wrap input:focus { border-color:rgba(37,244,244,.5) !important; }
+        .margem-input-wrap .pct { position:absolute; right:.65rem; top:50%; transform:translateY(-50%); font-size:.78rem; color:#64748b; pointer-events:none; }
+
+        /* calc box */
+        .calc-box { background:#111; border:1px solid rgba(37,244,244,.18); border-radius:.85rem; padding:1rem 1.1rem; }
+        .calc-result { display:flex; justify-content:space-between; align-items:flex-end; }
+        .calc-val { font-size:1.6rem; font-weight:800; color:#25f4f4; line-height:1; }
+        .calc-base { font-size:.65rem; color:#475569; text-align:right; }
+
+        /* btn usar */
+        .btn-usar { width:100%; margin-top:.85rem; padding:.65rem; border-radius:.65rem; border:none; background:rgba(37,244,244,.1); border:1px solid rgba(37,244,244,.3); color:#25f4f4; font-size:.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.4rem; transition:all .2s; }
+        .btn-usar:hover { background:rgba(37,244,244,.18); }
+        .btn-usar .material-symbols-outlined { font-size:.95rem; }
+
+        /* divider */
+        .divider { border:none; border-top:1px solid #2A2A2A; margin:.75rem 0; }
+        .divider-label { text-align:center; font-size:.62rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#475569; margin:.85rem 0 .65rem; }
+
+        /* save btn */
+        .btn-salvar { display:flex; align-items:center; justify-content:center; gap:.5rem; padding:.85rem 2rem; border-radius:.75rem; border:none; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; font-weight:700; font-size:.95rem; cursor:pointer; box-shadow:0 4px 20px rgba(37,244,244,.25); transition:opacity .2s,box-shadow .2s; }
+        .btn-salvar:hover { opacity:.9; box-shadow:0 6px 28px rgba(37,244,244,.4); }
+        .btn-salvar .material-symbols-outlined { font-size:1rem; font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+
+        /* toast */
+        #toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px); background:#1E1E1E; border:1px solid rgba(37,244,244,.35); color:#f1f5f9; padding:.65rem 1.2rem; border-radius:.75rem; font-size:.85rem; font-weight:500; display:flex; align-items:center; gap:.5rem; z-index:200; opacity:0; transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s; box-shadow:0 8px 32px rgba(0,0,0,.5); white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+        /* layout 2 col desktop */
+        @media(min-width:768px) {
+            .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; }
+        }
+
+        /* marketplace */
+        .mkt-row { display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:.65rem;border:1px solid #2A2A2A;background:#141414; }
+        .mkt-ico { width:2rem;height:2rem;border-radius:.45rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .mkt-ico .material-symbols-outlined { font-size:1rem;color:#25f4f4; }
+        .mkt-name { flex:1;font-size:.85rem;font-weight:600;color:#f1f5f9; }
+        .mkt-taxa-badge { font-size:.75rem;font-weight:700;color:#25f4f4;background:rgba(37,244,244,.1);padding:.2rem .55rem;border-radius:.4rem;flex-shrink:0; }
+        .mkt-del { width:1.7rem;height:1.7rem;border-radius:.4rem;border:none;background:transparent;color:#475569;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
+        .mkt-del:hover { color:#f87171;background:rgba(248,113,113,.1); }
+        .mkt-del .material-symbols-outlined { font-size:.9rem; }
+        .btn-add-mkt { display:flex;align-items:center;gap:.4rem;padding:.6rem .9rem;border-radius:.65rem;border:1px dashed rgba(37,244,244,.4);background:rgba(37,244,244,.05);color:#25f4f4;font-size:.8rem;font-weight:700;cursor:pointer;width:100%;justify-content:center;transition:all .2s; }
+        .btn-add-mkt:hover { background:rgba(37,244,244,.12);border-style:solid; }
+        .btn-add-mkt .material-symbols-outlined { font-size:.95rem; }
+        .mkt-form { display:none;flex-direction:column;gap:.55rem;padding:.75rem;background:#111;border:1px solid rgba(37,244,244,.25);border-radius:.75rem;animation:fadeUp .15s ease both; }
+        .mkt-form.open { display:flex; }
+        .mkt-form-row { display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:end; }
+        .mkt-taxa-wrap { position:relative;width:90px; }
+        .mkt-taxa-wrap input { width:100%;padding:.55rem .65rem;border-radius:.55rem;border:1px solid #2A2A2A !important;background:#141414 !important;color:#f1f5f9 !important;font-size:.9rem;font-weight:600;outline:none;padding-right:1.6rem;transition:border-color .2s; }
+        .mkt-taxa-wrap input:focus { border-color:rgba(37,244,244,.5) !important; }
+        .mkt-taxa-wrap .pct-sfx { position:absolute;right:.55rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.78rem;pointer-events:none; }
+        .btn-mkt-add-confirm { padding:.55rem 1rem;border-radius:.55rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:opacity .2s; }
+        .btn-mkt-add-confirm:hover { opacity:.88; }
+        .btn-mkt-cancel { padding:.55rem .75rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.82rem;cursor:pointer;transition:all .15s; }
+        .btn-mkt-cancel:hover { color:#f1f5f9;border-color:#475569; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Configurações</h1>
+        <button class="btn-salvar" onclick="salvar()">
+            <span class="material-symbols-outlined">save</span>
+            Salvar
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-5xl mx-auto px-4 py-6">
+    <div class="two-col">
+
+        <!-- ════ COLUNA ESQUERDA ════ -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+
+            <!-- ── Gás ── -->
+            <section>
+                <h2 class="sec-title">
+                    <span class="material-symbols-outlined" style="color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">local_fire_department</span>
+                    Configurações de Gás
+                </h2>
+                <div class="cfg-card">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+                        <div>
+                            <label class="field-label" for="gas-peso">Peso Botijão (kg)</label>
+                            <input id="gas-peso" type="number" min="1" step="0.1" class="fc" placeholder="13" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="gas-preco">Preço (R$)</label>
+                            <div class="fc-prefix">
+                                <span class="prefix">R$</span>
+                                <input id="gas-preco" type="number" min="0" step="0.01" class="fc" placeholder="120,00" />
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Preço/kg calculado -->
+                    <div class="hint" style="margin-top:.75rem">
+                        <span class="material-symbols-outlined">calculate</span>
+                        <span>Preço por kg: <strong id="gas-kg-val" style="color:#25f4f4">R$ 0,00</strong> — usado no cálculo do custo de equipamentos a gás.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Energia ── -->
+            <section>
+                <h2 class="sec-title">
+                    <span class="material-symbols-outlined" style="color:#fbbf24;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">bolt</span>
+                    Configurações de Energia
+                </h2>
+                <div class="cfg-card">
+                    <label class="field-label" for="kwh">Custo por kWh (R$)</label>
+                    <div class="fc-prefix">
+                        <span class="prefix">R$</span>
+                        <input id="kwh" type="number" min="0" step="0.01" class="fc" placeholder="0,93" oninput="syncKwh()" />
+                    </div>
+                    <div class="hint hint-warn" style="margin-top:.75rem">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        <span>O kWh você pode consultar na sua conta de luz, normalmente é a soma dos dois custos de tarifa Aneel <em>(Energia + Distribuição)</em>.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Metas de Margem ── -->
+            <section>
+                <h2 class="sec-title">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">trending_up</span>
+                    Metas de Margem
+                </h2>
+
+                <!-- Precificação -->
+                <div class="cfg-card" style="margin-bottom:.75rem">
+                    <div class="card-sub">
+                        <span class="material-symbols-outlined">sell</span>
+                        Precificação
+                    </div>
+                    <div class="margem-grid">
+                        <div class="margem-item">
+                            <span class="badge-low"><span class="material-symbols-outlined">arrow_downward</span> Baixa</span>
+                            <span class="margem-lbl">Abaixo de:</span>
+                            <div class="margem-input-wrap">
+                                <input id="prec-baixa" type="number" min="0" max="100" step="1" />
+                                <span class="pct">%</span>
+                            </div>
+                        </div>
+                        <div class="margem-item">
+                            <span class="badge-mid"><span class="material-symbols-outlined">remove</span> Razoável</span>
+                            <span class="margem-lbl">Abaixo de:</span>
+                            <div class="margem-input-wrap">
+                                <input id="prec-razo" type="number" min="0" max="100" step="1" />
+                                <span class="pct">%</span>
+                            </div>
+                        </div>
+                        <div class="margem-item">
+                            <span class="badge-high"><span class="material-symbols-outlined">arrow_upward</span> Excelente</span>
+                            <span class="margem-lbl">A partir de:</span>
+                            <div class="margem-input-wrap">
+                                <input id="prec-excel" type="number" min="0" max="100" step="1" />
+                                <span class="pct">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combos -->
+                <div class="cfg-card">
+                    <div class="card-sub">
+                        <span class="material-symbols-outlined">extension</span>
+                        Combos
+                    </div>
+                    <div class="margem-grid">
+                        <div class="margem-item">
+                            <span class="badge-low"><span class="material-symbols-outlined">arrow_downward</span> Baixa</span>
+                            <span class="margem-lbl">Abaixo de:</span>
+                            <div class="margem-input-wrap">
+                                <input id="comb-baixa" type="number" min="0" max="100" step="1" />
+                                <span class="pct">%</span>
+                            </div>
+                        </div>
+                        <div class="margem-item">
+                            <span class="badge-mid"><span class="material-symbols-outlined">remove</span> Razoável</span>
+                            <span class="margem-lbl">Abaixo de:</span>
+                            <div class="margem-input-wrap">
+                                <input id="comb-razo" type="number" min="0" max="100" step="1" />
+                                <span class="pct">%</span>
+                            </div>
+                        </div>
+                        <div class="margem-item">
+                            <span class="badge-high"><span class="material-symbols-outlined">arrow_upward</span> Excelente</span>
+                            <span class="margem-lbl">A partir de:</span>
+                            <div class="margem-input-wrap">
+                                <input id="comb-excel" type="number" min="0" max="100" step="1" />
+                                <span class="pct">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hint" style="margin-top:.85rem">
+                        <span class="material-symbols-outlined">info</span>
+                        <span>As metas de <strong>Precificação</strong> são usadas nos produtos individuais. As de <strong>Combos</strong> são usadas nos cards de combos.</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ════ COLUNA DIREITA ════ -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+
+            <!-- ── Preço e Mão de Obra ── -->
+            <section>
+                <h2 class="sec-title">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">engineering</span>
+                    Preço e Mão de Obra
+                </h2>
+                <div class="cfg-card">
+
+                    <!-- Calculadora -->
+                    <div class="card-sub">
+                        <span class="material-symbols-outlined">calculate</span>
+                        Calculadora de Custo/Hora
+                    </div>
+
+                    <label class="field-label" for="salario">Salário Mensal (R$)</label>
+                    <div class="fc-prefix">
+                        <span class="prefix">R$</span>
+                        <input id="salario" type="number" min="0" step="0.01" class="fc" placeholder="2800" oninput="calcHora()" />
+                    </div>
+
+                    <!-- Resultado calculado -->
+                    <div class="calc-box" style="margin-top:.85rem">
+                        <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.5rem">Valor Calculado da Hora</div>
+                        <div class="calc-result">
+                            <div>
+                                <span style="color:#64748b;font-size:.85rem;font-weight:600;margin-right:.25rem">R$</span>
+                                <span id="hora-calc" class="calc-val">0,00</span>
+                            </div>
+                            <div class="calc-base">
+                                BASE DE CÁLCULO<br>220 horas/mês
+                            </div>
+                        </div>
+                        <button class="btn-usar" onclick="usarValorCalculado()">
+                            <span class="material-symbols-outlined">arrow_downward</span>
+                            Usar este valor como Hora Trabalhada
+                        </button>
+                    </div>
+
+                    <!-- Info fórmula -->
+                    <div class="hint" style="margin-top:.75rem">
+                        <span class="material-symbols-outlined">info</span>
+                        <span>Fórmula: Salário ÷ <strong style="color:#f1f5f9">220 horas mensais</strong> <em>(padrão CLT: 44h/semana)</em>.</span>
+                    </div>
+
+                    <!-- Divisor -->
+                    <p class="divider-label">Valor Final</p>
+
+                    <!-- Hora trabalhada manual -->
+                    <label class="field-label" for="hora-final">Valor da Hora Trabalhada (R$/hora)</label>
+                    <div class="fc-prefix">
+                        <span class="prefix">R$</span>
+                        <input id="hora-final" type="number" min="0" step="0.01" class="fc" placeholder="0,00" />
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Este valor é usado na composição de custos das receitas (Custo Mão de Obra).</p>
+                </div>
+            </section>
+
+        </div><!-- /col direita -->
+    </div><!-- /two-col -->
+
+    <!-- ════ SEÇÃO MARKETPLACES (largura total) ════ -->
+    <section style="margin-top:1.5rem">
+        <h2 class="sec-title">
+            <span class="material-symbols-outlined" style="color:#25f4f4;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
+            Marketplaces e Taxas
+        </h2>
+        <div class="cfg-card">
+            <p class="text-xs text-slate-400 mb-3">Configure os marketplaces onde você vende e suas respectivas taxas. Eles aparecerão automaticamente nos Combos e Produtos.</p>
+
+            <!-- Lista dinâmica -->
+            <div id="mkt-list" style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem"></div>
+
+            <!-- Formulário de adição -->
+            <div class="mkt-form" id="mkt-form">
+                <p style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4">Novo Marketplace</p>
+                <div class="mkt-form-row">
+                    <div>
+                        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Nome do Marketplace</p>
+                        <input id="mkt-new-nome" type="text" class="fc" placeholder="Ex: Rappi, iFood..." autocomplete="off" style="padding:.6rem .8rem;font-size:.85rem" />
+                    </div>
+                    <div class="mkt-taxa-wrap">
+                        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Taxa</p>
+                        <input id="mkt-new-taxa" type="number" min="0" max="100" step="0.1" placeholder="0" />
+                        <span class="pct-sfx">%</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:.5rem">
+                    <button class="btn-mkt-cancel" onclick="closeMktForm()">Cancelar</button>
+                    <button class="btn-mkt-add-confirm" onclick="addMkt()">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Botão adicionar -->
+            <button class="btn-add-mkt" id="btn-add-mkt" onclick="openMktForm()">
+                <span class="material-symbols-outlined">add</span> Adicionar Marketplace
+            </button>
+
+            <div class="hint" style="margin-top:.85rem">
+                <span class="material-symbols-outlined">info</span>
+                <span>As taxas são descontadas do lucro bruto para calcular o lucro líquido por canal de venda.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botão salvar bottom mobile -->
+    <div class="mt-6 flex justify-end md:hidden">
+        <button class="btn-salvar w-full" onclick="salvar()">
+            <span class="material-symbols-outlined">save</span>
+            Salvar Configurações
+        </button>
+    </div>
+</main>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Configurações salvas!</span>
+</div>
+
+<!-- ══ Script ═══════════════════════════════════════════════════════ -->
+<script>
+const KEY = 'receitasx_config';
+const MKT_KEY = 'receitasx_marketplaces';
+
+const MKT_DEFAULTS = [
+    { id:'casa',  nome:'Porta de Casa', taxa:0   },
+    { id:'ifood', nome:'iFood',         taxa:28  },
+];
+
+let marketplaces = JSON.parse(localStorage.getItem(MKT_KEY) || 'null') || MKT_DEFAULTS;
+
+const DEFAULTS = {
+    gasPeso:    13,
+    gasPreco:   120,
+    kwh:        0.93,
+    precBaixa:  15,
+    precRazo:   20,
+    precExcel:  35,
+    combBaixa:  15,
+    combRazo:   20,
+    combExcel:  30,
+    salario:    2800,
+    horaFinal:  30,
+};
+
+/* ─── MARKETPLACES ───────────────────────────────────────────── */
+function renderMkts() {
+    const el = document.getElementById('mkt-list');
+    if (!marketplaces.length) {
+        el.innerHTML = '<p class="text-xs text-slate-500" style="padding:.35rem 0">Nenhum marketplace configurado ainda.</p>';
+        return;
+    }
+    el.innerHTML = marketplaces.map((m, i) => `
+    <div class="mkt-row">
+      <div class="mkt-ico"><span class="material-symbols-outlined">storefront</span></div>
+      <span class="mkt-name">${m.nome}</span>
+      <span class="mkt-taxa-badge">${m.taxa.toFixed(1)}%</span>
+      <button class="mkt-del" onclick="delMkt(${i})" title="Remover">
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>`).join('');
+}
+
+function openMktForm() {
+    document.getElementById('mkt-form').classList.add('open');
+    document.getElementById('btn-add-mkt').style.display = 'none';
+    document.getElementById('mkt-new-nome').focus();
+}
+function closeMktForm() {
+    document.getElementById('mkt-form').classList.remove('open');
+    document.getElementById('btn-add-mkt').style.display = '';
+    document.getElementById('mkt-new-nome').value = '';
+    document.getElementById('mkt-new-taxa').value = '';
+}
+function addMkt() {
+    const nome = document.getElementById('mkt-new-nome').value.trim();
+    const taxa = parseFloat(document.getElementById('mkt-new-taxa').value) || 0;
+    if (!nome) { document.getElementById('mkt-new-nome').focus(); return; }
+    marketplaces.push({ id: 'mkt_'+Date.now(), nome, taxa });
+    localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
+    renderMkts();
+    closeMktForm();
+    showToast('Marketplace adicionado!');
+}
+function delMkt(i) {
+    marketplaces.splice(i, 1);
+    localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
+    renderMkts();
+    showToast('Marketplace removido.');
+}
+
+/* ─── LOAD ───────────────────────────────────────────────────── */
+function load() {
+    const cfg = JSON.parse(localStorage.getItem(KEY) || 'null') || DEFAULTS;
+
+    document.getElementById('gas-peso').value   = cfg.gasPeso;
+    document.getElementById('gas-preco').value  = cfg.gasPreco;
+    document.getElementById('kwh').value        = cfg.kwh;
+    document.getElementById('prec-baixa').value = cfg.precBaixa;
+    document.getElementById('prec-razo').value  = cfg.precRazo;
+    document.getElementById('prec-excel').value = cfg.precExcel;
+    document.getElementById('comb-baixa').value = cfg.combBaixa;
+    document.getElementById('comb-razo').value  = cfg.combRazo;
+    document.getElementById('comb-excel').value = cfg.combExcel;
+    document.getElementById('salario').value    = cfg.salario;
+    document.getElementById('hora-final').value = cfg.horaFinal;
+
+    calcHora();
+    updateGasKg();
+    renderMkts();
+}
+
+/* ─── SALVAR ─────────────────────────────────────────────────────── */
+function salvar() {
+    const cfg = {
+        gasPeso:   parseFloat(document.getElementById('gas-peso').value)   || DEFAULTS.gasPeso,
+        gasPreco:  parseFloat(document.getElementById('gas-preco').value)  || DEFAULTS.gasPreco,
+        kwh:       parseFloat(document.getElementById('kwh').value)        || DEFAULTS.kwh,
+        precBaixa: parseFloat(document.getElementById('prec-baixa').value) || DEFAULTS.precBaixa,
+        precRazo:  parseFloat(document.getElementById('prec-razo').value)  || DEFAULTS.precRazo,
+        precExcel: parseFloat(document.getElementById('prec-excel').value) || DEFAULTS.precExcel,
+        combBaixa: parseFloat(document.getElementById('comb-baixa').value) || DEFAULTS.combBaixa,
+        combRazo:  parseFloat(document.getElementById('comb-razo').value)  || DEFAULTS.combRazo,
+        combExcel: parseFloat(document.getElementById('comb-excel').value) || DEFAULTS.combExcel,
+        salario:   parseFloat(document.getElementById('salario').value)    || DEFAULTS.salario,
+        horaFinal: parseFloat(document.getElementById('hora-final').value) || DEFAULTS.horaFinal,
+    };
+    localStorage.setItem(KEY, JSON.stringify(cfg));
+    showToast('Configurações salvas!');
+}
+
+/* ─── CALCULADORA HORA ───────────────────────────────────────────── */
+function fmtR(v) {
+    return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function calcHora() {
+    const sal  = parseFloat(document.getElementById('salario').value) || 0;
+    const hora = sal / 220;
+    document.getElementById('hora-calc').textContent = fmtR(hora);
+}
+
+function usarValorCalculado() {
+    const sal  = parseFloat(document.getElementById('salario').value) || 0;
+    const hora = sal / 220;
+    document.getElementById('hora-final').value = hora.toFixed(2);
+    // feedback visual
+    const el = document.getElementById('hora-final');
+    el.style.borderColor = 'rgba(37,244,244,.7)';
+    setTimeout(() => { el.style.borderColor = ''; }, 1500);
+    showToast('Valor aplicado!');
+}
+
+/* ─── GÁS KG ─────────────────────────────────────────────────────── */
+function updateGasKg() {
+    const peso  = parseFloat(document.getElementById('gas-peso').value)  || 0;
+    const preco = parseFloat(document.getElementById('gas-preco').value) || 0;
+    const kgVal = peso > 0 ? preco / peso : 0;
+    document.getElementById('gas-kg-val').textContent = 'R$ ' + fmtR(kgVal);
+}
+
+function syncKwh() { /* reservado para propagação futura */ }
+
+/* ─── EVENTOS GÁS ────────────────────────────────────────────────── */
+document.getElementById('gas-peso').addEventListener('input', updateGasKg);
+document.getElementById('gas-preco').addEventListener('input', updateGasKg);
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+load();
+</script>
+</body>
+</html>

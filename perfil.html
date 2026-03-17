@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Meu Perfil - ReceitasX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        input,select,textarea { background-color:#1E1E1E !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder,textarea::placeholder { color:#475569 !important; }
+        input:focus,select:focus,textarea:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* hero banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #0f2027 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
+            border: 1px solid #2A2A2A;
+            border-radius: 1.25rem;
+            padding: 2rem 1.5rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner::before {
+            content:'';position:absolute;top:-40px;right:-40px;
+            width:220px;height:220px;border-radius:50%;
+            background:radial-gradient(circle,rgba(37,244,244,.12),transparent 70%);
+            pointer-events:none;
+        }
+        .hero-banner::after {
+            content:'';position:absolute;bottom:-60px;left:-30px;
+            width:200px;height:200px;border-radius:50%;
+            background:radial-gradient(circle,rgba(37,244,244,.07),transparent 70%);
+            pointer-events:none;
+        }
+
+        /* avatar */
+        .avatar-wrap { position:relative;width:84px;height:84px;flex-shrink:0; }
+        .avatar { width:84px;height:84px;border-radius:50%;border:3px solid rgba(37,244,244,.4);background:linear-gradient(135deg,#1a2a3a,#0d1b2a);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#25f4f4;overflow:hidden;cursor:pointer;transition:border-color .2s; }
+        .avatar:hover { border-color:#25f4f4; }
+        .avatar img { width:100%;height:100%;object-fit:cover; }
+        .avatar-badge { position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:#25f4f4;display:flex;align-items:center;justify-content:center;border:2px solid #121212;cursor:pointer; }
+        .avatar-badge .material-symbols-outlined { font-size:.7rem;color:#0a0a0a;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* plan badge */
+        .plan-badge { display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .75rem;border-radius:9999px;font-size:.7rem;font-weight:700;letter-spacing:.04em; }
+        .plan-free { background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:#94a3b8; }
+        .plan-pro  { background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.35);color:#25f4f4; }
+        .plan-premium { background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(245,158,11,.08));border:1px solid rgba(251,191,36,.4);color:#fbbf24; }
+        .plan-badge .material-symbols-outlined { font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* stats strip */
+        .stats-strip { display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1.25rem; }
+        .stat-pill { background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.12);border-radius:.75rem;padding:.6rem .75rem;text-align:center; }
+        .stat-pill-val { font-size:1.35rem;font-weight:800;color:#25f4f4;line-height:1; }
+        .stat-pill-lbl { font-size:.6rem;font-weight:600;color:#64748b;margin-top:.2rem;text-transform:uppercase;letter-spacing:.06em; }
+
+        /* section card */
+        .sec-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;overflow:hidden; }
+        .sec-head { display:flex;align-items:center;gap:.65rem;padding:.85rem 1.1rem;border-bottom:1px solid #2A2A2A; }
+        .sec-head-ico { width:2rem;height:2rem;border-radius:.5rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center; }
+        .sec-head-ico .material-symbols-outlined { font-size:1rem;color:#25f4f4; }
+        .sec-head h3 { font-size:.85rem;font-weight:700; }
+        .sec-body { padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.85rem; }
+
+        /* form */
+        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;margin-bottom:.3rem;display:block; }
+        .fc { width:100%;padding:.7rem .9rem;border-radius:.7rem;border:1px solid #2A2A2A !important;background:#111 !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#475569 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.5) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:.65rem; }
+        .select-wrap { position:relative; }
+        .select-wrap select { -webkit-appearance:none;appearance:none; }
+        .select-wrap .chev { position:absolute;right:.85rem;top:50%;transform:translateY(-50%);pointer-events:none;color:#64748b;font-size:1rem; }
+
+        /* toggle */
+        .toggle { position:relative;width:2.4rem;height:1.35rem;flex-shrink:0; }
+        .toggle input { opacity:0;width:0;height:0; }
+        .toggle-track { position:absolute;inset:0;border-radius:9999px;background:#2A2A2A;transition:background .2s;cursor:pointer; }
+        .toggle input:checked + .toggle-track { background:#25f4f4; }
+        .toggle-thumb { position:absolute;top:.175rem;left:.175rem;width:.95rem;height:.95rem;border-radius:9999px;background:#fff;transition:transform .2s;pointer-events:none; }
+        .toggle input:checked ~ .toggle-thumb { transform:translateX(1.1rem); }
+        .notif-row { display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid #1E1E1E; }
+        .notif-row:last-child { border-bottom:none;padding-bottom:0; }
+        .notif-info p { font-size:.82rem;font-weight:600; }
+        .notif-info span { font-size:.7rem;color:#64748b; }
+
+        /* plan card */
+        .plan-card { border-radius:.85rem;padding:1rem 1.1rem;border:1px solid; }
+        .plan-card-free { background:rgba(100,116,139,.04);border-color:rgba(100,116,139,.2); }
+        .plan-card-pro  { background:rgba(37,244,244,.04);border-color:rgba(37,244,244,.2); }
+        .upgrade-btn { display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.7rem;border-radius:.7rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.85rem;cursor:pointer;margin-top:.85rem;box-shadow:0 3px 16px rgba(37,244,244,.22);transition:opacity .2s; }
+        .upgrade-btn:hover { opacity:.9; }
+        .upgrade-btn .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* save button */
+        .btn-save-main { width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.9rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.25);transition:opacity .2s,box-shadow .2s; }
+        .btn-save-main:hover { opacity:.9;box-shadow:0 6px 28px rgba(37,244,244,.4); }
+        .btn-save-main .material-symbols-outlined { font-size:1.1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* danger zone */
+        .danger-zone { border:1px solid rgba(248,113,113,.2);border-radius:.85rem;padding:.85rem 1rem;background:rgba(248,113,113,.03); }
+        .danger-btn { display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.65rem;border-radius:.65rem;border:1px solid rgba(248,113,113,.3);background:transparent;color:#f87171;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .danger-btn:hover { background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.5); }
+        .danger-btn .material-symbols-outlined { font-size:.95rem; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        .page-enter { animation:fadeUp .3s ease both; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-16">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Meu Perfil</h1>
+        <button onclick="salvar()" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-black" style="background:linear-gradient(135deg,#25f4f4,#0dc8c8);box-shadow:0 3px 16px rgba(37,244,244,.22)">
+            <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+            Salvar
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-2xl mx-auto px-4 py-5 page-enter" style="display:flex;flex-direction:column;gap:1.1rem">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div style="display:flex;align-items:flex-start;gap:1rem;position:relative;z-index:1">
+            <!-- Avatar -->
+            <div class="avatar-wrap" onclick="document.getElementById('avatar-file').click()">
+                <div class="avatar" id="avatar-display">
+                    <span id="avatar-initials">?</span>
+                    <img id="avatar-img" style="display:none" alt="foto" />
+                </div>
+                <div class="avatar-badge">
+                    <span class="material-symbols-outlined">photo_camera</span>
+                </div>
+                <input type="file" id="avatar-file" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)" />
+            </div>
+            <!-- Info -->
+            <div style="flex:1;min-width:0">
+                <p id="hero-nome" class="text-xl font-bold leading-tight" style="text-shadow:0 1px 8px rgba(0,0,0,.5)">Seu Nome</p>
+                <p id="hero-negocio" class="text-sm text-slate-400 mt-0.5">Nome do Negócio</p>
+                <div style="margin-top:.65rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+                    <span class="plan-badge plan-free" id="plan-badge">
+                        <span class="material-symbols-outlined">star</span> Plano Gratuito
+                    </span>
+                    <span style="font-size:.68rem;color:#64748b" id="plan-validade"></span>
+                </div>
+            </div>
+        </div>
+        <!-- Stats -->
+        <div class="stats-strip" style="position:relative;z-index:1">
+            <div class="stat-pill">
+                <p class="stat-pill-val" id="stat-receitas">0</p>
+                <p class="stat-pill-lbl">Receitas</p>
+            </div>
+            <div class="stat-pill">
+                <p class="stat-pill-val" id="stat-produtos">0</p>
+                <p class="stat-pill-lbl">Produtos</p>
+            </div>
+            <div class="stat-pill">
+                <p class="stat-pill-val" id="stat-despesas">0</p>
+                <p class="stat-pill-lbl">Despesas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações Pessoais -->
+    <div class="sec-card">
+        <div class="sec-head">
+            <div class="sec-head-ico"><span class="material-symbols-outlined">person</span></div>
+            <h3>Informações Pessoais</h3>
+        </div>
+        <div class="sec-body">
+            <div class="grid-2">
+                <div>
+                    <label class="field-label" for="f-nome">Nome</label>
+                    <input id="f-nome" type="text" class="fc" placeholder="Seu nome" oninput="updateHero()" />
+                </div>
+                <div>
+                    <label class="field-label" for="f-sobrenome">Sobrenome</label>
+                    <input id="f-sobrenome" type="text" class="fc" placeholder="Sobrenome" oninput="updateHero()" />
+                </div>
+            </div>
+            <div>
+                <label class="field-label" for="f-email">E-mail</label>
+                <input id="f-email" type="email" class="fc" placeholder="seu@email.com" />
+            </div>
+            <div>
+                <label class="field-label" for="f-tel">Telefone / WhatsApp</label>
+                <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Negócio -->
+    <div class="sec-card">
+        <div class="sec-head">
+            <div class="sec-head-ico"><span class="material-symbols-outlined">storefront</span></div>
+            <h3>Informações do Negócio</h3>
+        </div>
+        <div class="sec-body">
+            <div>
+                <label class="field-label" for="f-negocio">Nome do Negócio</label>
+                <input id="f-negocio" type="text" class="fc" placeholder="Ex: Delicias da Maria" oninput="updateHero()" />
+            </div>
+            <div>
+                <label class="field-label" for="f-segmento">Segmento</label>
+                <div class="select-wrap">
+                    <select id="f-segmento" class="fc">
+                        <option value="">— Selecione —</option>
+                        <option value="geladinhos">Geladinhos / Sacolés</option>
+                        <option value="doces">Doces e Confeitaria</option>
+                        <option value="bolos">Bolos e Tortas</option>
+                        <option value="salgados">Salgados</option>
+                        <option value="marmitas">Marmitas</option>
+                        <option value="acai">Açaí / Sorvetes</option>
+                        <option value="paodequeijo">Pão de Queijo</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                    <span class="chev material-symbols-outlined">expand_more</span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label class="field-label" for="f-cidade">Cidade</label>
+                    <input id="f-cidade" type="text" class="fc" placeholder="Ex: São Paulo" />
+                </div>
+                <div>
+                    <label class="field-label" for="f-estado">Estado</label>
+                    <div class="select-wrap">
+                        <select id="f-estado" class="fc">
+                            <option value="">UF</option>
+                            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                            <option selected>SP</option><option>SE</option><option>TO</option>
+                        </select>
+                        <span class="chev material-symbols-outlined">expand_more</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="field-label" for="f-bio">Sobre o negócio <span style="color:#475569;font-weight:400;text-transform:none">(Opcional)</span></label>
+                <textarea id="f-bio" class="fc" placeholder="Conte um pouco sobre o seu negócio..." style="resize:none;min-height:80px"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plano -->
+    <div class="sec-card">
+        <div class="sec-head">
+            <div class="sec-head-ico"><span class="material-symbols-outlined">workspace_premium</span></div>
+            <h3>Meu Plano</h3>
+        </div>
+        <div class="sec-body">
+            <div class="plan-card plan-free" id="plan-info-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                    <p class="font-bold text-sm">Plano Gratuito</p>
+                    <span class="material-symbols-outlined" style="color:#94a3b8;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">star_border</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:.3rem">
+                    <p class="text-xs text-slate-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#34d399">check_circle</span>
+                        Até 10 receitas
+                    </p>
+                    <p class="text-xs text-slate-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#34d399">check_circle</span>
+                        Até 20 produtos
+                    </p>
+                    <p class="text-xs text-slate-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#64748b">cancel</span>
+                        Precificação por marketplace
+                    </p>
+                    <p class="text-xs text-slate-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#64748b">cancel</span>
+                        Relatórios avançados
+                    </p>
+                </div>
+            </div>
+            <button class="upgrade-btn" onclick="location.href='acesso-vitalicio.html'">
+                <span class="material-symbols-outlined">rocket_launch</span>
+                Fazer Upgrade para Acesso Vitalício
+            </button>
+        </div>
+    </div>
+
+
+
+</main>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Salvo!</span>
+</div>
+
+<script>
+/* ─── CHAVE ──────────────────────────────────────────────────────── */
+const PROFILE_KEY = 'receitasx_perfil';
+
+/* ─── STATS do localStorage ─────────────────────────────────────── */
+function loadStats() {
+    const receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+    const produtos  = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+    const despesas  = JSON.parse(localStorage.getItem('receitasx_despesas') || '[]');
+    document.getElementById('stat-receitas').textContent = receitas.length;
+    document.getElementById('stat-produtos').textContent  = produtos.length;
+    document.getElementById('stat-despesas').textContent  = despesas.length;
+}
+
+/* ─── AVATAR ─────────────────────────────────────────────────────── */
+function handleAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const src = ev.target.result;
+        document.getElementById('avatar-img').src = src;
+        document.getElementById('avatar-img').style.display = 'block';
+        document.getElementById('avatar-initials').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function getInitials() {
+    const nome = (document.getElementById('f-nome').value || '').trim();
+    const sob  = (document.getElementById('f-sobrenome').value || '').trim();
+    if (!nome && !sob) return '?';
+    return ((nome[0]||'') + (sob[0]||'')).toUpperCase() || nome[0].toUpperCase();
+}
+
+/* ─── HERO UPDATE ────────────────────────────────────────────────── */
+function updateHero() {
+    const nome    = document.getElementById('f-nome').value.trim();
+    const sob     = document.getElementById('f-sobrenome').value.trim();
+    const negocio = document.getElementById('f-negocio').value.trim();
+    const full    = [nome, sob].filter(Boolean).join(' ') || 'Seu Nome';
+    document.getElementById('hero-nome').textContent    = full;
+    document.getElementById('hero-negocio').textContent = negocio || 'Nome do Negócio';
+    document.getElementById('avatar-initials').textContent = getInitials();
+}
+
+/* ─── MASK TEL ───────────────────────────────────────────────────── */
+function maskTel(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,11);
+    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3');
+    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/,'($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d*)$/,'($1) $2');
+    else if (v.length > 0) v = '(' + v;
+    el.value = v;
+}
+
+/* ─── LOAD ───────────────────────────────────────────────────────── */
+function load() {
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+    if (!p) return;
+    document.getElementById('f-nome').value      = p.nome      || '';
+    document.getElementById('f-sobrenome').value = p.sobrenome || '';
+    document.getElementById('f-email').value     = p.email     || '';
+    document.getElementById('f-tel').value       = p.tel       || '';
+    document.getElementById('f-negocio').value   = p.negocio   || '';
+    document.getElementById('f-segmento').value  = p.segmento  || '';
+    document.getElementById('f-cidade').value    = p.cidade    || '';
+    document.getElementById('f-estado').value    = p.estado    || 'SP';
+    document.getElementById('f-bio').value       = p.bio       || '';
+    if (p.avatar) {
+        document.getElementById('avatar-img').src = p.avatar;
+        document.getElementById('avatar-img').style.display = 'block';
+        document.getElementById('avatar-initials').style.display = 'none';
+    }
+    updateHero();
+}
+
+/* ─── SALVAR ─────────────────────────────────────────────────────── */
+function salvar() {
+    const avatar = document.getElementById('avatar-img').src || '';
+    const data = {
+        nome:       document.getElementById('f-nome').value.trim(),
+        sobrenome:  document.getElementById('f-sobrenome').value.trim(),
+        email:      document.getElementById('f-email').value.trim(),
+        tel:        document.getElementById('f-tel').value.trim(),
+        negocio:    document.getElementById('f-negocio').value.trim(),
+        segmento:   document.getElementById('f-segmento').value,
+        cidade:     document.getElementById('f-cidade').value.trim(),
+        estado:     document.getElementById('f-estado').value,
+        bio:        document.getElementById('f-bio').value.trim(),
+        avatar: avatar.startsWith('data:') ? avatar : '',
+    };
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+    updateHero();
+    showToast('Perfil salvo com sucesso!');
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type==='error'?'warning':'check_circle';
+    document.getElementById('toast-icon').style.color = type==='error'?'#f87171':'#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+load();
+loadStats();
+</script>
+</body>
+</html>
