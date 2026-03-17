@@ -146,6 +146,16 @@
         @keyframes shimmer { to{background-position:-200% 0} }
         @keyframes slideUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
         @keyframes fadeUp  { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+
+        #stats-link-wrap { flex-direction: column; }
+        /* -- layout desktop 2 colunas -- */
+        @media (min-width: 900px) {
+            #layout-grid   { grid-template-columns: 1fr 380px !important; align-items: start !important; }
+            #col-right     { position: sticky !important; top: 5rem !important; }
+            #stats-link-wrap { flex-direction: row !important; align-items: stretch !important; }
+            .stats-grid    { flex-shrink: 0; width: auto; min-width: 260px; }
+            .link-card     { flex: 1 !important; min-width: 0; }
+        }
     </style>
 </head>
 <body>
@@ -185,7 +195,7 @@
     <!-- GRID DESKTOP (2 colunas) -->
     <div id="layout-grid" style="display:grid;grid-template-columns:1fr;gap:1.25rem;">
     <div id="col-left" style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
-    <div id="stats-link-wrap" style="display:flex;flex-direction:column;gap:1.25rem;">
+    <div id="stats-link-wrap" style="display:flex;gap:1.25rem;">
     <!-- STATS -->
     <div class="stats-grid">
         <div class="stat-card stat-ganhos">
