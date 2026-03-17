@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Checkout · Acesso Vitalício - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -385,9 +387,22 @@ const PRECO_ORIG  = 97.00;
 let precoFinal    = PRECO_BASE;
 let cupomAplicado = null;
 let metodoPag     = 'pix';
+let codigoAfiliado = null; // capturado da URL ?ref=CODIGO
+
+// Captura código de afiliado da URL
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    codigoAfiliado = params.get('ref') || null;
+    if (codigoAfiliado) {
+        // Salva no localStorage para não perder se o usuário navegar
+        sessionStorage.setItem('ref_afiliado', codigoAfiliado);
+    } else {
+        codigoAfiliado = sessionStorage.getItem('ref_afiliado');
+    }
+})();
 
 // Cupons válidos: { codigo: { tipo:'%'|'R$', valor } }
-const CUPONS = {
+const CUPONS_LOCAL = {
     'BEMVINDA10': { tipo:'%',  valor:10,  label:'10% OFF' },
     'LANCAMENTO': { tipo:'%',  valor:20,  label:'20% OFF' },
     'AMIGA5'    : { tipo:'R$', valor:5,   label:'R$ 5,00 OFF' },
@@ -442,7 +457,7 @@ function aplicarCupom() {
     const fb     = document.getElementById('cupom-feedback');
     if (!codigo) { showFeedback('error','Informe um código de cupom.'); return; }
 
-    const cupom = CUPONS[codigo];
+    const cupom = CUPONS_LOCAL[codigo];
     if (!cupom) {
         cupomAplicado = null;
         precoFinal = PRECO_BASE;
@@ -527,34 +542,72 @@ function validar() {
 }
 
 /* ─── FINALIZAR ──────────────────────────────────────────────────── */
-function finalizarCompra() {
+async function finalizarCompra() {
     if (!validar()) return;
 
     const btn     = document.getElementById('btn-comprar');
     const spinner = document.getElementById('spinner');
     const bico    = document.getElementById('btn-ico');
     const btxt    = document.getElementById('btn-txt');
+    const email   = document.getElementById('f-email').value.trim();
 
     btn.disabled = true;
     spinner.style.display = 'block';
     bico.style.display    = 'none';
     btxt.textContent      = 'Processando...';
 
-    // Simulação de 2.2s
-    setTimeout(() => {
+    try {
+        // Gerar código de acesso único
+        const cod = 'RX-' + Math.random().toString(36).substring(2,8).toUpperCase();
+
+        // Salvar pedido no Supabase
+        let afiliadoId = null;
+        if (codigoAfiliado) {
+            const { data: af } = await sb.from('afiliados').select('id').eq('codigo', codigoAfiliado).single();
+            if (af) afiliadoId = af.id;
+        }
+
+        const { data: pedido, error: pedErr } = await sb.from('pedidos').insert({
+            email,
+            valor_pago:    precoFinal,
+            metodo_pag:    metodoPag,
+            status:        'confirmado',
+            codigo_acesso: cod,
+        }).select().single();
+
+        if (pedErr) throw pedErr;
+
+        // Registrar indicação se veio de afiliado
+        if (afiliadoId) {
+            await sb.from('indicacoes').insert({
+                afiliado_id:    afiliadoId,
+                indicado_email: email,
+                converteu:      true,
+                valor_pago:     precoFinal,
+                comissao:       +(precoFinal * 0.10).toFixed(2),
+            });
+            // Atualizar stats do afiliado
+            await sb.rpc('incrementar_venda_afiliado', {
+                p_afiliado_id: afiliadoId,
+                p_valor: precoFinal
+            }).catch(() => {}); // não bloqueia se RPC não existir ainda
+        }
+
+        sessionStorage.removeItem('ref_afiliado');
+
+        // Mostrar sucesso
         document.querySelector('.checkout-grid').style.display = 'none';
         const sw = document.getElementById('sucesso-wrap');
         sw.style.display = 'flex';
-        const cod = 'RX-' + Math.random().toString(36).substring(2,8).toUpperCase();
         document.getElementById('cod-acesso').textContent = cod;
 
-        // Salvar acesso no localStorage
-        localStorage.setItem('receitasx_acesso', JSON.stringify({
-            tipo:'vitalicio', codigo:cod,
-            data: new Date().toISOString(),
-            email: document.getElementById('f-email').value.trim(),
-        }));
-    }, 2200);
+    } catch (err) {
+        showToast('Erro ao processar: ' + err.message, 'error');
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        bico.style.display    = '';
+        btxt.textContent      = metodoPag === 'pix' ? 'Gerar Pix' : 'Finalizar Compra';
+    }
 }
 
 /* ─── PIX COPIAR ─────────────────────────────────────────────────── */
