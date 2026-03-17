@@ -1,81 +1,125 @@
 -- ================================================================
--- TABELAS PARA O PROGRAMA "INDIQUE E GANHE" - ReceitasX
+-- PROGRAMA "INDIQUE E GANHE" - ReceitasX
+-- VERSÃO SEGURA: recria as tabelas corretamente
 -- Execute no Supabase SQL Editor
 -- ================================================================
 
--- ── 1. AFILIADOS ────────────────────────────────────────────────
--- Cada usuário autenticado pode ser afiliado.
--- O campo `codigo` é o código único usado no link de indicação.
-CREATE TABLE IF NOT EXISTS afiliados (
+-- ── Remove policies antigas (se existirem) ──────────────────────
+DROP POLICY IF EXISTS "afiliados_self"             ON afiliados;
+DROP POLICY IF EXISTS "afiliados_read_by_codigo"   ON afiliados;
+DROP POLICY IF EXISTS "indicacoes_self"            ON indicacoes;
+DROP POLICY IF EXISTS "indicacoes_insert"          ON indicacoes;
+DROP POLICY IF EXISTS "saques_self"                ON saques_afiliado;
+
+-- ── Remove tabelas antigas (CASCADE para remover dependências) ───
+DROP TABLE IF EXISTS saques_afiliado  CASCADE;
+DROP TABLE IF EXISTS indicacoes       CASCADE;
+DROP TABLE IF EXISTS afiliados        CASCADE;
+
+-- ── 1. AFILIADOS ─────────────────────────────────────────────────
+CREATE TABLE afiliados (
   id              BIGSERIAL PRIMARY KEY,
   user_id         UUID UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   email           TEXT NOT NULL,
   codigo          TEXT UNIQUE NOT NULL,
-  total_ganhos    NUMERIC(10,2) DEFAULT 0,
-  total_vendas    INTEGER DEFAULT 0,
-  total_cliques   INTEGER DEFAULT 0,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  total_ganhos    NUMERIC(10,2) NOT NULL DEFAULT 0,
+  total_vendas    INTEGER       NOT NULL DEFAULT 0,
+  total_cliques   INTEGER       NOT NULL DEFAULT 0,
+  created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
+
 ALTER TABLE afiliados ENABLE ROW LEVEL SECURITY;
--- Afiliado vê apenas seus próprios dados
-CREATE POLICY "afiliados_self" ON afiliados FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
--- Checkout precisa ler o afiliado pelo código (anon)
-CREATE POLICY "afiliados_read_by_codigo" ON afiliados FOR SELECT USING (true);
+
+-- Dono vê e edita os próprios dados
+CREATE POLICY "afiliados_self"
+  ON afiliados FOR ALL
+  USING  (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Qualquer um pode ler pelo código (checkout anônimo verifica afiliado)
+CREATE POLICY "afiliados_public_read"
+  ON afiliados FOR SELECT
+  USING (true);
+
+-- Usuário autenticado pode criar seu próprio registro de afiliado
+CREATE POLICY "afiliados_insert_self"
+  ON afiliados FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
 
 -- ── 2. INDICAÇÕES ────────────────────────────────────────────────
--- Registra cada indicação feita por um afiliado.
-CREATE TABLE IF NOT EXISTS indicacoes (
+CREATE TABLE indicacoes (
   id              BIGSERIAL PRIMARY KEY,
-  afiliado_id     BIGINT NOT NULL REFERENCES afiliados(id) ON DELETE CASCADE,
-  indicado_email  TEXT NOT NULL,
-  converteu       BOOLEAN DEFAULT FALSE,
+  afiliado_id     BIGINT        NOT NULL REFERENCES afiliados(id) ON DELETE CASCADE,
+  indicado_email  TEXT          NOT NULL,
+  converteu       BOOLEAN       NOT NULL DEFAULT FALSE,
   valor_pago      NUMERIC(10,2),
   comissao        NUMERIC(10,2),
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
+
 ALTER TABLE indicacoes ENABLE ROW LEVEL SECURITY;
--- Afiliado vê somente suas indicações
-CREATE POLICY "indicacoes_self" ON indicacoes FOR SELECT
-  USING (afiliado_id IN (SELECT id FROM afiliados WHERE user_id = auth.uid()));
--- Checkout pode inserir indicações (anon/autenticado)
-CREATE POLICY "indicacoes_insert" ON indicacoes FOR INSERT WITH CHECK (true);
+
+-- Afiliado lê apenas as próprias indicações (via join com afiliados)
+CREATE POLICY "indicacoes_self_select"
+  ON indicacoes FOR SELECT
+  USING (
+    afiliado_id IN (
+      SELECT id FROM afiliados WHERE user_id = auth.uid()
+    )
+  );
+
+-- Qualquer um pode registrar uma indicação (checkout anônimo)
+CREATE POLICY "indicacoes_public_insert"
+  ON indicacoes FOR INSERT
+  WITH CHECK (true);
 
 -- ── 3. SAQUES DE AFILIADOS ───────────────────────────────────────
--- Solicitações de saque feitas pelos afiliados.
-CREATE TABLE IF NOT EXISTS saques_afiliado (
-  id          BIGSERIAL PRIMARY KEY,
-  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  email       TEXT NOT NULL,
+CREATE TABLE saques_afiliado (
+  id          BIGSERIAL    PRIMARY KEY,
+  user_id     UUID         NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  email       TEXT         NOT NULL,
   valor       NUMERIC(10,2) NOT NULL,
-  pix_chave   TEXT NOT NULL,
-  pix_tipo    TEXT NOT NULL DEFAULT 'cpf',
-  status      TEXT NOT NULL DEFAULT 'pendente', -- pendente, pago, cancelado
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  pix_chave   TEXT         NOT NULL,
+  pix_tipo    TEXT         NOT NULL DEFAULT 'cpf',
+  status      TEXT         NOT NULL DEFAULT 'pendente',
+  obs         TEXT,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+
 ALTER TABLE saques_afiliado ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "saques_self" ON saques_afiliado FOR ALL
-  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "saques_self"
+  ON saques_afiliado FOR ALL
+  USING  (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
 -- ── 4. RPC: incrementar stats do afiliado ────────────────────────
--- Chamada pelo checkout após conversão.
 CREATE OR REPLACE FUNCTION incrementar_venda_afiliado(
   p_afiliado_id BIGINT,
   p_valor       NUMERIC
 )
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 BEGIN
   UPDATE afiliados
   SET
-    total_ganhos  = total_ganhos + (p_valor * 0.10),
-    total_vendas  = total_vendas + 1
+    total_ganhos = total_ganhos + ROUND(p_valor * 0.10, 2),
+    total_vendas = total_vendas + 1
   WHERE id = p_afiliado_id;
 END;
 $$;
 
--- ── 5. RPC: registrar clique no link de afiliado ─────────────────
+-- ── 5. RPC: registrar clique no link ─────────────────────────────
 CREATE OR REPLACE FUNCTION registrar_clique_afiliado(p_codigo TEXT)
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 BEGIN
-  UPDATE afiliados SET total_cliques = total_cliques + 1 WHERE codigo = p_codigo;
+  UPDATE afiliados
+  SET total_cliques = total_cliques + 1
+  WHERE codigo = p_codigo;
 END;
 $$;
