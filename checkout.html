@@ -196,10 +196,68 @@
             </div>
         </div>
 
-        <!-- 2. Cupom de Desconto -->
+        <!-- 2. Informações do Negócio -->
         <div class="ck-card">
             <div class="ck-head">
                 <div class="ck-head-num">2</div>
+                <h3>Informações do Negócio</h3>
+            </div>
+            <div class="ck-body" style="display:flex;flex-direction:column;gap:.7rem">
+                <p style="font-size:.72rem;color:#475569;margin-bottom:.1rem">Preencha para deixar seu perfil pronto desde o primeiro acesso 🎉</p>
+                <div>
+                    <label class="field-label" for="f-negocio">Nome do Negócio</label>
+                    <input id="f-negocio" type="text" class="fc" placeholder="Ex: Delicias da Maria" autocomplete="organization" />
+                </div>
+                <div>
+                    <label class="field-label" for="f-segmento">Segmento</label>
+                    <div class="select-wrap">
+                        <select id="f-segmento" class="fc">
+                            <option value="">— Selecione —</option>
+                            <option value="confeitaria">🍰 Confeitaria</option>
+                            <option value="bolos">🎂 Bolos e Tortas</option>
+                            <option value="doces">🍬 Doces e Brigadeiros</option>
+                            <option value="sorvetes">🍦 Sorvetes e Geladinhos</option>
+                            <option value="salgados">🥐 Salgados e Lanches</option>
+                            <option value="paes">🍞 Pães e Panificação</option>
+                            <option value="bolos-decorados">🎨 Bolos Decorados</option>
+                            <option value="fit">🥗 Alimentação Saudável / Fit</option>
+                            <option value="gourmet">✨ Produtos Gourmet</option>
+                            <option value="outro">📦 Outro</option>
+                        </select>
+                        <span class="chev material-symbols-outlined">expand_more</span>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label class="field-label" for="f-cidade">Cidade</label>
+                        <input id="f-cidade" type="text" class="fc" placeholder="Ex: São Paulo" autocomplete="address-level2" />
+                    </div>
+                    <div>
+                        <label class="field-label" for="f-estado">Estado</label>
+                        <div class="select-wrap">
+                            <select id="f-estado" class="fc">
+                                <option value="">UF</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
+                            <span class="chev material-symbols-outlined">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Cupom de Desconto -->
+        <div class="ck-card">
+            <div class="ck-head">
+                <div class="ck-head-num">3</div>
                 <h3>Cupom de Desconto</h3>
             </div>
             <div class="ck-body">
@@ -214,7 +272,7 @@
         <!-- 3. Pagamento -->
         <div class="ck-card">
             <div class="ck-head">
-                <div class="ck-head-num">3</div>
+                <div class="ck-head-num">4</div>
                 <h3>Forma de Pagamento</h3>
             </div>
             <div class="ck-body">
