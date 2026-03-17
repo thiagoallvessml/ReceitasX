@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -168,30 +168,30 @@
                 <h3>Seus Dados</h3>
             </div>
             <div class="ck-body" style="display:flex;flex-direction:column;gap:.7rem">
-                <div class="grid-2">
-                    <div>
-                        <label class="field-label" for="f-nome">Nome</label>
-                        <input id="f-nome" type="text" class="fc" placeholder="Seu nome" autocomplete="given-name" />
-                        <p class="field-err" id="err-nome">Informe seu nome.</p>
+
+                <!-- Banner do usuário logado -->
+                <div id="user-banner" style="display:flex;align-items:center;gap:.85rem;background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.15);border-radius:.75rem;padding:.85rem 1rem">
+                    <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span class="material-symbols-outlined" style="font-size:1.3rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">person</span>
                     </div>
-                    <div>
-                        <label class="field-label" for="f-sobrenome">Sobrenome</label>
-                        <input id="f-sobrenome" type="text" class="fc" placeholder="Sobrenome" autocomplete="family-name" />
+                    <div style="flex:1;min-width:0">
+                        <p id="user-nome-display" style="font-size:.88rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Carregando...</p>
+                        <p id="user-email-display" style="font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
                     </div>
+                    <span class="material-symbols-outlined" style="font-size:.9rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">verified</span>
                 </div>
+
+                <!-- Campos ocultos para uso interno -->
+                <input type="hidden" id="f-nome" />
+                <input type="hidden" id="f-email" />
+
                 <div>
-                    <label class="field-label" for="f-email">E-mail</label>
-                    <input id="f-email" type="email" class="fc" placeholder="seu@email.com" autocomplete="email" />
-                    <p class="field-err" id="err-email">Informe um e-mail válido.</p>
-                </div>
-                <div>
-                    <label class="field-label" for="f-tel">WhatsApp</label>
+                    <label class="field-label" for="f-tel">WhatsApp <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
                     <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" autocomplete="tel" />
                 </div>
                 <div>
-                    <label class="field-label" for="f-cpf">CPF</label>
+                    <label class="field-label" for="f-cpf">CPF <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
                     <input id="f-cpf" type="text" class="fc" placeholder="000.000.000-00" oninput="maskCPF(this)" maxlength="14" />
-                    <p class="field-err" id="err-cpf">Informe um CPF válido.</p>
                 </div>
             </div>
         </div>
@@ -381,7 +381,7 @@
 </div>
 
 <script>
-/* ─── ESTADO ─────────────────────────────────────────────────────── */
+/* ── ESTADO ──────────────────────────────────────────── */
 const PRECO_BASE  = 46.90;
 const PRECO_ORIG  = 97.00;
 let precoFinal    = PRECO_BASE;
@@ -389,19 +389,38 @@ let cupomAplicado = null;
 let metodoPag     = 'pix';
 let codigoAfiliado = null; // capturado da URL ?ref=CODIGO
 
-// Captura código de afiliado da URL
+/* ── INIT: capturar afiliado da URL ─────────────────── */
 (function() {
-    const params = new URLSearchParams(window.location.search);
-    codigoAfiliado = params.get('ref') || null;
-    if (codigoAfiliado) {
-        // Salva no localStorage para não perder se o usuário navegar
+    const p = new URLSearchParams(location.search);
+    const ref = p.get('ref') || sessionStorage.getItem('ref_afiliado');
+    if (ref) {
+        codigoAfiliado = ref.toUpperCase();
         sessionStorage.setItem('ref_afiliado', codigoAfiliado);
-    } else {
-        codigoAfiliado = sessionStorage.getItem('ref_afiliado');
     }
 })();
 
-// Cupons válidos: { codigo: { tipo:'%'|'R$', valor } }
+/* ── TOTAIS ─────────────────────────────────────────── */
+function fmtR(v) {
+    return 'R$ ' + v.toFixed(2).replace('.',',');
+}
+function updateTotal() {
+    document.getElementById('total-val').textContent = fmtR(precoFinal);
+}
+function updateParcelas() {
+    const p = parseInt(document.getElementById('f-parcelas').value) || 1;
+    const vp = (precoFinal / p).toFixed(2).replace('.',',');
+    document.getElementById('parcelas-info').textContent =
+        p === 1 ? '' : `ou em até ${p}x de R$ ${vp} sem juros`;
+    // Atualizar opções do select com preço atual
+    const sel = document.getElementById('f-parcelas');
+    for (let i = 0; i < sel.options.length; i++) {
+        const n = i + 1;
+        const val = (precoFinal / n).toFixed(2).replace('.',',');
+        sel.options[i].text = `${n}x de R$ ${val} (sem juros)`;
+    }
+}
+
+/* ── CUPONS (local — fallback sem Supabase) ─────────── */
 const CUPONS_LOCAL = {
     'BEMVINDA10': { tipo:'%',  valor:10,  label:'10% OFF' },
     'LANCAMENTO': { tipo:'%',  valor:20,  label:'20% OFF' },
@@ -409,7 +428,7 @@ const CUPONS_LOCAL = {
     'DESCONTO15' : { tipo:'%', valor:15,  label:'15% OFF' },
 };
 
-/* ─── MASKS ──────────────────────────────────────────────────────── */
+/* ── MASKS ──────────────────────────────────────────── */
 function maskTel(el) {
     let v = el.value.replace(/\D/g,'').slice(0,11);
     if (v.length>10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3');
@@ -436,7 +455,7 @@ function maskExp(el) {
     el.value = v;
 }
 
-/* ─── PAGAMENTO TABS ─────────────────────────────────────────────── */
+/* ── PAGAMENTO TABS ─────────────────────────────────── */
 function selectPay(m) {
     metodoPag = m;
     document.getElementById('tab-pix').classList.toggle('active', m==='pix');
@@ -451,97 +470,76 @@ function updateBtnTxt() {
     else t.textContent = 'Finalizar Compra';
 }
 
-/* ─── CUPOM ──────────────────────────────────────────────────────── */
-function aplicarCupom() {
+/* ── CUPOM ──────────────────────────────────────────── */
+async function aplicarCupom() {
     const codigo = document.getElementById('f-cupom').value.trim().toUpperCase();
-    const fb     = document.getElementById('cupom-feedback');
     if (!codigo) { showFeedback('error','Informe um código de cupom.'); return; }
 
-    const cupom = CUPONS_LOCAL[codigo];
-    if (!cupom) {
+    // Tenta Supabase primeiro
+    let cupomData = null;
+    try {
+        const { data, error } = await sb.from('cupons')
+            .select('*')
+            .eq('codigo', codigo)
+            .eq('ativo', true)
+            .single();
+        if (!error && data) cupomData = { tipo: data.tipo, valor: parseFloat(data.valor) };
+    } catch(e) {}
+
+    // fallback local
+    if (!cupomData && CUPONS_LOCAL[codigo]) {
+        const c = CUPONS_LOCAL[codigo];
+        cupomData = { tipo: c.tipo, valor: c.valor };
+    }
+
+    if (!cupomData) {
         cupomAplicado = null;
         precoFinal = PRECO_BASE;
         showFeedback('error','Cupom inválido ou expirado.');
         document.getElementById('row-cupom').style.display = 'none';
         updateTotal();
+        updateParcelas();
         return;
     }
 
-    let desc = cupom.tipo === '%' ? PRECO_BASE * (cupom.valor/100) : cupom.valor;
+    let desc = cupomData.tipo === '%' ? PRECO_BASE * (cupomData.valor/100) : cupomData.valor;
     desc = Math.min(desc, PRECO_BASE);
     precoFinal = Math.max(0, PRECO_BASE - desc);
-    cupomAplicado = { codigo, desc, label:cupom.label };
+    cupomAplicado = { codigo, desc };
 
-    showFeedback('ok', `✅ Cupom "${codigo}" aplicado — ${cupom.label}`);
+    const labelMap = CUPONS_LOCAL[codigo] ? CUPONS_LOCAL[codigo].label :
+        (cupomData.tipo === '%' ? `${cupomData.valor}% OFF` : `R$ ${cupomData.valor.toFixed(2)} OFF`);
+
+    showFeedback('ok', `✓ Cupom "${codigo}" aplicado — ${labelMap}`);
     document.getElementById('row-cupom').style.display   = 'flex';
     document.getElementById('cupom-aplicado').textContent = codigo;
     document.getElementById('val-cupom-desc').textContent = '- ' + fmtR(desc);
     document.getElementById('f-cupom').disabled = true;
     document.getElementById('btn-aplicar').disabled = true;
     updateTotal();
+    updateParcelas();
 }
 
 function showFeedback(tipo, msg) {
     const el = document.getElementById('cupom-feedback');
     el.style.display = 'flex';
-    el.className     = 'cupom-feedback ' + tipo;
-    el.innerHTML     = `<span class="material-symbols-outlined">${tipo==='ok'?'check_circle':'cancel'}</span>${msg}`;
+    el.className = 'cupom-feedback ' + (tipo === 'ok' ? 'ok' : 'err');
+    el.innerHTML = `<span class="material-symbols-outlined">${tipo==='ok'?'check_circle':'cancel'}</span><span>${msg}</span>`;
 }
 
-/* ─── TOTAL ──────────────────────────────────────────────────────── */
-function fmtR(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-
-function updateTotal() {
-    document.getElementById('total-val').textContent = fmtR(precoFinal);
-    updateParcelas();
-}
-function updateParcelas() {
-    const sel = document.getElementById('f-parcelas');
-    const n   = parseInt(sel?.value || 1);
-    const por = precoFinal / 3;
-    document.getElementById('parcelas-info').textContent =
-        `ou em até 3x de ${fmtR(por)} sem juros`;
-
-    // Atualizar opções do select com valor atualizado
-    if (sel) {
-        sel.options[0].text = `1x de ${fmtR(precoFinal)} (sem juros)`;
-        sel.options[1].text = `2x de ${fmtR(precoFinal/2)} (sem juros)`;
-        sel.options[2].text = `3x de ${fmtR(precoFinal/3)} (sem juros)`;
-    }
-}
-
-/* ─── VALIDAÇÃO ──────────────────────────────────────────────────── */
+/* ── VALIDAÇÃO ──────────────────────────────────────── */
 function validar() {
-    let ok = true;
-    const nome  = document.getElementById('f-nome').value.trim();
     const email = document.getElementById('f-email').value.trim();
-    const cpf   = document.getElementById('f-cpf').value.replace(/\D/g,'');
-
-    if (!nome) {
-        document.getElementById('f-nome').classList.add('error');
-        document.getElementById('err-nome').style.display='block'; ok=false;
-    } else {
-        document.getElementById('f-nome').classList.remove('error');
-        document.getElementById('err-nome').style.display='none';
+    // Email é preenchido automaticamente via Auth; se não tiver, usuário não está logado
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('Você precisa estar logado para finalizar a compra.', 'error');
+        setTimeout(() => { location.href = 'login.html'; }, 2000);
+        return false;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('f-email').classList.add('error');
-        document.getElementById('err-email').style.display='block'; ok=false;
-    } else {
-        document.getElementById('f-email').classList.remove('error');
-        document.getElementById('err-email').style.display='none';
-    }
-    if (cpf.length !== 11) {
-        document.getElementById('f-cpf').classList.add('error');
-        document.getElementById('err-cpf').style.display='block'; ok=false;
-    } else {
-        document.getElementById('f-cpf').classList.remove('error');
-        document.getElementById('err-cpf').style.display='none';
-    }
-    return ok;
+    return true;
 }
 
-/* ─── FINALIZAR ──────────────────────────────────────────────────── */
+/* ── FINALIZAR ──────────────────────────────────────── */
 async function finalizarCompra() {
     if (!validar()) return;
 
@@ -560,42 +558,56 @@ async function finalizarCompra() {
         // Gerar código de acesso único
         const cod = 'RX-' + Math.random().toString(36).substring(2,8).toUpperCase();
 
-        // Salvar pedido no Supabase
+        // Buscar afiliado se houver referência
         let afiliadoId = null;
         if (codigoAfiliado) {
-            const { data: af } = await sb.from('afiliados').select('id').eq('codigo', codigoAfiliado).single();
-            if (af) afiliadoId = af.id;
+            try {
+                const { data: af } = await sb.from('afiliados').select('id').eq('codigo', codigoAfiliado).single();
+                if (af) afiliadoId = af.id;
+            } catch(e) {}
         }
 
-        const { data: pedido, error: pedErr } = await sb.from('pedidos').insert({
+        // Obter user_id do usuário logado
+        const { data: { user } } = await sb.auth.getUser();
+        const userId = user ? user.id : null;
+
+        // Inserir pedido — inclui user_id para passar o RLS
+        const payload = {
             email,
             valor_pago:    precoFinal,
             metodo_pag:    metodoPag,
             status:        'confirmado',
             codigo_acesso: cod,
-        }).select().single();
+        };
+        if (userId) payload.user_id = userId;
 
-        if (pedErr) throw pedErr;
+        const { data: pedido, error: pedErr } = await sb.from('pedidos').insert(payload).select().single();
+
+        if (pedErr) {
+            console.error('Erro ao salvar pedido:', pedErr.message);
+            throw pedErr;
+        }
 
         // Registrar indicação se veio de afiliado
-        if (afiliadoId) {
-            await sb.from('indicacoes').insert({
-                afiliado_id:    afiliadoId,
-                indicado_email: email,
-                converteu:      true,
-                valor_pago:     precoFinal,
-                comissao:       +(precoFinal * 0.10).toFixed(2),
-            });
-            // Atualizar stats do afiliado
-            await sb.rpc('incrementar_venda_afiliado', {
-                p_afiliado_id: afiliadoId,
-                p_valor: precoFinal
-            }).catch(() => {}); // não bloqueia se RPC não existir ainda
+        if (afiliadoId && pedido) {
+            try {
+                await sb.from('indicacoes').insert({
+                    afiliado_id:    afiliadoId,
+                    indicado_email: email,
+                    converteu:      true,
+                    valor_pago:     precoFinal,
+                    comissao:       +(precoFinal * 0.10).toFixed(2),
+                });
+                await sb.rpc('incrementar_venda_afiliado', {
+                    p_afiliado_id: afiliadoId,
+                    p_valor: precoFinal
+                }).catch(() => {});
+            } catch(e) {}
         }
 
         sessionStorage.removeItem('ref_afiliado');
 
-        // Mostrar sucesso
+        // Mostrar tela de sucesso
         document.querySelector('.checkout-grid').style.display = 'none';
         const sw = document.getElementById('sucesso-wrap');
         sw.style.display = 'flex';
@@ -610,7 +622,7 @@ async function finalizarCompra() {
     }
 }
 
-/* ─── PIX COPIAR ─────────────────────────────────────────────────── */
+/* ── PIX COPIAR ─────────────────────────────────────── */
 function copiarPix() {
     const code = document.getElementById('pix-code').textContent;
     navigator.clipboard.writeText(code).catch(()=>{});
@@ -619,7 +631,7 @@ function copiarPix() {
     setTimeout(()=>{ document.getElementById('copy-ico').textContent='content_copy'; },2000);
 }
 
-/* ─── TOAST ──────────────────────────────────────────────────────── */
+/* ── TOAST ──────────────────────────────────────────── */
 let toastTimer;
 function showToast(msg, type='success') {
     const t = document.getElementById('toast');
@@ -631,8 +643,32 @@ function showToast(msg, type='success') {
     toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
 }
 
-/* ─── INIT ───────────────────────────────────────────────────────── */
-updateParcelas();
+/* ── INIT: Auth + preencher campos ──────────────────── */
+document.addEventListener("DOMContentLoaded", async () => {
+    updateParcelas();
+
+    // Verificar usuário logado
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
+            // Redirecionar para login mantendo redirect para checkout
+            location.href = "login.html?redirect=checkout.html";
+            return;
+        }
+
+        // Preencher campos hidden
+        const nome = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split("@")[0];
+        document.getElementById("f-nome").value  = nome;
+        document.getElementById("f-email").value = user.email;
+
+        // Mostrar banner do usuário
+        document.getElementById("user-nome-display").textContent  = nome;
+        document.getElementById("user-email-display").textContent = user.email;
+
+    } catch(e) {
+        console.error("Auth check failed:", e);
+    }
+});
 </script>
 </body>
 </html>
