@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -113,7 +113,7 @@
         .saque-label { font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem; }
         .saque-val { font-size:2rem;font-weight:900;color:#f1f5f9;line-height:1; }
         .saque-sub { font-size:.72rem;color:#64748b;margin-top:.25rem; }
-        .btn-saque { display:flex;align-items:center;gap:.45rem;padding:.8rem 1.5rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.25);transition:all .15s;white-space:nowrap;flex-shrink:0; }
+        .btn-saque { padding:.8rem 1.5rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.25);transition:all .15s;white-space:nowrap;flex-shrink:0; }
         .btn-saque:hover { opacity:.9;box-shadow:0 6px 28px rgba(37,244,244,.4); }
         .btn-saque:disabled { opacity:.4;cursor:not-allowed; }
         .btn-saque .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
@@ -244,7 +244,6 @@
             <div class="saque-sub">Mínimo de R$ 20,00 para solicitar saque via Pix</div>
         </div>
         <button class="btn-saque" id="btn-saque" onclick="abrirModalSaque()" disabled>
-            <span class="material-symbols-outlined">pix</span>
             Solicitar Saque
         </button>
     </div>
