@@ -167,7 +167,7 @@
 </header>
 
 <!-- ── CONTEÚDO ── -->
-<div class="page-wrap">
+<div style="max-width:1200px;margin:0 auto;padding:1.25rem 1.25rem 5rem;">
 
     <!-- HERO -->
     <div class="hero">
@@ -184,8 +184,8 @@
     </div>
 
     <!-- GRID DESKTOP (2 colunas) -->
-    <div class="page-grid">
-    <div class="col-left">
+    <div id="layout-grid" style="display:grid;grid-template-columns:1fr;gap:1.25rem;">
+    <div id="col-left" style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
     <!-- STATS -->
     <div class="stats-grid">
         <div class="stat-card stat-ganhos">
@@ -240,8 +240,8 @@
     </div>
 
     </div><!-- /col-left -->
-    <div class="col-right">
-    <!-- SALDO PARA SAQUE -->
+    </div><!-- /col-left -->
+    <div id="col-right" style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
     <div class="saque-card" id="saque-card">
         <div class="saque-info">
             <div class="saque-label">💰 Saldo disponível para saque</div>
@@ -312,8 +312,8 @@
     </div>
 
     </div><!-- /col-right -->
-    </div><!-- /page-grid -->
-
+    </div><!-- /col-right -->
+    </div><!-- /layout-grid -->
     <!-- REGRAS -->
     <div class="rules-card">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.85rem">
@@ -685,6 +685,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('modal-saque').addEventListener('click', function(e) {
     if (e.target === this) fecharModalSaque();
 });
+
+/* -- layout responsivo desktop -- */
+function applyLayout() {
+    var grid  = document.getElementById('layout-grid');
+    var right = document.getElementById('col-right');
+    if (!grid || !right) return;
+    if (window.innerWidth >= 900) {
+        grid.style.gridTemplateColumns = '1fr 380px';
+        grid.style.alignItems          = 'start';
+        right.style.position           = 'sticky';
+        right.style.top                = '5rem';
+    } else {
+        grid.style.gridTemplateColumns = '1fr';
+        right.style.position           = 'static';
+        right.style.top                = 'auto';
+    }
+}
+window.addEventListener('resize', applyLayout);
+applyLayout();
 </script>
 </body>
 </html>
