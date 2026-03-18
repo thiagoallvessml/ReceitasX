@@ -209,19 +209,18 @@
 
 /* ── Carregar configs do Supabase ────────────────────────────────── */
 async function carregarConfiguracoes() {
-    const { data, error } = await sb.from('configuracoes').select('*');
+    const { data, error } = await sb.from('config_afiliados').select('*').eq('id', 1).single();
 
-    const cfg = {};
-    (data || []).forEach(row => { cfg[row.chave] = row.valor; });
+    const cfg = data || {};
 
-    // Preencher inputs
-    document.getElementById('comissao').value    = cfg.comissao_pct    ?? '10';
-    document.getElementById('saque_minimo').value = cfg.saque_minimo   ?? '50';
-    document.getElementById('valor_plano').value  = cfg.valor_plano    ?? '46.90';
+    document.getElementById('comissao').value     = cfg.comissao_pct ?? '10';
+    document.getElementById('saque_minimo').value  = cfg.saque_minimo  ?? '50';
+    document.getElementById('valor_plano').value   = cfg.valor_plano   ?? '46.90';
 
     atualizarPreview();
     renderResumo(cfg);
 }
+
 
 /* ── Atualizar preview em tempo real ─────────────────────────────── */
 function atualizarPreview() {
@@ -268,24 +267,25 @@ async function salvar() {
     btn.disabled = true;
     btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin .8s linear infinite">sync</span> Salvando…`;
 
-    const configs = [
-        { chave: 'comissao_pct',  valor: document.getElementById('comissao').value    || '10' },
-        { chave: 'saque_minimo',  valor: document.getElementById('saque_minimo').value || '50' },
-        { chave: 'valor_plano',   valor: document.getElementById('valor_plano').value  || '46.90' },
-    ];
 
     try {
-        for (const cfg of configs) {
-            const { error } = await sb.from('configuracoes')
-                .upsert({ chave: cfg.chave, valor: cfg.valor }, { onConflict: 'chave' });
-            if (error) throw error;
-        }
+        const payload = {
+            id:           1,
+            comissao_pct: parseFloat(document.getElementById('comissao').value)     || 10,
+            saque_minimo: parseFloat(document.getElementById('saque_minimo').value) || 50,
+            valor_plano:  parseFloat(document.getElementById('valor_plano').value)  || 46.90,
+            updated_at:   new Date().toISOString(),
+        };
+
+        const { error } = await sb.from('config_afiliados')
+            .upsert(payload, { onConflict: 'id' });
+        if (error) throw new Error(error.message || JSON.stringify(error));
 
         showToast('✓ Configurações salvas com sucesso!');
-        renderResumo(Object.fromEntries(configs.map(c => [c.chave, c.valor])));
+        renderResumo(payload);
     } catch (e) {
-        console.error(e);
-        showToast('Erro ao salvar: ' + (e.message || 'verifique o console'), 'error');
+        console.error('Erro ao salvar configurações:', e?.message || e);
+        showToast('Erro: ' + (e?.message || 'verifique o console'), 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = `<span class="material-symbols-outlined">save</span> Salvar`;

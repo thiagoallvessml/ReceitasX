@@ -1,35 +1,37 @@
 -- ================================================================
--- ReceitasX · Tabela de configurações do sistema
+-- ReceitasX · Configurações do sistema (linha única)
 -- Execute no Supabase Dashboard → SQL Editor
 -- ================================================================
 
-CREATE TABLE IF NOT EXISTS configuracoes (
-  chave      TEXT PRIMARY KEY,
-  valor      TEXT NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- Usar tabela config simples com uma única linha (sem key-value)
+CREATE TABLE IF NOT EXISTS config_afiliados (
+  id            INTEGER PRIMARY KEY DEFAULT 1,
+  comissao_pct  NUMERIC(5,2)  NOT NULL DEFAULT 10,
+  saque_minimo  NUMERIC(10,2) NOT NULL DEFAULT 50,
+  valor_plano   NUMERIC(10,2) NOT NULL DEFAULT 46.90,
+  updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  CHECK (id = 1)  -- garante sempre 1 linha
 );
 
-ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE config_afiliados ENABLE ROW LEVEL SECURITY;
 
--- Apenas admin pode ler e escrever
-DROP POLICY IF EXISTS "cfg_admin_all" ON configuracoes;
-CREATE POLICY "cfg_admin_all"
-  ON configuracoes FOR ALL
+-- Qualquer autenticado pode ler
+DROP POLICY IF EXISTS "cfg_af_read" ON config_afiliados;
+CREATE POLICY "cfg_af_read"
+  ON config_afiliados FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- Só admin pode atualizar
+DROP POLICY IF EXISTS "cfg_af_update" ON config_afiliados;
+CREATE POLICY "cfg_af_update"
+  ON config_afiliados FOR ALL
   USING (get_my_role() = 'admin')
   WITH CHECK (get_my_role() = 'admin');
 
--- Qualquer autenticado pode LER (para usar os valores no frontend)
-DROP POLICY IF EXISTS "cfg_read_auth" ON configuracoes;
-CREATE POLICY "cfg_read_auth"
-  ON configuracoes FOR SELECT
-  USING (auth.role() = 'authenticated');
-
--- Inserir valores padrão
-INSERT INTO configuracoes (chave, valor) VALUES
-  ('comissao_pct',  '10'),
-  ('saque_minimo',  '50'),
-  ('valor_plano',   '46.90')
-ON CONFLICT (chave) DO NOTHING;
+-- Inserir linha padrão
+INSERT INTO config_afiliados (id, comissao_pct, saque_minimo, valor_plano)
+VALUES (1, 10, 50, 46.90)
+ON CONFLICT (id) DO NOTHING;
 
 -- Verificar
-SELECT chave, valor FROM configuracoes ORDER BY chave;
+SELECT * FROM config_afiliados;
