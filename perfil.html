@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Meu Perfil - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -321,117 +324,211 @@
 </div>
 
 <script>
-/* ─── CHAVE ──────────────────────────────────────────────────────── */
-const PROFILE_KEY = 'receitasx_perfil';
+/* ══════════════════════════════════════════════════════════════════
+   perfil.html · Integração Supabase
+   Lê/salva dados na tabela "perfis" e usa auth.user para o e-mail
+══════════════════════════════════════════════════════════════════ */
 
-/* ─── STATS do localStorage ─────────────────────────────────────── */
-function loadStats() {
-    const receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
-    const produtos  = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
-    const despesas  = JSON.parse(localStorage.getItem('receitasx_despesas') || '[]');
-    document.getElementById('stat-receitas').textContent = receitas.length;
-    document.getElementById('stat-produtos').textContent  = produtos.length;
-    document.getElementById('stat-despesas').textContent  = despesas.length;
+let _userId = null;
+let _avatarNovoFile = null; // arquivo selecionado ainda não enviado
+
+/* ─── Inicialização ──────────────────────────────────────────────── */
+(async () => {
+    const session = await getSession();
+    if (!session) { window.location.replace('login.html'); return; }
+
+    _userId = session.user.id;
+
+    // Preenche e-mail do auth (somente leitura)
+    const emailEl = document.getElementById('f-email');
+    emailEl.value    = session.user.email || '';
+    emailEl.readOnly = true;
+    emailEl.style.opacity = '.6';
+    emailEl.style.cursor  = 'not-allowed';
+    emailEl.title = 'O e-mail é gerenciado pela autenticação e não pode ser alterado aqui.';
+
+    await Promise.all([loadPerfil(), loadStats()]);
+})();
+
+/* ─── Carregar perfil do Supabase ────────────────────────────────── */
+async function loadPerfil() {
+    try {
+        const { data: p, error } = await sb
+            .from('perfis')
+            .select('*')
+            .eq('id', _userId)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+        if (!p) return;
+
+        document.getElementById('f-nome').value      = p.nome      || '';
+        document.getElementById('f-sobrenome').value = p.sobrenome || '';
+        document.getElementById('f-tel').value       = p.telefone  || '';
+        document.getElementById('f-negocio').value   = p.negocio   || '';
+        document.getElementById('f-segmento').value  = p.segmento  || '';
+        document.getElementById('f-cidade').value    = p.cidade    || '';
+        document.getElementById('f-estado').value    = p.estado    || 'SP';
+        document.getElementById('f-bio').value       = p.bio       || '';
+
+        // Avatar
+        if (p.avatar_url) {
+            const img = document.getElementById('avatar-img');
+            img.src = p.avatar_url;
+            img.style.display = 'block';
+            document.getElementById('avatar-initials').style.display = 'none';
+        }
+
+        // Plano
+        atualizarPlano(p.plano || 'gratuito');
+
+        updateHero();
+    } catch (e) {
+        console.error('Erro ao carregar perfil:', e);
+        showToast('Erro ao carregar perfil.', 'error');
+    }
 }
 
-/* ─── AVATAR ─────────────────────────────────────────────────────── */
+/* ─── Stats reais do Supabase ────────────────────────────────────── */
+async function loadStats() {
+    try {
+        const [{ count: cr }, { count: cp }, { count: cd }] = await Promise.all([
+            sb.from('receitas').select('id', { count:'exact', head:true }).eq('user_id', _userId),
+            sb.from('produtos').select('id', { count:'exact', head:true }).eq('user_id', _userId),
+            sb.from('despesas').select('id', { count:'exact', head:true }).eq('user_id', _userId),
+        ]);
+        document.getElementById('stat-receitas').textContent = cr ?? 0;
+        document.getElementById('stat-produtos').textContent  = cp ?? 0;
+        document.getElementById('stat-despesas').textContent  = cd ?? 0;
+    } catch (e) {
+        console.warn('Erro ao carregar stats:', e);
+    }
+}
+
+/* ─── Avatar upload ──────────────────────────────────────────────── */
 function handleAvatarUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
+    _avatarNovoFile = file;
     const reader = new FileReader();
     reader.onload = ev => {
-        const src = ev.target.result;
-        document.getElementById('avatar-img').src = src;
-        document.getElementById('avatar-img').style.display = 'block';
+        const img = document.getElementById('avatar-img');
+        img.src = ev.target.result;
+        img.style.display = 'block';
         document.getElementById('avatar-initials').style.display = 'none';
     };
     reader.readAsDataURL(file);
 }
 
+async function uploadAvatar() {
+    if (!_avatarNovoFile || !_userId) return null;
+    const ext  = _avatarNovoFile.name.split('.').pop();
+    const path = `${_userId}/avatar.${ext}`;
+    const { error } = await sb.storage
+        .from('avatars')
+        .upload(path, _avatarNovoFile, { upsert: true, contentType: _avatarNovoFile.type });
+    if (error) { console.warn('Avatar upload falhou:', error); return null; }
+    const { data } = sb.storage.from('avatars').getPublicUrl(path);
+    return data?.publicUrl || null;
+}
+
+/* ─── Initials ───────────────────────────────────────────────────── */
 function getInitials() {
     const nome = (document.getElementById('f-nome').value || '').trim();
     const sob  = (document.getElementById('f-sobrenome').value || '').trim();
     if (!nome && !sob) return '?';
-    return ((nome[0]||'') + (sob[0]||'')).toUpperCase() || nome[0].toUpperCase();
+    return ((nome[0] || '') + (sob[0] || '')).toUpperCase();
 }
 
-/* ─── HERO UPDATE ────────────────────────────────────────────────── */
+/* ─── Hero update (tempo real ao digitar) ───────────────────────── */
 function updateHero() {
     const nome    = document.getElementById('f-nome').value.trim();
     const sob     = document.getElementById('f-sobrenome').value.trim();
     const negocio = document.getElementById('f-negocio').value.trim();
-    const full    = [nome, sob].filter(Boolean).join(' ') || 'Seu Nome';
-    document.getElementById('hero-nome').textContent    = full;
+    document.getElementById('hero-nome').textContent    = [nome, sob].filter(Boolean).join(' ') || 'Seu Nome';
     document.getElementById('hero-negocio').textContent = negocio || 'Nome do Negócio';
     document.getElementById('avatar-initials').textContent = getInitials();
 }
 
-/* ─── MASK TEL ───────────────────────────────────────────────────── */
+/* ─── Máscara telefone ───────────────────────────────────────────── */
 function maskTel(el) {
-    let v = el.value.replace(/\D/g,'').slice(0,11);
-    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3');
-    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/,'($1) $2-$3');
-    else if (v.length > 2) v = v.replace(/^(\d{2})(\d*)$/,'($1) $2');
-    else if (v.length > 0) v = '(' + v;
+    let v = el.value.replace(/\D/g, '').slice(0, 11);
+    if      (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    else if (v.length > 6)  v = v.replace(/^(\d{2})(\d{4})(\d*)$/,   '($1) $2-$3');
+    else if (v.length > 2)  v = v.replace(/^(\d{2})(\d*)$/,           '($1) $2');
+    else if (v.length > 0)  v = '(' + v;
     el.value = v;
 }
 
-/* ─── LOAD ───────────────────────────────────────────────────────── */
-function load() {
-    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
-    if (!p) return;
-    document.getElementById('f-nome').value      = p.nome      || '';
-    document.getElementById('f-sobrenome').value = p.sobrenome || '';
-    document.getElementById('f-email').value     = p.email     || '';
-    document.getElementById('f-tel').value       = p.tel       || '';
-    document.getElementById('f-negocio').value   = p.negocio   || '';
-    document.getElementById('f-segmento').value  = p.segmento  || '';
-    document.getElementById('f-cidade').value    = p.cidade    || '';
-    document.getElementById('f-estado').value    = p.estado    || 'SP';
-    document.getElementById('f-bio').value       = p.bio       || '';
-    if (p.avatar) {
-        document.getElementById('avatar-img').src = p.avatar;
-        document.getElementById('avatar-img').style.display = 'block';
-        document.getElementById('avatar-initials').style.display = 'none';
-    }
-    updateHero();
-}
-
-/* ─── SALVAR ─────────────────────────────────────────────────────── */
-function salvar() {
-    const avatar = document.getElementById('avatar-img').src || '';
-    const data = {
-        nome:       document.getElementById('f-nome').value.trim(),
-        sobrenome:  document.getElementById('f-sobrenome').value.trim(),
-        email:      document.getElementById('f-email').value.trim(),
-        tel:        document.getElementById('f-tel').value.trim(),
-        negocio:    document.getElementById('f-negocio').value.trim(),
-        segmento:   document.getElementById('f-segmento').value,
-        cidade:     document.getElementById('f-cidade').value.trim(),
-        estado:     document.getElementById('f-estado').value,
-        bio:        document.getElementById('f-bio').value.trim(),
-        avatar: avatar.startsWith('data:') ? avatar : '',
+/* ─── Plano badge ────────────────────────────────────────────────── */
+function atualizarPlano(plano) {
+    const badge = document.getElementById('plan-badge');
+    const labels = {
+        gratuito: { cls:'plan-free', ico:'star_border', txt:'Plano Gratuito' },
+        pro:      { cls:'plan-pro',  ico:'star',        txt:'Plano Pro' },
+        vitalicio:{ cls:'plan-premium', ico:'workspace_premium', txt:'Acesso Vitalício' },
     };
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
-    updateHero();
-    showToast('Perfil salvo com sucesso!');
+    const l = labels[plano] || labels.gratuito;
+    badge.className = `plan-badge ${l.cls}`;
+    badge.innerHTML = `<span class="material-symbols-outlined">${l.ico}</span> ${l.txt}`;
 }
 
-/* ─── TOAST ──────────────────────────────────────────────────────── */
+/* ─── Salvar no Supabase ─────────────────────────────────────────── */
+async function salvar() {
+    if (!_userId) return;
+    const btnSave = document.querySelector('button[onclick="salvar()"]');
+    if (btnSave) { btnSave.disabled = true; btnSave.style.opacity = '.7'; }
+
+    try {
+        // Faz upload do avatar se houver novo arquivo
+        let avatarUrl = null;
+        if (_avatarNovoFile) {
+            avatarUrl = await uploadAvatar();
+            _avatarNovoFile = null;
+        }
+
+        const payload = {
+            id:         _userId,
+            nome:       document.getElementById('f-nome').value.trim()      || null,
+            sobrenome:  document.getElementById('f-sobrenome').value.trim()  || null,
+            telefone:   document.getElementById('f-tel').value.trim()        || null,
+            negocio:    document.getElementById('f-negocio').value.trim()    || null,
+            segmento:   document.getElementById('f-segmento').value          || null,
+            cidade:     document.getElementById('f-cidade').value.trim()     || null,
+            estado:     document.getElementById('f-estado').value            || null,
+            bio:        document.getElementById('f-bio').value.trim()        || null,
+            updated_at: new Date().toISOString(),
+        };
+
+        if (avatarUrl) payload.avatar_url = avatarUrl;
+
+        const { error } = await sb
+            .from('perfis')
+            .upsert(payload, { onConflict: 'id' });
+
+        if (error) throw error;
+
+        updateHero();
+        showToast('Perfil salvo com sucesso! ✓');
+    } catch (e) {
+        console.error('Erro ao salvar perfil:', e);
+        showToast('Erro ao salvar: ' + e.message, 'error');
+    } finally {
+        if (btnSave) { btnSave.disabled = false; btnSave.style.opacity = ''; }
+    }
+}
+
+/* ─── Toast ──────────────────────────────────────────────────────── */
 let toastTimer;
-function showToast(msg, type='success') {
+function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    document.getElementById('toast-icon').textContent = type==='error'?'warning':'check_circle';
-    document.getElementById('toast-icon').style.color = type==='error'?'#f87171':'#25f4f4';
-    document.getElementById('toast-msg').textContent  = msg;
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'warning' : 'check_circle';
+    document.getElementById('toast-icon').style.color  = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent   = msg;
     t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
-
-/* ─── INIT ───────────────────────────────────────────────────────── */
-load();
-loadStats();
 </script>
 </body>
 </html>

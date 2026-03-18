@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -7,6 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
+    <!-- Role badge estilo -->
+    <style>
+        .role-badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:800;padding:.15rem .45rem;border-radius:.35rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25);letter-spacing:.04em;text-transform:uppercase; }
+        .nav-card-admin { border-color:rgba(251,146,60,.2) !important;background:linear-gradient(135deg,rgba(251,146,60,.06),rgba(251,146,60,.02)) !important; }
+        .nav-card-admin:hover { border-color:rgba(251,146,60,.45) !important; }
+    </style>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -115,18 +121,37 @@
             </a>
         </div>
     </section>
-    <!-- ── Gestão & Estoque ─────────────────────────────────── -->
-    <section>
+    <!-- ── Admin (visível apenas para role=admin) ─────────────── -->
+    <section data-role="admin" style="display:none">
         <div class="flex items-center gap-2 mb-4 px-1">
-            <span class="material-symbols-outlined text-primary text-sm">inventory_2</span>
-            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Gestão & Estoque</h2>
+            <span class="material-symbols-outlined text-sm" style="color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Administração</h2>
+            <span class="role-badge-admin">Admin</span>
         </div>
-        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-            <!-- Cadastrar -->
-            <a href="gerenciar-insumos.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">add_circle</span>
-                <span class="text-xs font-medium text-center">Cadastrar</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Gestão de Usuários -->
+            <a href="admin-usuarios.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">manage_accounts</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Gestão de Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Roles, permissões e contas</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Faturamento de Afiliados -->
+            <a href="admin-faturamento-afiliados.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Faturamento de Afiliados</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Saques, comissões e ranking</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
         </div>
     </section>
@@ -179,5 +204,31 @@
             </a>
         </div>
     </section>
+
+    <script>
+    // Controle de visibilidade por role — executa direto ao carregar
+    (async () => {
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) return;
+
+            const { data: perfil } = await sb
+                .from('perfis')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            const role = perfil?.role ?? 'afiliado';
+            console.log('[ReceitasX] Role:', role);
+
+            document.querySelectorAll('[data-role]').forEach(el => {
+                const allowed = el.dataset.role.split(',').map(r => r.trim());
+                el.style.display = allowed.includes(role) ? '' : 'none';
+            });
+        } catch (e) {
+            console.warn('[ReceitasX] Erro ao carregar role:', e);
+        }
+    })();
+    </script>
 </body>
 </html>

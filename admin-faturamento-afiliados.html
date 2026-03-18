@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Faturamento de Afiliados - Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* btn back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* ── KPI cards ── */
+        .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem; }
+        @media(min-width:640px){ .kpi-grid { grid-template-columns:repeat(4,1fr); } }
+        .kpi { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem 1.1rem;position:relative;overflow:hidden; }
+        .kpi::after { content:'';position:absolute;top:-30px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.07;pointer-events:none; }
+        .kpi-green::after  { background:#25f4f4; }
+        .kpi-orange::after { background:#fb923c; }
+        .kpi-yellow::after { background:#fbbf24; }
+        .kpi-red::after    { background:#f87171; }
+        .kpi-lbl { font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b;margin-bottom:.4rem; }
+        .kpi-val { font-size:1.5rem;font-weight:800;line-height:1;color:#f1f5f9; }
+        .kpi-val.green  { color:#25f4f4; }
+        .kpi-val.orange { color:#fb923c; }
+        .kpi-val.yellow { color:#fbbf24; }
+        .kpi-val.red    { color:#f87171; }
+        .kpi-sub { font-size:.68rem;color:#475569;margin-top:.3rem; }
+
+        /* ── Tab bar ── */
+        .tabs { display:flex;gap:.25rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.3rem; }
+        .tab { flex:1;padding:.5rem;text-align:center;font-size:.78rem;font-weight:700;border-radius:.6rem;border:none;background:transparent;color:#64748b;cursor:pointer;transition:all .2s; }
+        .tab.active { background:#2A2A2A;color:#f1f5f9; }
+        .tab:hover:not(.active) { color:#94a3b8; }
+
+        /* ── Search ── */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.88rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569; }
+        .search-input:focus { border-color:rgba(37,244,244,.4); }
+
+        /* ── Table ── */
+        .tbl-wrap { overflow-x:auto;border-radius:.85rem;border:1px solid #2A2A2A; }
+        table { width:100%;border-collapse:collapse;font-size:.82rem; }
+        thead th { background:#1A1A1A;padding:.75rem 1rem;text-align:left;font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#475569;white-space:nowrap;border-bottom:1px solid #2A2A2A; }
+        tbody tr { border-bottom:1px solid #1E1E1E;transition:background .1s; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover { background:#1A1A1A; }
+        tbody td { padding:.75rem 1rem;color:#cbd5e1;vertical-align:middle; }
+        .td-bold { font-weight:700;color:#f1f5f9; }
+
+        /* ── Status badges ── */
+        .s-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:.4rem;white-space:nowrap; }
+        .s-pendente  { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25); }
+        .s-pago      { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
+        .s-rejeitado { background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.25); }
+        .s-badge .material-symbols-outlined { font-size:.75rem; }
+
+        /* ── Action buttons ── */
+        .btn-pagar    { display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:700;padding:.3rem .7rem;border-radius:.45rem;border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.1);color:#34d399;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .btn-pagar:hover    { background:rgba(52,211,153,.2); }
+        .btn-rejeitar { display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:700;padding:.3rem .7rem;border-radius:.45rem;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.08);color:#f87171;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .btn-rejeitar:hover { background:rgba(248,113,113,.18); }
+        .btn-pagar .material-symbols-outlined,
+        .btn-rejeitar .material-symbols-outlined { font-size:.85rem; }
+
+        /* ── Avatar inline ── */
+        .av-sm { width:2rem;height:2rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.2),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#25f4f4;flex-shrink:0;text-transform:uppercase; }
+
+        /* ── Pix info ── */
+        .pix-row { display:flex;align-items:center;gap:.4rem; }
+        .pix-chip { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:.35rem;background:rgba(37,244,244,.08);color:#25f4f4;border:1px solid rgba(37,244,244,.2); }
+
+        /* ── Empty ── */
+        .empty { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* ── Loading shimmer ── */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.65rem;height:3.2rem; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* ── Modal ── */
+        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s; }
+        .modal-overlay.open { opacity:1;pointer-events:all; }
+        .modal { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:480px;padding:1.5rem;animation:fadeUp .25s ease both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+        .modal-title { font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem; }
+        .modal-field { margin-bottom:.85rem; }
+        .modal-field label { display:block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;margin-bottom:.35rem; }
+        .modal-val { font-size:.95rem;color:#f1f5f9;font-weight:600; }
+        .modal-obs { width:100%;padding:.7rem .9rem;border-radius:.7rem;border:1px solid #2A2A2A !important;background:#111 !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;resize:none;min-height:70px;transition:border-color .2s; }
+        .modal-obs:focus { border-color:rgba(37,244,244,.5) !important; }
+        .modal-btns { display:flex;gap:.6rem;margin-top:1.1rem; }
+        .btn-cancel { flex:1;padding:.7rem;border-radius:.7rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s; }
+        .btn-cancel:hover { border-color:#475569;color:#94a3b8; }
+        .btn-confirm-pay { flex:2;padding:.7rem;border-radius:.7rem;border:none;background:linear-gradient(135deg,#34d399,#059669);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:opacity .2s; }
+        .btn-confirm-pay:hover { opacity:.9; }
+        .btn-confirm-pay .material-symbols-outlined { font-size:1rem; }
+        .btn-confirm-rej { flex:2;padding:.7rem;border-radius:.7rem;border:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:#f87171;font-weight:700;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:all .15s; }
+        .btn-confirm-rej:hover { background:rgba(248,113,113,.25); }
+
+        /* ── Toast ── */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* ── Admin banner ── */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* ── Section title ── */
+        .sec-title { font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem; }
+        .sec-title .material-symbols-outlined { font-size:.9rem;color:#25f4f4; }
+
+        /* ── Rank badge ── */
+        .rank-1 { color:#fbbf24; }
+        .rank-2 { color:#94a3b8; }
+        .rank-3 { color:#fb923c; }
+
+        /* ── Export btn ── */
+        .btn-export { display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .btn-export:hover { border-color:#475569;color:#94a3b8; }
+        .btn-export .material-symbols-outlined { font-size:.95rem; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+        <h1 class="text-base font-semibold flex-1">Faturamento de Afiliados</h1>
+        <button class="btn-export" onclick="exportarCSV()" id="btn-export" style="display:none">
+            <span class="material-symbols-outlined">download</span>
+            Exportar CSV
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═══════════════════════════════════════════════════════ -->
+<main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
+
+    <!-- Banner admin -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">lock</span>
+        <span>Área exclusiva para administradores — dados financeiros de todos os afiliados.</span>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi kpi-green shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-orange shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-yellow shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-red shimmer" style="min-height:5rem"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabs">
+        <button class="tab active" onclick="setTab('afiliados', this)" id="tab-afiliados">
+            Afiliados
+        </button>
+        <button class="tab" onclick="setTab('saques', this)" id="tab-saques">
+            Saques
+            <span id="badge-pendente" style="display:none;margin-left:.3rem;background:#fb923c;color:#0a0a0a;font-size:.6rem;font-weight:800;padding:.1rem .4rem;border-radius:9999px;"></span>
+        </button>
+        <button class="tab" onclick="setTab('indicacoes', this)" id="tab-indicacoes">
+            Indicações
+        </button>
+    </div>
+
+    <!-- Search + Export row -->
+    <div class="flex gap-3 items-center">
+        <div class="search-wrap flex-1">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar…" oninput="renderAtivo()" />
+        </div>
+    </div>
+
+    <!-- ── Painel: Afiliados ── -->
+    <div id="painel-afiliados">
+        <div class="sec-title">
+            <span class="material-symbols-outlined">group</span>
+            Ranking de Afiliados
+        </div>
+        <div class="tbl-wrap">
+            <table id="tbl-afiliados">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Afiliado</th>
+                        <th>Código</th>
+                        <th>Cliques</th>
+                        <th>Vendas</th>
+                        <th>Total Ganhos</th>
+                        <th>Saldo Pendente</th>
+                        <th>Membro desde</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-afiliados">
+                    <tr><td colspan="8"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── Painel: Saques ── -->
+    <div id="painel-saques" style="display:none">
+        <div class="sec-title">
+            <span class="material-symbols-outlined">payments</span>
+            Solicitações de Saque
+        </div>
+        <div class="tbl-wrap">
+            <table id="tbl-saques">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Afiliado</th>
+                        <th>Valor</th>
+                        <th>Chave Pix</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Obs</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-saques">
+                    <tr><td colspan="8"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── Painel: Indicações ── -->
+    <div id="painel-indicacoes" style="display:none">
+        <div class="sec-title">
+            <span class="material-symbols-outlined">share</span>
+            Todas as Indicações
+        </div>
+        <div class="tbl-wrap">
+            <table id="tbl-indicacoes">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Afiliado (código)</th>
+                        <th>E-mail Indicado</th>
+                        <th>Converteu?</th>
+                        <th>Valor Pago</th>
+                        <th>Comissão</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-indicacoes">
+                    <tr><td colspan="6"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- ══ Modal Confirmar Pagamento ══════════════════════════════════ -->
+<div class="modal-overlay" id="modal-pagar">
+    <div class="modal">
+        <div class="modal-title">
+            <span class="material-symbols-outlined" style="color:#34d399;font-size:1.2rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">paid</span>
+            Confirmar Pagamento
+        </div>
+        <div class="modal-field">
+            <label>Afiliado</label>
+            <div class="modal-val" id="mp-afiliado">—</div>
+        </div>
+        <div class="modal-field">
+            <label>Valor a Pagar</label>
+            <div class="modal-val" id="mp-valor" style="color:#34d399;font-size:1.3rem">—</div>
+        </div>
+        <div class="modal-field">
+            <label>Chave Pix</label>
+            <div class="modal-val" id="mp-pix">—</div>
+        </div>
+        <div class="modal-field">
+            <label>Observação (opcional)</label>
+            <textarea class="modal-obs" id="mp-obs" placeholder="Ex: Pix realizado às 14h via app…"></textarea>
+        </div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="fecharModal('modal-pagar')">Cancelar</button>
+            <button class="btn-confirm-pay" onclick="confirmarPagamento()">
+                <span class="material-symbols-outlined">check_circle</span>
+                Confirmar Pagamento
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Modal Rejeitar Saque ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-rejeitar">
+    <div class="modal">
+        <div class="modal-title">
+            <span class="material-symbols-outlined" style="color:#f87171;font-size:1.2rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">cancel</span>
+            Rejeitar Saque
+        </div>
+        <div class="modal-field">
+            <label>Afiliado</label>
+            <div class="modal-val" id="mr-afiliado">—</div>
+        </div>
+        <div class="modal-field">
+            <label>Valor</label>
+            <div class="modal-val" id="mr-valor" style="color:#f87171">—</div>
+        </div>
+        <div class="modal-field">
+            <label>Motivo da Rejeição</label>
+            <textarea class="modal-obs" id="mr-obs" placeholder="Informe o motivo para o afiliado…"></textarea>
+        </div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="fecharModal('modal-rejeitar')">Cancelar</button>
+            <button class="btn-confirm-rej" onclick="confirmarRejeicao()">
+                <span class="material-symbols-outlined">close</span>
+                Rejeitar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<!-- ══ Script ═══════════════════════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════════════════════════
+   admin-faturamento-afiliados.html
+   Página exclusiva para admins — gestão financeira de afiliados
+   Dados: tabelas afiliados, saques_afiliado, indicacoes
+════════════════════════════════════════════════════════════════ */
+
+let abaAtiva    = 'afiliados';
+let allAfiliados  = [];
+let allSaques     = [];
+let allIndicacoes = [];
+let saqueAtivoId  = null; // id do saque sendo processado no modal
+
+// ── Guard: só admin ────────────────────────────────────────────
+(async () => {
+    await _waitForRole(4000);
+
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+
+    document.getElementById('btn-export').style.display = '';
+    await loadTudo();
+})();
+
+// ── Carregar todos os dados ────────────────────────────────────
+async function loadTudo() {
+    try {
+        const [resAfil, resSaques, resIndic] = await Promise.all([
+            sb.from('afiliados')
+              .select('*, perfis(nome, sobrenome)')
+              .order('total_ganhos', { ascending: false }),
+
+            sb.from('saques_afiliado')
+              .select('*')
+              .order('created_at', { ascending: false }),
+
+            sb.from('indicacoes')
+              .select('*, afiliados(codigo, email)')
+              .order('created_at', { ascending: false }),
+        ]);
+
+        if (resAfil.error)   throw resAfil.error;
+        if (resSaques.error) throw resSaques.error;
+        if (resIndic.error)  throw resIndic.error;
+
+        allAfiliados  = resAfil.data  || [];
+        allSaques     = resSaques.data || [];
+        allIndicacoes = resIndic.data  || [];
+
+        renderKPIs();
+        renderAtivo();
+        atualizarBadgePendente();
+    } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        showToast('Erro ao carregar dados: ' + e.message, 'error');
+    }
+}
+
+// ── KPIs ──────────────────────────────────────────────────────
+function renderKPIs() {
+    const totalComissoes = allAfiliados.reduce((s, a) => s + Number(a.total_ganhos || 0), 0);
+    const pendente = allSaques
+        .filter(s => s.status === 'pendente')
+        .reduce((s, x) => s + Number(x.valor || 0), 0);
+    const totalPago = allSaques
+        .filter(s => s.status === 'pago')
+        .reduce((s, x) => s + Number(x.valor || 0), 0);
+    const totalAfil = allAfiliados.length;
+    const totalVendas = allAfiliados.reduce((s, a) => s + Number(a.total_vendas || 0), 0);
+
+    document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi kpi-green">
+            <div class="kpi-lbl">Total Comissões Geradas</div>
+            <div class="kpi-val green">${fmtR(totalComissoes)}</div>
+            <div class="kpi-sub">${totalVendas} vendas no total</div>
+        </div>
+        <div class="kpi kpi-orange">
+            <div class="kpi-lbl">Saques Pendentes</div>
+            <div class="kpi-val orange">${fmtR(pendente)}</div>
+            <div class="kpi-sub">${allSaques.filter(s=>s.status==='pendente').length} solicitações aguardando</div>
+        </div>
+        <div class="kpi kpi-yellow">
+            <div class="kpi-lbl">Total Pago</div>
+            <div class="kpi-val yellow">${fmtR(totalPago)}</div>
+            <div class="kpi-sub">${allSaques.filter(s=>s.status==='pago').length} saques realizados</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-lbl">Afiliados Ativos</div>
+            <div class="kpi-val">${totalAfil}</div>
+            <div class="kpi-sub">${allIndicacoes.filter(i=>i.converteu).length} conversões</div>
+        </div>`;
+}
+
+// ── Badge de saques pendentes na aba ──────────────────────────
+function atualizarBadgePendente() {
+    const n = allSaques.filter(s => s.status === 'pendente').length;
+    const b = document.getElementById('badge-pendente');
+    if (n > 0) { b.textContent = n; b.style.display = ''; }
+    else        { b.style.display = 'none'; }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
+function setTab(aba, btn) {
+    abaAtiva = aba;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('painel-afiliados').style.display  = aba === 'afiliados'  ? '' : 'none';
+    document.getElementById('painel-saques').style.display     = aba === 'saques'     ? '' : 'none';
+    document.getElementById('painel-indicacoes').style.display = aba === 'indicacoes' ? '' : 'none';
+    document.getElementById('search').value = '';
+    renderAtivo();
+}
+
+function renderAtivo() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    if (abaAtiva === 'afiliados')  renderAfiliados(q);
+    if (abaAtiva === 'saques')     renderSaques(q);
+    if (abaAtiva === 'indicacoes') renderIndicacoes(q);
+}
+
+// ── Render Afiliados ──────────────────────────────────────────
+function renderAfiliados(q = '') {
+    let list = allAfiliados;
+    if (q) list = list.filter(a => {
+        const nome = nomeAfiliado(a).toLowerCase();
+        return nome.includes(q) || a.codigo.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
+    });
+
+    const tbody = document.getElementById('tbody-afiliados');
+    if (!list.length) { tbody.innerHTML = emptyCel(8); return; }
+
+    // Calcular saldo pendente de cada afiliado
+    const saldoPend = {};
+    allSaques.filter(s => s.status === 'pendente').forEach(s => {
+        saldoPend[s.user_id] = (saldoPend[s.user_id] || 0) + Number(s.valor);
+    });
+
+    tbody.innerHTML = list.map((a, i) => {
+        const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+        const pend = saldoPend[a.user_id] || 0;
+        return `
+        <tr>
+            <td class="td-bold" style="text-align:center">${rank}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:.6rem">
+                    <div class="av-sm">${initials(nomeAfiliado(a))}</div>
+                    <div>
+                        <div class="td-bold" style="font-size:.85rem">${esc(nomeAfiliado(a))}</div>
+                        <div style="font-size:.7rem;color:#64748b">${esc(a.email)}</div>
+                    </div>
+                </div>
+            </td>
+            <td><code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.8rem;color:#25f4f4">${esc(a.codigo)}</code></td>
+            <td>${fmt(a.total_cliques)}</td>
+            <td>${fmt(a.total_vendas)}</td>
+            <td class="td-bold" style="color:#25f4f4">${fmtR(a.total_ganhos)}</td>
+            <td class="td-bold" style="color:${pend > 0 ? '#fbbf24' : '#475569'}">${fmtR(pend)}</td>
+            <td style="color:#475569;font-size:.78rem">${fmtDate(a.created_at)}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ── Render Saques ─────────────────────────────────────────────
+function renderSaques(q = '') {
+    let list = allSaques;
+    if (q) list = list.filter(s =>
+        s.email.toLowerCase().includes(q) ||
+        s.pix_chave.toLowerCase().includes(q) ||
+        s.status.toLowerCase().includes(q)
+    );
+
+    const tbody = document.getElementById('tbody-saques');
+    if (!list.length) { tbody.innerHTML = emptyCel(8); return; }
+
+    tbody.innerHTML = list.map(s => {
+        const badgeCls = s.status === 'pago' ? 's-pago' : s.status === 'rejeitado' ? 's-rejeitado' : 's-pendente';
+        const badgeIco = s.status === 'pago' ? 'check_circle' : s.status === 'rejeitado' ? 'cancel' : 'schedule';
+        const badgeTxt = s.status === 'pago' ? 'Pago' : s.status === 'rejeitado' ? 'Rejeitado' : 'Pendente';
+        const acoes = s.status === 'pendente' ? `
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                <button class="btn-pagar" onclick="abrirModalPagar('${s.id}')">
+                    <span class="material-symbols-outlined">paid</span>Pagar
+                </button>
+                <button class="btn-rejeitar" onclick="abrirModalRejeitar('${s.id}')">
+                    <span class="material-symbols-outlined">close</span>Rejeitar
+                </button>
+            </div>` : `<span style="font-size:.72rem;color:#475569">—</span>`;
+
+        return `
+        <tr>
+            <td style="color:#64748b;font-size:.78rem;white-space:nowrap">${fmtDate(s.created_at)}</td>
+            <td>
+                <div class="td-bold" style="font-size:.85rem">${esc(s.email)}</div>
+            </td>
+            <td class="td-bold" style="color:#25f4f4;white-space:nowrap">${fmtR(s.valor)}</td>
+            <td>
+                <div class="pix-row">
+                    <span class="pix-chip">${esc(s.pix_tipo.toUpperCase())}</span>
+                    <span style="font-size:.8rem;color:#94a3b8">${esc(s.pix_chave)}</span>
+                </div>
+            </td>
+            <td style="text-transform:capitalize;color:#64748b;font-size:.8rem">${esc(s.pix_tipo)}</td>
+            <td>
+                <span class="s-badge ${badgeCls}">
+                    <span class="material-symbols-outlined">${badgeIco}</span>${badgeTxt}
+                </span>
+            </td>
+            <td style="font-size:.75rem;color:#64748b;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.obs || '—')}</td>
+            <td>${acoes}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ── Render Indicações ─────────────────────────────────────────
+function renderIndicacoes(q = '') {
+    let list = allIndicacoes;
+    if (q) list = list.filter(i =>
+        (i.indicado_email || '').toLowerCase().includes(q) ||
+        (i.afiliados?.codigo || '').toLowerCase().includes(q)
+    );
+
+    const tbody = document.getElementById('tbody-indicacoes');
+    if (!list.length) { tbody.innerHTML = emptyCel(6); return; }
+
+    tbody.innerHTML = list.map(i => {
+        const conv = i.converteu
+            ? `<span class="s-badge s-pago"><span class="material-symbols-outlined">check_circle</span>Sim</span>`
+            : `<span class="s-badge" style="background:#1E1E1E;color:#475569;border-color:#2A2A2A"><span class="material-symbols-outlined">schedule</span>Não</span>`;
+        return `
+        <tr>
+            <td style="color:#64748b;font-size:.78rem;white-space:nowrap">${fmtDate(i.created_at)}</td>
+            <td>
+                <code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.78rem;color:#25f4f4">${esc(i.afiliados?.codigo || '—')}</code>
+                <div style="font-size:.7rem;color:#64748b">${esc(i.afiliados?.email || '')}</div>
+            </td>
+            <td style="font-size:.82rem;color:#94a3b8">${esc(i.indicado_email)}</td>
+            <td>${conv}</td>
+            <td class="td-bold" style="color:${i.valor_pago ? '#f1f5f9' : '#475569'}">${i.valor_pago ? fmtR(i.valor_pago) : '—'}</td>
+            <td class="td-bold" style="color:${i.comissao ? '#25f4f4' : '#475569'}">${i.comissao ? fmtR(i.comissao) : '—'}</td>
+        </tr>`;
+    }).join('');
+}
+
+// ── Modal Pagar ───────────────────────────────────────────────
+function abrirModalPagar(id) {
+    saqueAtivoId = id;
+    const s = allSaques.find(x => String(x.id) === String(id));
+    if (!s) return;
+    document.getElementById('mp-afiliado').textContent = s.email;
+    document.getElementById('mp-valor').textContent    = fmtR(s.valor);
+    document.getElementById('mp-pix').textContent      = `${s.pix_tipo.toUpperCase()}: ${s.pix_chave}`;
+    document.getElementById('mp-obs').value = '';
+    document.getElementById('modal-pagar').classList.add('open');
+}
+
+async function confirmarPagamento() {
+    if (!saqueAtivoId) return;
+    const obs = document.getElementById('mp-obs').value.trim();
+    await atualizarSaque(saqueAtivoId, 'pago', obs);
+    fecharModal('modal-pagar');
+}
+
+// ── Modal Rejeitar ────────────────────────────────────────────
+function abrirModalRejeitar(id) {
+    saqueAtivoId = id;
+    const s = allSaques.find(x => String(x.id) === String(id));
+    if (!s) return;
+    document.getElementById('mr-afiliado').textContent = s.email;
+    document.getElementById('mr-valor').textContent    = fmtR(s.valor);
+    document.getElementById('mr-obs').value = '';
+    document.getElementById('modal-rejeitar').classList.add('open');
+}
+
+async function confirmarRejeicao() {
+    if (!saqueAtivoId) return;
+    const obs = document.getElementById('mr-obs').value.trim();
+    await atualizarSaque(saqueAtivoId, 'rejeitado', obs);
+    fecharModal('modal-rejeitar');
+}
+
+function fecharModal(id) {
+    document.getElementById(id).classList.remove('open');
+    saqueAtivoId = null;
+}
+
+// Fecha modal ao clicar fora
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ── Atualizar status do saque ─────────────────────────────────
+async function atualizarSaque(id, novoStatus, obs) {
+    try {
+        const payload = { status: novoStatus };
+        if (obs) payload.obs = obs;
+
+        const { error } = await sb
+            .from('saques_afiliado')
+            .update(payload)
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // Atualiza localmente
+        const idx = allSaques.findIndex(s => String(s.id) === String(id));
+        if (idx !== -1) {
+            allSaques[idx].status = novoStatus;
+            if (obs) allSaques[idx].obs = obs;
+        }
+
+        renderKPIs();
+        renderSaques(document.getElementById('search').value.toLowerCase().trim());
+        atualizarBadgePendente();
+
+        const emoji = novoStatus === 'pago' ? '✓' : '✕';
+        const txt   = novoStatus === 'pago' ? 'Pagamento confirmado!' : 'Saque rejeitado.';
+        showToast(`${emoji} ${txt}`);
+    } catch (e) {
+        console.error('Erro ao atualizar saque:', e);
+        showToast('Erro: ' + e.message, 'error');
+    }
+}
+
+// ── Exportar CSV ──────────────────────────────────────────────
+function exportarCSV() {
+    const rows = [['Email', 'Código', 'Cliques', 'Vendas', 'Total Ganhos (R$)', 'Membro Desde']];
+    allAfiliados.forEach(a => {
+        rows.push([a.email, a.codigo, a.total_cliques, a.total_vendas,
+            Number(a.total_ganhos).toFixed(2), fmtDate(a.created_at)]);
+    });
+    const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: `afiliados_${new Date().toISOString().slice(0,10)}.csv` });
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exportado!');
+}
+
+// ── Utilitários ───────────────────────────────────────────────
+function nomeAfiliado(a) {
+    if (a.perfis) {
+        const n = [a.perfis.nome, a.perfis.sobrenome].filter(Boolean).join(' ');
+        if (n) return n;
+    }
+    return a.email.split('@')[0];
+}
+
+function initials(nome) {
+    const parts = nome.split(' ');
+    return (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+}
+
+function fmtR(v) {
+    return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmt(v) { return Number(v || 0).toLocaleString('pt-BR'); }
+
+function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function emptyCel(cols) {
+    return `<tr><td colspan="${cols}"><div class="empty"><span class="material-symbols-outlined">search_off</span><p>Nenhum resultado encontrado.</p></div></td></tr>`;
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color  = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent   = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
