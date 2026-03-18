@@ -6,6 +6,7 @@
     <title>Checkout · Acesso Vitalício - ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
+    <script src="config-loader.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -436,9 +437,20 @@
 
 <script>
 /* ── ESTADO ──────────────────────────────────────────── */
-const PRECO_BASE  = 46.90;
+let PRECO_BASE  = 46.90;  // atualizado via AppConfig após load
 const PRECO_ORIG  = 97.00;
 let precoFinal    = PRECO_BASE;
+
+// Aplica preço dinâmico quando config carregar
+document.addEventListener('appconfig:loaded', () => {
+    PRECO_BASE = window.AppConfig.valorPlano;
+    precoFinal = PRECO_BASE;
+    updateTotal();
+    updateParcelas();
+    // Atualizar texto estático do botão e total
+    const totalEl = document.getElementById('total-val');
+    if (totalEl) totalEl.textContent = fmtR(PRECO_BASE);
+});
 let cupomAplicado = null;
 let metodoPag     = 'pix';
 let codigoAfiliado = null; // capturado da URL ?ref=CODIGO
