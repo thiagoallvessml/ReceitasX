@@ -368,11 +368,11 @@
                 <div style="display:flex;flex-direction:column;gap:.5rem">
                     <div class="order-row old-price">
                         <span class="label">Preço original</span>
-                        <span class="val">R$ 97,00</span>
+                        <span class="val" id="val-preco-orig">R$ 97,00</span>
                     </div>
                     <div class="order-row">
                         <span class="label">Desconto</span>
-                        <span class="val" style="color:#34d399">- R$ 50,10</span>
+                        <span class="val" id="val-desconto" style="color:#34d399">- R$ 50,10</span>
                     </div>
                     <div class="order-row discount" id="row-cupom" style="display:none">
                         <span class="label">Cupom <span id="cupom-aplicado" style="color:#25f4f4;font-weight:700"></span></span>
@@ -445,11 +445,18 @@ let precoFinal    = PRECO_BASE;
 document.addEventListener('appconfig:loaded', () => {
     PRECO_BASE = window.AppConfig.valorPlano;
     precoFinal = PRECO_BASE;
+
+    const desconto = PRECO_ORIG - PRECO_BASE;
+    const pctOff   = Math.round((desconto / PRECO_ORIG) * 100);
+
+    // Atualizar elementos do resumo
+    const origEl = document.getElementById('val-preco-orig');
+    const descEl = document.getElementById('val-desconto');
+    if (origEl) origEl.textContent = fmtR(PRECO_ORIG);
+    if (descEl) descEl.textContent = '- ' + fmtR(desconto);
+
     updateTotal();
     updateParcelas();
-    // Atualizar texto estático do botão e total
-    const totalEl = document.getElementById('total-val');
-    if (totalEl) totalEl.textContent = fmtR(PRECO_BASE);
 });
 let cupomAplicado = null;
 let metodoPag     = 'pix';
