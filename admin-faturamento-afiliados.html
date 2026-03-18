@@ -381,7 +381,7 @@ async function loadTudo() {
     try {
         const [resAfil, resSaques, resIndic] = await Promise.all([
             sb.from('afiliados')
-              .select('*, perfis(nome, sobrenome)')
+              .select('*')
               .order('total_ganhos', { ascending: false }),
 
             sb.from('saques_afiliado')
@@ -389,7 +389,7 @@ async function loadTudo() {
               .order('created_at', { ascending: false }),
 
             sb.from('indicacoes')
-              .select('*, afiliados(codigo, email)')
+              .select('*, afiliado:afiliados!inner(id, codigo, email)')
               .order('created_at', { ascending: false }),
         ]);
 
@@ -570,7 +570,7 @@ function renderIndicacoes(q = '') {
     let list = allIndicacoes;
     if (q) list = list.filter(i =>
         (i.indicado_email || '').toLowerCase().includes(q) ||
-        (i.afiliados?.codigo || '').toLowerCase().includes(q)
+        (i.afiliado?.codigo || '').toLowerCase().includes(q)
     );
 
     const tbody = document.getElementById('tbody-indicacoes');
@@ -584,8 +584,8 @@ function renderIndicacoes(q = '') {
         <tr>
             <td style="color:#64748b;font-size:.78rem;white-space:nowrap">${fmtDate(i.created_at)}</td>
             <td>
-                <code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.78rem;color:#25f4f4">${esc(i.afiliados?.codigo || '—')}</code>
-                <div style="font-size:.7rem;color:#64748b">${esc(i.afiliados?.email || '')}</div>
+                <code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.78rem;color:#25f4f4">${esc(i.afiliado?.codigo || '—')}</code>
+                <div style="font-size:.7rem;color:#64748b">${esc(i.afiliado?.email || '')}</div>
             </td>
             <td style="font-size:.82rem;color:#94a3b8">${esc(i.indicado_email)}</td>
             <td>${conv}</td>
