@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Configurações - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#121212; color:#f1f5f9; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* ── Back btn ── */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#64748b;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* ── Section card ── */
+        .cfg-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.15rem;overflow:hidden;margin-bottom:1.25rem; }
+        .cfg-card-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A; }
+        .cfg-card-head .ico { width:2.2rem;height:2.2rem;border-radius:.6rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .cfg-card-head h2 { font-size:.92rem;font-weight:700; }
+        .cfg-card-head p  { font-size:.72rem;color:#64748b;margin-top:.1rem; }
+        .cfg-body { padding:1.25rem;display:flex;flex-direction:column;gap:1rem; }
+
+        /* ── Field ── */
+        .field { display:flex;flex-direction:column;gap:.35rem; }
+        .field label { font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b; }
+        .field-desc { font-size:.7rem;color:#475569;margin-top:-.15rem; }
+        .input-wrap { display:flex;align-items:center;border:1px solid #2A2A2A;border-radius:.75rem;background:#111;overflow:hidden;transition:border-color .2s; }
+        .input-wrap:focus-within { border-color:rgba(37,244,244,.45); }
+        .input-prefix, .input-suffix { padding:.7rem .85rem;font-size:.88rem;font-weight:600;color:#475569;background:#161616;flex-shrink:0;user-select:none; }
+        .input-prefix { border-right:1px solid #2A2A2A; }
+        .input-suffix { border-left:1px solid #2A2A2A; }
+        .cfg-input { flex:1;background:transparent;border:none;outline:none;color:#f1f5f9;font-size:.95rem;font-weight:600;padding:.7rem .9rem;width:100%; }
+        .cfg-input::placeholder { color:#334155;font-weight:400; }
+
+        /* ── Preview chip ── */
+        .preview-chip { display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .85rem;border-radius:9999px;font-size:.75rem;font-weight:700; }
+        .chip-green  { background:rgba(37,244,244,.08);border:1px solid rgba(37,244,244,.2);color:#25f4f4; }
+        .chip-yellow { background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fbbf24; }
+
+        /* ── Save button ── */
+        .btn-save { display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:.8rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.88rem;cursor:pointer;transition:opacity .15s, box-shadow .2s;box-shadow:0 4px 16px rgba(37,244,244,.2); }
+        .btn-save:hover { opacity:.9;box-shadow:0 6px 24px rgba(37,244,244,.35); }
+        .btn-save:disabled { opacity:.45;cursor:not-allowed;box-shadow:none; }
+        .btn-save .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* ── Admin banner ── */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.18);border-radius:.75rem;font-size:.75rem;color:#fb923c;margin-bottom:1.5rem; }
+
+        /* ── Divider ── */
+        .divider { height:1px;background:#2A2A2A;margin:.25rem 0; }
+
+        /* ── Info row ── */
+        .info-row { display:flex;justify-content:space-between;align-items:center;padding:.6rem 0; }
+        .info-row:not(:last-child) { border-bottom:1px solid #1E1E1E; }
+        .info-key { font-size:.78rem;color:#64748b; }
+        .info-val { font-size:.88rem;font-weight:700;color:#f1f5f9; }
+
+        /* ── Toast ── */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* ── Skeleton ── */
+        .skeleton { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.5rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header style="position:sticky;top:0;z-index:30;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #2A2A2A;">
+    <div style="max-width:680px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem;">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.2rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">admin_panel_settings</span>
+        <h1 style="font-size:.95rem;font-weight:700;flex:1">Configurações do Sistema</h1>
+        <button class="btn-save" id="btn-save" onclick="salvar()" disabled>
+            <span class="material-symbols-outlined">save</span>
+            Salvar
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ════════════════════════════════════════════════════════ -->
+<main style="max-width:680px;margin:0 auto;padding:1.5rem 1.25rem;">
+
+    <!-- Banner admin -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined" style="font-size:1rem;color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">lock</span>
+        <span>Apenas administradores podem alterar estas configurações.</span>
+    </div>
+
+    <!-- ── Programa de Afiliados ── -->
+    <div class="cfg-card">
+        <div class="cfg-card-head">
+            <div class="ico" style="background:rgba(37,244,244,.08);border:1px solid rgba(37,244,244,.18);">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">hub</span>
+            </div>
+            <div>
+                <h2>Programa de Afiliados</h2>
+                <p>Controle comissão e regras do programa de indicação.</p>
+            </div>
+        </div>
+        <div class="cfg-body">
+
+            <!-- Comissão -->
+            <div class="field">
+                <label>Comissão por venda</label>
+                <p class="field-desc">Percentual pago ao afiliado em cada venda confirmada.</p>
+                <div class="input-wrap">
+                    <div class="input-prefix" style="min-width:3rem;text-align:center">%</div>
+                    <input class="cfg-input" id="comissao" type="number" min="1" max="100" step="0.1" placeholder="10" oninput="atualizarPreview()" />
+                </div>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-top:.2rem">
+                    <span class="preview-chip chip-green" id="preview-comissao">10% por venda</span>
+                    <span style="font-size:.7rem;color:#475569" id="preview-valor-comissao">= R$ 4,69 em compra de R$ 46,90</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Saque Mínimo -->
+            <div class="field">
+                <label>Saque Mínimo</label>
+                <p class="field-desc">Valor mínimo acumulado para o afiliado solicitar saque via Pix.</p>
+                <div class="input-wrap">
+                    <div class="input-prefix">R$</div>
+                    <input class="cfg-input" id="saque_minimo" type="number" min="1" step="0.01" placeholder="50.00" oninput="atualizarPreview()" />
+                </div>
+                <div style="margin-top:.2rem">
+                    <span class="preview-chip chip-yellow" id="preview-saque">Mínimo de R$ 50,00 para saque</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Valor do produto (referência) -->
+            <div class="field">
+                <label>Valor do Plano (referência)</label>
+                <p class="field-desc">Preço base do plano usado para calcular a comissão em reais.</p>
+                <div class="input-wrap">
+                    <div class="input-prefix">R$</div>
+                    <input class="cfg-input" id="valor_plano" type="number" min="1" step="0.01" placeholder="46.90" oninput="atualizarPreview()" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Resumo atual ── -->
+    <div class="cfg-card">
+        <div class="cfg-card-head">
+            <div class="ico" style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#fbbf24;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">summarize</span>
+            </div>
+            <div>
+                <h2>Resumo Atual</h2>
+                <p>Como estão as configurações salvas no banco.</p>
+            </div>
+        </div>
+        <div class="cfg-body" id="resumo-body">
+            <div class="skeleton" style="height:2rem"></div>
+            <div class="skeleton" style="height:2rem"></div>
+            <div class="skeleton" style="height:2rem"></div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ══ Toast ══════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Salvo!</span>
+</div>
+
+<script>
+/* ── Guard: só admin ─────────────────────────────────────────────── */
+(async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { location.replace('login.html'); return; }
+
+    const { data: perfil } = await sb.from('perfis').select('role').eq('id', session.user.id).single();
+    if (perfil?.role !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <a href="index.html" style="color:#25f4f4;font-weight:600">← Voltar</a>
+            </div>`;
+        return;
+    }
+
+    await carregarConfiguracoes();
+    document.getElementById('btn-save').disabled = false;
+})();
+
+/* ── Carregar configs do Supabase ────────────────────────────────── */
+async function carregarConfiguracoes() {
+    const { data, error } = await sb.from('configuracoes').select('*');
+
+    const cfg = {};
+    (data || []).forEach(row => { cfg[row.chave] = row.valor; });
+
+    // Preencher inputs
+    document.getElementById('comissao').value    = cfg.comissao_pct    ?? '10';
+    document.getElementById('saque_minimo').value = cfg.saque_minimo   ?? '50';
+    document.getElementById('valor_plano').value  = cfg.valor_plano    ?? '46.90';
+
+    atualizarPreview();
+    renderResumo(cfg);
+}
+
+/* ── Atualizar preview em tempo real ─────────────────────────────── */
+function atualizarPreview() {
+    const pct    = parseFloat(document.getElementById('comissao').value)    || 10;
+    const saque  = parseFloat(document.getElementById('saque_minimo').value) || 50;
+    const plano  = parseFloat(document.getElementById('valor_plano').value)  || 46.90;
+
+    const valorComissao = (plano * pct / 100).toFixed(2).replace('.', ',');
+
+    document.getElementById('preview-comissao').textContent      = `${pct}% por venda`;
+    document.getElementById('preview-valor-comissao').textContent = `= R$ ${valorComissao} em compra de R$ ${fmtR(plano)}`;
+    document.getElementById('preview-saque').textContent          = `Mínimo de R$ ${fmtR(saque)} para saque`;
+}
+
+function fmtR(v) {
+    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ── Render resumo ───────────────────────────────────────────────── */
+function renderResumo(cfg) {
+    const pct   = cfg.comissao_pct  ?? '10';
+    const saque = cfg.saque_minimo  ?? '50';
+    const plano = cfg.valor_plano   ?? '46.90';
+    const valorC = (parseFloat(plano) * parseFloat(pct) / 100).toFixed(2).replace('.', ',');
+
+    document.getElementById('resumo-body').innerHTML = `
+        <div class="info-row">
+            <span class="info-key">Comissão</span>
+            <span class="info-val" style="color:#25f4f4">${pct}% <span style="font-size:.72rem;color:#475569;font-weight:400">(R$ ${valorC} por venda)</span></span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Saque mínimo</span>
+            <span class="info-val" style="color:#fbbf24">R$ ${fmtR(parseFloat(saque))}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-key">Valor do plano (referência)</span>
+            <span class="info-val">R$ ${fmtR(parseFloat(plano))}</span>
+        </div>`;
+}
+
+/* ── Salvar ──────────────────────────────────────────────────────── */
+async function salvar() {
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin .8s linear infinite">sync</span> Salvando…`;
+
+    const configs = [
+        { chave: 'comissao_pct',  valor: document.getElementById('comissao').value    || '10' },
+        { chave: 'saque_minimo',  valor: document.getElementById('saque_minimo').value || '50' },
+        { chave: 'valor_plano',   valor: document.getElementById('valor_plano').value  || '46.90' },
+    ];
+
+    try {
+        for (const cfg of configs) {
+            const { error } = await sb.from('configuracoes')
+                .upsert({ chave: cfg.chave, valor: cfg.valor }, { onConflict: 'chave' });
+            if (error) throw error;
+        }
+
+        showToast('✓ Configurações salvas com sucesso!');
+        renderResumo(Object.fromEntries(configs.map(c => [c.chave, c.valor])));
+    } catch (e) {
+        console.error(e);
+        showToast('Erro ao salvar: ' + (e.message || 'verifique o console'), 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined">save</span> Salvar`;
+    }
+}
+
+/* ── Toast ───────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color  = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent   = msg;
+    t.style.borderColor = type === 'error' ? 'rgba(248,113,113,.35)' : 'rgba(37,244,244,.35)';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* Animação spin */
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
