@@ -389,7 +389,7 @@ async function loadTudo() {
               .order('created_at', { ascending: false }),
 
             sb.from('indicacoes')
-              .select('*, afiliado:afiliados!inner(id, codigo, email)')
+              .select('*')
               .order('created_at', { ascending: false }),
         ]);
 
@@ -568,15 +568,23 @@ function renderSaques(q = '') {
 // ── Render Indicações ─────────────────────────────────────────
 function renderIndicacoes(q = '') {
     let list = allIndicacoes;
-    if (q) list = list.filter(i =>
-        (i.indicado_email || '').toLowerCase().includes(q) ||
-        (i.afiliado?.codigo || '').toLowerCase().includes(q)
-    );
+
+    // Mapa id -> afiliado usando dados já carregados (sem join)
+    const afiliadoMap = {};
+    allAfiliados.forEach(a => { afiliadoMap[a.id] = a; });
+
+    if (q) list = list.filter(i => {
+        const af = afiliadoMap[i.afiliado_id];
+        return (i.indicado_email || '').toLowerCase().includes(q) ||
+               (af?.codigo || '').toLowerCase().includes(q) ||
+               (af?.email  || '').toLowerCase().includes(q);
+    });
 
     const tbody = document.getElementById('tbody-indicacoes');
     if (!list.length) { tbody.innerHTML = emptyCel(6); return; }
 
     tbody.innerHTML = list.map(i => {
+        const af = afiliadoMap[i.afiliado_id];
         const conv = i.converteu
             ? `<span class="s-badge s-pago"><span class="material-symbols-outlined">check_circle</span>Sim</span>`
             : `<span class="s-badge" style="background:#1E1E1E;color:#475569;border-color:#2A2A2A"><span class="material-symbols-outlined">schedule</span>Não</span>`;
@@ -584,8 +592,8 @@ function renderIndicacoes(q = '') {
         <tr>
             <td style="color:#64748b;font-size:.78rem;white-space:nowrap">${fmtDate(i.created_at)}</td>
             <td>
-                <code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.78rem;color:#25f4f4">${esc(i.afiliado?.codigo || '—')}</code>
-                <div style="font-size:.7rem;color:#64748b">${esc(i.afiliado?.email || '')}</div>
+                <code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.78rem;color:#25f4f4">${esc(af?.codigo || '—')}</code>
+                <div style="font-size:.7rem;color:#64748b">${esc(af?.email || '')}</div>
             </td>
             <td style="font-size:.82rem;color:#94a3b8">${esc(i.indicado_email)}</td>
             <td>${conv}</td>
@@ -594,6 +602,7 @@ function renderIndicacoes(q = '') {
         </tr>`;
     }).join('');
 }
+
 
 // ── Modal Pagar ───────────────────────────────────────────────
 function abrirModalPagar(id) {
