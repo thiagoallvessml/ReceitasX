@@ -37,13 +37,13 @@
         .field { display:flex;flex-direction:column;gap:.35rem; }
         .field label { font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b; }
         .field-desc { font-size:.7rem;color:#475569;margin-top:-.15rem; }
-        .input-wrap { display:flex;align-items:center;border:1px solid #2A2A2A;border-radius:.75rem;background:#111;overflow:hidden;transition:border-color .2s; }
-        .input-wrap:focus-within { border-color:rgba(37,244,244,.45); }
-        .input-prefix, .input-suffix { padding:.7rem .85rem;font-size:.88rem;font-weight:600;color:#475569;background:#161616;flex-shrink:0;user-select:none; }
+        .input-wrap { display:flex;align-items:center;border:1px solid #2A2A2A !important;border-radius:.75rem;background:#111 !important;overflow:hidden;transition:border-color .2s; }
+        .input-wrap:focus-within { border-color:rgba(37,244,244,.45) !important; }
+        .input-prefix, .input-suffix { padding:.7rem .85rem;font-size:.88rem;font-weight:600;color:#475569 !important;background:#161616 !important;flex-shrink:0;user-select:none; }
         .input-prefix { border-right:1px solid #2A2A2A; }
         .input-suffix { border-left:1px solid #2A2A2A; }
-        .cfg-input { flex:1;background:transparent;border:none;outline:none;color:#f1f5f9;font-size:.95rem;font-weight:600;padding:.7rem .9rem;width:100%; }
-        .cfg-input::placeholder { color:#334155;font-weight:400; }
+        .cfg-input { flex:1;background:transparent !important;border:none !important;outline:none !important;color:#f1f5f9 !important;font-size:.95rem;font-weight:600;padding:.7rem .9rem;width:100%;box-shadow:none !important; }
+        .cfg-input::placeholder { color:#334155 !important;font-weight:400; }
 
         /* ── Preview chip ── */
         .preview-chip { display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .85rem;border-radius:9999px;font-size:.75rem;font-weight:700; }
