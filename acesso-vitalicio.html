@@ -407,10 +407,10 @@
                 Acesso Vitalício
             </div>
             <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.4rem;flex-wrap:wrap">
-                <span style="font-size:1.5rem;font-weight:800;color:#94a3b8;text-decoration:line-through;text-decoration-color:#f87171;text-decoration-thickness:2px">R$ 97,00</span>
-                <span style="padding:.2rem .65rem;border-radius:9999px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.35);color:#f87171;font-size:.72rem;font-weight:800;letter-spacing:.04em">-52% OFF</span>
+                <span id="price-orig" style="font-size:1.5rem;font-weight:800;color:#94a3b8;text-decoration:line-through;text-decoration-color:#f87171;text-decoration-thickness:2px">R$ 97,00</span>
+                <span id="price-badge-off" style="padding:.2rem .65rem;border-radius:9999px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.35);color:#f87171;font-size:.72rem;font-weight:800;letter-spacing:.04em">-52% OFF</span>
             </div>
-            <p class="price-main" id="price-main">R$ 46,90</p>
+            <p class="price-main" id="price-main">...</p>
             <p class="price-suffix">pagamento único · para sempre</p>
 
             <hr class="price-divider" />
@@ -457,7 +457,7 @@
     <div class="faq-list">
         <div class="faq-item" onclick="toggleFaq(this)">
             <div class="faq-q">O acesso é realmente para sempre?<span class="material-symbols-outlined">expand_more</span></div>
-            <div class="faq-a">Sim! Você paga uma única vez de R$ 46,90 e tem acesso a tudo para sempre, incluindo todas as novas funcionalidades que adicionarmos no futuro.</div>
+            <div class="faq-a">Sim! Você paga uma única vez de <span class="preco-display">R$ 46,90</span> e tem acesso a tudo para sempre, incluindo todas as novas funcionalidades que adicionarmos no futuro.</div>
         </div>
         <div class="faq-item" onclick="toggleFaq(this)">
             <div class="faq-q">Preciso instalar alguma coisa?<span class="material-symbols-outlined">expand_more</span></div>
@@ -503,13 +503,26 @@ function handleCompra() {
 
 // Atualiza preços dinamicamente quando config carregar
 document.addEventListener('appconfig:loaded', () => {
-    const v = window.AppConfig.valorPlano;
-    const fmt = 'R$ ' + v.toFixed(2).replace('.', ',');
-    // Atualiza todos os elementos com classe preco-display
+    const ORIG = 97.00;
+    const v    = window.AppConfig.valorPlano;
+    const fmt  = 'R$ ' + v.toFixed(2).replace('.', ',');
+    const desc = ORIG - v;
+    const pct  = Math.round((desc / ORIG) * 100);
+
+    // Todos os botões/textos com classe preco-display
     document.querySelectorAll('.preco-display').forEach(el => el.textContent = fmt);
-    // Atualiza o preço principal grande
+
+    // Preço principal grande
     const pm = document.getElementById('price-main');
     if (pm) pm.textContent = fmt;
+
+    // Preço original riscado
+    const po = document.getElementById('price-orig');
+    if (po) po.textContent = 'R$ ' + ORIG.toFixed(2).replace('.', ',');
+
+    // Badge de desconto (recalcular %)
+    const pb = document.getElementById('price-badge-off');
+    if (pb) pb.textContent = '-' + pct + '% OFF';
 });
 
 // Scroll suave para âncoras
