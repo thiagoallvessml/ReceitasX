@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -520,52 +520,71 @@ function updateBtnTxt() {
 /* ── CUPOM ──────────────────────────────────────────── */
 async function aplicarCupom() {
     const codigo = document.getElementById('f-cupom').value.trim().toUpperCase();
-    if (!codigo) { showFeedback('error','Informe um código de cupom.'); return; }
+    if (!codigo) { showFeedback('error', 'Informe um código de cupom.'); return; }
 
-    // Tenta Supabase primeiro
     let cupomData = null;
+
+    // 1️⃣ Busca na tabela cupons (cupons de desconto normais)
     try {
         const { data, error } = await sb.from('cupons')
             .select('*')
             .eq('codigo', codigo)
             .eq('ativo', true)
             .single();
-        if (!error && data) cupomData = { tipo: data.tipo, valor: parseFloat(data.valor) };
+        if (!error && data) {
+            cupomData = { tipo: data.tipo, valor: parseFloat(data.valor), label: null };
+        }
     } catch(e) {}
 
-    // fallback local
+    // 2️⃣ Busca na tabela afiliados (código de indicação = 10% de desconto + rastreia afiliado)
+    if (!cupomData) {
+        try {
+            const { data: af } = await sb.from('afiliados')
+                .select('id, codigo, email')
+                .eq('codigo', codigo)
+                .single();
+            if (af) {
+                cupomData = { tipo: '%', valor: 10, label: '10% OFF (código de indicação)', afiliadoId: af.id };
+                codigoAfiliado = codigo; // rastreia para crédito de comissão
+                sessionStorage.setItem('ref_afiliado', codigo);
+            }
+        } catch(e) {}
+    }
+
+    // 3️⃣ Fallback local (cupons hardcoded)
     if (!cupomData && CUPONS_LOCAL[codigo]) {
         const c = CUPONS_LOCAL[codigo];
-        cupomData = { tipo: c.tipo, valor: c.valor };
+        cupomData = { tipo: c.tipo, valor: c.valor, label: c.label };
     }
 
     if (!cupomData) {
         cupomAplicado = null;
         precoFinal = PRECO_BASE;
-        showFeedback('error','Cupom inválido ou expirado.');
+        showFeedback('error', 'Cupom inválido ou expirado.');
         document.getElementById('row-cupom').style.display = 'none';
         updateTotal();
         updateParcelas();
         return;
     }
 
-    let desc = cupomData.tipo === '%' ? PRECO_BASE * (cupomData.valor/100) : cupomData.valor;
+    let desc = cupomData.tipo === '%' ? PRECO_BASE * (cupomData.valor / 100) : cupomData.valor;
     desc = Math.min(desc, PRECO_BASE);
     precoFinal = Math.max(0, PRECO_BASE - desc);
     cupomAplicado = { codigo, desc };
 
-    const labelMap = CUPONS_LOCAL[codigo] ? CUPONS_LOCAL[codigo].label :
+    const label = cupomData.label ||
         (cupomData.tipo === '%' ? `${cupomData.valor}% OFF` : `R$ ${cupomData.valor.toFixed(2)} OFF`);
 
-    showFeedback('ok', `✓ Cupom "${codigo}" aplicado — ${labelMap}`);
-    document.getElementById('row-cupom').style.display   = 'flex';
+    showFeedback('ok', `✓ Código "${codigo}" aplicado — ${label}`);
+    document.getElementById('row-cupom').style.display    = 'flex';
     document.getElementById('cupom-aplicado').textContent = codigo;
     document.getElementById('val-cupom-desc').textContent = '- ' + fmtR(desc);
-    document.getElementById('f-cupom').disabled = true;
+    document.getElementById('f-cupom').disabled    = true;
     document.getElementById('btn-aplicar').disabled = true;
     updateTotal();
     updateParcelas();
 }
+
 
 function showFeedback(tipo, msg) {
     const el = document.getElementById('cupom-feedback');
