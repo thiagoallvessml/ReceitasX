@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Acesso Vitalício - ReceitasX</title>
+    <title>Acesso VitalÃ­cio - ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="config-loader.js"></script>
@@ -21,11 +21,11 @@
         body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; color:#f1f5f9; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
 
-        /* ── HEADER ── */
+        /* â”€â”€ HEADER â”€â”€ */
         .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
         .btn-back:hover { color:#25f4f4; }
 
-        /* ── HERO ── */
+        /* â”€â”€ HERO â”€â”€ */
         .hero {
             position:relative;overflow:hidden;
             padding:5rem 1.5rem 4rem;
@@ -61,7 +61,7 @@
             font-size:clamp(.95rem,2.5vw,1.15rem);color:#94a3b8;max-width:540px;margin:0 auto 2.5rem;line-height:1.7;
         }
 
-        /* ── CTA BUTTON ── */
+        /* â”€â”€ CTA BUTTON â”€â”€ */
         .cta-btn {
             display:inline-flex;align-items:center;gap:.55rem;
             padding:1rem 2.2rem;border-radius:9999px;border:none;
@@ -77,14 +77,14 @@
         .cta-price { font-size:.82rem;font-weight:600;color:rgba(10,10,10,.65); }
         .cta-note { font-size:.78rem;color:#64748b;margin-top:.75rem; }
 
-        /* ── SECTION ── */
+        /* â”€â”€ SECTION â”€â”€ */
         .section { max-width:900px;margin:0 auto;padding:4rem 1.5rem; }
         .section-title { text-align:center;margin-bottom:2.5rem; }
         .section-title .eyebrow { font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#25f4f4;margin-bottom:.5rem; }
         .section-title h2 { font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;line-height:1.2; }
         .section-title p { color:#64748b;margin-top:.5rem;font-size:.95rem; }
 
-        /* ── BENEFITS GRID ── */
+        /* â”€â”€ BENEFITS GRID â”€â”€ */
         .benefits-grid { display:grid;grid-template-columns:1fr;gap:1rem; }
         @media(min-width:540px)  { .benefits-grid { grid-template-columns:1fr 1fr; } }
         @media(min-width:860px)  { .benefits-grid { grid-template-columns:1fr 1fr 1fr; } }
@@ -107,7 +107,7 @@
         .benefit-name { font-size:.92rem;font-weight:700; }
         .benefit-desc { font-size:.8rem;color:#64748b;line-height:1.55; }
 
-        /* ── COMPARISON ── */
+        /* â”€â”€ COMPARISON â”€â”€ */
         .compare-table { border:1px solid #1E1E1E;border-radius:1.1rem;overflow:hidden; }
         .compare-head { display:grid;grid-template-columns:1fr 1fr 1fr;background:#141414; }
         .compare-head-cell { padding:.85rem 1rem;font-size:.78rem;font-weight:700;color:#64748b;text-align:center;border-bottom:1px solid #1E1E1E; }
@@ -120,7 +120,7 @@
         .ico-ok  { color:#25f4f4;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
         .ico-no  { color:#334155;font-size:1.1rem; }
 
-        /* ── DEPOIMENTOS ── */
+        /* â”€â”€ DEPOIMENTOS â”€â”€ */
         .dep-grid { display:grid;grid-template-columns:1fr;gap:1rem; }
         @media(min-width:640px) { .dep-grid { grid-template-columns:1fr 1fr 1fr; } }
         .dep-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1.1rem;display:flex;flex-direction:column;gap:.75rem; }
@@ -132,7 +132,7 @@
         .dep-name { font-size:.8rem;font-weight:700; }
         .dep-role { font-size:.68rem;color:#64748b; }
 
-        /* ── PRICE CARD ── */
+        /* â”€â”€ PRICE CARD â”€â”€ */
         .price-section { text-align:center;padding:4rem 1.5rem; }
         .price-card {
             max-width:440px;margin:0 auto;
@@ -164,7 +164,7 @@
         .price-guarantee { font-size:.72rem;color:#475569;margin-top:1rem; }
         .price-guarantee .material-symbols-outlined { font-size:.85rem;color:#64748b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
 
-        /* ── FAQ ── */
+        /* â”€â”€ FAQ â”€â”€ */
         .faq-list { max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:.6rem; }
         .faq-item { background:#141414;border:1px solid #1E1E1E;border-radius:.85rem;overflow:hidden;transition:border-color .2s; }
         .faq-item.open { border-color:rgba(37,244,244,.2); }
@@ -174,11 +174,11 @@
         .faq-a { font-size:.82rem;color:#64748b;line-height:1.65;padding:0 1.1rem 1rem;display:none; }
         .faq-item.open .faq-a { display:block; }
 
-        /* ── FOOTER / GUARANTEE ── */
+        /* â”€â”€ FOOTER / GUARANTEE â”€â”€ */
         .guarantee-strip { background:linear-gradient(135deg,rgba(37,244,244,.04),rgba(37,244,244,.01));border-top:1px solid rgba(37,244,244,.1);border-bottom:1px solid rgba(37,244,244,.1);padding:2rem 1.5rem;text-align:center; }
         .guarantee-strip .material-symbols-outlined { font-size:3rem;color:#25f4f4;display:block;margin:0 auto .75rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
 
-        /* ── STICKY CTA ── */
+        /* â”€â”€ STICKY CTA â”€â”€ */
         .sticky-bar { position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-top:1px solid #1E1E1E;padding:.85rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:50; }
         .sticky-bar-txt p { font-size:.82rem;font-weight:700; }
         .sticky-bar-txt span { font-size:.7rem;color:#64748b; }
@@ -192,7 +192,7 @@
 </head>
 <body>
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header style="position:sticky;top:0;z-index:40;background:rgba(10,10,10,.9);backdrop-filter:blur(16px);border-bottom:1px solid #1A1A1A">
     <div style="max-width:900px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem">
         <button class="btn-back" onclick="history.back()">
@@ -203,33 +203,33 @@
     </div>
 </header>
 
-<!-- ══ HERO ═════════════════════════════════════════════════════════ -->
+<!-- â•â• HERO â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section class="hero fade-in">
     <div class="hero-glow"></div>
     <div class="hero-glow2"></div>
     <div style="position:relative;z-index:1">
         <div class="badge-vita">
             <span class="material-symbols-outlined">workspace_premium</span>
-            Acesso Vitalício · Pague uma vez, use para sempre
+            Acesso VitalÃ­cio Â· Pague uma vez, use para sempre
         </div>
-        <h1>Transforme seu negócio<br/>com o ReceitasX</h1>
+        <h1>Transforme seu negÃ³cio<br/>com o ReceitasX</h1>
         <p class="sub">
-            Calcule custos, precifique com inteligência, gerencie seus produtos e maximize seus lucros — 
-            tudo em um único lugar, para sempre.
+            Calcule custos, precifique com inteligÃªncia, gerencie seus produtos e maximize seus lucros â€” 
+            tudo em um Ãºnico lugar, para sempre.
         </p>
         <a href="#comprar" class="cta-btn">
             <span class="material-symbols-outlined">rocket_launch</span>
-            Compre Agora — <span class="preco-display">R$ 46,90</span>
+            Compre Agora â€” <span class="preco-display">...</span>
         </a>
-        <p class="cta-note">✅ Acesso completo e vitalício · Sem mensalidades · Sem surpresas</p>
+        <p class="cta-note">âœ… Acesso completo e vitalÃ­cio Â· Sem mensalidades Â· Sem surpresas</p>
     </div>
 </section>
 
-<!-- ══ BENEFÍCIOS ════════════════════════════════════════════════════ -->
+<!-- â•â• BENEFÃCIOS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section class="section">
     <div class="section-title">
-        <p class="eyebrow">O que você recebe</p>
-        <h2>Tudo que você precisa para<br/>lucrar mais e trabalhar menos</h2>
+        <p class="eyebrow">O que vocÃª recebe</p>
+        <h2>Tudo que vocÃª precisa para<br/>lucrar mais e trabalhar menos</h2>
         <p>Acesso completo a todas as funcionalidades, para sempre.</p>
     </div>
     <div class="benefits-grid">
@@ -241,12 +241,12 @@
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">shopping_basket</span></div>
             <p class="benefit-name">Produtos Ilimitados</p>
-            <p class="benefit-desc">Gerencie todo o seu catálogo de produtos sem limitações de quantidade.</p>
+            <p class="benefit-desc">Gerencie todo o seu catÃ¡logo de produtos sem limitaÃ§Ãµes de quantidade.</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">storefront</span></div>
-            <p class="benefit-name">Precificação por Marketplace</p>
-            <p class="benefit-desc">Veja quanto você lucra em cada canal: Porta de Casa, iFood, Rappi e outros que você criar.</p>
+            <p class="benefit-name">PrecificaÃ§Ã£o por Marketplace</p>
+            <p class="benefit-desc">Veja quanto vocÃª lucra em cada canal: Porta de Casa, iFood, Rappi e outros que vocÃª criar.</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">layers</span></div>
@@ -256,55 +256,55 @@
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">receipt_long</span></div>
             <p class="benefit-name">Controle de Despesas</p>
-            <p class="benefit-desc">Cadastre suas despesas fixas e variáveis para ter visão real do seu resultado financeiro.</p>
+            <p class="benefit-desc">Cadastre suas despesas fixas e variÃ¡veis para ter visÃ£o real do seu resultado financeiro.</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">settings</span></div>
-            <p class="benefit-name">Configurações Avançadas</p>
-            <p class="benefit-desc">Configure metas de margem, custo do gás, energia, mão de obra e muito mais.</p>
+            <p class="benefit-name">ConfiguraÃ§Ãµes AvanÃ§adas</p>
+            <p class="benefit-desc">Configure metas de margem, custo do gÃ¡s, energia, mÃ£o de obra e muito mais.</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">inventory_2</span></div>
-            <p class="benefit-name">Gestão de Insumos</p>
-            <p class="benefit-desc">Controle preços e pesos de todos os seus insumos para cálculo preciso de custo.</p>
+            <p class="benefit-name">GestÃ£o de Insumos</p>
+            <p class="benefit-desc">Controle preÃ§os e pesos de todos os seus insumos para cÃ¡lculo preciso de custo.</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">trending_up</span></div>
-            <p class="benefit-name">Métricas em Tempo Real</p>
-            <p class="benefit-desc">Lucro, margem, markup e custo médio calculados automaticamente enquanto você digita.</p>
+            <p class="benefit-name">MÃ©tricas em Tempo Real</p>
+            <p class="benefit-desc">Lucro, margem, markup e custo mÃ©dio calculados automaticamente enquanto vocÃª digita.</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-ico"><span class="material-symbols-outlined">update</span></div>
-            <p class="benefit-name">Atualizações Inclusas</p>
-            <p class="benefit-desc">Todas as futuras funcionalidades incluídas no seu acesso. Pague uma vez e receba sempre.</p>
+            <p class="benefit-name">AtualizaÃ§Ãµes Inclusas</p>
+            <p class="benefit-desc">Todas as futuras funcionalidades incluÃ­das no seu acesso. Pague uma vez e receba sempre.</p>
         </div>
     </div>
 </section>
 
-<!-- ══ COMPARATIVO ═══════════════════════════════════════════════════ -->
+<!-- â•â• COMPARATIVO â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section style="max-width:900px;margin:0 auto;padding:0 1.5rem 4rem">
     <div class="section-title">
         <p class="eyebrow">Comparativo</p>
-        <h2>Gratuito vs. Vitalício</h2>
+        <h2>Gratuito vs. VitalÃ­cio</h2>
     </div>
     <div class="compare-table">
         <div class="compare-head">
             <div class="compare-head-cell" style="text-align:left">Funcionalidade</div>
             <div class="compare-head-cell">Gratuito</div>
-            <div class="compare-head-cell vita">⭐ Vitalício</div>
+            <div class="compare-head-cell vita">â­ VitalÃ­cio</div>
         </div>
         <div class="compare-row">
             <div class="compare-cell">Receitas cadastradas</div>
-            <div class="compare-cell">Até 10</div>
+            <div class="compare-cell">AtÃ© 10</div>
             <div class="compare-cell vita"><span class="material-symbols-outlined ico-ok">all_inclusive</span></div>
         </div>
         <div class="compare-row">
             <div class="compare-cell">Produtos cadastrados</div>
-            <div class="compare-cell">Até 20</div>
+            <div class="compare-cell">AtÃ© 20</div>
             <div class="compare-cell vita"><span class="material-symbols-outlined ico-ok">all_inclusive</span></div>
         </div>
         <div class="compare-row">
-            <div class="compare-cell">Precificação por Marketplace</div>
+            <div class="compare-cell">PrecificaÃ§Ã£o por Marketplace</div>
             <div class="compare-cell"><span class="material-symbols-outlined ico-no">cancel</span></div>
             <div class="compare-cell vita"><span class="material-symbols-outlined ico-ok">check_circle</span></div>
         </div>
@@ -330,18 +330,18 @@
         </div>
         <div class="compare-row">
             <div class="compare-cell">Mensalidade</div>
-            <div class="compare-cell">—</div>
-            <div class="compare-cell vita" style="color:#25f4f4;font-weight:700">R$ 0 / mês</div>
+            <div class="compare-cell">â€”</div>
+            <div class="compare-cell vita" style="color:#25f4f4;font-weight:700">R$ 0 / mÃªs</div>
         </div>
     </div>
 </section>
 
-<!-- ══ DEPOIMENTOS ═══════════════════════════════════════════════════ -->
+<!-- â•â• DEPOIMENTOS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section style="background:#0d0d0d;padding:4rem 1.5rem">
     <div style="max-width:900px;margin:0 auto">
         <div class="section-title">
             <p class="eyebrow">O que dizem as clientes</p>
-            <h2>Empreendedoras que<br/>transformaram seu negócio</h2>
+            <h2>Empreendedoras que<br/>transformaram seu negÃ³cio</h2>
         </div>
         <div class="dep-grid">
             <div class="dep-card">
@@ -350,12 +350,12 @@
                     <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
                     <span class="material-symbols-outlined">star</span>
                 </div>
-                <p class="dep-text">"Antes eu chutava os preços e mal sabia se estava tendo lucro. Com o ReceitasX descobri que estava vendendo no prejuízo! Recuperei meu negócio."</p>
+                <p class="dep-text">"Antes eu chutava os preÃ§os e mal sabia se estava tendo lucro. Com o ReceitasX descobri que estava vendendo no prejuÃ­zo! Recuperei meu negÃ³cio."</p>
                 <div class="dep-author">
                     <div class="dep-avatar">AM</div>
                     <div>
                         <p class="dep-name">Ana Maria S.</p>
-                        <p class="dep-role">Geladinhos Artesanais · SP</p>
+                        <p class="dep-role">Geladinhos Artesanais Â· SP</p>
                     </div>
                 </div>
             </div>
@@ -365,12 +365,12 @@
                     <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
                     <span class="material-symbols-outlined">star</span>
                 </div>
-                <p class="dep-text">"A funcionalidade de marketplace é incrível! Agora sei exatamente quanto ganho no iFood vs venda direta. Aumentei minha margem em 12%."</p>
+                <p class="dep-text">"A funcionalidade de marketplace Ã© incrÃ­vel! Agora sei exatamente quanto ganho no iFood vs venda direta. Aumentei minha margem em 12%."</p>
                 <div class="dep-author">
                     <div class="dep-avatar">JL</div>
                     <div>
                         <p class="dep-name">Juliana L.</p>
-                        <p class="dep-role">Doces Caseiros · MG</p>
+                        <p class="dep-role">Doces Caseiros Â· MG</p>
                     </div>
                 </div>
             </div>
@@ -385,7 +385,7 @@
                     <div class="dep-avatar">CR</div>
                     <div>
                         <p class="dep-name">Carla R.</p>
-                        <p class="dep-role">Bolos e Tortas · RJ</p>
+                        <p class="dep-role">Bolos e Tortas Â· RJ</p>
                     </div>
                 </div>
             </div>
@@ -393,75 +393,75 @@
     </div>
 </section>
 
-<!-- ══ PRICE CARD ════════════════════════════════════════════════════ -->
+<!-- â•â• PRICE CARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section class="price-section" id="comprar">
     <div class="section-title">
-        <p class="eyebrow">Investimento único</p>
-        <h2>Uma decisão que muda seu negócio</h2>
+        <p class="eyebrow">Investimento Ãºnico</p>
+        <h2>Uma decisÃ£o que muda seu negÃ³cio</h2>
         <p>Sem mensalidades. Sem surpresas. Use para sempre.</p>
     </div>
     <div class="price-card">
         <div style="position:relative;z-index:1">
             <div class="price-badge">
                 <span class="material-symbols-outlined">workspace_premium</span>
-                Acesso Vitalício
+                Acesso VitalÃ­cio
             </div>
             <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.4rem;flex-wrap:wrap">
                 <span id="price-orig" style="font-size:1.5rem;font-weight:800;color:#94a3b8;text-decoration:line-through;text-decoration-color:#f87171;text-decoration-thickness:2px">R$ 97,00</span>
                 <span id="price-badge-off" style="padding:.2rem .65rem;border-radius:9999px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.35);color:#f87171;font-size:.72rem;font-weight:800;letter-spacing:.04em">-52% OFF</span>
             </div>
             <p class="price-main" id="price-main">...</p>
-            <p class="price-suffix">pagamento único · para sempre</p>
+            <p class="price-suffix">pagamento Ãºnico Â· para sempre</p>
 
             <hr class="price-divider" />
 
             <div class="price-features">
                 <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Receitas e Produtos Ilimitados</div>
-                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Precificação por Marketplace</div>
+                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> PrecificaÃ§Ã£o por Marketplace</div>
                 <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Criador de Combos</div>
                 <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Controle de Despesas</div>
-                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Gestão de Insumos, Embalagens e Equipamentos</div>
-                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Exportação de dados CSV</div>
-                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Todas as atualizações futuras</div>
+                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> GestÃ£o de Insumos, Embalagens e Equipamentos</div>
+                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> ExportaÃ§Ã£o de dados CSV</div>
+                <div class="pf-row"><span class="material-symbols-outlined">check_circle</span> Todas as atualizaÃ§Ãµes futuras</div>
             </div>
 
             <a href="#" onclick="handleCompra()" class="cta-btn" style="width:100%;justify-content:center;font-size:1rem">
                 <span class="material-symbols-outlined">shopping_cart</span>
-                Comprar Agora — <span class="preco-display">R$ 46,90</span>
+                Comprar Agora â€” <span class="preco-display">...</span>
             </a>
 
             <p class="price-guarantee">
                 <span class="material-symbols-outlined">verified_user</span>
-                Compra segura · Acesso liberado imediatamente
+                Compra segura Â· Acesso liberado imediatamente
             </p>
         </div>
     </div>
 </section>
 
-<!-- ══ GARANTIA ══════════════════════════════════════════════════════ -->
+<!-- â•â• GARANTIA â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section class="guarantee-strip">
     <span class="material-symbols-outlined">verified_user</span>
-    <p style="font-size:1.1rem;font-weight:800;margin-bottom:.4rem">Satisfação Garantida</p>
+    <p style="font-size:1.1rem;font-weight:800;margin-bottom:.4rem">SatisfaÃ§Ã£o Garantida</p>
     <p style="font-size:.88rem;color:#64748b;max-width:440px;margin:0 auto;line-height:1.6">
-        Se você não ficar satisfeita nos primeiros <strong style="color:#f1f5f9">7 dias</strong>, 
+        Se vocÃª nÃ£o ficar satisfeita nos primeiros <strong style="color:#f1f5f9">7 dias</strong>, 
         devolvemos 100% do seu dinheiro. Sem perguntas, sem burocracia.
     </p>
 </section>
 
-<!-- ══ FAQ ═══════════════════════════════════════════════════════════ -->
+<!-- â•â• FAQ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <section class="section">
     <div class="section-title">
-        <p class="eyebrow">Dúvidas</p>
+        <p class="eyebrow">DÃºvidas</p>
         <h2>Perguntas Frequentes</h2>
     </div>
     <div class="faq-list">
         <div class="faq-item" onclick="toggleFaq(this)">
-            <div class="faq-q">O acesso é realmente para sempre?<span class="material-symbols-outlined">expand_more</span></div>
-            <div class="faq-a">Sim! Você paga uma única vez de <span class="preco-display">R$ 46,90</span> e tem acesso a tudo para sempre, incluindo todas as novas funcionalidades que adicionarmos no futuro.</div>
+            <div class="faq-q">O acesso Ã© realmente para sempre?<span class="material-symbols-outlined">expand_more</span></div>
+            <div class="faq-a">Sim! VocÃª paga uma Ãºnica vez de <span class="preco-display">...</span> e tem acesso a tudo para sempre, incluindo todas as novas funcionalidades que adicionarmos no futuro.</div>
         </div>
         <div class="faq-item" onclick="toggleFaq(this)">
             <div class="faq-q">Preciso instalar alguma coisa?<span class="material-symbols-outlined">expand_more</span></div>
-            <div class="faq-a">Não. O ReceitasX funciona diretamente no navegador do seu celular ou computador, sem instalação. Basta acessar e começar a usar.</div>
+            <div class="faq-a">NÃ£o. O ReceitasX funciona diretamente no navegador do seu celular ou computador, sem instalaÃ§Ã£o. Basta acessar e comeÃ§ar a usar.</div>
         </div>
         <div class="faq-item" onclick="toggleFaq(this)">
             <div class="faq-q">E se eu trocar de celular, perco os dados?<span class="material-symbols-outlined">expand_more</span></div>
@@ -469,24 +469,24 @@
         </div>
         <div class="faq-item" onclick="toggleFaq(this)">
             <div class="faq-q">Como funciona o pagamento?<span class="material-symbols-outlined">expand_more</span></div>
-            <div class="faq-a">O pagamento é feito de forma segura. Após a confirmação, seu acesso vitalício é liberado imediatamente. Aceitamos cartão de crédito e Pix.</div>
+            <div class="faq-a">O pagamento Ã© feito de forma segura. ApÃ³s a confirmaÃ§Ã£o, seu acesso vitalÃ­cio Ã© liberado imediatamente. Aceitamos cartÃ£o de crÃ©dito e Pix.</div>
         </div>
         <div class="faq-item" onclick="toggleFaq(this)">
-            <div class="faq-q">Posso usar para qualquer tipo de negócio de alimentos?<span class="material-symbols-outlined">expand_more</span></div>
-            <div class="faq-a">Sim! O ReceitasX foi desenvolvido para qualquer empreendedora de alimentos: geladinhos, doces, bolos, salgados, marmitas, açaí e muito mais.</div>
+            <div class="faq-q">Posso usar para qualquer tipo de negÃ³cio de alimentos?<span class="material-symbols-outlined">expand_more</span></div>
+            <div class="faq-a">Sim! O ReceitasX foi desenvolvido para qualquer empreendedora de alimentos: geladinhos, doces, bolos, salgados, marmitas, aÃ§aÃ­ e muito mais.</div>
         </div>
     </div>
 </section>
 
-<!-- ══ STICKY BAR ════════════════════════════════════════════════════ -->
+<!-- â•â• STICKY BAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="sticky-bar">
     <div class="sticky-bar-txt">
-        <p>Acesso Vitalício ReceitasX</p>
-        <span>Pague uma vez · Use para sempre</span>
+        <p>Acesso VitalÃ­cio ReceitasX</p>
+        <span>Pague uma vez Â· Use para sempre</span>
     </div>
     <button class="sticky-cta" onclick="handleCompra()">
         <span class="material-symbols-outlined">shopping_cart</span>
-        <span class="preco-display">R$ 46,90</span> · Comprar
+        <span class="preco-display">...</span> Â· Comprar
     </button>
 </div>
 
@@ -501,7 +501,7 @@ function handleCompra() {
     location.href = 'checkout.html';
 }
 
-// Atualiza preços dinamicamente quando config carregar
+// Atualiza preÃ§os dinamicamente quando config carregar
 document.addEventListener('appconfig:loaded', () => {
     const ORIG = 97.00;
     const v    = window.AppConfig.valorPlano;
@@ -509,14 +509,14 @@ document.addEventListener('appconfig:loaded', () => {
     const desc = ORIG - v;
     const pct  = Math.round((desc / ORIG) * 100);
 
-    // Todos os botões/textos com classe preco-display
+    // Todos os botÃµes/textos com classe preco-display
     document.querySelectorAll('.preco-display').forEach(el => el.textContent = fmt);
 
-    // Preço principal grande
+    // PreÃ§o principal grande
     const pm = document.getElementById('price-main');
     if (pm) pm.textContent = fmt;
 
-    // Preço original riscado
+    // PreÃ§o original riscado
     const po = document.getElementById('price-orig');
     if (po) po.textContent = 'R$ ' + ORIG.toFixed(2).replace('.', ',');
 
@@ -525,7 +525,7 @@ document.addEventListener('appconfig:loaded', () => {
     if (pb) pb.textContent = '-' + pct + '% OFF';
 });
 
-// Scroll suave para âncoras
+// Scroll suave para Ã¢ncoras
 document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', function(e) {
         const href = this.getAttribute('href');
@@ -538,3 +538,4 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 </script>
 </body>
 </html>
+
