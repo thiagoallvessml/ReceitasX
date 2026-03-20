@@ -34,20 +34,11 @@
         .hero-title span { background:linear-gradient(135deg,#25f4f4,#0dc8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
         .hero-sub { font-size:.88rem;color:#64748b;line-height:1.6;max-width:480px; }
 
-        /* ── stats ── */
-        .stats-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;flex-shrink:0; }
-        .stat-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1rem 1.1rem;transition:border-color .2s; }
-        .stat-card:hover { border-color:rgba(37,244,244,.2); }
-        .stat-label { font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b;margin-bottom:.4rem; }
-        .stat-val { font-size:1.5rem;font-weight:900;line-height:1; }
-        .stat-sub { font-size:.68rem;color:#64748b;margin-top:.25rem; }
-        .stat-ganhos .stat-val  { color:#25f4f4; }
-        .stat-vendas .stat-val  { color:#34d399; }
-        .stat-pendente .stat-val{ color:#fbbf24; }
-        .stat-cliques .stat-val { color:#a78bfa; }
+        /* ── commission badge ── */
+        .comm-badge { display:inline-flex;align-items:center;gap:.3rem;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:9999px;padding:.25rem .7rem;font-size:.7rem;font-weight:700;color:#34d399;margin-top:.5rem; }
 
         /* ── link section ── */
-        .link-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1.25rem;flex:1;min-width:0; }
+        .link-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1.25rem;margin-bottom:1.5rem; }
         .link-card-head { display:flex;align-items:center;gap:.6rem;margin-bottom:1rem; }
         .link-card-head .material-symbols-outlined { font-size:1.1rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
         .link-card-title { font-size:.88rem;font-weight:700; }
@@ -73,30 +64,6 @@
         .step-title { font-size:.88rem;font-weight:700;margin-bottom:.3rem; }
         .step-desc { font-size:.75rem;color:#64748b;line-height:1.6; }
 
-        /* ── commission badge ── */
-        .comm-badge { display:inline-flex;align-items:center;gap:.3rem;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:9999px;padding:.25rem .7rem;font-size:.7rem;font-weight:700;color:#34d399;margin-top:.5rem; }
-
-        /* ── tabela de indicações ── */
-        .table-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden;margin-bottom:1.5rem; }
-        .table-head-bar { display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.15rem;border-bottom:1px solid #1E1E1E; }
-        .table-head-bar h3 { font-size:.88rem;font-weight:700; }
-        .table-wrap { overflow-x:auto; }
-        table { width:100%;border-collapse:collapse;font-size:.8rem; }
-        th { padding:.65rem 1rem;text-align:left;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;border-bottom:1px solid #1E1E1E;white-space:nowrap; }
-        td { padding:.75rem 1rem;border-bottom:1px solid #111;color:#94a3b8;white-space:nowrap; }
-        tr:last-child td { border-bottom:none; }
-        tr:hover td { background:rgba(255,255,255,.015); }
-        .status-badge { display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .6rem;border-radius:9999px;font-size:.65rem;font-weight:700; }
-        .status-ok   { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2); }
-        .status-pend { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2); }
-        .status-clk  { background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2); }
-
-        /* ── empty state ── */
-        .empty { display:flex;flex-direction:column;align-items:center;text-align:center;padding:3rem 1.5rem;gap:.75rem; }
-        .empty-ico { width:4rem;height:4rem;border-radius:50%;background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.12);display:flex;align-items:center;justify-content:center; }
-        .empty-ico .material-symbols-outlined { font-size:1.75rem;color:#334155;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
-        .empty p { font-size:.82rem;color:#475569; }
-
         /* ── regras ── */
         .rules-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1.25rem;margin-bottom:1.5rem; }
         .rules-list { display:flex;flex-direction:column;gap:.6rem; }
@@ -106,56 +73,12 @@
         .rule-text { font-size:.78rem;color:#64748b;line-height:1.55; }
         .rule-text strong { color:#94a3b8; }
 
-        /* ── saque ── */
-        .saque-card { background:linear-gradient(135deg,rgba(37,244,244,.06) 0%,rgba(37,244,244,.02) 100%);border:1px solid rgba(37,244,244,.18);border-radius:1rem;padding:1.25rem;display:flex;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap; }
-        .saque-info { flex:1;min-width:200px; }
-        .saque-label { font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem; }
-        .saque-val { font-size:2rem;font-weight:900;color:#f1f5f9;line-height:1; }
-        .saque-sub { font-size:.72rem;color:#64748b;margin-top:.25rem; }
-        .btn-saque { padding:.8rem 1.5rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.25);transition:all .15s;white-space:nowrap;flex-shrink:0; }
-        .btn-saque:hover { opacity:.9;box-shadow:0 6px 28px rgba(37,244,244,.4); }
-        .btn-saque:disabled { opacity:.4;cursor:not-allowed; }
-        .btn-saque .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
-
         /* ── toast ── */
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
 
-        /* ── modal saque ── */
-        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px); }
-        .modal-overlay.open { display:flex; }
-        .modal-box { background:#141414;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:440px;overflow:hidden;animation:slideUp .2s ease; }
-        .modal-box-head { display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid #1E1E1E; }
-        .modal-box-head h3 { font-size:.95rem;font-weight:700; }
-        .modal-close { width:2rem;height:2rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s; }
-        .modal-close:hover { color:#f1f5f9;border-color:#3A3A3A; }
-        .modal-close .material-symbols-outlined { font-size:1rem; }
-        .modal-body { padding:1.25rem; }
-        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:.3rem;display:block; }
-        .fc { width:100%;padding:.72rem .9rem;border-radius:.65rem;border:1px solid #2A2A2A !important;background:#0f0f0f !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
-        .fc::placeholder { color:#334155 !important; }
-        .fc:focus { border-color:rgba(37,244,244,.5) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
-        .modal-footer { display:flex;gap:.6rem;padding:.85rem 1.25rem;border-top:1px solid #1E1E1E; }
-        .btn-cancel { flex:1;padding:.72rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s; }
-        .btn-cancel:hover { border-color:#3A3A3A;color:#94a3b8; }
-        .btn-confirm { flex:1;padding:.72rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;transition:opacity .15s; }
-        .btn-confirm:hover { opacity:.9; }
-
-        /* ── loader ── */
-        .skeleton { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:.5rem; }
         @keyframes shimmer { to{background-position:-200% 0} }
-        @keyframes slideUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
         @keyframes fadeUp  { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
-
-        #stats-link-wrap { flex-direction: column; }
-        /* -- layout desktop 2 colunas -- */
-        @media (min-width: 900px) {
-            #layout-grid   { grid-template-columns: 1fr 380px !important; align-items: start !important; }
-            #col-right     { position: sticky !important; top: 5rem !important; }
-            #stats-link-wrap { flex-direction: row !important; align-items: flex-start !important; }
-            .stats-grid    { flex-shrink: 0; width: auto; min-width: 260px; }
-            .link-card     { flex: 1 !important; min-width: 0; }
-        }
     </style>
 </head>
 <body style="visibility:hidden">
@@ -207,7 +130,7 @@
     </a>
 
     <!-- LINK DE INDICAÇÃO -->
-    <div class="link-card" style="margin-bottom:1.5rem">
+    <div class="link-card">
         <div class="link-card-head">
             <span class="material-symbols-outlined">link</span>
             <span class="link-card-title">Seu link exclusivo</span>
@@ -263,8 +186,6 @@
         </div>
     </div>
 
-
-
     <!-- REGRAS -->
     <div class="rules-card">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.85rem">
@@ -297,47 +218,6 @@
 
 </div><!-- /container -->
 
-<!-- ── MODAL DE SAQUE ── -->
-<div class="modal-overlay" id="modal-saque">
-    <div class="modal-box">
-        <div class="modal-box-head">
-            <h3>Solicitar Saque via Pix</h3>
-            <button class="modal-close" onclick="fecharModalSaque()">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <div class="modal-body" style="display:flex;flex-direction:column;gap:.85rem">
-            <div style="background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.15);border-radius:.75rem;padding:.85rem 1rem;display:flex;align-items:center;gap:.65rem">
-                <span class="material-symbols-outlined" style="color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
-                <div>
-                    <p style="font-size:.7rem;color:#64748b">Saldo disponível</p>
-                    <p style="font-size:1.1rem;font-weight:800;color:#25f4f4" id="modal-saldo">R$ 0,00</p>
-                </div>
-            </div>
-            <div>
-                <label class="field-label" for="pix-chave">Chave Pix</label>
-                <input id="pix-chave" type="text" class="fc" placeholder="CPF, e-mail, telefone ou chave aleatória" />
-            </div>
-            <div>
-                <label class="field-label" for="pix-tipo">Tipo da chave</label>
-                <select id="pix-tipo" class="fc" style="background:#0f0f0f !important;color:#f1f5f9 !important;border:1px solid #2A2A2A !important;">
-                    <option value="cpf">CPF</option>
-                    <option value="email">E-mail</option>
-                    <option value="telefone">Telefone</option>
-                    <option value="aleatoria">Chave aleatória</option>
-                </select>
-            </div>
-            <p style="font-size:.72rem;color:#475569;line-height:1.5">
-                ⏱️ O pagamento é processado em até <strong style="color:#94a3b8">3 dias úteis</strong>. Você receberá uma confirmação por e-mail.
-            </p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="fecharModalSaque()">Cancelar</button>
-            <button class="btn-confirm" id="btn-confirmar-saque" onclick="solicitarSaque()">Solicitar Saque</button>
-        </div>
-    </div>
-</div>
-
 <!-- ── TOAST ── -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
@@ -345,26 +225,14 @@
 </div>
 
 <script>
-/* ── ESTADO ────────────────────────────────────────── */
-let userEmail    = '';
-let userNome     = '';
-let userId       = null;
-let codigoRef    = '';
-let saldoDisp    = 0;
-let totalGanhos  = 0;
-let totalVendas  = 0;
-let totalCliques = 0;
+/* ── ESTADO ── */
+let userEmail = '';
+let userId    = null;
+let codigoRef = '';
 
 const BASE_URL = location.origin + '/checkout.html';
 
-/* ── UTILS ─────────────────────────────────────────── */
-function fmtR(v) {
-    return 'R$ ' + Number(v).toFixed(2).replace('.',',');
-}
-function fmtData(d) {
-    return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
-}
-
+/* ── TOAST ── */
 let toastTimer;
 function showToast(msg, type='success') {
     const t = document.getElementById('toast');
@@ -376,15 +244,14 @@ function showToast(msg, type='success') {
     toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-/* ── GERAR CÓDIGO DO AFILIADO ──────────────────────── */
+/* ── GERAR CÓDIGO ── */
 function gerarCodigo(email) {
-    // Gera código a partir do email: parte antes do @ + 4 chars aleatórios
     const base = email.split('@')[0].replace(/[^a-zA-Z0-9]/g,'').slice(0,6).toUpperCase();
     const sufx = Math.random().toString(36).substring(2,6).toUpperCase();
     return base + sufx;
 }
 
-/* ── COPIAR LINK ────────────────────────────────────── */
+/* ── COPIAR LINK ── */
 function copiarLink() {
     const url = document.getElementById('link-url').textContent;
     navigator.clipboard.writeText(url).then(() => {
@@ -395,18 +262,18 @@ function copiarLink() {
     }).catch(() => showToast('Erro ao copiar', 'error'));
 }
 
-/* ── COMPARTILHAR WhatsApp ─────────────────────────── */
+/* ── WHATSAPP ── */
 function compartilharWhatsApp() {
-    const url  = document.getElementById('link-url').textContent;
-    const msg  = encodeURIComponent(
-        `🍰 Oi! Uso o ReceitasX para precificar meus doces e amei!\n\n`+
-        `Ele te ajuda a calcular o custo de cada receita, definir o preço certo e lucrar mais. 🤩\n\n`+
+    const url = document.getElementById('link-url').textContent;
+    const msg = encodeURIComponent(
+        `🍰 Oi! Uso o ReceitasX para precificar meus doces e amei!\n\n` +
+        `Ele te ajuda a calcular o custo de cada receita, definir o preço certo e lucrar mais. 🤩\n\n` +
         `Acesse pelo meu link e garanta o acesso vitalício: ${url}`
     );
     window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 
-/* ── COMPARTILHAR NATIVO ───────────────────────────── */
+/* ── COMPARTILHAR NATIVO ── */
 function compartilharNativo() {
     const url = document.getElementById('link-url').textContent;
     if (navigator.share) {
@@ -416,216 +283,70 @@ function compartilharNativo() {
     }
 }
 
-/* ── COPIAR MENSAGEM PRONTA ────────────────────────── */
+/* ── COPIAR MENSAGEM PRONTA ── */
 function copiarMensagem() {
     const url = document.getElementById('link-url').textContent;
     const msg =
-        `🍰 Oi! Uso o ReceitasX para precificar meus doces e amei!\n\n`+
-        `Ele te ajuda a calcular o custo de cada receita, definir o preço certo e lucrar mais. 🤩\n\n`+
+        `🍰 Oi! Uso o ReceitasX para precificar meus doces e amei!\n\n` +
+        `Ele te ajuda a calcular o custo de cada receita, definir o preço certo e lucrar mais. 🤩\n\n` +
         `Acesse pelo meu link e garanta o acesso vitalício com desconto:\n${url}`;
-    navigator.clipboard.writeText(msg).then(() => {
-        showToast('Mensagem copiada! É só colar no WhatsApp 🎉');
-    }).catch(() => showToast('Erro ao copiar', 'error'));
+    navigator.clipboard.writeText(msg)
+        .then(() => showToast('Mensagem copiada! É só colar no WhatsApp 🎉'))
+        .catch(() => showToast('Erro ao copiar', 'error'));
 }
 
-/* ── MODAL SAQUE ────────────────────────────────────── */
-function abrirModalSaque() {
-    document.getElementById('modal-saldo').textContent = fmtR(saldoDisp);
-    document.getElementById('modal-saque').classList.add('open');
-}
-function fecharModalSaque() {
-    document.getElementById('modal-saque').classList.remove('open');
+/* ── RENDERIZAR LINK ── */
+function renderLink() {
+    document.getElementById('link-url').textContent = `${BASE_URL}?ref=${codigoRef}`;
 }
 
-async function solicitarSaque() {
-    const chave = document.getElementById('pix-chave').value.trim();
-    const tipo  = document.getElementById('pix-tipo').value;
-    if (!chave) { showToast('Informe sua chave Pix', 'error'); return; }
-    if (saldoDisp < 20) { showToast('Saldo mínimo de R$ 20,00 para saque', 'error'); return; }
-
-    const btn = document.getElementById('btn-confirmar-saque');
-    btn.disabled = true;
-    btn.textContent = 'Solicitando...';
-
-    try {
-        // Registrar solicitação de saque
-        const { error } = await sb.from('saques_afiliado').insert({
-            user_id:    userId,
-            email:      userEmail,
-            valor:      saldoDisp,
-            pix_chave:  chave,
-            pix_tipo:   tipo,
-            status:     'pendente',
-        });
-        if (error) throw error;
-
-        fecharModalSaque();
-        showToast('Saque solicitado com sucesso! 🎉 Você receberá em até 3 dias úteis.');
-        // Atualizar UI
-        saldoDisp = 0;
-        document.getElementById('saldo-saque').textContent = fmtR(0);
-        document.getElementById('stat-pendente').textContent = fmtR(0);
-        document.getElementById('btn-saque').disabled = true;
-    } catch(e) {
-        // Tabela pode não existir ainda — registrar feedback ao usuário de qualquer forma
-        fecharModalSaque();
-        showToast('Solicitação enviada! Entraremos em contato por e-mail. 😊');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Solicitar Saque';
-    }
-}
-
-/* ── RENDERIZAR TABELA ──────────────────────────────── */
-function renderTabela(indicacoes) {
-    document.getElementById('total-indicacoes').textContent = `${indicacoes.length} indicação${indicacoes.length !== 1 ? 'ões' : ''}`;
-
-    if (indicacoes.length === 0) {
-        document.getElementById('empty-state').style.display      = 'flex';
-        document.getElementById('table-container').style.display  = 'none';
-        return;
-    }
-
-    document.getElementById('empty-state').style.display      = 'none';
-    document.getElementById('table-container').style.display  = 'block';
-
-    const tbody = document.getElementById('tbody-indicacoes');
-    tbody.innerHTML = '';
-
-    indicacoes.forEach((ind, i) => {
-        const email    = ind.indicado_email || '–';
-        const emailShort = email.length > 28 ? email.substring(0, 26) + '…' : email;
-        const data     = ind.created_at ? fmtData(ind.created_at) : '–';
-        const conv     = ind.converteu;
-        const comissao = ind.comissao ? fmtR(ind.comissao) : (conv ? fmtR((ind.valor_pago || 46.90) * 0.10) : '–');
-
-        let badge = '';
-        if (conv) {
-            badge = `<span class="status-badge status-ok"><span class="material-symbols-outlined" style="font-size:.65rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">check_circle</span> Convertida</span>`;
-        } else {
-            badge = `<span class="status-badge status-clk"><span class="material-symbols-outlined" style="font-size:.65rem">touch_app</span> Clicou</span>`;
-        }
-
-        const row = document.createElement('tr');
-        row.style.animation = `fadeUp .15s ${i * .04}s ease both`;
-        row.innerHTML = `
-            <td title="${email}" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:#f1f5f9">${emailShort}</td>
-            <td>${data}</td>
-            <td>${badge}</td>
-            <td style="text-align:right;color:${conv ? '#34d399' : '#475569'};font-weight:${conv ? '700' : '400'}">${comissao}</td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-/* ── BUSCAR DADOS DO AFILIADO ───────────────────────── */
+/* ── BUSCAR / CRIAR AFILIADO ── */
 async function carregarDados(user) {
     try {
-        // Buscar ou criar registro do afiliado
         let { data: afiliado, error: afErr } = await sb
             .from('afiliados')
-            .select('*')
+            .select('id, codigo')
             .eq('user_id', user.id)
             .single();
 
         if (afErr && afErr.code === 'PGRST116') {
-            // Não existe — criar
+            // Afiliado não existe — criar
             const codigo = gerarCodigo(user.email);
             const { data: novoAf, error: crErr } = await sb.from('afiliados').insert({
                 user_id: user.id,
                 email:   user.email,
                 codigo:  codigo,
-            }).select().single();
-
-            if (crErr) {
-                // Tabela não existe ainda — usar código local
-                codigoRef = 'REF-' + user.id.substring(0,8).toUpperCase();
-                renderLink();
-                renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0 });
-                renderTabela([]);
-                return;
-            }
-            afiliado = novoAf;
+            }).select('id, codigo').single();
+            codigoRef = crErr ? ('REF-' + user.id.substring(0,8).toUpperCase()) : novoAf.codigo;
         } else if (afErr) {
-            throw afErr;
+            // Outro erro — fallback local
+            codigoRef = gerarCodigo(user.email);
+        } else {
+            codigoRef = afiliado.codigo;
         }
 
-        codigoRef = afiliado.codigo;
         renderLink();
-
-        // Stats
-        const ganhos  = parseFloat(afiliado.total_ganhos || 0);
-        const vendas  = parseInt(afiliado.total_vendas || 0);
-        const cliques = parseInt(afiliado.total_cliques || 0);
-
-        // Buscar indicações
-        const { data: indicacoes } = await sb
-            .from('indicacoes')
-            .select('*')
-            .eq('afiliado_id', afiliado.id)
-            .order('created_at', { ascending: false });
-
-        // Calcular saldo disponível (vendas confirmadas - saques)
-        const { data: saques } = await sb
-            .from('saques_afiliado')
-            .select('valor,status')
-            .eq('user_id', user.id);
-
-        let totalSacado = 0;
-        (saques || []).forEach(s => {
-            if (s.status !== 'cancelado') totalSacado += parseFloat(s.valor || 0);
-        });
-
-        saldoDisp   = Math.max(0, ganhos - totalSacado);
-        totalGanhos = ganhos;
-        totalVendas = vendas;
-        totalCliques = cliques;
-
-        renderStats({ ganhos, vendas, pendente: saldoDisp, cliques });
-        renderTabela(indicacoes || []);
-
-        // Habilitar botão saque se tiver saldo
-        if (saldoDisp >= 20) {
-            document.getElementById('btn-saque').disabled = false;
-        }
     } catch(e) {
-        console.error('Erro ao carregar dados do afiliado:', e);
-        // Fallback — usar código baseado no email
+        console.error('Erro ao carregar link do afiliado:', e);
         codigoRef = gerarCodigo(user.email);
         renderLink();
-        renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0 });
-        renderTabela([]);
     }
 }
 
-function renderLink() {
-    const url = `${BASE_URL}?ref=${codigoRef}`;
-    document.getElementById('link-url').textContent = url;
-}
-
-function renderStats({ ganhos, vendas, pendente, cliques }) {
-    document.getElementById('stat-ganhos').textContent   = fmtR(ganhos);
-    document.getElementById('stat-vendas').textContent   = vendas.toString();
-    document.getElementById('stat-pendente').textContent = fmtR(pendente);
-    document.getElementById('stat-cliques').textContent  = cliques.toString();
-    document.getElementById('saldo-saque').textContent   = fmtR(pendente);
-    document.getElementById('modal-saldo').textContent   = fmtR(pendente);
-}
-
-/* ── INIT ────────────────────────────────────────────── */
+/* ── INIT ── */
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // 1. Verifica sessão local (rápido, sem chamada de rede)
+        // 1. Verifica sessão local (sem rede — instantâneo)
         const { data: { session } } = await sb.auth.getSession();
         if (!session) {
             location.href = 'login.html?redirect=indique-ganhe.html';
             return;
         }
 
-        // Sessão local confirmada — exibe a página
+        // Sessão confirmada — exibe a página
         document.body.style.visibility = 'visible';
 
-        // 2. Valida token no servidor em segundo plano
+        // 2. Valida token no servidor
         const { data: { user }, error: authErr } = await sb.auth.getUser();
         if (authErr || !user) {
             location.href = 'login.html?redirect=indique-ganhe.html';
@@ -634,7 +355,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         userId    = user.id;
         userEmail = user.email;
-        userNome  = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split('@')[0];
 
         await carregarDados(user);
     } catch(e) {
@@ -642,30 +362,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         location.href = 'login.html';
     }
 });
-
-// Fechar modal ao clicar no overlay
-document.getElementById('modal-saque').addEventListener('click', function(e) {
-    if (e.target === this) fecharModalSaque();
-});
-
-/* -- layout responsivo desktop -- */
-function applyLayout() {
-    var grid  = document.getElementById('layout-grid');
-    var right = document.getElementById('col-right');
-    if (!grid || !right) return;
-    if (window.innerWidth >= 900) {
-        grid.style.gridTemplateColumns = '1fr 380px';
-        grid.style.alignItems          = 'start';
-        right.style.position           = 'sticky';
-        right.style.top                = '5rem';
-    } else {
-        grid.style.gridTemplateColumns = '1fr';
-        right.style.position           = 'static';
-        right.style.top                = 'auto';
-    }
-}
-window.addEventListener('resize', applyLayout);
-applyLayout();
 </script>
 </body>
 </html>
