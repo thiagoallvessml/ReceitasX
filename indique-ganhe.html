@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -192,36 +192,8 @@
         </div>
     </div>
 
-    <!-- GRID DESKTOP (2 colunas) -->
-    <div id="layout-grid" style="display:grid;grid-template-columns:1fr;gap:1.25rem;">
-    <div id="col-left" style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
-    <div id="stats-link-wrap" style="display:flex;gap:1.25rem;">
-    <!-- STATS -->
-    <div class="stats-grid">
-        <div class="stat-card stat-ganhos">
-            <div class="stat-label">Total Ganho</div>
-            <div class="stat-val" id="stat-ganhos">–</div>
-            <div class="stat-sub">desde o início</div>
-        </div>
-        <div class="stat-card stat-vendas">
-            <div class="stat-label">Vendas</div>
-            <div class="stat-val" id="stat-vendas">–</div>
-            <div class="stat-sub">convertidas</div>
-        </div>
-        <div class="stat-card stat-pendente">
-            <div class="stat-label">A Receber</div>
-            <div class="stat-val" id="stat-pendente">–</div>
-            <div class="stat-sub">disponível para saque</div>
-        </div>
-        <div class="stat-card stat-cliques">
-            <div class="stat-label">Cliques</div>
-            <div class="stat-val" id="stat-cliques">–</div>
-            <div class="stat-sub">no seu link</div>
-        </div>
-    </div>
-
     <!-- LINK DE INDICAÇÃO -->
-    <div class="link-card">
+    <div class="link-card" style="margin-bottom:1.5rem">
         <div class="link-card-head">
             <span class="material-symbols-outlined">link</span>
             <span class="link-card-title">Seu link exclusivo</span>
@@ -248,22 +220,6 @@
             </button>
         </div>
     </div>
-    </div><!-- /stats-link-wrap -->
-
-    </div><!-- /col-left -->
-    <div id="col-right" style="display:flex;flex-direction:column;gap:1.25rem;min-width:0;">
-    <div class="saque-card" id="saque-card">
-        <div class="saque-info">
-            <div class="saque-label">💰 Saldo disponível para saque</div>
-            <div class="saque-val" id="saldo-saque">R$ 0,00</div>
-            <div class="saque-sub">Mínimo de R$ 20,00 para solicitar saque via Pix</div>
-        </div>
-        <button class="btn-saque" id="btn-saque" onclick="abrirModalSaque()" disabled>
-            Solicitar Saque
-        </button>
-    </div>
-    </div><!-- /col-right -->
-    </div><!-- /layout-grid -->
 
     <!-- COMO FUNCIONA -->
     <div style="margin-bottom:1.5rem">
@@ -293,35 +249,7 @@
         </div>
     </div>
 
-    <!-- HISTÓRICO DE INDICAÇÕES -->
-    <div class="table-card">
-        <div class="table-head-bar">
-            <h3>Histórico de indicações</h3>
-            <span style="font-size:.72rem;color:#475569" id="total-indicacoes">0 indicações</span>
-        </div>
-        <div id="tabela-wrap">
-            <div class="empty" id="empty-state">
-                <div class="empty-ico">
-                    <span class="material-symbols-outlined">group_add</span>
-                </div>
-                <p style="font-weight:600;color:#64748b">Nenhuma indicação ainda</p>
-                <p>Compartilhe seu link e comece a ganhar agora!</p>
-            </div>
-            <div class="table-wrap" id="table-container" style="display:none">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Indicada</th>
-                            <th>Data</th>
-                            <th>Status</th>
-                            <th style="text-align:right">Comissão</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-indicacoes"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+
 
     <!-- REGRAS -->
     <div class="rules-card">
