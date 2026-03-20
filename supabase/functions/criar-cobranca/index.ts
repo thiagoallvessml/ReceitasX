@@ -50,6 +50,8 @@ serve(async (req) => {
       },
     };
 
+    console.log('Body enviado para AbacatePay:', JSON.stringify(body));
+
     const resp = await fetch(`${ABACATE_API}/billing/create`, {
       method:  'POST',
       headers: {
@@ -60,10 +62,12 @@ serve(async (req) => {
     });
 
     const data = await resp.json();
+    console.log('Resposta AbacatePay (status', resp.status, '):', JSON.stringify(data));
 
     if (!resp.ok) {
-      console.error('AbacatePay error:', data);
-      return new Response(JSON.stringify({ error: data?.error || 'Erro ao gerar cobrança' }), {
+      // Retorna o objeto completo para diagnóstico
+      const errMsg = data?.error || data?.message || data?.errors?.[0] || JSON.stringify(data);
+      return new Response(JSON.stringify({ error: errMsg, raw: data }), {
         status: resp.status,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });

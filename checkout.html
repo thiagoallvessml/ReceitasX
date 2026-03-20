@@ -607,7 +607,8 @@ async function finalizarCompra() {
         const data = await resp.json();
 
         if (!resp.ok || !data.url) {
-            throw new Error(data.error || 'Erro ao gerar cobrança');
+            const msg = data.error || (data.raw ? JSON.stringify(data.raw) : 'Erro ao gerar cobrança');
+            throw new Error(msg);
         }
 
         // Redireciona para página de pagamento do AbacatePay
