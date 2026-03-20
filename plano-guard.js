@@ -108,8 +108,11 @@ async function verificarLimite(recurso) {
 }
 
 /* ── Modal de bloqueio ────────────────────────────────────────── */
-(function injectBloqueioModal() {
+
+function _criarModalBloqueio() {
   if (document.getElementById('plano-bloqueio-overlay')) return;
+  if (!document.body) return; // body ainda não existe, tenta depois
+
   const el = document.createElement('div');
   el.id = 'plano-bloqueio-overlay';
   el.style.cssText = `
@@ -158,9 +161,20 @@ async function verificarLimite(recurso) {
   `;
   document.body.appendChild(el);
   el.addEventListener('click', e => { if (e.target === el) fecharBloqueio(); });
-})();
+}
+
+// Tenta criar assim que o DOM estiver pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _criarModalBloqueio);
+} else {
+  _criarModalBloqueio();
+}
+
 
 function mostrarBloqueio(recurso) {
+  // Garante que o modal foi criado (caso o DOMContentLoaded ainda não disparou)
+  _criarModalBloqueio();
+
   const nome   = NOMES_RECURSO[recurso] || recurso;
   const limite = LIMITES_GRATUITO[recurso] ?? 0;
   const total  = getTotalCriado(recurso);
@@ -174,7 +188,7 @@ function mostrarBloqueio(recurso) {
 
   document.getElementById('plano-bloq-msg').innerHTML =
     limite === 0
-      ? `A criação de <strong>${nome}s</strong> não está disponível no plano gratuito.<br>Faça upgrade para criar combos ilimitados.`
+      ? `A criação de <strong>${nome}s</strong> não está disponível no plano gratuito.<br>Faça upgrade para desbloquear.`
       : `Você já criou <strong>${total}</strong> de <strong>${limite}</strong> ${nome.toLowerCase()}${limite > 1 ? 's' : ''} permitidos no plano gratuito.<br><br>Mesmo após excluir itens, o limite é calculado pelo total já criado.`;
 
   ov.style.opacity = '1';
