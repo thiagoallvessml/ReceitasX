@@ -422,6 +422,30 @@ let codigoAfiliado = null;
     if (ref) {
         codigoAfiliado = ref.toUpperCase();
         sessionStorage.setItem('ref_afiliado', codigoAfiliado);
+
+        // Registra clique no banco — só quando vem direto da URL (?ref=)
+        if (p.get('ref')) {
+            (async () => {
+                try {
+                    // Busca o afiliado pelo código
+                    const { data: af } = await sb
+                        .from('afiliados')
+                        .select('id, total_cliques')
+                        .eq('codigo', codigoAfiliado)
+                        .single();
+
+                    if (af) {
+                        // Incrementa total_cliques
+                        await sb
+                            .from('afiliados')
+                            .update({ total_cliques: (af.total_cliques || 0) + 1 })
+                            .eq('id', af.id);
+                    }
+                } catch(e) {
+                    // Silencia erro — não deve impedir o checkout
+                }
+            })();
+        }
     }
 })();
 
