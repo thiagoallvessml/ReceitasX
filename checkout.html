@@ -574,7 +574,10 @@ function validar() {
     return true;
 }
 
-/* ── FINALIZAR ──────────────────────────────────────── */
+/* ── EDGE FUNCTION URL ── */
+const EDGE_URL = 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/criar-cobranca';
+
+/* ── FINALIZAR (AbacatePay) ── */
 async function finalizarCompra() {
     if (!validar()) return;
 
@@ -582,88 +585,45 @@ async function finalizarCompra() {
     const spinner = document.getElementById('spinner');
     const bico    = document.getElementById('btn-ico');
     const btxt    = document.getElementById('btn-txt');
-    const email   = document.getElementById('f-email').value.trim();
 
-    btn.disabled = true;
+    btn.disabled          = true;
     spinner.style.display = 'block';
     bico.style.display    = 'none';
-    btxt.textContent      = 'Processando...';
+    btxt.textContent      = 'Gerando Pix...';
 
     try {
-        // Gerar código de acesso único
-        const cod = 'RX-' + Math.random().toString(36).substring(2,8).toUpperCase();
+        const nome     = document.getElementById('f-nome').value.trim();
+        const email    = document.getElementById('f-email').value.trim();
+        const telefone = document.getElementById('f-tel').value.trim();
 
-        // Buscar afiliado se houver referência
-        let afiliadoId = null;
-        if (codigoAfiliado) {
-            try {
-                const { data: af } = await sb.from('afiliados').select('id').eq('codigo', codigoAfiliado).single();
-                if (af) afiliadoId = af.id;
-            } catch(e) {}
+        const resp = await fetch(EDGE_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nome,
+                email,
+                telefone,
+                valor:  precoFinal,
+                ref:    codigoAfiliado || null,
+            }),
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok || !data.url) {
+            throw new Error(data.error || 'Erro ao gerar cobrança');
         }
 
-        // Obter user_id do usuário logado
-        const { data: { user } } = await sb.auth.getUser();
-        const userId = user ? user.id : null;
-
-        // Inserir pedido — inclui user_id para passar o RLS
-        const payload = {
-            email,
-            valor_pago:    precoFinal,
-            metodo_pag:    metodoPag,
-            status:        'confirmado',
-            codigo_acesso: cod,
-        };
-        if (userId) payload.user_id = userId;
-
-        const { data: pedido, error: pedErr } = await sb.from('pedidos').insert(payload).select().single();
-
-        if (pedErr) {
-            console.error('Erro ao salvar pedido:', pedErr.message);
-            throw pedErr;
-        }
-
-        // Registrar indicação se veio de afiliado
-        if (afiliadoId && pedido) {
-            try {
-                await sb.from('indicacoes').insert({
-                    afiliado_id:    afiliadoId,
-                    indicado_email: email,
-                    converteu:      true,
-                    valor_pago:     precoFinal,
-                    comissao:       +(precoFinal * 0.10).toFixed(2),
-                });
-                await sb.rpc('incrementar_venda_afiliado', {
-                    p_afiliado_id: afiliadoId,
-                    p_valor: precoFinal
-                }).catch(() => {});
-            } catch(e) {}
-        }
-
-        sessionStorage.removeItem('ref_afiliado');
-
-        // Mostrar tela de sucesso
-        document.querySelector('.checkout-grid').style.display = 'none';
-        const sw = document.getElementById('sucesso-wrap');
-        sw.style.display = 'flex';
-        document.getElementById('cod-acesso').textContent = cod;
+        // Redireciona para página de pagamento do AbacatePay
+        window.location.href = data.url;
 
     } catch (err) {
-        showToast('Erro ao processar: ' + err.message, 'error');
-        btn.disabled = false;
+        showToast('Erro: ' + (err.message || 'Tente novamente'), 'error');
+        btn.disabled          = false;
         spinner.style.display = 'none';
         bico.style.display    = '';
-        btxt.textContent = 'Gerar Pix';
+        btxt.textContent      = 'Gerar Pix';
     }
-}
-
-/* ── PIX COPIAR ─────────────────────────────────────── */
-function copiarPix() {
-    const code = document.getElementById('pix-code').textContent;
-    navigator.clipboard.writeText(code).catch(()=>{});
-    document.getElementById('copy-ico').textContent = 'check';
-    showToast('Código Pix copiado!');
-    setTimeout(()=>{ document.getElementById('copy-ico').textContent='content_copy'; },2000);
 }
 
 /* ── TOAST ──────────────────────────────────────────── */
@@ -680,8 +640,6 @@ function showToast(msg, type='success') {
 
 /* ── INIT: Auth + preencher campos ──────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
-    updateParcelas();
-
     // Verificar usuário logado
     try {
         const { data: { user } } = await sb.auth.getUser();
