@@ -207,7 +207,8 @@
                         <th>#</th>
                         <th>Afiliado</th>
                         <th>Código</th>
-                        <th>Cliques</th>
+                        <th>Cliques Link</th>
+                        <th>Cupons</th>
                         <th>Vendas</th>
                         <th>Total Ganhos</th>
                         <th>Saldo Pendente</th>
@@ -215,7 +216,7 @@
                     </tr>
                 </thead>
                 <tbody id="tbody-afiliados">
-                    <tr><td colspan="8"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                    <tr><td colspan="9"><div class="shimmer" style="margin:.5rem"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -234,15 +235,14 @@
                         <th>Data</th>
                         <th>Afiliado</th>
                         <th>Valor</th>
-                        <th>Chave Pix</th>
-                        <th>Tipo</th>
+                        <th>Contato Pix</th>
                         <th>Status</th>
                         <th>Obs</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-saques">
-                    <tr><td colspan="8"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                    <tr><td colspan="7"><div class="shimmer" style="margin:.5rem"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -481,7 +481,7 @@ function renderAfiliados(q = '') {
     });
 
     const tbody = document.getElementById('tbody-afiliados');
-    if (!list.length) { tbody.innerHTML = emptyCel(8); return; }
+    if (!list.length) { tbody.innerHTML = emptyCel(9); return; }
 
     // Calcular saldo pendente de cada afiliado
     const saldoPend = {};
@@ -506,6 +506,7 @@ function renderAfiliados(q = '') {
             </td>
             <td><code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.8rem;color:#25f4f4">${esc(a.codigo)}</code></td>
             <td>${fmt(a.total_cliques)}</td>
+            <td>${fmt(a.total_cupons)}</td>
             <td>${fmt(a.total_vendas)}</td>
             <td class="td-bold" style="color:#25f4f4">${fmtR(a.total_ganhos)}</td>
             <td class="td-bold" style="color:${pend > 0 ? '#fbbf24' : '#475569'}">${fmtR(pend)}</td>
@@ -518,13 +519,13 @@ function renderAfiliados(q = '') {
 function renderSaques(q = '') {
     let list = allSaques;
     if (q) list = list.filter(s =>
-        s.email.toLowerCase().includes(q) ||
-        s.pix_chave.toLowerCase().includes(q) ||
-        s.status.toLowerCase().includes(q)
+        (s.email || '').toLowerCase().includes(q) ||
+        (s.pix_chave || '').toLowerCase().includes(q) ||
+        (s.status || '').toLowerCase().includes(q)
     );
 
     const tbody = document.getElementById('tbody-saques');
-    if (!list.length) { tbody.innerHTML = emptyCel(8); return; }
+    if (!list.length) { tbody.innerHTML = emptyCel(7); return; }
 
     tbody.innerHTML = list.map(s => {
         const badgeCls = s.status === 'pago' ? 's-pago' : s.status === 'rejeitado' ? 's-rejeitado' : 's-pendente';
@@ -548,12 +549,10 @@ function renderSaques(q = '') {
             </td>
             <td class="td-bold" style="color:#25f4f4;white-space:nowrap">${fmtR(s.valor)}</td>
             <td>
-                <div class="pix-row">
-                    <span class="pix-chip">${esc(s.pix_tipo.toUpperCase())}</span>
-                    <span style="font-size:.8rem;color:#94a3b8">${esc(s.pix_chave)}</span>
-                </div>
+                ${s.pix_chave
+                    ? `<div class="pix-row"><span class="pix-chip">${esc((s.pix_tipo||'PIX').toUpperCase())}</span><span style="font-size:.8rem;color:#94a3b8">${esc(s.pix_chave)}</span></div>`
+                    : `<span style="font-size:.75rem;color:#475569">(a combinar)</span>`}
             </td>
-            <td style="text-transform:capitalize;color:#64748b;font-size:.8rem">${esc(s.pix_tipo)}</td>
             <td>
                 <span class="s-badge ${badgeCls}">
                     <span class="material-symbols-outlined">${badgeIco}</span>${badgeTxt}
@@ -611,7 +610,9 @@ function abrirModalPagar(id) {
     if (!s) return;
     document.getElementById('mp-afiliado').textContent = s.email;
     document.getElementById('mp-valor').textContent    = fmtR(s.valor);
-    document.getElementById('mp-pix').textContent      = `${s.pix_tipo.toUpperCase()}: ${s.pix_chave}`;
+    document.getElementById('mp-pix').textContent      = s.pix_chave
+        ? `${(s.pix_tipo || '').toUpperCase()}: ${s.pix_chave}`
+        : 'Entrar em contato com o afiliado';
     document.getElementById('mp-obs').value = '';
     document.getElementById('modal-pagar').classList.add('open');
 }
