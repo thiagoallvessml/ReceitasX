@@ -173,7 +173,7 @@
             <span class="material-symbols-outlined text-primary text-sm">settings_suggest</span>
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Sistema</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <!-- Configurações -->
             <a href="configuracoes.html"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
@@ -201,6 +201,22 @@
                     <p class="text-xs" style="color:#64748b;margin-top:.1rem">Indique amigas e ganhe comissão em Pix</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
+            </a>
+            <!-- Meus Ganhos -->
+            <a href="meus-ganhos.html"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
+                style="background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(251,191,36,.02));border-color:rgba(251,191,36,.2);">
+                <div class="p-2 rounded-lg" style="background:rgba(251,191,36,.1);color:#fbbf24;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">wallet</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Meus Ganhos</h4>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-saldo-idx">R$ 0,00</span>
+                    </div>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Saldo, comissões e solicitar saque</p>
+                </div>
+                <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
             </a>
             <!-- Meu Perfil -->
             <a href="perfil.html"
@@ -237,6 +253,38 @@
                 const allowed = el.dataset.role.split(',').map(r => r.trim());
                 el.style.display = allowed.includes(role) ? '' : 'none';
             });
+
+            // Buscar saldo do afiliado para exibir no badge
+            try {
+                const { data: afiliado } = await sb
+                    .from('afiliados')
+                    .select('total_ganhos')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (afiliado) {
+                    const { data: saques } = await sb
+                        .from('saques_afiliado')
+                        .select('valor, status')
+                        .eq('user_id', session.user.id);
+
+                    const ganhos = parseFloat(afiliado.total_ganhos || 0);
+                    let sacado = 0;
+                    (saques || []).forEach(s => {
+                        if (s.status !== 'cancelado') sacado += parseFloat(s.valor || 0);
+                    });
+                    const saldo = Math.max(0, ganhos - sacado);
+                    const badge = document.getElementById('badge-saldo-idx');
+                    if (badge) {
+                        badge.textContent = 'R$ ' + saldo.toFixed(2).replace('.', ',');
+                        if (saldo > 0) {
+                            badge.style.background = 'rgba(52,211,153,.15)';
+                            badge.style.color = '#34d399';
+                            badge.style.borderColor = 'rgba(52,211,153,.3)';
+                        }
+                    }
+                }
+            } catch(_) {}
         } catch (e) {
             console.warn('[ReceitasX] Erro ao carregar role:', e);
         }
