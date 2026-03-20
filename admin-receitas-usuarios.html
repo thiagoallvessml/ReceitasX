@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin — Receitas dos Usuários · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* admin banner */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* badge admin */
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .badge-admin .material-symbols-outlined { font-size:.75rem; }
+
+        /* stats */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.85rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569; }
+        .search-input:focus { border-color:rgba(37,244,244,.4); }
+
+        /* user row */
+        .user-row { display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;cursor:pointer;transition:border-color .18s,background .18s; }
+        .user-row:hover, .user-row.active { border-color:rgba(37,244,244,.35);background:#1E1E1E; }
+        .user-row.active { background:rgba(37,244,244,.04); }
+
+        .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.25),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.88rem;font-weight:700;color:#25f4f4;text-transform:uppercase; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.88rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-sub  { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem; }
+
+        .rec-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;flex-shrink:0; }
+        .rec-badge.has   { background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);color:#25f4f4; }
+        .rec-badge.empty { background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#64748b; }
+        .rec-badge .material-symbols-outlined { font-size:.75rem; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* drawer */
+        .drawer-bg { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s; }
+        .drawer-bg.open { opacity:1;pointer-events:auto; }
+        .drawer { position:fixed;top:0;right:0;height:100%;width:100%;max-width:480px;background:#141414;border-left:1px solid #2A2A2A;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1);overflow:hidden; }
+        .drawer-bg.open .drawer { transform:translateX(0); }
+        @media(max-width:540px) { .drawer { max-width:100%;border-left:none;border-top:1px solid #2A2A2A;border-radius:1.1rem 1.1rem 0 0;height:92%;top:auto;bottom:0; } .drawer-bg { align-items:flex-end; } }
+
+        .drawer-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0; }
+        .drawer-body { flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:.75rem; }
+
+        /* recipe card */
+        .rec-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1rem;transition:border-color .15s; }
+        .rec-card:hover { border-color:rgba(37,244,244,.2); }
+        .rec-card-name { font-size:.9rem;font-weight:700;color:#f1f5f9;margin-bottom:.35rem; }
+        .rec-card-meta { display:flex;flex-wrap:wrap;gap:.4rem; }
+        .rec-tag { display:inline-flex;align-items:center;gap:.2rem;font-size:.65rem;font-weight:600;padding:.18rem .5rem;border-radius:.35rem;background:#1E1E1E;border:1px solid #2A2A2A;color:#64748b; }
+        .rec-tag .material-symbols-outlined { font-size:.72rem; }
+        .rec-tag.cyan { background:rgba(37,244,244,.07);border-color:rgba(37,244,244,.2);color:#25f4f4; }
+        .rec-tag.green { background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.2);color:#34d399; }
+
+        /* empty */
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* pill filter */
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .pill.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+        <h1 class="text-base font-semibold flex-1">Receitas dos Usuários</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span> Admin
+        </span>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+
+    <!-- Banner -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">menu_book</span>
+        <span>Visualize todas as receitas criadas por cada usuário. Clique em um usuário para ver detalhes.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-3">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-usuarios">—</div>
+            <div class="stat-lbl">Usuários</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total-rec" style="color:#25f4f4">—</div>
+            <div class="stat-lbl">Total Receitas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-media" style="color:#34d399">—</div>
+            <div class="stat-lbl">Média / Usuário</div>
+        </div>
+    </div>
+
+    <!-- Search + filtro -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div class="search-wrap flex-1 w-full">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou negócio…" oninput="filtrar()" />
+        </div>
+        <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
+            <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
+            <button class="pill" data-filter="com" onclick="setFilter('com',this)">Com receitas</button>
+            <button class="pill" data-filter="sem" onclick="setFilter('sem',this)">Sem receitas</button>
+        </div>
+    </div>
+
+    <!-- Contagem -->
+    <p id="count-label" class="text-xs text-slate-500"></p>
+
+    <!-- Lista -->
+    <div id="user-list" class="space-y-2"></div>
+
+</main>
+
+<!-- ══ Drawer Receitas ═══════════════════════════════════════════════ -->
+<div id="drawer-bg" class="drawer-bg" onclick="closeDrawer()">
+    <div class="drawer" onclick="event.stopPropagation()">
+        <div class="drawer-head">
+            <div class="avatar" id="drawer-avatar">??</div>
+            <div style="flex:1;min-width:0">
+                <p id="drawer-nome" class="font-bold text-sm leading-tight">—</p>
+                <p id="drawer-negocio" class="text-xs text-slate-400 mt-0.5">—</p>
+            </div>
+            <button onclick="closeDrawer()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+            </button>
+        </div>
+
+        <!-- sub-info do usuário -->
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-wrap:wrap;" id="drawer-tags"></div>
+
+        <!-- busca receitas -->
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A">
+            <div class="search-wrap">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="rec-search" class="search-input" type="text" placeholder="Filtrar receitas…" oninput="filtrarReceitas()" />
+            </div>
+        </div>
+
+        <div class="drawer-body" id="drawer-body">
+            <!-- preenchido por JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+let todosUsuarios = [];  // [{ perfil, receitas:[] }]
+let currentFilter = 'todos';
+let currentUserReceitas = [];
+
+// ── Guard admin ───────────────────────────────────────────────────
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarDados();
+})();
+
+// ── Carregar perfis + contagem de receitas ─────────────────────────
+async function carregarDados() {
+    showLoading();
+    try {
+        // 1. Busca todos os perfis
+        const { data: perfis, error: ep } = await sb
+            .from('perfis')
+            .select('id, nome, sobrenome, negocio, segmento, cidade, estado, plano, role, created_at')
+            .order('created_at', { ascending: false });
+        if (ep) throw ep;
+
+        // 2. Busca todas as receitas (id, nome, user_id, campos básicos)
+        const { data: receitas, error: er } = await sb
+            .from('receitas')
+            .select('id, nome, categoria, unidades, custo_total, tempo_preparo, created_at, user_id')
+            .order('created_at', { ascending: false });
+        if (er) throw er;
+
+        // 3. Agrupa receitas por user_id
+        const recMap = {};
+        (receitas || []).forEach(r => {
+            if (!recMap[r.user_id]) recMap[r.user_id] = [];
+            recMap[r.user_id].push(r);
+        });
+
+        // 4. Monta a estrutura
+        todosUsuarios = (perfis || []).map(p => ({
+            perfil: p,
+            receitas: recMap[p.id] || [],
+        }));
+
+        atualizarStats();
+        filtrar();
+    } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        document.getElementById('user-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">error</span>
+                <p>Erro ao carregar dados.<br><small style="font-size:.72rem">${esc(e.message)}</small></p>
+            </div>`;
+    }
+}
+
+// ── Stats ──────────────────────────────────────────────────────────
+function atualizarStats() {
+    const total = todosUsuarios.length;
+    const totalRec = todosUsuarios.reduce((s, u) => s + u.receitas.length, 0);
+    const media = total > 0 ? (totalRec / total).toFixed(1) : '0';
+    document.getElementById('stat-usuarios').textContent   = total;
+    document.getElementById('stat-total-rec').textContent  = totalRec;
+    document.getElementById('stat-media').textContent      = media;
+}
+
+// ── Filtro + busca ─────────────────────────────────────────────────
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let list = todosUsuarios;
+
+    if (currentFilter === 'com')  list = list.filter(u => u.receitas.length > 0);
+    if (currentFilter === 'sem')  list = list.filter(u => u.receitas.length === 0);
+
+    if (q) {
+        list = list.filter(u => {
+            const nome = ((u.perfil.nome || '') + ' ' + (u.perfil.sobrenome || '')).toLowerCase();
+            const neg  = (u.perfil.negocio || '').toLowerCase();
+            return nome.includes(q) || neg.includes(q);
+        });
+    }
+
+    document.getElementById('count-label').textContent =
+        `${list.length} usuário${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
+
+    renderLista(list);
+}
+
+// ── Render lista de usuários ───────────────────────────────────────
+function renderLista(list) {
+    const el = document.getElementById('user-list');
+
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">person_search</span>
+                <p>Nenhum usuário encontrado.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(u => {
+        const p = u.perfil;
+        const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+        const initials = getInitials(p.nome, p.sobrenome);
+        const qtd = u.receitas.length;
+        const badgeClass = qtd > 0 ? 'has' : 'empty';
+        const badgeIco   = qtd > 0 ? 'menu_book' : 'book';
+        const badgeTxt   = qtd > 0 ? `${qtd} receita${qtd > 1 ? 's' : ''}` : 'Nenhuma';
+        const criadoEm   = new Date(p.created_at).toLocaleDateString('pt-BR');
+
+        return `
+        <div class="user-row" id="row-${p.id}" onclick="abrirDrawer('${p.id}')">
+            <div class="avatar">${initials}</div>
+            <div class="user-info">
+                <div class="user-name">${esc(nomeCompleto)}</div>
+                <div class="user-sub">${esc(p.negocio || '—')} · Desde ${criadoEm}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0">
+                <span class="rec-badge ${badgeClass}">
+                    <span class="material-symbols-outlined">${badgeIco}</span>
+                    ${badgeTxt}
+                </span>
+                <span style="font-size:.65rem;color:#475569">${esc(p.plano || 'gratuito')}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Drawer ─────────────────────────────────────────────────────────
+function abrirDrawer(userId) {
+    const found = todosUsuarios.find(u => u.perfil.id === userId);
+    if (!found) return;
+
+    const p = found.perfil;
+    currentUserReceitas = found.receitas;
+
+    // Header do drawer
+    const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+    document.getElementById('drawer-avatar').textContent = getInitials(p.nome, p.sobrenome);
+    document.getElementById('drawer-nome').textContent    = nomeCompleto;
+    document.getElementById('drawer-negocio').textContent = p.negocio || 'Negócio não informado';
+
+    // Tags de info
+    const tags = [];
+    if (p.segmento) tags.push({ ico:'storefront', txt: p.segmento });
+    if (p.cidade || p.estado) tags.push({ ico:'location_on', txt: [p.cidade, p.estado].filter(Boolean).join(' – ') });
+    tags.push({ ico:'workspace_premium', txt: p.plano || 'gratuito', cls: p.plano && p.plano !== 'gratuito' ? 'cyan' : '' });
+    tags.push({ ico:'menu_book', txt: `${currentUserReceitas.length} receita${currentUserReceitas.length !== 1 ? 's' : ''}`, cls: currentUserReceitas.length > 0 ? 'green' : '' });
+
+    document.getElementById('drawer-tags').innerHTML = tags.map(t =>
+        `<span class="rec-tag ${t.cls || ''}">
+            <span class="material-symbols-outlined">${t.ico}</span>
+            ${esc(t.txt)}
+        </span>`
+    ).join('');
+
+    // Limpa busca
+    document.getElementById('rec-search').value = '';
+    filtrarReceitas();
+
+    // Destaca linha
+    document.querySelectorAll('.user-row').forEach(r => r.classList.remove('active'));
+    document.getElementById(`row-${userId}`)?.classList.add('active');
+
+    // Abre
+    document.getElementById('drawer-bg').classList.add('open');
+}
+
+function closeDrawer() {
+    document.getElementById('drawer-bg').classList.remove('open');
+    document.querySelectorAll('.user-row').forEach(r => r.classList.remove('active'));
+}
+
+function filtrarReceitas() {
+    const q = (document.getElementById('rec-search').value || '').toLowerCase().trim();
+    const lista = q
+        ? currentUserReceitas.filter(r => (r.nome || '').toLowerCase().includes(q) || (r.categoria || '').toLowerCase().includes(q))
+        : currentUserReceitas;
+
+    renderReceitas(lista);
+}
+
+function renderReceitas(lista) {
+    const body = document.getElementById('drawer-body');
+
+    if (!lista.length) {
+        body.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">menu_book</span>
+                <p>${currentUserReceitas.length === 0 ? 'Este usuário ainda não criou receitas.' : 'Nenhuma receita encontrada.'}</p>
+            </div>`;
+        return;
+    }
+
+    body.innerHTML = lista.map(r => {
+        const data = new Date(r.created_at).toLocaleDateString('pt-BR');
+        const custoUnit = r.unidades > 0 && r.custo_total > 0
+            ? `R$ ${(r.custo_total / r.unidades).toFixed(2).replace('.', ',')}`
+            : null;
+
+        return `
+        <div class="rec-card" style="animation:fadeUp .2s ease both">
+            <div class="rec-card-name">${esc(r.nome || 'Sem nome')}</div>
+            <div class="rec-card-meta">
+                ${r.categoria ? `<span class="rec-tag"><span class="material-symbols-outlined">label</span>${esc(r.categoria)}</span>` : ''}
+                ${r.unidades ? `<span class="rec-tag cyan"><span class="material-symbols-outlined">production_quantity_limits</span>${r.unidades} un.</span>` : ''}
+                ${r.tempo_preparo ? `<span class="rec-tag"><span class="material-symbols-outlined">schedule</span>${r.tempo_preparo} min</span>` : ''}
+                ${custoUnit ? `<span class="rec-tag green"><span class="material-symbols-outlined">payments</span>${custoUnit}/un.</span>` : ''}
+                <span class="rec-tag"><span class="material-symbols-outlined">calendar_today</span>${data}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Shimmer loading ────────────────────────────────────────────────
+function showLoading() {
+    document.getElementById('user-list').innerHTML =
+        Array(6).fill('<div class="shimmer"></div>').join('');
+}
+
+// ── Utilitários ───────────────────────────────────────────────────
+function getInitials(nome, sobrenome) {
+    return (((nome || '?')[0] || '') + ((sobrenome || '')[0] || '')).toUpperCase() || '?';
+}
+function esc(str) {
+    return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>
