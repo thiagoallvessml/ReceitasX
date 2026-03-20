@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
-const ABACATE_API = 'https://api.abacatepay.com/v2';
+const ABACATE_API = 'https://api.abacatepay.com/v1';
 const ABACATE_KEY = Deno.env.get('ABACATEPAY_KEY') ?? '';
 
 const CORS = {
@@ -27,70 +27,46 @@ serve(async (req) => {
     const origin    = req.headers.get('origin') || 'https://receitasx.vercel.app';
     const cpfDigits = String(taxId).replace(/\D/g, '');
 
-    // Formata telefone para +55XXXXXXXXXXX
-    let cellphone = '';
+    // Monta customer — cellphone só enviado se informado
+    const customer: Record<string, string> = {
+      name:  nome || email.split('@')[0],
+      email,
+      taxId: cpfDigits,
+    };
     if (telefone && String(telefone).trim()) {
       const tel = String(telefone).replace(/\D/g, '');
-      cellphone = tel.startsWith('55') ? `+${tel}` : `+55${tel}`;
+      customer.cellphone = tel.startsWith('55') ? `+${tel}` : `+55${tel}`;
     }
 
-    // ── Passo 1: criar/buscar customer ──────────────────────────────
-    const custResp = await fetch(`${ABACATE_API}/customers/create`, {
-      method:  'POST',
-      headers: {
-        'Authorization': `Bearer ${ABACATE_KEY}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        name:      nome || email.split('@')[0],
-        email,
-        taxId:     cpfDigits,
-        cellphone: cellphone || undefined,
-      }),
-    });
-
-    const custText = await custResp.text();
-    console.log('Customer resp:', custResp.status, custText);
-
-    let custData: Record<string, unknown>;
-    try { custData = JSON.parse(custText); } catch { custData = {}; }
-
-    // Aceita 200 ou 409 (já existe) — em ambos temos o customer
-    const customerId = (custData?.data as Record<string, unknown>)?.id as string | undefined;
-
-    // ── Passo 2: criar checkout ──────────────────────────────────────
-    const checkoutBody: Record<string, unknown> = {
-      methods:       ['PIX'],
-      returnUrl:     `${origin}/acesso-vitalicio.html`,
-      completionUrl: `${origin}/checkout.html?sucesso=1${ref ? `&ref=${ref}` : ''}`,
-      externalId:    `RX-${Date.now()}`,
-      items: [
+    const body = {
+      frequency: 'ONE_TIME',
+      methods:   ['PIX'],
+      products: [
         {
-          id:       'acesso-vitalicio',
-          quantity: 1,
           externalId: `RX-${Date.now()}`,
-          name:     'ReceitasX - Acesso Vitalicio',
-          price:    Math.round(Number(valor) * 100),
-          description: 'Acesso vitalicio ao ReceitasX',
+          name:       'ReceitasX - Acesso Vitalicio',
+          quantity:   1,
+          price:      Math.round(Number(valor) * 100),
         },
       ],
+      returnUrl:     `${origin}/acesso-vitalicio.html`,
+      completionUrl: `${origin}/checkout.html?sucesso=1${ref ? `&ref=${ref}` : ''}`,
+      customer,
     };
-    if (customerId) checkoutBody.customerId = customerId;
 
-    console.log('Key:', ABACATE_KEY ? 'ok' : 'AUSENTE');
-    console.log('Checkout body:', JSON.stringify(checkoutBody));
+    console.log('Key ok:', !!ABACATE_KEY, '| body:', JSON.stringify(body));
 
-    const resp = await fetch(`${ABACATE_API}/checkouts/create`, {
+    const resp = await fetch(`${ABACATE_API}/billing/create`, {
       method:  'POST',
       headers: {
         'Authorization': `Bearer ${ABACATE_KEY}`,
         'Content-Type':  'application/json',
       },
-      body: JSON.stringify(checkoutBody),
+      body: JSON.stringify(body),
     });
 
     const text = await resp.text();
-    console.log('Checkout resp:', resp.status, text);
+    console.log('AbacatePay', resp.status, text);
 
     let data: Record<string, unknown>;
     try { data = JSON.parse(text); } catch { data = { raw: text }; }
@@ -103,18 +79,16 @@ serve(async (req) => {
       });
     }
 
-    // v2 retorna { data: { url, id, ... } }
-    const checkoutData = (data?.data as Record<string, unknown>) || data;
-    const url = checkoutData?.url as string;
-
+    // v1 retorna { url, id, ... } diretamente
+    const url = data?.url as string;
     if (!url) {
-      return new Response(JSON.stringify({ error: 'URL de pagamento não retornada', debug: data }), {
+      return new Response(JSON.stringify({ error: 'URL não retornada', debug: data }), {
         status: 500,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ url, id: checkoutData?.id }), {
+    return new Response(JSON.stringify({ url, id: data?.id }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
@@ -127,5 +101,3 @@ serve(async (req) => {
     });
   }
 });
-
-
