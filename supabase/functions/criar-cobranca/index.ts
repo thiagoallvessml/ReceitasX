@@ -10,7 +10,6 @@ const CORS = {
 };
 
 serve(async (req) => {
-  // Preflight CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: CORS });
   }
@@ -26,31 +25,38 @@ serve(async (req) => {
     }
 
     const origin = req.headers.get('origin') || 'https://receitasx.vercel.app';
-    const returnUrl = `${origin}/acesso-vitalicio.html`;
-    const completionUrl = `${origin}/checkout.html?sucesso=1${ref ? `&ref=${ref}` : ''}`;
+
+    // customer — cellphone só se informado, taxId somente dígitos
+    const cpfDigits = String(taxId).replace(/\D/g, '');
+    const customer: Record<string, string> = {
+      name:  nome || email.split('@')[0],
+      email,
+      taxId: cpfDigits,
+    };
+    if (telefone && telefone.trim()) {
+      // Formata para +55XXXXXXXXXXX
+      const tel = telefone.replace(/\D/g, '');
+      customer.cellphone = tel.startsWith('55') ? `+${tel}` : `+55${tel}`;
+    }
 
     const body = {
-      frequency:     'ONE_TIME',
-      methods:       ['PIX'],
+      frequency: 'ONE_TIME',
+      methods:   ['PIX'],
       products: [
         {
-          externalId: 'ACESSO-VITALICIO',
-          name:       'ReceitasX — Acesso Vitalício',
+          externalId: `ACESSO-VITALICIO-${Date.now()}`, // único por chamada
+          name:       'ReceitasX - Acesso Vitalicio',
           quantity:   1,
-          price:      Math.round(valor * 100), // centavos
+          price:      Math.round(Number(valor) * 100),
         },
       ],
-      returnUrl,
-      completionUrl,
-      customer: {
-        name:      nome || email.split('@')[0],
-        email,
-        cellphone: telefone || '',
-        taxId,
-      },
+      returnUrl:    `${origin}/acesso-vitalicio.html`,
+      completionUrl:`${origin}/checkout.html?sucesso=1${ref ? `&ref=${ref}` : ''}`,
+      customer,
     };
 
-    console.log('Body enviado para AbacatePay:', JSON.stringify(body));
+    console.log('Key presente:', ABACATE_KEY ? 'sim' : 'NÃO');
+    console.log('Body:', JSON.stringify(body));
 
     const resp = await fetch(`${ABACATE_API}/billing/create`, {
       method:  'POST',
@@ -61,13 +67,15 @@ serve(async (req) => {
       body: JSON.stringify(body),
     });
 
-    const data = await resp.json();
-    console.log('Resposta AbacatePay (status', resp.status, '):', JSON.stringify(data));
+    const text = await resp.text();
+    console.log('AbacatePay status:', resp.status, '| body:', text);
+
+    let data: Record<string, unknown>;
+    try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
     if (!resp.ok) {
-      // Retorna o objeto completo para diagnóstico
-      const errMsg = data?.error || data?.message || data?.errors?.[0] || JSON.stringify(data);
-      return new Response(JSON.stringify({ error: errMsg, raw: data }), {
+      const errMsg = (data?.error as string) || (data?.message as string) || text;
+      return new Response(JSON.stringify({ error: errMsg, debug: data }), {
         status: resp.status,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
@@ -79,10 +87,11 @@ serve(async (req) => {
     });
 
   } catch (err) {
-    console.error('Edge function error:', err);
-    return new Response(JSON.stringify({ error: 'Erro interno' }), {
+    console.error('Edge error:', err);
+    return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }
 });
+
