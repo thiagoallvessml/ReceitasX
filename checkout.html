@@ -406,7 +406,6 @@ document.addEventListener('appconfig:loaded', () => {
     if (descEl) descEl.textContent = '- ' + fmtR(desconto);
 
     updateTotal();
-    updateParcelas();
 });
 let cupomAplicado  = null;
 const metodoPag    = 'pix';
@@ -429,19 +428,6 @@ function fmtR(v) {
 function updateTotal() {
     document.getElementById('total-val').textContent = fmtR(precoFinal);
 }
-function updateParcelas() {
-    const p = parseInt(document.getElementById('f-parcelas').value) || 1;
-    const vp = (precoFinal / p).toFixed(2).replace('.',',');
-    document.getElementById('parcelas-info').textContent =
-        p === 1 ? '' : `ou em até ${p}x de R$ ${vp} sem juros`;
-    // Atualizar opções do select com preço atual
-    const sel = document.getElementById('f-parcelas');
-    for (let i = 0; i < sel.options.length; i++) {
-        const n = i + 1;
-        const val = (precoFinal / n).toFixed(2).replace('.',',');
-        sel.options[i].text = `${n}x de R$ ${val} (sem juros)`;
-    }
-}
 
 /* ── CUPONS (local — fallback sem Supabase) ─────────── */
 const CUPONS_LOCAL = {
@@ -458,16 +444,6 @@ function maskTel(el) {
     else if (v.length>6) v = v.replace(/^(\d{2})(\d{4})(\d*)$/,'($1) $2-$3');
     else if (v.length>2) v = v.replace(/^(\d{2})(\d*)$/,'($1) $2');
     else if (v.length>0) v = '('+v;
-    el.value = v;
-}
-function maskCard(el) {
-    let v = el.value.replace(/\D/g,'').slice(0,16);
-    v = v.replace(/(\d{4})(?=\d)/g,'$1 ');
-    el.value = v;
-}
-function maskExp(el) {
-    let v = el.value.replace(/\D/g,'').slice(0,4);
-    if (v.length>2) v = v.slice(0,2)+'/'+v.slice(2);
     el.value = v;
 }
 
