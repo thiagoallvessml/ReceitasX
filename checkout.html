@@ -191,8 +191,8 @@
                     <input id="f-cpf" type="text" class="fc" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" autocomplete="off" required />
                 </div>
                 <div>
-                    <label class="field-label" for="f-tel">WhatsApp <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
-                    <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" autocomplete="tel" />
+                    <label class="field-label" for="f-tel">WhatsApp <span style="color:#f87171;font-weight:700">*</span></label>
+                    <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" autocomplete="tel" required />
                 </div>
             </div>
         </div>
@@ -551,8 +551,9 @@ function showFeedback(tipo, msg) {
 
 /* ── VALIDAÇÃO ──────────────────────────────────────── */
 function validar() {
-    const email = document.getElementById('f-email').value.trim();
-    const cpf   = document.getElementById('f-cpf').value.replace(/\D/g,'');
+    const email    = document.getElementById('f-email').value.trim();
+    const cpf      = document.getElementById('f-cpf').value.replace(/\D/g,'');
+    const telefone = document.getElementById('f-tel').value.replace(/\D/g,'');
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         showToast('Você precisa estar logado para finalizar a compra.', 'error');
         setTimeout(() => { location.href = 'login.html'; }, 2000);
@@ -565,6 +566,13 @@ function validar() {
         return false;
     }
     document.getElementById('f-cpf').classList.remove('error');
+    if (telefone.length < 10) {
+        showToast('Informe seu WhatsApp com DDD.', 'error');
+        document.getElementById('f-tel').classList.add('error');
+        document.getElementById('f-tel').focus();
+        return false;
+    }
+    document.getElementById('f-tel').classList.remove('error');
     return true;
 }
 

@@ -26,18 +26,19 @@ serve(async (req) => {
 
     const origin = req.headers.get('origin') || 'https://receitasx.vercel.app';
 
-    // customer — cellphone só se informado, taxId somente dígitos
+    // customer — taxId somente dígitos, cellphone sempre string
     const cpfDigits = String(taxId).replace(/\D/g, '');
-    const customer: Record<string, string> = {
-      name:  nome || email.split('@')[0],
-      email,
-      taxId: cpfDigits,
-    };
+    let cellphone = '';
     if (telefone && telefone.trim()) {
-      // Formata para +55XXXXXXXXXXX
-      const tel = telefone.replace(/\D/g, '');
-      customer.cellphone = tel.startsWith('55') ? `+${tel}` : `+55${tel}`;
+      const tel = String(telefone).replace(/\D/g, '');
+      cellphone = tel.startsWith('55') ? `+${tel}` : `+55${tel}`;
     }
+    const customer = {
+      name:      nome || email.split('@')[0],
+      email,
+      taxId:     cpfDigits,
+      cellphone,
+    };
 
     const body = {
       frequency: 'ONE_TIME',
