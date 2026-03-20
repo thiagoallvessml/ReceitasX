@@ -423,11 +423,10 @@ let codigoAfiliado = null;
         codigoAfiliado = ref.toUpperCase();
         sessionStorage.setItem('ref_afiliado', codigoAfiliado);
 
-        // Registra clique no banco — só quando vem direto da URL (?ref=)
+        // Registra clique de LINK no banco — só quando vem direto da URL (?ref=)
         if (p.get('ref')) {
             (async () => {
                 try {
-                    // Busca o afiliado pelo código
                     const { data: af } = await sb
                         .from('afiliados')
                         .select('id, total_cliques')
@@ -435,15 +434,13 @@ let codigoAfiliado = null;
                         .single();
 
                     if (af) {
-                        // Incrementa total_cliques
+                        // total_cliques = cliques via link
                         await sb
                             .from('afiliados')
                             .update({ total_cliques: (af.total_cliques || 0) + 1 })
                             .eq('id', af.id);
                     }
-                } catch(e) {
-                    // Silencia erro — não deve impedir o checkout
-                }
+                } catch(e) { /* silencia */ }
             })();
         }
     }
@@ -520,7 +517,7 @@ async function aplicarCupom() {
     if (!cupomData) {
         try {
             const { data: af } = await sb.from('afiliados')
-                .select('id, total_cliques, codigo, email')
+                .select('id, total_cupons, codigo, email')
                 .eq('codigo', codigo)
                 .single();
             if (af) {
@@ -528,10 +525,10 @@ async function aplicarCupom() {
                 codigoAfiliado = codigo; // rastreia para crédito de comissão
                 sessionStorage.setItem('ref_afiliado', codigo);
 
-                // Registra clique — digitou o código manualmente como cupom
+                // Registra uso de CUPOM — digitou o código manualmente
                 try {
                     await sb.from('afiliados')
-                        .update({ total_cliques: (af.total_cliques || 0) + 1 })
+                        .update({ total_cupons: (af.total_cupons || 0) + 1 })
                         .eq('id', af.id);
                 } catch(_) {}
             }

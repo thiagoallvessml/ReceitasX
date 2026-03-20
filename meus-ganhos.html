@@ -35,7 +35,7 @@
 
         /* ── stats ── */
         .stats-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1.5rem; }
-        @media(min-width:640px){ .stats-grid { grid-template-columns:repeat(4,1fr); } }
+        @media(min-width:640px){ .stats-grid { grid-template-columns:repeat(3,1fr); } }
         .stat-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1.1rem 1.15rem;transition:border-color .2s,transform .2s; }
         .stat-card:hover { border-color:rgba(37,244,244,.25);transform:translateY(-2px); }
         .stat-label { font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b;margin-bottom:.4rem; }
@@ -176,10 +176,18 @@
             <div class="stat-sub">disponível para saque</div>
         </div>
         <div class="stat-card stat-cliques">
-            <div class="stat-icon"><span class="material-symbols-outlined">touch_app</span></div>
-            <div class="stat-label">Cliques</div>
+            <div class="stat-icon"><span class="material-symbols-outlined">link</span></div>
+            <div class="stat-label">Cliques no Link</div>
             <div class="stat-val" id="stat-cliques">–</div>
-            <div class="stat-sub">no seu link</div>
+            <div class="stat-sub">via ?ref= na URL</div>
+        </div>
+        <div class="stat-card stat-cliques" style="--clr:rgba(251,191,36,.1);">
+            <div class="stat-icon" style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.15)">
+                <span class="material-symbols-outlined" style="color:#fbbf24;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">confirmation_number</span>
+            </div>
+            <div class="stat-label">Cupons Usados</div>
+            <div class="stat-val" id="stat-cupons" style="color:#fbbf24">–</div>
+            <div class="stat-sub">código digitado manual</div>
         </div>
     </div>
 
@@ -434,6 +442,7 @@ async function carregarDados(user) {
         const ganhos  = parseFloat(afiliado.total_ganhos  || 0);
         const vendas  = parseInt(afiliado.total_vendas    || 0);
         const cliques = parseInt(afiliado.total_cliques   || 0);
+        const cupons  = parseInt(afiliado.total_cupons    || 0);
 
         // Buscar indicações
         const { data: indicacoes } = await sb
@@ -455,7 +464,7 @@ async function carregarDados(user) {
 
         saldoDisp = Math.max(0, ganhos - totalSacado);
 
-        renderStats({ ganhos, vendas, pendente: saldoDisp, cliques });
+        renderStats({ ganhos, vendas, pendente: saldoDisp, cliques, cupons });
         renderTabela(indicacoes || []);
         atualizarProgress(saldoDisp);
 
@@ -464,16 +473,17 @@ async function carregarDados(user) {
         }
     } catch(e) {
         console.error('Erro ao carregar dados:', e);
-        renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0 });
+        renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0, cupons:0 });
         renderTabela([]);
     }
 }
 
-function renderStats({ ganhos, vendas, pendente, cliques }) {
+function renderStats({ ganhos, vendas, pendente, cliques, cupons }) {
     document.getElementById('stat-ganhos').textContent   = fmtR(ganhos);
     document.getElementById('stat-vendas').textContent   = vendas.toString();
     document.getElementById('stat-pendente').textContent = fmtR(pendente);
     document.getElementById('stat-cliques').textContent  = cliques.toString();
+    document.getElementById('stat-cupons').textContent   = (cupons || 0).toString();
     document.getElementById('saldo-saque').textContent   = fmtR(pendente);
     document.getElementById('modal-saldo').textContent   = fmtR(pendente);
 }
