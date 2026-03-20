@@ -415,23 +415,13 @@
 
 /* ─── RENDER ──────────────────────────────────────────────── */
 
-let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || 'null') || [
-    { id:1, nome:'Abacaxi Cremoso',   cat:'Gourmet', preco:7.00,  custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:2, nome:'Blue Ice',          cat:'Gourmet', preco:6.50,  custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:3, nome:'Chocolate Trufado', cat:'Gourmet', preco:9.00,  custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:4, nome:'Goiaba Cremoso',    cat:'Gourmet', preco:6.00,  custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:5, nome:'Mini pudins',       cat:'Gourmet', preco:10.00, custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:6, nome:'Ninho com Nutella', cat:'Gourmet', preco:9.00,  custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:7, nome:'Pudim',             cat:'Gourmet', preco:7.80,  custo:0, rend:0, obs:'', img:'', disp:true },
-    { id:8, nome:'Tortuguita',        cat:'Gourmet', preco:8.00,  custo:0, rend:0, obs:'', img:'', disp:true },
-];
+let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
 
 let receitas     = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
 let searchQ      = '';
 let pendingDelId = null;
 
 function save() { localStorage.setItem('receitasx_produtos', JSON.stringify(produtos)); }
-if (!localStorage.getItem('receitasx_produtos')) save();
 
 /* ─── HELPERS ────────────────────────────────────────────────────── */
 function fmtR(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
