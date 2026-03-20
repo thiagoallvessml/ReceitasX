@@ -188,7 +188,7 @@
         <div class="saque-info">
             <div class="saque-label">💰 Saldo disponível para saque</div>
             <div class="saque-val" id="saldo-saque">R$ 0,00</div>
-            <div class="saque-sub">Mínimo de R$ 20,00 para solicitar saque via Pix</div>
+            <div class="saque-sub" id="saque-sub-txt">Mínimo de R$ 20,00 para solicitar saque via Pix</div>
             <div class="progress-wrap" id="progress-wrap">
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
@@ -293,6 +293,7 @@ let userEmail    = '';
 let userNome     = '';
 let userId       = null;
 let saldoDisp    = 0;
+let saqueMinimo  = 20; // padrão — sobrescrito pela config do banco
 
 /* ── UTILS ── */
 function fmtR(v) {
@@ -315,11 +316,17 @@ function showToast(msg, type='success') {
 
 /* ── PROGRESS BAR ── */
 function atualizarProgress(saldo) {
-    const meta  = 20;
-    const pct   = Math.min(100, (saldo / meta) * 100);
+    const meta  = saqueMinimo;
+    const pct   = meta > 0 ? Math.min(100, (saldo / meta) * 100) : 100;
     document.getElementById('progress-fill').style.width  = pct + '%';
     document.getElementById('progress-text').textContent  = `${fmtR(saldo)} de ${fmtR(meta)}`;
     document.getElementById('progress-pct').textContent   = Math.round(pct) + '%';
+}
+
+/* ── ATUALIZAR TEXTOS COM VALOR MÍNIMO ── */
+function aplicarConfiguracoes() {
+    const sub = document.getElementById('saque-sub-txt');
+    if (sub) sub.textContent = `Mínimo de ${fmtR(saqueMinimo)} para solicitar saque via Pix`;
 }
 
 /* ── MODAL SAQUE ── */
@@ -335,7 +342,7 @@ async function solicitarSaque() {
     const chave = document.getElementById('pix-chave').value.trim();
     const tipo  = document.getElementById('pix-tipo').value;
     if (!chave) { showToast('Informe sua chave Pix', 'error'); return; }
-    if (saldoDisp < 20) { showToast('Saldo mínimo de R$ 20,00 para saque', 'error'); return; }
+    if (saldoDisp < saqueMinimo) { showToast(`Saldo mínimo de ${fmtR(saqueMinimo)} para saque`, 'error'); return; }
 
     const btn = document.getElementById('btn-confirmar-saque');
     btn.disabled = true;
@@ -456,7 +463,7 @@ async function carregarDados(user) {
         renderTabela(indicacoes || []);
         atualizarProgress(saldoDisp);
 
-        if (saldoDisp >= 20) {
+        if (saldoDisp >= saqueMinimo) {
             document.getElementById('btn-saque').disabled = false;
         }
     } catch(e) {
@@ -473,6 +480,19 @@ function renderStats({ ganhos, vendas, pendente, cliques }) {
     document.getElementById('stat-cliques').textContent  = cliques.toString();
     document.getElementById('saldo-saque').textContent   = fmtR(pendente);
     document.getElementById('modal-saldo').textContent   = fmtR(pendente);
+}
+
+/* ── CARREGAR CONFIG DO BANCO ── */
+async function carregarConfig() {
+    try {
+        const { data } = await sb
+            .from('config_afiliados')
+            .select('saque_minimo')
+            .eq('id', 1)
+            .single();
+        if (data?.saque_minimo) saqueMinimo = parseFloat(data.saque_minimo);
+    } catch(_) { /* mantém padrão 20 */ }
+    aplicarConfiguracoes();
 }
 
 /* ── INIT ── */
@@ -497,7 +517,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         userId    = user.id;
         userEmail = user.email;
         userNome  = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split('@')[0];
-        await carregarDados(user);
+
+        // 3. Carrega config (saque mínimo) e dados em paralelo
+        await Promise.all([carregarConfig(), carregarDados(user)]);
     } catch(e) {
         console.error('Auth error:', e);
         location.href = 'login.html';
