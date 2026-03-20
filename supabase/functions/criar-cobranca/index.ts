@@ -79,8 +79,10 @@ serve(async (req) => {
       });
     }
 
-    // v1 retorna { url, id, ... } diretamente
-    const url = data?.url as string;
+    // v1 pode retornar { url } direto OU { data: { url } }
+    const inner = (data?.data as Record<string, unknown>) ?? {};
+    const url   = (data?.url ?? inner?.url) as string | undefined;
+
     if (!url) {
       return new Response(JSON.stringify({ error: 'URL não retornada', debug: data }), {
         status: 500,
@@ -88,7 +90,7 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ url, id: data?.id }), {
+    return new Response(JSON.stringify({ url, id: data?.id ?? inner?.id }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
