@@ -232,10 +232,10 @@ async function carregarDados() {
             .order('created_at', { ascending: false });
         if (ep) throw ep;
 
-        // 2. Busca todas as receitas (id, nome, user_id, campos básicos)
+        // 2. Busca todas as receitas (colunas que existem na tabela)
         const { data: receitas, error: er } = await sb
             .from('receitas')
-            .select('id, nome, categoria, unidades, custo_total, tempo_preparo, created_at, user_id')
+            .select('id, nome, created_at, user_id')
             .order('created_at', { ascending: false });
         if (er) throw er;
 
@@ -412,19 +412,13 @@ function renderReceitas(lista) {
 
     body.innerHTML = lista.map(r => {
         const data = new Date(r.created_at).toLocaleDateString('pt-BR');
-        const custoUnit = r.unidades > 0 && r.custo_total > 0
-            ? `R$ ${(r.custo_total / r.unidades).toFixed(2).replace('.', ',')}`
-            : null;
 
         return `
         <div class="rec-card" style="animation:fadeUp .2s ease both">
             <div class="rec-card-name">${esc(r.nome || 'Sem nome')}</div>
             <div class="rec-card-meta">
-                ${r.categoria ? `<span class="rec-tag"><span class="material-symbols-outlined">label</span>${esc(r.categoria)}</span>` : ''}
-                ${r.unidades ? `<span class="rec-tag cyan"><span class="material-symbols-outlined">production_quantity_limits</span>${r.unidades} un.</span>` : ''}
-                ${r.tempo_preparo ? `<span class="rec-tag"><span class="material-symbols-outlined">schedule</span>${r.tempo_preparo} min</span>` : ''}
-                ${custoUnit ? `<span class="rec-tag green"><span class="material-symbols-outlined">payments</span>${custoUnit}/un.</span>` : ''}
                 <span class="rec-tag"><span class="material-symbols-outlined">calendar_today</span>${data}</span>
+                <span class="rec-tag"><span class="material-symbols-outlined">tag</span>ID ${r.id}</span>
             </div>
         </div>`;
     }).join('');
