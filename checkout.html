@@ -187,6 +187,10 @@
                 <input type="hidden" id="f-email" />
 
                 <div>
+                    <label class="field-label" for="f-cpf">CPF <span style="color:#f87171;font-weight:700">*</span></label>
+                    <input id="f-cpf" type="text" class="fc" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" autocomplete="off" required />
+                </div>
+                <div>
                     <label class="field-label" for="f-tel">WhatsApp <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
                     <input id="f-tel" type="tel" class="fc" placeholder="(11) 99999-9999" oninput="maskTel(this)" autocomplete="tel" />
                 </div>
@@ -446,6 +450,13 @@ function maskTel(el) {
     else if (v.length>0) v = '('+v;
     el.value = v;
 }
+function maskCPF(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,11);
+    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d*)/,'$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d*)/,'$1.$2');
+    el.value = v;
+}
 
 /* ── PAGAMENTO TABS ─────────────────────────────────── */
 function selectPay(m) {
@@ -541,12 +552,19 @@ function showFeedback(tipo, msg) {
 /* ── VALIDAÇÃO ──────────────────────────────────────── */
 function validar() {
     const email = document.getElementById('f-email').value.trim();
-    // Email é preenchido automaticamente via Auth; se não tiver, usuário não está logado
+    const cpf   = document.getElementById('f-cpf').value.replace(/\D/g,'');
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         showToast('Você precisa estar logado para finalizar a compra.', 'error');
         setTimeout(() => { location.href = 'login.html'; }, 2000);
         return false;
     }
+    if (cpf.length !== 11) {
+        showToast('Informe um CPF válido.', 'error');
+        document.getElementById('f-cpf').classList.add('error');
+        document.getElementById('f-cpf').focus();
+        return false;
+    }
+    document.getElementById('f-cpf').classList.remove('error');
     return true;
 }
 
@@ -571,6 +589,7 @@ async function finalizarCompra() {
         const nome     = document.getElementById('f-nome').value.trim();
         const email    = document.getElementById('f-email').value.trim();
         const telefone = document.getElementById('f-tel').value.trim();
+        const cpf      = document.getElementById('f-cpf').value.replace(/\D/g,'');
 
         const resp = await fetch(EDGE_URL, {
             method:  'POST',
@@ -579,6 +598,7 @@ async function finalizarCompra() {
                 nome,
                 email,
                 telefone,
+                taxId:  cpf,
                 valor:  precoFinal,
                 ref:    codigoAfiliado || null,
             }),

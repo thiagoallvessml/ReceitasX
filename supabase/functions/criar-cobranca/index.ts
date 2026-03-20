@@ -16,10 +16,10 @@ serve(async (req) => {
   }
 
   try {
-    const { nome, email, telefone, valor, ref } = await req.json();
+    const { nome, email, telefone, taxId, valor, ref } = await req.json();
 
-    if (!email || !valor) {
-      return new Response(JSON.stringify({ error: 'email e valor são obrigatórios' }), {
+    if (!email || !valor || !taxId) {
+      return new Response(JSON.stringify({ error: 'email, cpf e valor são obrigatórios' }), {
         status: 400,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
@@ -46,6 +46,7 @@ serve(async (req) => {
         name:      nome || email.split('@')[0],
         email,
         cellphone: telefone || '',
+        taxId,
       },
     };
 
