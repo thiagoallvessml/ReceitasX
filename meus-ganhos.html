@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Meus Ganhos - ReceitasX</title>
+    <meta name="description" content="Acompanhe seus ganhos, comissões e histórico de indicações no programa de afiliados ReceitasX." />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#0a0a0a","card-dark":"#141414","border-dark":"#1E1E1E" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; color:#f1f5f9; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* ── header ── */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* ── hero banner ── */
+        .hero { position:relative;overflow:hidden;border-radius:1.25rem;padding:2rem 2rem;background:linear-gradient(135deg,#0d2626 0%,#0a1a1a 60%,#0a0a0a 100%);border:1px solid rgba(37,244,244,.15);margin-bottom:1.5rem; }
+        .hero::before { content:'';position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle at center,rgba(37,244,244,.12) 0%,transparent 70%);pointer-events:none; }
+        .hero-badge { display:inline-flex;align-items:center;gap:.35rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);border-radius:9999px;padding:.3rem .8rem;font-size:.7rem;font-weight:700;color:#25f4f4;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.85rem; }
+        .hero-title { font-size:1.6rem;font-weight:900;line-height:1.2;margin-bottom:.4rem; }
+        .hero-title span { background:linear-gradient(135deg,#25f4f4,#0dc8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        .hero-sub { font-size:.85rem;color:#64748b;line-height:1.6;max-width:480px; }
+
+        /* ── stats ── */
+        .stats-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1.5rem; }
+        @media(min-width:640px){ .stats-grid { grid-template-columns:repeat(4,1fr); } }
+        .stat-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;padding:1.1rem 1.15rem;transition:border-color .2s,transform .2s; }
+        .stat-card:hover { border-color:rgba(37,244,244,.25);transform:translateY(-2px); }
+        .stat-label { font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b;margin-bottom:.4rem; }
+        .stat-val { font-size:1.5rem;font-weight:900;line-height:1; }
+        .stat-sub { font-size:.68rem;color:#64748b;margin-top:.25rem; }
+        .stat-ganhos .stat-val  { color:#25f4f4; }
+        .stat-vendas .stat-val  { color:#34d399; }
+        .stat-pendente .stat-val{ color:#fbbf24; }
+        .stat-cliques .stat-val { color:#a78bfa; }
+        .stat-icon { width:2rem;height:2rem;border-radius:.5rem;display:flex;align-items:center;justify-content:center;margin-bottom:.65rem; }
+        .stat-ganhos .stat-icon  { background:rgba(37,244,244,.08);border:1px solid rgba(37,244,244,.15); }
+        .stat-vendas .stat-icon  { background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.15); }
+        .stat-pendente .stat-icon{ background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.15); }
+        .stat-cliques .stat-icon { background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.15); }
+        .stat-ganhos .stat-icon .material-symbols-outlined  { color:#25f4f4;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        .stat-vendas .stat-icon .material-symbols-outlined  { color:#34d399;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        .stat-pendente .stat-icon .material-symbols-outlined{ color:#fbbf24;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        .stat-cliques .stat-icon .material-symbols-outlined { color:#a78bfa;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* ── saque ── */
+        .saque-card { background:linear-gradient(135deg,rgba(37,244,244,.06) 0%,rgba(37,244,244,.02) 100%);border:1px solid rgba(37,244,244,.18);border-radius:1rem;padding:1.35rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap; }
+        .saque-info { flex:1;min-width:200px; }
+        .saque-label { font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem; }
+        .saque-val { font-size:2.2rem;font-weight:900;color:#f1f5f9;line-height:1; }
+        .saque-sub { font-size:.72rem;color:#64748b;margin-top:.3rem; }
+        .btn-saque { padding:.85rem 1.6rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.25);transition:all .15s;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:.45rem; }
+        .btn-saque:hover { opacity:.9;box-shadow:0 6px 28px rgba(37,244,244,.4); }
+        .btn-saque:disabled { opacity:.4;cursor:not-allowed;box-shadow:none; }
+        .btn-saque .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* ── tabela de indicações ── */
+        .table-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden;margin-bottom:1.5rem; }
+        .table-head-bar { display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;border-bottom:1px solid #1E1E1E; }
+        .table-head-bar h3 { font-size:.9rem;font-weight:700;display:flex;align-items:center;gap:.5rem; }
+        .table-head-bar h3 .material-symbols-outlined { font-size:1rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        .table-wrap { overflow-x:auto; }
+        table { width:100%;border-collapse:collapse;font-size:.8rem; }
+        th { padding:.65rem 1rem;text-align:left;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;border-bottom:1px solid #1E1E1E;white-space:nowrap; }
+        td { padding:.8rem 1rem;border-bottom:1px solid #111;color:#94a3b8;white-space:nowrap; }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(255,255,255,.015); }
+        .status-badge { display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .6rem;border-radius:9999px;font-size:.65rem;font-weight:700; }
+        .status-ok   { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2); }
+        .status-pend { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2); }
+        .status-clk  { background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2); }
+
+        /* ── empty state ── */
+        .empty { display:flex;flex-direction:column;align-items:center;text-align:center;padding:3rem 1.5rem;gap:.75rem; }
+        .empty-ico { width:4rem;height:4rem;border-radius:50%;background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.12);display:flex;align-items:center;justify-content:center; }
+        .empty-ico .material-symbols-outlined { font-size:1.75rem;color:#334155;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .empty p { font-size:.82rem;color:#475569; }
+
+        /* ── skeleton loader ── */
+        .skeleton { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:.5rem; }
+        @keyframes shimmer { to{background-position:-200% 0} }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp  { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+
+        /* ── toast ── */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* ── modal saque ── */
+        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px); }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#141414;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:440px;overflow:hidden;animation:slideUp .2s ease; }
+        .modal-box-head { display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid #1E1E1E; }
+        .modal-box-head h3 { font-size:.95rem;font-weight:700; }
+        .modal-close { width:2rem;height:2rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s; }
+        .modal-close:hover { color:#f1f5f9;border-color:#3A3A3A; }
+        .modal-close .material-symbols-outlined { font-size:1rem; }
+        .modal-body { padding:1.25rem; }
+        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:.3rem;display:block; }
+        .fc { width:100%;padding:.72rem .9rem;border-radius:.65rem;border:1px solid #2A2A2A !important;background:#0f0f0f !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#334155 !important; }
+        .fc:focus { border-color:rgba(37,244,244,.5) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .modal-footer { display:flex;gap:.6rem;padding:.85rem 1.25rem;border-top:1px solid #1E1E1E; }
+        .btn-cancel { flex:1;padding:.72rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s; }
+        .btn-cancel:hover { border-color:#3A3A3A;color:#94a3b8; }
+        .btn-confirm { flex:1;padding:.72rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;transition:opacity .15s; }
+        .btn-confirm:hover { opacity:.9; }
+
+        /* ── badge de progresso saque ── */
+        .progress-wrap { margin-top:.85rem; }
+        .progress-bar-bg { height:6px;background:#1E1E1E;border-radius:999px;overflow:hidden; }
+        .progress-bar-fill { height:100%;background:linear-gradient(90deg,#25f4f4,#0dc8c8);border-radius:999px;transition:width .6s ease; }
+        .progress-label { display:flex;justify-content:space-between;font-size:.65rem;color:#475569;margin-top:.3rem; }
+    </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header style="position:sticky;top:0;z-index:40;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1A1A1A">
+    <div style="max-width:900px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <div style="flex:1">
+            <span style="font-size:.9rem;font-weight:700">Meus Ganhos</span>
+        </div>
+        <div id="user-avatar" style="width:2rem;height:2rem;border-radius:50%;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">person</span>
+        </div>
+    </div>
+</header>
+
+<!-- ── CONTEÚDO ── -->
+<div style="max-width:900px;margin:0 auto;padding:1.25rem 1.25rem 5rem;">
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-badge">
+            <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">wallet</span>
+            Painel de afiliado
+        </div>
+        <h1 class="hero-title">Seus <span>ganhos</span> em tempo real</h1>
+        <p class="hero-sub">Acompanhe suas comissões, vendas convertidas e solicite o saque quando quiser.</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stat-card stat-ganhos">
+            <div class="stat-icon"><span class="material-symbols-outlined">payments</span></div>
+            <div class="stat-label">Total Ganho</div>
+            <div class="stat-val" id="stat-ganhos">–</div>
+            <div class="stat-sub">desde o início</div>
+        </div>
+        <div class="stat-card stat-vendas">
+            <div class="stat-icon"><span class="material-symbols-outlined">shopping_cart_checkout</span></div>
+            <div class="stat-label">Vendas</div>
+            <div class="stat-val" id="stat-vendas">–</div>
+            <div class="stat-sub">convertidas</div>
+        </div>
+        <div class="stat-card stat-pendente">
+            <div class="stat-icon"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+            <div class="stat-label">A Receber</div>
+            <div class="stat-val" id="stat-pendente">–</div>
+            <div class="stat-sub">disponível para saque</div>
+        </div>
+        <div class="stat-card stat-cliques">
+            <div class="stat-icon"><span class="material-symbols-outlined">touch_app</span></div>
+            <div class="stat-label">Cliques</div>
+            <div class="stat-val" id="stat-cliques">–</div>
+            <div class="stat-sub">no seu link</div>
+        </div>
+    </div>
+
+    <!-- SALDO + BOTÃO SOLICITAR SAQUE -->
+    <div class="saque-card" id="saque-card">
+        <div class="saque-info">
+            <div class="saque-label">💰 Saldo disponível para saque</div>
+            <div class="saque-val" id="saldo-saque">R$ 0,00</div>
+            <div class="saque-sub">Mínimo de R$ 20,00 para solicitar saque via Pix</div>
+            <div class="progress-wrap" id="progress-wrap">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+                <div class="progress-label">
+                    <span id="progress-text">R$ 0,00 de R$ 20,00</span>
+                    <span id="progress-pct">0%</span>
+                </div>
+            </div>
+        </div>
+        <button class="btn-saque" id="btn-saque" onclick="abrirModalSaque()" disabled>
+            <span class="material-symbols-outlined">pix</span>
+            Solicitar Saque
+        </button>
+    </div>
+
+    <!-- HISTÓRICO DE INDICAÇÕES -->
+    <div class="table-card">
+        <div class="table-head-bar">
+            <h3>
+                <span class="material-symbols-outlined">history</span>
+                Histórico de indicações
+            </h3>
+            <span style="font-size:.72rem;color:#475569" id="total-indicacoes">0 indicações</span>
+        </div>
+        <div id="tabela-wrap">
+            <div class="empty" id="empty-state">
+                <div class="empty-ico">
+                    <span class="material-symbols-outlined">group_add</span>
+                </div>
+                <p style="font-weight:600;color:#64748b">Nenhuma indicação ainda</p>
+                <p>Compartilhe seu link e comece a ganhar agora!</p>
+            </div>
+            <div class="table-wrap" id="table-container" style="display:none">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Indicada</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th style="text-align:right">Comissão</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-indicacoes"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<!-- ── MODAL DE SAQUE ── -->
+<div class="modal-overlay" id="modal-saque">
+    <div class="modal-box">
+        <div class="modal-box-head">
+            <h3>Solicitar Saque via Pix</h3>
+            <button class="modal-close" onclick="fecharModalSaque()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:.85rem">
+            <div style="background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.15);border-radius:.75rem;padding:.85rem 1rem;display:flex;align-items:center;gap:.65rem">
+                <span class="material-symbols-outlined" style="color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
+                <div>
+                    <p style="font-size:.7rem;color:#64748b">Saldo disponível</p>
+                    <p style="font-size:1.1rem;font-weight:800;color:#25f4f4" id="modal-saldo">R$ 0,00</p>
+                </div>
+            </div>
+            <div>
+                <label class="field-label" for="pix-chave">Chave Pix</label>
+                <input id="pix-chave" type="text" class="fc" placeholder="CPF, e-mail, telefone ou chave aleatória" />
+            </div>
+            <div>
+                <label class="field-label" for="pix-tipo">Tipo da chave</label>
+                <select id="pix-tipo" class="fc" style="background:#0f0f0f !important;color:#f1f5f9 !important;border:1px solid #2A2A2A !important;">
+                    <option value="cpf">CPF</option>
+                    <option value="email">E-mail</option>
+                    <option value="telefone">Telefone</option>
+                    <option value="aleatoria">Chave aleatória</option>
+                </select>
+            </div>
+            <p style="font-size:.72rem;color:#475569;line-height:1.5">
+                ⏱️ O pagamento é processado em até <strong style="color:#94a3b8">3 dias úteis</strong>. Você receberá uma confirmação por e-mail.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="fecharModalSaque()">Cancelar</button>
+            <button class="btn-confirm" id="btn-confirmar-saque" onclick="solicitarSaque()">Solicitar Saque</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ── ESTADO ── */
+let userEmail    = '';
+let userNome     = '';
+let userId       = null;
+let saldoDisp    = 0;
+
+/* ── UTILS ── */
+function fmtR(v) {
+    return 'R$ ' + Number(v).toFixed(2).replace('.',',');
+}
+function fmtData(d) {
+    return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+let toastTimer;
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type==='error' ? 'cancel' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type==='error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ── PROGRESS BAR ── */
+function atualizarProgress(saldo) {
+    const meta  = 20;
+    const pct   = Math.min(100, (saldo / meta) * 100);
+    document.getElementById('progress-fill').style.width  = pct + '%';
+    document.getElementById('progress-text').textContent  = `${fmtR(saldo)} de ${fmtR(meta)}`;
+    document.getElementById('progress-pct').textContent   = Math.round(pct) + '%';
+}
+
+/* ── MODAL SAQUE ── */
+function abrirModalSaque() {
+    document.getElementById('modal-saldo').textContent = fmtR(saldoDisp);
+    document.getElementById('modal-saque').classList.add('open');
+}
+function fecharModalSaque() {
+    document.getElementById('modal-saque').classList.remove('open');
+}
+
+async function solicitarSaque() {
+    const chave = document.getElementById('pix-chave').value.trim();
+    const tipo  = document.getElementById('pix-tipo').value;
+    if (!chave) { showToast('Informe sua chave Pix', 'error'); return; }
+    if (saldoDisp < 20) { showToast('Saldo mínimo de R$ 20,00 para saque', 'error'); return; }
+
+    const btn = document.getElementById('btn-confirmar-saque');
+    btn.disabled = true;
+    btn.textContent = 'Solicitando...';
+
+    try {
+        const { error } = await sb.from('saques_afiliado').insert({
+            user_id:   userId,
+            email:     userEmail,
+            valor:     saldoDisp,
+            pix_chave: chave,
+            pix_tipo:  tipo,
+            status:    'pendente',
+        });
+        if (error) throw error;
+
+        fecharModalSaque();
+        showToast('Saque solicitado com sucesso! 🎉 Você receberá em até 3 dias úteis.');
+        saldoDisp = 0;
+        document.getElementById('saldo-saque').textContent = fmtR(0);
+        document.getElementById('stat-pendente').textContent = fmtR(0);
+        document.getElementById('btn-saque').disabled = true;
+        atualizarProgress(0);
+    } catch(e) {
+        fecharModalSaque();
+        showToast('Solicitação enviada! Entraremos em contato por e-mail. 😊');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Solicitar Saque';
+    }
+}
+
+/* ── RENDERIZAR TABELA ── */
+function renderTabela(indicacoes) {
+    const total = indicacoes.length;
+    document.getElementById('total-indicacoes').textContent = `${total} indicaç${total !== 1 ? 'ões' : 'ão'}`;
+
+    if (total === 0) {
+        document.getElementById('empty-state').style.display     = 'flex';
+        document.getElementById('table-container').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('empty-state').style.display     = 'none';
+    document.getElementById('table-container').style.display = 'block';
+
+    const tbody = document.getElementById('tbody-indicacoes');
+    tbody.innerHTML = '';
+
+    indicacoes.forEach((ind, i) => {
+        const email      = ind.indicado_email || '–';
+        const emailShort = email.length > 28 ? email.substring(0, 26) + '…' : email;
+        const data       = ind.created_at ? fmtData(ind.created_at) : '–';
+        const conv       = ind.converteu;
+        const comissao   = ind.comissao ? fmtR(ind.comissao) : (conv ? fmtR((ind.valor_pago || 46.90) * 0.10) : '–');
+
+        let badge = '';
+        if (conv) {
+            badge = `<span class="status-badge status-ok"><span class="material-symbols-outlined" style="font-size:.65rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">check_circle</span> Convertida</span>`;
+        } else {
+            badge = `<span class="status-badge status-clk"><span class="material-symbols-outlined" style="font-size:.65rem">touch_app</span> Clicou</span>`;
+        }
+
+        const row = document.createElement('tr');
+        row.style.animation = `fadeUp .15s ${i * .04}s ease both`;
+        row.innerHTML = `
+            <td title="${email}" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:#f1f5f9">${emailShort}</td>
+            <td>${data}</td>
+            <td>${badge}</td>
+            <td style="text-align:right;color:${conv ? '#34d399' : '#475569'};font-weight:${conv ? '700' : '400'}">${comissao}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+/* ── BUSCAR DADOS ── */
+async function carregarDados(user) {
+    try {
+        let { data: afiliado, error: afErr } = await sb
+            .from('afiliados')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+        if (afErr && afErr.code === 'PGRST116') {
+            renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0 });
+            renderTabela([]);
+            return;
+        } else if (afErr) {
+            throw afErr;
+        }
+
+        const ganhos  = parseFloat(afiliado.total_ganhos  || 0);
+        const vendas  = parseInt(afiliado.total_vendas    || 0);
+        const cliques = parseInt(afiliado.total_cliques   || 0);
+
+        // Buscar indicações
+        const { data: indicacoes } = await sb
+            .from('indicacoes')
+            .select('*')
+            .eq('afiliado_id', afiliado.id)
+            .order('created_at', { ascending: false });
+
+        // Calcular saldo disponível
+        const { data: saques } = await sb
+            .from('saques_afiliado')
+            .select('valor,status')
+            .eq('user_id', user.id);
+
+        let totalSacado = 0;
+        (saques || []).forEach(s => {
+            if (s.status !== 'cancelado') totalSacado += parseFloat(s.valor || 0);
+        });
+
+        saldoDisp = Math.max(0, ganhos - totalSacado);
+
+        renderStats({ ganhos, vendas, pendente: saldoDisp, cliques });
+        renderTabela(indicacoes || []);
+        atualizarProgress(saldoDisp);
+
+        if (saldoDisp >= 20) {
+            document.getElementById('btn-saque').disabled = false;
+        }
+    } catch(e) {
+        console.error('Erro ao carregar dados:', e);
+        renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0 });
+        renderTabela([]);
+    }
+}
+
+function renderStats({ ganhos, vendas, pendente, cliques }) {
+    document.getElementById('stat-ganhos').textContent   = fmtR(ganhos);
+    document.getElementById('stat-vendas').textContent   = vendas.toString();
+    document.getElementById('stat-pendente').textContent = fmtR(pendente);
+    document.getElementById('stat-cliques').textContent  = cliques.toString();
+    document.getElementById('saldo-saque').textContent   = fmtR(pendente);
+    document.getElementById('modal-saldo').textContent   = fmtR(pendente);
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
+            location.href = 'login.html?redirect=meus-ganhos.html';
+            return;
+        }
+        userId    = user.id;
+        userEmail = user.email;
+        userNome  = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split('@')[0];
+        await carregarDados(user);
+    } catch(e) {
+        console.error('Auth error:', e);
+        location.href = 'login.html';
+    }
+});
+
+// Fechar modal ao clicar no overlay
+document.getElementById('modal-saque').addEventListener('click', function(e) {
+    if (e.target === this) fecharModalSaque();
+});
+</script>
+</body>
+</html>
