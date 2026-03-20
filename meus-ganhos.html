@@ -200,7 +200,7 @@
             </div>
         </div>
         <button class="btn-saque" id="btn-saque" onclick="abrirModalSaque()" disabled>
-            <span class="material-symbols-outlined">pix</span>
+            <span class="material-symbols-outlined">account_balance_wallet</span>
             Solicitar Saque
         </button>
     </div>
@@ -244,7 +244,7 @@
 <div class="modal-overlay" id="modal-saque">
     <div class="modal-box">
         <div class="modal-box-head">
-            <h3>Solicitar Saque via Pix</h3>
+            <h3>Solicitar Saque</h3>
             <button class="modal-close" onclick="fecharModalSaque()">
                 <span class="material-symbols-outlined">close</span>
             </button>
@@ -257,19 +257,9 @@
                     <p style="font-size:1.1rem;font-weight:800;color:#25f4f4" id="modal-saldo">R$ 0,00</p>
                 </div>
             </div>
-            <div>
-                <label class="field-label" for="pix-chave">Chave Pix</label>
-                <input id="pix-chave" type="text" class="fc" placeholder="CPF, e-mail, telefone ou chave aleatória" />
-            </div>
-            <div>
-                <label class="field-label" for="pix-tipo">Tipo da chave</label>
-                <select id="pix-tipo" class="fc" style="background:#0f0f0f !important;color:#f1f5f9 !important;border:1px solid #2A2A2A !important;">
-                    <option value="cpf">CPF</option>
-                    <option value="email">E-mail</option>
-                    <option value="telefone">Telefone</option>
-                    <option value="aleatoria">Chave aleatória</option>
-                </select>
-            </div>
+            <p style="font-size:.82rem;color:#94a3b8;line-height:1.6">
+                Ao solicitar o saque, nossa equipe entrará em contato pelo e-mail cadastrado para combinar a forma de pagamento.
+            </p>
             <p style="font-size:.72rem;color:#475569;line-height:1.5">
                 ⏱️ O pagamento é processado em até <strong style="color:#94a3b8">3 dias úteis</strong>. Você receberá uma confirmação por e-mail.
             </p>
@@ -349,9 +339,6 @@ function fecharModalSaque() {
 }
 
 async function solicitarSaque() {
-    const chave = document.getElementById('pix-chave').value.trim();
-    const tipo  = document.getElementById('pix-tipo').value;
-    if (!chave) { showToast('Informe sua chave Pix', 'error'); return; }
     if (saqueMinimo === null) { showToast('Valor mínimo ainda não configurado', 'error'); return; }
     if (saldoDisp < saqueMinimo) { showToast(`Saldo mínimo de ${fmtR(saqueMinimo)} para saque`, 'error'); return; }
 
@@ -361,17 +348,15 @@ async function solicitarSaque() {
 
     try {
         const { error } = await sb.from('saques_afiliado').insert({
-            user_id:   userId,
-            email:     userEmail,
-            valor:     saldoDisp,
-            pix_chave: chave,
-            pix_tipo:  tipo,
-            status:    'pendente',
+            user_id: userId,
+            email:   userEmail,
+            valor:   saldoDisp,
+            status:  'pendente',
         });
         if (error) throw error;
 
         fecharModalSaque();
-        showToast('Saque solicitado com sucesso! 🎉 Você receberá em até 3 dias úteis.');
+        showToast('Saque solicitado com sucesso! 🎉 Entraremos em contato em até 3 dias úteis.');
         saldoDisp = 0;
         document.getElementById('saldo-saque').textContent = fmtR(0);
         document.getElementById('stat-pendente').textContent = fmtR(0);
