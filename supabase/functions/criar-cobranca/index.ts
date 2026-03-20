@@ -52,6 +52,11 @@ serve(async (req) => {
       returnUrl:     `${origin}/acesso-vitalicio.html`,
       completionUrl: `${origin}/checkout.html?sucesso=1${ref ? `&ref=${ref}` : ''}`,
       customer,
+      metadata: {
+        email,
+        ref:   ref || '',
+        valor: String(valor),
+      },
     };
 
     console.log('Key ok:', !!ABACATE_KEY, '| body:', JSON.stringify(body));
