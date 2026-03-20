@@ -88,13 +88,30 @@ serve(async (req) => {
         if (af) {
           const comissao = +(valorReal * 0.10).toFixed(2);
 
-          await sb.from('indicacoes').insert({
-            afiliado_id:    af.id,
-            indicado_email: email,
-            converteu:      true,
-            valor_pago:     valorReal,
-            comissao,
-          });
+          // Tenta atualizar indicação pendente existente (converteu: false → true)
+          const { data: updated, error: updErr } = await sb
+            .from('indicacoes')
+            .update({
+              converteu:  true,
+              valor_pago: valorReal,
+              comissao,
+            })
+            .eq('afiliado_id', af.id)
+            .eq('indicado_email', email)
+            .eq('converteu', false)
+            .select()
+            .maybeSingle();
+
+          // Se não havia indicação pendente, insere nova com converteu: true
+          if (!updated && !updErr) {
+            await sb.from('indicacoes').insert({
+              afiliado_id:    af.id,
+              indicado_email: email,
+              converteu:      true,
+              valor_pago:     valorReal,
+              comissao,
+            });
+          }
 
           await sb.rpc('incrementar_venda_afiliado', {
             p_afiliado_id: af.id,

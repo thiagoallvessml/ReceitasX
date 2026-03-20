@@ -1,7 +1,10 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const ABACATE_API = 'https://api.abacatepay.com/v1';
-const ABACATE_KEY = Deno.env.get('ABACATEPAY_KEY') ?? '';
+const ABACATE_API   = 'https://api.abacatepay.com/v1';
+const ABACATE_KEY   = Deno.env.get('ABACATEPAY_KEY') ?? '';
+const SUPABASE_URL  = Deno.env.get('SUPABASE_URL')  ?? '';
+const SUPABASE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
@@ -93,6 +96,42 @@ serve(async (req) => {
         status: 500,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
+    }
+
+    // ── Se veio com código de afiliado, registra indicação pendente ──
+    if (ref) {
+      try {
+        const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+        const { data: af } = await sb
+          .from('afiliados')
+          .select('id')
+          .eq('codigo', String(ref).toUpperCase())
+          .single();
+
+        if (af) {
+          // Verifica se já existe indicação pendente para esse email+afiliado
+          const { data: existing } = await sb
+            .from('indicacoes')
+            .select('id')
+            .eq('afiliado_id', af.id)
+            .eq('indicado_email', email)
+            .eq('converteu', false)
+            .maybeSingle();
+
+          if (!existing) {
+            await sb.from('indicacoes').insert({
+              afiliado_id:    af.id,
+              indicado_email: email,
+              converteu:      false,
+            });
+            console.log(`Indicação pendente criada para afiliado ${ref} → ${email}`);
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao registrar indicação pendente:', e);
+        // Não bloqueia o fluxo principal
+      }
     }
 
     return new Response(JSON.stringify({ url, id: data?.id ?? inner?.id }), {
