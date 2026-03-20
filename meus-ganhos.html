@@ -125,7 +125,7 @@
         .progress-label { display:flex;justify-content:space-between;font-size:.65rem;color:#475569;margin-top:.3rem; }
     </style>
 </head>
-<body>
+<body style="visibility:hidden">
 
 <!-- ── HEADER ── -->
 <header style="position:sticky;top:0;z-index:40;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1A1A1A">
@@ -478,8 +478,19 @@ function renderStats({ ganhos, vendas, pendente, cliques }) {
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) {
+        // 1. Verifica sessão local (rápido, sem chamada de rede)
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+            location.href = 'login.html?redirect=meus-ganhos.html';
+            return;
+        }
+
+        // Sessão confirmada — exibe a página
+        document.body.style.visibility = 'visible';
+
+        // 2. Valida token no servidor
+        const { data: { user }, error: authErr } = await sb.auth.getUser();
+        if (authErr || !user) {
             location.href = 'login.html?redirect=meus-ganhos.html';
             return;
         }
