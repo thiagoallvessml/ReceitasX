@@ -198,9 +198,145 @@ async function podecriar(recurso) {
 }
 
 // Expõe globalmente
-window.podecriar       = podecriar;       // alias lowercase para templates
-window.podecriar       = podecriar;
+window.podecriar        = podecriar;
 window.registrarCriacao = registrarCriacao;
 window.mostrarBloqueio  = mostrarBloqueio;
 window.fecharBloqueio   = fecharBloqueio;
 window.isPlanoPago      = isPlanoPago;
+window.injetarAviso     = injetarAviso;
+
+/* ── Banner de aviso por página ───────────────────────────────── */
+
+const ICONES_RECURSO = {
+  receitas:      'menu_book',
+  produtos:      'inventory_2',
+  insumos:       'egg',
+  embalagens:    'package_2',
+  equipamentos:  'settings',
+  combos:        'layers',
+  precificacoes: 'storefront',
+};
+
+/**
+ * Injeta um banner de aviso contextual logo após o <header>.
+ * Só exibe para usuários no plano gratuito.
+ * @param {string} recurso  chave do LIMITES_GRATUITO
+ */
+async function injetarAviso(recurso) {
+  // Não exibe se já existe um banner
+  if (document.getElementById('pg-aviso-banner')) return;
+
+  const pago = await isPlanoPago();
+  if (pago) return; // plano pago → sem aviso
+
+  const limite  = LIMITES_GRATUITO[recurso] ?? Infinity;
+  const usado   = getTotalCriado(recurso);
+  const nome    = NOMES_RECURSO[recurso]  || recurso;
+  const icone   = ICONES_RECURSO[recurso] || 'info';
+
+  // Define estilo com base no uso
+  let bg, border, color, iconeAviso, textoUso;
+
+  if (limite === 0) {
+    // Recurso completamente bloqueado
+    bg = 'rgba(248,113,113,.08)';
+    border = 'rgba(248,113,113,.3)';
+    color  = '#f87171';
+    iconeAviso = 'block';
+    textoUso = `${nome}s bloqueados no plano gratuito`;
+  } else if (usado >= limite) {
+    // Limite atingido
+    bg = 'rgba(248,113,113,.08)';
+    border = 'rgba(248,113,113,.3)';
+    color  = '#f87171';
+    iconeAviso = 'warning';
+    textoUso = `Limite atingido — ${usado}/${limite} ${nome.toLowerCase()}${limite > 1 ? 's' : ''} criados`;
+  } else if (usado >= Math.ceil(limite * 0.5) || (limite - usado) <= 1) {
+    // Quase no limite (≥50% usado ou só 1 restante)
+    bg = 'rgba(251,191,36,.07)';
+    border = 'rgba(251,191,36,.3)';
+    color  = '#fbbf24';
+    iconeAviso = 'info';
+    textoUso = `Plano gratuito — ${usado}/${limite} ${nome.toLowerCase()}${limite > 1 ? 's' : ''} usados`;
+  } else {
+    // Uso baixo: aviso discreto
+    bg = 'rgba(37,244,244,.05)';
+    border = 'rgba(37,244,244,.18)';
+    color  = '#25f4f4';
+    iconeAviso = 'info';
+    textoUso = `Plano gratuito — ${usado}/${limite} ${nome.toLowerCase()}${limite > 1 ? 's' : ''} usados`;
+  }
+
+  // Calcula % para a mini barra
+  const pct = limite === 0 ? 100 : Math.min(100, (usado / limite) * 100);
+  const barColor = pct >= 100 ? '#ef4444' : pct >= 50 ? '#fbbf24' : '#25f4f4';
+
+  const banner = document.createElement('div');
+  banner.id = 'pg-aviso-banner';
+  banner.style.cssText = `
+    background:${bg};
+    border-bottom:1px solid ${border};
+    padding:.55rem 1rem;
+    display:flex;align-items:center;gap:.6rem;
+    position:sticky;top:56px;z-index:19;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    animation:pgAvisoIn .3s ease both;
+  `;
+  banner.innerHTML = `
+    <style>
+      @keyframes pgAvisoIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+      #pg-aviso-banner .pg-av-prog { height:3px;border-radius:9999px;background:#2A2A2A;overflow:hidden;width:60px;flex-shrink:0; }
+      #pg-aviso-banner .pg-av-prog-fill { height:100%;border-radius:9999px;background:${barColor};width:${pct}%;transition:width .5s ease; }
+      @media(max-width:540px){ #pg-aviso-banner .pg-av-hide-sm { display:none; } }
+    </style>
+
+    <!-- ícone recurso -->
+    <span class="material-symbols-outlined" style="font-size:.95rem;color:${color};flex-shrink:0;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">${icone}</span>
+
+    <!-- ícone aviso -->
+    <span class="material-symbols-outlined" style="font-size:.85rem;color:${color};flex-shrink:0;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">${iconeAviso}</span>
+
+    <!-- texto -->
+    <span style="font-size:.75rem;font-weight:600;color:${color};flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      ${textoUso}
+    </span>
+
+    <!-- mini barra de progresso -->
+    <div class="pg-av-prog pg-av-hide-sm">
+      <div class="pg-av-prog-fill"></div>
+    </div>
+
+    <!-- botão upgrade -->
+    <a href="acesso-vitalicio.html" style="
+      flex-shrink:0;display:flex;align-items:center;gap:.3rem;
+      padding:.3rem .75rem;border-radius:9999px;
+      background:linear-gradient(135deg,#25f4f4,#0dc8c8);
+      color:#0a0a0a;font-size:.68rem;font-weight:700;
+      text-decoration:none;white-space:nowrap;
+      box-shadow:0 2px 8px rgba(37,244,244,.25);
+      transition:opacity .15s;
+    " onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <span class="material-symbols-outlined" style="font-size:.75rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">rocket_launch</span>
+      <span class="pg-av-hide-sm">Upgrade</span>
+    </a>
+
+    <!-- fechar -->
+    <button onclick="this.closest('#pg-aviso-banner').remove()" style="
+      background:transparent;border:none;cursor:pointer;
+      color:#475569;display:flex;align-items:center;padding:0;flex-shrink:0;
+      transition:color .15s;
+    " onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#475569'"
+       title="Fechar aviso">
+      <span class="material-symbols-outlined" style="font-size:1rem">close</span>
+    </button>
+  `;
+
+  // Insere após o <header>
+  const header = document.querySelector('header');
+  if (header && header.nextSibling) {
+    header.parentNode.insertBefore(banner, header.nextSibling);
+  } else {
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
+}

@@ -754,6 +754,7 @@ document.addEventListener('keydown', e => {
     if (!user) return;
     userId = user.id;
     await loadEquipamentos();
+    injetarAviso('equipamentos');
 })();
 </script>
 </body>

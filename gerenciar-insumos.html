@@ -803,6 +803,7 @@ document.addEventListener('keydown', e => {
     if (!user) return; // auth-guard já redireciona
     userId = user.id;
     await loadInsumos();
+    injetarAviso('insumos');
 })();
 </script>
 </body>

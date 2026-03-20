@@ -567,6 +567,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCadas
     if (!user) return;
     userId = user.id;
     await loadEmbalagens();
+    injetarAviso('embalagens');
 })();
 </script>
 </body>
