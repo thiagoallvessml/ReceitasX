@@ -520,13 +520,20 @@ async function aplicarCupom() {
     if (!cupomData) {
         try {
             const { data: af } = await sb.from('afiliados')
-                .select('id, codigo, email')
+                .select('id, total_cliques, codigo, email')
                 .eq('codigo', codigo)
                 .single();
             if (af) {
                 cupomData = { tipo: '%', valor: 10, label: '10% OFF (código de indicação)', afiliadoId: af.id };
                 codigoAfiliado = codigo; // rastreia para crédito de comissão
                 sessionStorage.setItem('ref_afiliado', codigo);
+
+                // Registra clique — digitou o código manualmente como cupom
+                try {
+                    await sb.from('afiliados')
+                        .update({ total_cliques: (af.total_cliques || 0) + 1 })
+                        .eq('id', af.id);
+                } catch(_) {}
             }
         } catch(e) {}
     }
