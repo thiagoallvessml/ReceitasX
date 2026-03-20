@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Receitas - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="plano-guard.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -745,7 +748,9 @@ let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
 
-function openCadastrar() {
+async function openCadastrar() {
+    const ok = await podecriar('receitas');
+    if (!ok) return;
     // recarrega catálogos em tempo real
     embCatalogo = JSON.parse(localStorage.getItem('receitasx_embalagens')  || '[]');
     eqpCatalogo = JSON.parse(localStorage.getItem('receitasx_equipamentos')|| '[]');
@@ -1096,6 +1101,7 @@ function salvarReceita(e) {
     const newId = Math.max(0, ...receitas.map(r => r.id)) + 1;
     receitas.push({ id:newId, nome, categoria:'gourmet', unidades:rend, tempo, precoTotal:0, custoTotal, grad });
     save();
+    registrarCriacao('receitas');
     renderCards();
     closeModal();
     showToast(`"${nome}" cadastrada!`);

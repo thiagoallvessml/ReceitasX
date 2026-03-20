@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
+    <script src="plano-guard.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -628,8 +629,12 @@ function resetModal() {
     document.getElementById('prev-custo-h-gas').textContent = 'R$ 0,00';
 }
 
-function openCadastrar(id) {
+async function openCadastrar(id) {
     resetModal();
+    if (!id) {
+        const ok = await podecriar('equipamentos');
+        if (!ok) return;
+    }
     if (id) {
         const e = equipamentos.find(x => x.id === id);
         if (!e) return;
@@ -699,6 +704,7 @@ async function salvarEquipamento() {
             const { data, error } = await sb.from('equipamentos').insert(payload).select().single();
             if (error) throw error;
             equipamentos.unshift(data);
+            registrarCriacao('equipamentos');
             showToast(`"${nome}" cadastrado!`);
         }
         renderList(); closeCadastrar();

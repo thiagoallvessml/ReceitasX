@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
+    <script src="plano-guard.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -123,6 +124,23 @@
         /* toast */
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* progress bar */
+        .prog-row { display:flex; flex-direction:column; gap:.3rem; }
+        .prog-top  { display:flex; justify-content:space-between; align-items:center; }
+        .prog-lbl  { font-size:.72rem; font-weight:600; color:#94a3b8; }
+        .prog-cnt  { font-size:.72rem; font-weight:700; color:#f1f5f9; }
+        .prog-cnt.at-limit { color:#f87171; }
+        .prog-track { height:.35rem; background:#2A2A2A; border-radius:9999px; overflow:hidden; }
+        .prog-fill  { height:100%; border-radius:9999px; transition:width .5s ease; }
+        .prog-fill.ok   { background:linear-gradient(90deg,#25f4f4,#0dc8c8); }
+        .prog-fill.warn { background:linear-gradient(90deg,#fbbf24,#f59e0b); }
+        .prog-fill.full { background:linear-gradient(90deg,#f87171,#ef4444); }
+
+        /* vitalicio card */
+        .plan-card-vit { background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(245,158,11,.03)); border-color:rgba(251,191,36,.35); }
+        .vit-feat { display:flex; align-items:center; gap:.45rem; font-size:.75rem; color:#e2e8f0; padding:.2rem 0; }
+        .vit-feat .material-symbols-outlined { font-size:.9rem; color:#25f4f4; flex-shrink:0; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
         .page-enter { animation:fadeUp .3s ease both; }
@@ -281,35 +299,9 @@
             <div class="sec-head-ico"><span class="material-symbols-outlined">workspace_premium</span></div>
             <h3>Meu Plano</h3>
         </div>
-        <div class="sec-body">
-            <div class="plan-card plan-free" id="plan-info-card">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-                    <p class="font-bold text-sm">Plano Gratuito</p>
-                    <span class="material-symbols-outlined" style="color:#94a3b8;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">star_border</span>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:.3rem">
-                    <p class="text-xs text-slate-400 flex items-center gap-1">
-                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#34d399">check_circle</span>
-                        Até 10 receitas
-                    </p>
-                    <p class="text-xs text-slate-400 flex items-center gap-1">
-                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#34d399">check_circle</span>
-                        Até 20 produtos
-                    </p>
-                    <p class="text-xs text-slate-400 flex items-center gap-1">
-                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#64748b">cancel</span>
-                        Precificação por marketplace
-                    </p>
-                    <p class="text-xs text-slate-400 flex items-center gap-1">
-                        <span class="material-symbols-outlined" style="font-size:.85rem;color:#64748b">cancel</span>
-                        Relatórios avançados
-                    </p>
-                </div>
-            </div>
-            <button class="upgrade-btn" onclick="location.href='acesso-vitalicio.html'">
-                <span class="material-symbols-outlined">rocket_launch</span>
-                Fazer Upgrade para Acesso Vitalício
-            </button>
+        <div class="sec-body" id="plano-container">
+            <!-- preenchido por JS -->
+            <div style="color:#64748b;font-size:.82rem;text-align:center;padding:1rem">Carregando plano...</div>
         </div>
     </div>
 
@@ -347,7 +339,7 @@ let _avatarNovoFile = null; // arquivo selecionado ainda não enviado
     emailEl.style.cursor  = 'not-allowed';
     emailEl.title = 'O e-mail é gerenciado pela autenticação e não pode ser alterado aqui.';
 
-    await Promise.all([loadPerfil(), loadStats()]);
+    await Promise.all([loadPerfil(), loadStats(), loadPlano()]);
 })();
 
 /* ─── Carregar perfil do Supabase ────────────────────────────────── */
@@ -379,14 +371,137 @@ async function loadPerfil() {
             document.getElementById('avatar-initials').style.display = 'none';
         }
 
-        // Plano
-        atualizarPlano(p.plano || 'gratuito');
-
+        // Plano (agora carregado separadamente via loadPlano)
         updateHero();
     } catch (e) {
         console.error('Erro ao carregar perfil:', e);
         showToast('Erro ao carregar perfil.', 'error');
     }
+}
+
+/* ─── Carregar plano real via pedidos ───────────────────────────────── */
+async function loadPlano() {
+    try {
+        const session = await getSession();
+        if (!session) return renderPlanoGratuito();
+
+        const { data } = await sb
+            .from('pedidos')
+            .select('id')
+            .eq('status', 'pago')
+            .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
+            .limit(1);
+
+        if (data && data.length > 0) {
+            renderPlanoVitalicio();
+            // atualiza badge no hero
+            const badge = document.getElementById('plan-badge');
+            badge.className = 'plan-badge plan-premium';
+            badge.innerHTML = '<span class="material-symbols-outlined">workspace_premium</span> Acesso Vitálicio';
+        } else {
+            renderPlanoGratuito();
+        }
+    } catch (e) {
+        console.warn('Erro ao verificar plano:', e);
+        renderPlanoGratuito();
+    }
+}
+
+/* ─── Limites do plano gratuito (espelho do plano-guard.js) ────────── */
+const LIMITES = {
+    receitas:    { label:'Receitas',      icon:'menu_book',       limite:2 },
+    produtos:    { label:'Produtos',      icon:'inventory_2',     limite:2 },
+    insumos:     { label:'Insumos',       icon:'egg',             limite:7 },
+    embalagens:  { label:'Embalagens',    icon:'package_2',       limite:2 },
+    equipamentos:{ label:'Equipamentos',  icon:'settings',        limite:1 },
+    combos:      { label:'Combos',        icon:'layers',          limite:0 },
+    precificacoes:{ label:'Cat. Marketplace', icon:'storefront',  limite:2 },
+};
+const LSK = {
+    receitas:     'receitasx_pg_receitas',
+    produtos:     'receitasx_pg_produtos',
+    insumos:      'receitasx_pg_insumos',
+    embalagens:   'receitasx_pg_embalagens',
+    equipamentos: 'receitasx_pg_equipamentos',
+    combos:       'receitasx_pg_combos',
+    precificacoes:'receitasx_pg_precificacoes',
+};
+
+function getUsado(recurso) { return parseInt(localStorage.getItem(LSK[recurso]) || '0', 10); }
+
+function renderPlanoGratuito() {
+    const rows = Object.entries(LIMITES).map(([key, cfg]) => {
+        const usado  = getUsado(key);
+        const limite = cfg.limite;
+        const pct    = limite === 0 ? 100 : Math.min(100, (usado / limite) * 100);
+        const cls    = pct >= 100 ? 'full' : pct >= 75 ? 'warn' : 'ok';
+        const cntCls = pct >= 100 ? 'at-limit' : '';
+        const limText = limite === 0 ? 'Bloqueado' : `${usado} / ${limite}`;
+        return `
+        <div class="prog-row">
+            <div class="prog-top">
+                <span class="prog-lbl">
+                    <span class="material-symbols-outlined" style="font-size:.8rem;margin-right:.2rem;vertical-align:text-bottom">${cfg.icon}</span>
+                    ${cfg.label}
+                </span>
+                <span class="prog-cnt ${cntCls}">${limText}</span>
+            </div>
+            <div class="prog-track">
+                <div class="prog-fill ${cls}" style="width:${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('plano-container').innerHTML = `
+        <div class="plan-card plan-free">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                <div>
+                    <p class="font-bold text-sm">Plano Gratuito</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Uso atual dos seus recursos</p>
+                </div>
+                <span class="material-symbols-outlined" style="color:#94a3b8;font-size:1.4rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">star_border</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.65rem">
+                ${rows}
+            </div>
+        </div>
+        <button class="upgrade-btn" onclick="location.href='acesso-vitalicio.html'">
+            <span class="material-symbols-outlined">rocket_launch</span>
+            Fazer Upgrade — Acesso Vitálicio
+        </button>`;
+}
+
+function renderPlanoVitalicio() {
+    const feats = [
+        'Receitas ilimitadas',
+        'Produtos ilimitados',
+        'Insumos ilimitados',
+        'Embalagens ilimitadas',
+        'Equipamentos ilimitados',
+        'Combos ilimitados',
+        'Precificação por marketplace',
+        'Exportação CSV',
+        'Suporte prioritário',
+    ];
+    const rows = feats.map(f => `
+        <div class="vit-feat">
+            <span class="material-symbols-outlined">check_circle</span>
+            ${f}
+        </div>`).join('');
+
+    document.getElementById('plano-container').innerHTML = `
+        <div class="plan-card plan-card-vit" style="border-radius:.85rem;padding:1rem 1.1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+                <div>
+                    <p class="font-bold text-sm" style="color:#fbbf24">Acesso Vitálicio</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Todos os recursos desbloqueados</p>
+                </div>
+                <span class="material-symbols-outlined" style="color:#fbbf24;font-size:1.5rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">workspace_premium</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.2rem">
+                ${rows}
+            </div>
+        </div>`;
 }
 
 /* ─── Stats reais do Supabase ────────────────────────────────────── */
@@ -460,18 +575,6 @@ function maskTel(el) {
     el.value = v;
 }
 
-/* ─── Plano badge ────────────────────────────────────────────────── */
-function atualizarPlano(plano) {
-    const badge = document.getElementById('plan-badge');
-    const labels = {
-        gratuito: { cls:'plan-free', ico:'star_border', txt:'Plano Gratuito' },
-        pro:      { cls:'plan-pro',  ico:'star',        txt:'Plano Pro' },
-        vitalicio:{ cls:'plan-premium', ico:'workspace_premium', txt:'Acesso Vitalício' },
-    };
-    const l = labels[plano] || labels.gratuito;
-    badge.className = `plan-badge ${l.cls}`;
-    badge.innerHTML = `<span class="material-symbols-outlined">${l.ico}</span> ${l.txt}`;
-}
 
 /* ─── Salvar no Supabase ─────────────────────────────────────────── */
 async function salvar() {

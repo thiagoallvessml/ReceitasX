@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Precificação por Marketplace - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="plano-guard.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -402,7 +405,9 @@ function salvar() {
 /* ─── MODAL CRIAR CATEGORIA ──────────────────────────────────────── */
 function openModalCat()  { document.getElementById('modal-cat').classList.add('open'); setTimeout(()=>document.getElementById('cat-nome').focus(),60); }
 function closeModalCat() { document.getElementById('modal-cat').classList.remove('open'); }
-function criarCategoria() {
+async function criarCategoria() {
+    const ok = await podecriar('precificacoes');
+    if (!ok) return;
     const nome = document.getElementById('cat-nome').value.trim();
     const taxa = parseFloat(document.getElementById('cat-taxa').value) || 0;
     if (!nome) { document.getElementById('cat-nome').focus(); return; }
@@ -423,6 +428,7 @@ function criarCategoria() {
     document.getElementById('cat-nome').value = '';
     document.getElementById('cat-taxa').value = '';
     closeModalCat();
+    registrarCriacao('precificacoes');
     currentMktIdx = marketplaces.length - 1;
     renderTabs();
     renderBanner();
