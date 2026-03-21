@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Detalhes da Receita - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#0a0a0a","card-dark":"#141414","border-dark":"#1E1E1E" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; color:#f1f5f9; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* ── header ── */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .btn-icon { width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s; }
+        .btn-icon:hover { border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .btn-icon .material-symbols-outlined { font-size:1.1rem; }
+
+        /* ── gradient covers ── */
+        .grad-1 { background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%); }
+        .grad-2 { background:linear-gradient(135deg,#f59e0b 0%,#ef4444 100%); }
+        .grad-3 { background:linear-gradient(135deg,#8b5cf6 0%,#ec4899 100%); }
+        .grad-4 { background:linear-gradient(135deg,#06b6d4 0%,#6366f1 100%); }
+        .grad-5 { background:linear-gradient(135deg,#84cc16 0%,#22d3ee 100%); }
+        .grad-6 { background:linear-gradient(135deg,#f97316 0%,#facc15 100%); }
+
+        /* ── hero card ── */
+        .hero-card { background:#141414;border:1px solid #1E1E1E;border-radius:1.25rem;padding:1.25rem;display:flex;align-items:center;gap:1.1rem;margin-bottom:1rem; }
+        .cover-thumb { width:72px;height:72px;border-radius:.85rem;flex-shrink:0;display:flex;align-items:center;justify-content:center; }
+        .cover-thumb .material-symbols-outlined { font-size:2rem;color:rgba(255,255,255,.5);font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48; }
+        .hero-info { flex:1;min-width:0; }
+        .hero-nome { font-size:1.25rem;font-weight:800;line-height:1.2;margin-bottom:.2rem; }
+        .hero-cat  { font-size:.75rem;color:#64748b; }
+        .hero-actions { display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap; }
+        .btn-edit   { display:flex;align-items:center;gap:.35rem;padding:.6rem 1.1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s; }
+        .btn-edit:hover { border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .btn-delete { display:flex;align-items:center;gap:.35rem;padding:.6rem 1.1rem;border-radius:.65rem;border:1px solid rgba(248,113,113,.3);background:transparent;color:#f87171;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s; }
+        .btn-delete:hover { background:rgba(248,113,113,.08); }
+        .btn-edit .material-symbols-outlined,
+        .btn-delete .material-symbols-outlined { font-size:.95rem; }
+
+        /* ── stat strip ── */
+        .stat-strip { display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem; }
+        .stat-box { background:#141414;border:1px solid #1E1E1E;border-radius:.85rem;padding:.85rem 1rem; }
+        .stat-box-lbl { font-size:.55rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#475569;margin-bottom:.25rem;display:flex;align-items:center;gap:.25rem; }
+        .stat-box-lbl .material-symbols-outlined { font-size:.8rem; }
+        .stat-box-val { font-size:1.15rem;font-weight:800;color:#f1f5f9; }
+
+        /* ── custo accordion ── */
+        .cost-section { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden;margin-bottom:.6rem; }
+        .cost-head { display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;transition:background .15s;gap:.6rem; }
+        .cost-head:hover { background:rgba(255,255,255,.02); }
+        .cost-head-left { display:flex;align-items:center;gap:.65rem;font-size:.82rem;font-weight:700; }
+        .cost-head-left .ico { width:1.75rem;height:1.75rem;border-radius:.45rem;background:rgba(37,244,244,.08);border:1px solid rgba(37,244,244,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .cost-head-left .ico .material-symbols-outlined { font-size:.9rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .cost-head-right { display:flex;align-items:center;gap:.5rem; }
+        .cost-valor { font-size:.88rem;font-weight:700;color:#25f4f4; }
+        .chev { transition:transform .25s;font-size:1.1rem;color:#475569; }
+        .cost-section.open .chev { transform:rotate(180deg); }
+        .cost-body { border-top:1px solid #1E1E1E;padding:.75rem 1.1rem;display:none; }
+        .cost-section.open .cost-body { display:block; }
+        .cost-item { display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid #111;font-size:.8rem; }
+        .cost-item:last-child { border-bottom:none; }
+        .cost-item-nome { color:#94a3b8; }
+        .cost-item-val { color:#f1f5f9;font-weight:600; }
+        .cost-item-qty { color:#475569;font-size:.72rem;margin-left:.3rem; }
+        .empty-items { color:#475569;font-size:.78rem;padding:.25rem 0; }
+
+        /* ── resumo financeiro ── */
+        .resumo { border-radius:1.25rem;padding:1.5rem;background:linear-gradient(135deg,#0d2626 0%,#0a1a1a 60%,#0a0a0a 100%);border:1px solid rgba(37,244,244,.15);margin-bottom:1.5rem;position:relative;overflow:hidden; }
+        .resumo::before { content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(37,244,244,.1),transparent 70%);pointer-events:none; }
+        .resumo-label { font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem; }
+        .resumo-title { font-size:1.1rem;font-weight:800;margin-bottom:.15rem; }
+        .resumo-total { font-size:2.5rem;font-weight:900;color:#f1f5f9;line-height:1;margin-bottom:1.1rem; }
+        .resumo-grid { display:grid;grid-template-columns:1fr 1fr;gap:.6rem; }
+        @media(min-width:480px){ .resumo-grid { grid-template-columns:repeat(4,1fr); } }
+        .resumo-cell { background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:.65rem;padding:.7rem .85rem; }
+        .resumo-cell-lbl { font-size:.6rem;color:#64748b;margin-bottom:.25rem; }
+        .resumo-cell-val { font-size:1rem;font-weight:800; }
+        .rc-preco  .resumo-cell-val { color:#25f4f4; }
+        .rc-custo  .resumo-cell-val { color:#94a3b8; }
+        .rc-lucro  .resumo-cell-val { color:#34d399; }
+        .rc-margem .resumo-cell-val { color:#fbbf24; }
+        .rc-markup .resumo-cell-val { color:#a78bfa; }
+        .rc-preco-unit .resumo-cell-val { color:#25f4f4; }
+
+        /* ── toast ── */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* ── not found ── */
+        .not-found { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:1rem;text-align:center; }
+        .not-found .material-symbols-outlined { font-size:3.5rem;color:#334155; }
+
+        /* ── modal confirm ── */
+        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px); }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#141414;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:380px;padding:1.5rem; }
+        .modal-box h3 { font-size:1rem;font-weight:700;margin-bottom:.5rem; }
+        .modal-box p { font-size:.85rem;color:#64748b;margin-bottom:1.25rem;line-height:1.6; }
+        .modal-btns { display:flex;gap:.6rem; }
+        .modal-btns .btn-cancel { flex:1;padding:.7rem;border-radius:.7rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-weight:600;font-size:.85rem;cursor:pointer; }
+        .modal-btns .btn-confirm-del { flex:1;padding:.7rem;border-radius:.7rem;border:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:#f87171;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .15s; }
+        .modal-btns .btn-confirm-del:hover { background:rgba(248,113,113,.25); }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+        .page-enter { animation:fadeUp .3s ease both; }
+    </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header style="position:sticky;top:0;z-index:40;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1A1A1A">
+    <div style="max-width:860px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.85rem">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span style="font-size:.9rem;font-weight:700;flex:1">Detalhes da Receita</span>
+        <button class="btn-icon" onclick="compartilhar()" title="Compartilhar">
+            <span class="material-symbols-outlined">share</span>
+        </button>
+        <button class="btn-icon" id="btn-menu" onclick="toggleMenu()" title="Mais opções">
+            <span class="material-symbols-outlined">more_vert</span>
+        </button>
+        <!-- Dropdown menu -->
+        <div id="dropdown" style="position:absolute;top:3.5rem;right:1.25rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;padding:.4rem;min-width:160px;z-index:50;display:none;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+            <button onclick="editarReceita()" style="width:100%;display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-radius:.5rem;border:none;background:transparent;color:#94a3b8;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,.05)';this.style.color='#f1f5f9'" onmouseout="this.style.background='transparent';this.style.color='#94a3b8'">
+                <span class="material-symbols-outlined" style="font-size:.95rem">edit</span> Editar receita
+            </button>
+            <button onclick="abrirModalExcluir()" style="width:100%;display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-radius:.5rem;border:none;background:transparent;color:#f87171;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left;transition:all .15s" onmouseover="this.style.background='rgba(248,113,113,.08)'" onmouseout="this.style.background='transparent'">
+                <span class="material-symbols-outlined" style="font-size:.95rem">delete</span> Excluir receita
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- ── CONTEÚDO ── -->
+<div id="page-content" style="max-width:860px;margin:0 auto;padding:1.25rem 1.25rem 5rem" class="page-enter">
+    <!-- preenchido por JS -->
+</div>
+
+<!-- ── NOT FOUND ── -->
+<div id="not-found" class="not-found" style="display:none">
+    <span class="material-symbols-outlined">search_off</span>
+    <p style="font-size:1rem;font-weight:700">Receita não encontrada</p>
+    <p style="font-size:.85rem;color:#64748b">Esta receita pode ter sido excluída.</p>
+    <a href="receitas.html" style="margin-top:.5rem;padding:.65rem 1.4rem;border-radius:.75rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Ver todas as receitas</a>
+</div>
+
+<!-- ── MODAL EXCLUIR ── -->
+<div class="modal-overlay" id="modal-excluir">
+    <div class="modal-box">
+        <h3>Excluir receita?</h3>
+        <p id="modal-nome-receita">Esta ação não pode ser desfeita.</p>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+            <button class="btn-confirm-del" onclick="confirmarExclusao()">
+                <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle">delete</span> Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   receita-detalhe.html
+   Lê receita do localStorage por ID na URL (?id=X)
+════════════════════════════════════════════════════════════ */
+
+const GRADIENTS = ['grad-1','grad-2','grad-3','grad-4','grad-5','grad-6'];
+
+/* ── helpers ── */
+function fmtR(v) {
+    return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function catLabel(c) {
+    return { gourmet:'Receita Gourmet', classica:'Receita Clássica', fitness:'Receita Fitness', vegana:'Receita Vegana', personalizada:'Receita Personalizada' }[c] || (c || 'Receita');
+}
+function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── carregar receitas do localStorage ── */
+function getReceitas() {
+    return JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+}
+function salvarReceitas(arr) {
+    localStorage.setItem('receitasx_receitas', JSON.stringify(arr));
+}
+
+/* ── cálculos ── */
+function calc(r) {
+    const unidades    = r.unidades || 1;
+    const precoTotal  = r.precoTotal  || 0;
+    const custoTotal  = r.custoTotal  || 0;
+    const precoUnit   = precoTotal  / unidades;
+    const custoUnit   = custoTotal  / unidades;
+    const lucroTotal  = precoTotal  - custoTotal;
+    const lucroUnit   = lucroTotal  / unidades;
+    const margem      = precoTotal > 0 ? (lucroTotal / precoTotal) * 100 : 0;
+    const markup      = custoTotal > 0 ? precoTotal / custoTotal : 0;
+    return { precoTotal, custoTotal, precoUnit, custoUnit, lucroTotal, lucroUnit, margem, markup };
+}
+
+/* ── montar seção de custo (accordion) ── */
+function makeSection(icon, label, valor, itens, aberto) {
+    const id = 'sec-' + label.replace(/\s/g,'-').toLowerCase();
+    const cls = aberto ? 'cost-section open' : 'cost-section';
+    const itensHtml = itens.length
+        ? itens.map(it => `
+            <div class="cost-item">
+                <span class="cost-item-nome">${esc(it.nome)}${it.qty ? `<span class="cost-item-qty">(${it.qty})</span>` : ''}</span>
+                <span class="cost-item-val">${fmtR(it.valor)}</span>
+            </div>`).join('')
+        : `<p class="empty-items">Nenhum item registrado</p>`;
+
+    return `
+    <div class="${cls}" id="${id}">
+        <div class="cost-head" onclick="toggleSection('${id}')">
+            <div class="cost-head-left">
+                <div class="ico"><span class="material-symbols-outlined">${icon}</span></div>
+                ${esc(label.toUpperCase())}
+            </div>
+            <div class="cost-head-right">
+                <span class="cost-valor">${fmtR(valor)}</span>
+                <span class="material-symbols-outlined chev">expand_more</span>
+            </div>
+        </div>
+        <div class="cost-body">${itensHtml}</div>
+    </div>`;
+}
+
+function toggleSection(id) {
+    document.getElementById(id)?.classList.toggle('open');
+}
+
+/* ── ID da URL ── */
+const params = new URLSearchParams(location.search);
+const receitaId = parseInt(params.get('id'));
+
+let receitaAtual = null;
+
+/* ── render principal ── */
+function render() {
+    const receitas = getReceitas();
+    const r = receitas.find(x => x.id === receitaId);
+
+    if (!r) {
+        document.getElementById('page-content').style.display = 'none';
+        document.getElementById('not-found').style.display = 'flex';
+        return;
+    }
+    receitaAtual = r;
+
+    const c = calc(r);
+    const grad = r.grad || GRADIENTS[r.id % GRADIENTS.length];
+
+    // ── ingredientes, embalagens, equipamentos, mão de obra (se existirem salvos)
+    const ings  = r.ingredientes  || [];
+    const embs  = r.embalagens    || [];
+    const eqps  = r.equipamentos  || [];
+    const mobs  = r.maoDeObra     || [];
+
+    // custo de cada categoria — usa valores salvos ou distribui do total
+    const custoIng  = r.custoIng  ?? (ings.length  ? ings.reduce((s,i)=>s+(i.valor||0),0)  : 0);
+    const custoEmb  = r.custoEmb  ?? (embs.length  ? embs.reduce((s,i)=>s+(i.valor||0),0)  : 0);
+    const custoEqp  = r.custoEqp  ?? (eqps.length  ? eqps.reduce((s,i)=>s+(i.valor||0),0)  : 0);
+    const custoMob  = r.custoMob  ?? (mobs.length  ? mobs.reduce((s,i)=>s+(i.valor||0),0)  : 0);
+
+    document.getElementById('page-content').innerHTML = `
+        <!-- Hero card -->
+        <div class="hero-card">
+            <div class="cover-thumb ${grad}">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 200,'GRAD' 0,'opsz' 48">restaurant</span>
+            </div>
+            <div class="hero-info">
+                <div class="hero-nome">${esc(r.nome)}</div>
+                <div class="hero-cat">${catLabel(r.categoria)}</div>
+                <div class="hero-actions">
+                    <button class="btn-edit" onclick="editarReceita()">
+                        <span class="material-symbols-outlined">edit</span> Editar
+                    </button>
+                    <button class="btn-delete" onclick="abrirModalExcluir()">
+                        <span class="material-symbols-outlined">delete</span> Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat strip -->
+        <div class="stat-strip">
+            <div class="stat-box">
+                <div class="stat-box-lbl"><span class="material-symbols-outlined">grid_view</span> RENDIMENTO</div>
+                <div class="stat-box-val">${r.unidades || 0} unid.</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-lbl"><span class="material-symbols-outlined">sell</span> PREÇO BASE</div>
+                <div class="stat-box-val" style="color:#25f4f4">${fmtR(c.precoUnit)}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-lbl"><span class="material-symbols-outlined">schedule</span> TEMPO</div>
+                <div class="stat-box-val">${r.tempo || 0} min</div>
+            </div>
+        </div>
+
+        <!-- Detalhamento de Custos -->
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#475569;margin-bottom:.65rem;display:flex;align-items:center;gap:.4rem">
+            <span class="material-symbols-outlined" style="font-size:.9rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">receipt_long</span>
+            Detalhamento de Custos
+        </div>
+
+        ${makeSection('emoji_food_beverage', 'Ingredientes', custoIng, ings, true)}
+        ${makeSection('inventory_2',         'Embalagens',   custoEmb, embs, false)}
+        ${makeSection('blender',             'Equipamentos', custoEqp, eqps, false)}
+        ${makeSection('person',              'Mão de Obra',  custoMob, mobs, false)}
+
+        <!-- Resumo Financeiro -->
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#475569;margin:.85rem 0 .65rem;display:flex;align-items:center;gap:.4rem">
+            <span class="material-symbols-outlined" style="font-size:.9rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
+            Resumo Financeiro
+        </div>
+        <div class="resumo">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;position:relative;z-index:1;">
+                <div>
+                    <div class="resumo-label">Custo Total</div>
+                    <div class="resumo-title">Da receita completa</div>
+                </div>
+                <div class="resumo-total">${fmtR(c.custoTotal)}</div>
+            </div>
+            <div class="resumo-grid" style="position:relative;z-index:1">
+                <div class="resumo-cell rc-preco">
+                    <div class="resumo-cell-lbl">Preço Total</div>
+                    <div class="resumo-cell-val">${fmtR(c.precoTotal)}</div>
+                </div>
+                <div class="resumo-cell rc-preco-unit">
+                    <div class="resumo-cell-lbl">Preço Unit.</div>
+                    <div class="resumo-cell-val">${fmtR(c.precoUnit)}</div>
+                </div>
+                <div class="resumo-cell rc-custo">
+                    <div class="resumo-cell-lbl">Custo Unit.</div>
+                    <div class="resumo-cell-val">${fmtR(c.custoUnit)}</div>
+                </div>
+                <div class="resumo-cell rc-lucro">
+                    <div class="resumo-cell-lbl">Lucro Total</div>
+                    <div class="resumo-cell-val">${fmtR(c.lucroTotal)}</div>
+                </div>
+                <div class="resumo-cell rc-lucro">
+                    <div class="resumo-cell-lbl">Lucro Unit.</div>
+                    <div class="resumo-cell-val">${fmtR(c.lucroUnit)}</div>
+                </div>
+                <div class="resumo-cell rc-margem">
+                    <div class="resumo-cell-lbl">Margem</div>
+                    <div class="resumo-cell-val">${c.margem.toFixed(0)}%</div>
+                </div>
+                <div class="resumo-cell rc-markup">
+                    <div class="resumo-cell-lbl">Markup</div>
+                    <div class="resumo-cell-val">${c.markup.toFixed(1)}x</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dica se precoTotal = 0 -->
+        ${c.precoTotal === 0 ? `
+        <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:.85rem;padding:.85rem 1rem;display:flex;gap:.65rem;align-items:flex-start;margin-top:-.5rem;margin-bottom:1rem">
+            <span class="material-symbols-outlined" style="color:#fbbf24;font-size:1.1rem;flex-shrink:0;margin-top:.05rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">info</span>
+            <p style="font-size:.8rem;color:#fbbf24;line-height:1.6">Defina um <strong>Preço Total</strong> para esta receita para ver os cálculos de lucro e margem.</p>
+        </div>` : ''}
+    `;
+
+    // atualiza título da página
+    document.title = `${r.nome} - ReceitasX`;
+
+    // modal
+    document.getElementById('modal-nome-receita').textContent =
+        `Tem certeza que deseja excluir "${r.nome}"? Esta ação não pode ser desfeita.`;
+}
+
+/* ── ações ── */
+function editarReceita() {
+    fecharDropdown();
+    showToast('Edição disponível na tela de Receitas!');
+    setTimeout(() => { location.href = 'receitas.html'; }, 1500);
+}
+
+function abrirModalExcluir() {
+    fecharDropdown();
+    document.getElementById('modal-excluir').classList.add('open');
+}
+
+function fecharModal() {
+    document.getElementById('modal-excluir').classList.remove('open');
+}
+
+function confirmarExclusao() {
+    const receitas = getReceitas();
+    const restantes = receitas.filter(x => x.id !== receitaId);
+    salvarReceitas(restantes);
+    fecharModal();
+    showToast('Receita excluída!');
+    setTimeout(() => { location.href = 'receitas.html'; }, 1200);
+}
+
+async function compartilhar() {
+    const r = receitaAtual;
+    if (!r) return;
+    const txt = `🍰 ${r.nome}\n💰 Custo: ${fmtR(r.custoTotal)} | Preço: ${fmtR(r.precoTotal)}\n📊 ${r.unidades} unidades · ${r.tempo} min`;
+    if (navigator.share) {
+        try { await navigator.share({ title: r.nome, text: txt }); } catch(_) {}
+    } else {
+        await navigator.clipboard.writeText(txt);
+        showToast('Informações copiadas!');
+    }
+}
+
+/* ── dropdown menu ── */
+function toggleMenu() {
+    const d = document.getElementById('dropdown');
+    d.style.display = d.style.display === 'block' ? 'none' : 'block';
+}
+function fecharDropdown() {
+    document.getElementById('dropdown').style.display = 'none';
+}
+document.addEventListener('click', e => {
+    if (!document.getElementById('btn-menu').contains(e.target) &&
+        !document.getElementById('dropdown').contains(e.target)) {
+        fecharDropdown();
+    }
+});
+
+// Fecha modal ao clicar fora
+document.getElementById('modal-excluir').addEventListener('click', function(e) {
+    if (e.target === this) fecharModal();
+});
+
+/* ── toast ── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'cancel' : 'check_circle';
+    document.getElementById('toast-icon').style.color  = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent   = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── init ── */
+if (!receitaId) {
+    document.getElementById('page-content').style.display = 'none';
+    document.getElementById('not-found').style.display = 'flex';
+} else {
+    render();
+}
+</script>
+</body>
+</html>
