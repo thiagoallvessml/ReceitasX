@@ -143,6 +143,7 @@
         .vit-feat .material-symbols-outlined { font-size:.9rem; color:#25f4f4; flex-shrink:0; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .page-enter { animation:fadeUp .3s ease both; }
     </style>
 </head>
@@ -307,6 +308,15 @@
 
 
 
+    <!-- Sair da conta -->
+    <div class="danger-zone">
+        <p style="font-size:.72rem;color:#94a3b8;margin-bottom:.75rem;font-weight:600">SESSÃO</p>
+        <button class="danger-btn" onclick="sairDaConta()" id="btn-sair">
+            <span class="material-symbols-outlined">logout</span>
+            Sair da conta
+        </button>
+    </div>
+
 </main>
 
 <!-- ══ Toast ════════════════════════════════════════════════════════ -->
@@ -323,6 +333,20 @@
 
 let _userId = null;
 let _avatarNovoFile = null; // arquivo selecionado ainda não enviado
+
+/* ─── Sair da conta ──────────────────────────────────────────────── */
+async function sairDaConta() {
+    const btn = document.getElementById('btn-sair');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite">progress_activity</span> Saindo...';
+    try {
+        await sb.auth.signOut();
+    } catch(e) { /* ignora */ }
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace('login.html');
+}
+
 
 /* ─── Inicialização ──────────────────────────────────────────────── */
 (async () => {
