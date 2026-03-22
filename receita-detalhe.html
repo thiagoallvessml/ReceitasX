@@ -181,7 +181,8 @@
 <script>
 /* ══════════════════════════════════════════════════════════
    receita-detalhe.html
-   Lê receita do localStorage por ID na URL (?id=X)
+   Lê receita do Supabase por ID (UUID) na URL (?id=X)
+   Fallback: localStorage
 ════════════════════════════════════════════════════════════ */
 
 const GRADIENTS = ['grad-1','grad-2','grad-3','grad-4','grad-5','grad-6'];
@@ -197,7 +198,67 @@ function esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-/* ── carregar receitas do localStorage ── */
+/* ── ID da URL ── */
+const params = new URLSearchParams(location.search);
+const receitaId = params.get('id'); // UUID do Supabase
+
+let receitaAtual = null;
+
+/* ── carregar do Supabase com fallback localStorage ── */
+async function carregarReceita() {
+    if (!receitaId) { mostrarNotFound(); return; }
+
+    // Tenta Supabase
+    try {
+        const { data, error } = await sb
+            .from('receitas')
+            .select('*')
+            .eq('id', receitaId)
+            .single();
+
+        if (!error && data) {
+            receitaAtual = {
+                id:          data.id,
+                nome:        data.nome,
+                categoria:   data.categoria  || 'gourmet',
+                unidades:    data.unidades   || 1,
+                tempo:       data.tempo      || 0,
+                precoTotal:  parseFloat(data.preco_total || 0),
+                custoTotal:  parseFloat(data.custo_total || 0),
+                custoIng:    parseFloat(data.custo_ing   || 0),
+                custoEmb:    parseFloat(data.custo_emb   || 0),
+                custoEqp:    parseFloat(data.custo_eqp   || 0),
+                custoMob:    parseFloat(data.custo_mob   || 0),
+                ingredientes: data.ingredientes  || [],
+                embalagens:   data.embalagens    || [],
+                equipamentos: data.equipamentos  || [],
+                maoDeObra:    data.mao_de_obra   || [],
+                grad:         data.grad || GRADIENTS[0],
+            };
+            render();
+            return;
+        }
+    } catch(e) {
+        console.warn('Supabase indisponível, tentando localStorage:', e);
+    }
+
+    // Fallback localStorage (IDs numéricos antigos)
+    const local = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+    const r = local.find(x => String(x.id) === String(receitaId));
+    if (r) {
+        receitaAtual = r;
+        render();
+    } else {
+        mostrarNotFound();
+    }
+}
+
+function mostrarNotFound() {
+    document.getElementById('page-content').style.display = 'none';
+    document.getElementById('not-found').style.display = 'flex';
+}
+
+/* ── carregar receitas do localStorage (mantido para exclusão de fallback) ── */
 function getReceitas() {
     return JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
 }
@@ -251,38 +312,25 @@ function toggleSection(id) {
     document.getElementById(id)?.classList.toggle('open');
 }
 
-/* ── ID da URL ── */
-const params = new URLSearchParams(location.search);
-const receitaId = parseInt(params.get('id'));
-
-let receitaAtual = null;
-
 /* ── render principal ── */
 function render() {
-    const receitas = getReceitas();
-    const r = receitas.find(x => x.id === receitaId);
-
-    if (!r) {
-        document.getElementById('page-content').style.display = 'none';
-        document.getElementById('not-found').style.display = 'flex';
-        return;
-    }
-    receitaAtual = r;
+    const r = receitaAtual;
+    if (!r) { mostrarNotFound(); return; }
 
     const c = calc(r);
-    const grad = r.grad || GRADIENTS[r.id % GRADIENTS.length];
+    const grad = r.grad || GRADIENTS[0];
 
-    // ── ingredientes, embalagens, equipamentos, mão de obra (se existirem salvos)
+    // ingredientes, embalagens, equipamentos, mão de obra
     const ings  = r.ingredientes  || [];
     const embs  = r.embalagens    || [];
     const eqps  = r.equipamentos  || [];
     const mobs  = r.maoDeObra     || [];
 
-    // custo de cada categoria — usa valores salvos ou distribui do total
-    const custoIng  = r.custoIng  ?? (ings.length  ? ings.reduce((s,i)=>s+(i.valor||0),0)  : 0);
-    const custoEmb  = r.custoEmb  ?? (embs.length  ? embs.reduce((s,i)=>s+(i.valor||0),0)  : 0);
-    const custoEqp  = r.custoEqp  ?? (eqps.length  ? eqps.reduce((s,i)=>s+(i.valor||0),0)  : 0);
-    const custoMob  = r.custoMob  ?? (mobs.length  ? mobs.reduce((s,i)=>s+(i.valor||0),0)  : 0);
+    // custo de cada categoria
+    const custoIng = r.custoIng  ?? ings.reduce((s,i) => s+(i.valor||0), 0);
+    const custoEmb = r.custoEmb  ?? embs.reduce((s,i) => s+(i.valor||0), 0);
+    const custoEqp = r.custoEqp  ?? eqps.reduce((s,i) => s+(i.valor||0), 0);
+    const custoMob = r.custoMob  ?? mobs.reduce((s,i) => s+(i.valor||0), 0);
 
     document.getElementById('page-content').innerHTML = `
         <!-- Hero card -->
@@ -408,10 +456,16 @@ function fecharModal() {
     document.getElementById('modal-excluir').classList.remove('open');
 }
 
-function confirmarExclusao() {
-    const receitas = getReceitas();
-    const restantes = receitas.filter(x => x.id !== receitaId);
-    salvarReceitas(restantes);
+async function confirmarExclusao() {
+    try {
+        // tenta deletar no Supabase
+        await sb.from('receitas').delete().eq('id', receitaId);
+    } catch(e) {
+        console.warn('Deletar Supabase falhou, removendo local:', e);
+    }
+    // remove do localStorage também
+    const local = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+    localStorage.setItem('receitasx_receitas', JSON.stringify(local.filter(x => String(x.id) !== String(receitaId))));
     fecharModal();
     showToast('Receita excluída!');
     setTimeout(() => { location.href = 'receitas.html'; }, 1200);
@@ -462,12 +516,7 @@ function showToast(msg, type='success') {
 }
 
 /* ── init ── */
-if (!receitaId) {
-    document.getElementById('page-content').style.display = 'none';
-    document.getElementById('not-found').style.display = 'flex';
-} else {
-    render();
-}
+carregarReceita();
 </script>
 </body>
 </html>

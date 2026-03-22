@@ -581,18 +581,62 @@
 /* ─── DADOS ──────────────────────────────────────────────────────── */
 const GRADIENTS = ['grad-1','grad-2','grad-3','grad-4','grad-5','grad-6'];
 
-let receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [
-    { id:1, nome:'Mini Pudins',       categoria:'gourmet',  unidades:9,  tempo:60, precoTotal:90.00, custoTotal:44.55, grad:'grad-1' },
-    { id:2, nome:'Abacaxi Cremoso',   categoria:'gourmet',  unidades:12, tempo:60, precoTotal:84.00, custoTotal:62.87, grad:'grad-2' },
-    { id:3, nome:'Goiaba Cremoso',    categoria:'gourmet',  unidades:12, tempo:60, precoTotal:72.00, custoTotal:54.28, grad:'grad-3' },
-    { id:4, nome:'Coco com Abacaxi',  categoria:'classica', unidades:10, tempo:45, precoTotal:60.00, custoTotal:38.00, grad:'grad-4' },
-    { id:5, nome:'Morango Fitness',   categoria:'fitness',  unidades:8,  tempo:30, precoTotal:48.00, custoTotal:28.00, grad:'grad-5' },
-    { id:6, nome:'Brigadeiro Vegano', categoria:'vegana',   unidades:20, tempo:50, precoTotal:80.00, custoTotal:45.00, grad:'grad-6' },
-];
+// receitas em memória — carregadas do Supabase + localStorage como fallback
+let receitas = [];
 
 let searchQuery = '';
 let currentFilter = 'todas';
+
+// localStorage (compatibilidade p/ dados antigos)
 function save() { localStorage.setItem('receitasx_receitas', JSON.stringify(receitas)); }
+
+/* Mapeia linha do Supabase para o formato usado pelos cards */
+function sbRowToLocal(r) {
+    return {
+        id:         r.id,          // UUID do Supabase
+        nome:       r.nome,
+        categoria:  r.categoria  || 'gourmet',
+        unidades:   r.unidades   || 1,
+        tempo:      r.tempo      || 0,
+        precoTotal: parseFloat(r.preco_total || 0),
+        custoTotal: parseFloat(r.custo_total || 0),
+        custoIng:   parseFloat(r.custo_ing   || 0),
+        custoEmb:   parseFloat(r.custo_emb   || 0),
+        custoEqp:   parseFloat(r.custo_eqp   || 0),
+        custoMob:   parseFloat(r.custo_mob   || 0),
+        ingredientes:  r.ingredientes  || [],
+        embalagens:    r.embalagens    || [],
+        equipamentos:  r.equipamentos  || [],
+        maoDeObra:     r.mao_de_obra   || [],
+        grad:       r.grad || GRADIENTS[0],
+        created_at: r.created_at,
+    };
+}
+
+/* Carrega receitas do Supabase (autentica primeiro) */
+async function carregarReceitas() {
+    try {
+        const user = await getUser();
+        if (!user) {
+            // não logado — usar localStorage como fallback
+            receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [];
+            renderCards();
+            return;
+        }
+        const { data, error } = await sb
+            .from('receitas')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        receitas = (data || []).map(sbRowToLocal);
+        save(); // sincroniza localStorage
+    } catch(err) {
+        console.warn('Supabase indisponível, usando localStorage:', err);
+        receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [];
+    }
+    renderCards();
+}
 
 /* ─── CÁLCULOS ───────────────────────────────────────────────────── */
 function calc(r) {
@@ -1063,8 +1107,8 @@ function calcPrevia() {
 }
 
 
-/* ─── SALVAR ─ */
-function salvarReceita(e) {
+/* ─── SALVAR ──────────────────────────────────────────────────────── */
+async function salvarReceita(e) {
     e.preventDefault();
     const nome = document.getElementById('r-nome').value.trim();
     if (!nome) {
@@ -1073,38 +1117,103 @@ function salvarReceita(e) {
         document.getElementById('r-nome').focus();
         return;
     }
-    const rend      = parseInt(document.getElementById('r-rend').value) || 1;
-    const tempo     = parseInt(document.getElementById('r-tempo').value) || 0;
+    const rend  = parseInt(document.getElementById('r-rend').value)  || 1;
+    const tempo = parseInt(document.getElementById('r-tempo').value) || 0;
+    const grad  = GRADIENTS[receitas.length % GRADIENTS.length];
 
-    // custo total
-    let custoTotal = 0;
+    // ─ custo de ingredientes ─
+    let custoIng = 0, ingList = [];
     document.querySelectorAll('[data-ingid]').forEach(sel => {
-        const id    = sel.dataset.ingid;
-        const qty   = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
-        const custo = parseFloat(sel.selectedOptions[0]?.dataset.custo || 0);
-        custoTotal += custo * qty;
+        const id      = sel.dataset.ingid;
+        const qty     = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+        const opt     = sel.selectedOptions[0];
+        const custoPkg = parseFloat(opt?.dataset.custo  || 0);
+        const pesoPkg  = parseFloat(opt?.dataset.peso   || 0);
+        const unIns    = opt?.dataset.unidade || '';
+        const unSel    = document.getElementById(`ing-un-${id}`);
+        const unUsada  = unSel?.value || '';
+        let custo = 0;
+        if (custoPkg > 0 && pesoPkg > 0 && unUsada) {
+            const baseIns  = toBase(pesoPkg, unIns);
+            const baseUsed = toBase(qty, unUsada);
+            if (toBaseUnit(unUsada) === toBaseUnit(unIns)) custo = (baseUsed / baseIns) * custoPkg;
+        } else if (custoPkg > 0 && unUsada === 'un') {
+            custo = custoPkg * qty;
+        }
+        custoIng += custo;
+        if (opt?.text) ingList.push({ nome: opt.text.split('(')[0].trim(), qty: `${qty} ${unUsada}`, valor: custo });
     });
+
+    // ─ custo de embalagens ─
+    let custoEmb = 0, embList = [];
     document.querySelectorAll('[data-embid]').forEach(sel => {
         const id      = sel.dataset.embid;
         const qty     = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
-        const custoUn = parseFloat(sel.selectedOptions[0]?.dataset.custoUn || 0);
-        custoTotal += custoUn * qty;
+        const opt     = sel.selectedOptions[0];
+        const custoUn = parseFloat(opt?.dataset.custoUn || 0);
+        const total   = custoUn * qty;
+        custoEmb += total;
+        if (opt?.text) embList.push({ nome: opt.text.split('(')[0].trim(), qty: `${qty} un`, valor: total });
     });
+
+    // ─ custo de equipamentos ─
+    let custoEqp = 0, eqpList = [];
     document.querySelectorAll('[data-eqpid]').forEach(sel => {
         const id     = sel.dataset.eqpid;
         const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
-        const custoH = parseFloat(sel.selectedOptions[0]?.dataset.custoH || 0);
-        custoTotal += (mins / 60) * custoH;
+        const opt    = sel.selectedOptions[0];
+        const custoH = parseFloat(opt?.dataset.custoH || 0);
+        const total  = (mins / 60) * custoH;
+        custoEqp += total;
+        if (opt?.text) eqpList.push({ nome: opt.text.split('(')[0].trim(), qty: `${mins} min`, valor: total });
     });
 
-    const grad  = GRADIENTS[receitas.length % GRADIENTS.length];
-    const newId = Math.max(0, ...receitas.map(r => r.id)) + 1;
-    receitas.push({ id:newId, nome, categoria:'gourmet', unidades:rend, tempo, precoTotal:0, custoTotal, grad });
+    const custoTotal = custoIng + custoEmb + custoEqp;
+
+    // ─ tenta salvar no Supabase ─
+    const btnSave = document.querySelector('.btn-save');
+    if (btnSave) btnSave.disabled = true;
+    try {
+        const user = await getUser();
+        if (user) {
+            const payload = {
+                user_id:      user.id,
+                nome,
+                categoria:    'gourmet',
+                unidades:     rend,
+                tempo,
+                preco_total:  0,
+                custo_total:  custoTotal,
+                custo_ing:    custoIng,
+                custo_emb:    custoEmb,
+                custo_eqp:    custoEqp,
+                custo_mob:    0,
+                grad,
+                ingredientes: ingList,
+                embalagens:   embList,
+                equipamentos: eqpList,
+                mao_de_obra:  [],
+            };
+            const { data: nova, error } = await sb.from('receitas').insert(payload).select().single();
+            if (error) throw error;
+            receitas.unshift(sbRowToLocal(nova));
+        } else {
+            throw new Error('não logado');
+        }
+    } catch(err) {
+        // fallback localStorage
+        console.warn('Supabase indisponível, salvando local:', err);
+        const newId = Date.now();
+        receitas.unshift({ id:newId, nome, categoria:'gourmet', unidades:rend, tempo, precoTotal:0, custoTotal, grad });
+    } finally {
+        if (btnSave) btnSave.disabled = false;
+    }
+
     save();
     registrarCriacao('receitas');
     renderCards();
     closeModal();
-    showToast(`"${nome}" cadastrada!`);
+    showToast(`"‏${nome}‏" cadastrada!`);
 }
 
 /* ─── TOAST ──────────────────────────────────────────────────────── */
@@ -1122,8 +1231,7 @@ function showToast(msg, type='success') {
 }
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
-if (!localStorage.getItem('receitasx_receitas')) save();
-renderCards();
+carregarReceitas();
 injetarAviso('receitas');
 </script>
 </body>
