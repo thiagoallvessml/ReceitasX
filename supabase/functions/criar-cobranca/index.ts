@@ -134,6 +134,34 @@ serve(async (req) => {
       }
     }
 
+    // ── Registra pedido pendente no Supabase ─────────────────────────
+    try {
+      const sbAdmin = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+      const billingId = (data?.id ?? inner?.id) as string || '';
+
+      // Tenta achar user_id pelo email
+      let userId: string | null = null;
+      try {
+        const { data: usersData } = await sbAdmin.auth.admin.listUsers({ perPage: 1000 });
+        const found = (usersData as { users: {email:string;id:string}[] })?.users?.find(u => u.email === email);
+        userId = found?.id ?? null;
+      } catch(_) {}
+
+      await sbAdmin.from('pedidos').insert({
+        email,
+        valor_pago:    valor,
+        metodo_pag:    'pix',
+        status:        'pendente',
+        billing_id:    billingId,
+        codigo_acesso: 'RX-PENDENTE',
+        ...(userId ? { user_id: userId } : {}),
+      });
+      console.log(`Pedido pendente registrado: ${email} | billing: ${billingId}`);
+    } catch(e) {
+      console.error('Erro ao registrar pedido pendente:', e);
+      // Não bloqueia o retorno
+    }
+
     return new Response(JSON.stringify({ url, id: data?.id ?? inner?.id }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },

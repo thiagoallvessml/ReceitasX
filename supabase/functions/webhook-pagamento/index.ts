@@ -52,13 +52,25 @@ serve(async (req) => {
     // Código de acesso único
     const cod = 'RX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    // Buscar user_id pelo email (tabela auth.users via perfis_usuarios)
-    const { data: perfil } = await sb
-      .from('perfis_usuarios')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle();
-    const userId = perfil?.id ?? null;
+    // Buscar user_id pelo email (tabela perfis)
+    let userId: string | null = null;
+    try {
+      const { data: perfil } = await sb
+        .from('perfis')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      userId = perfil?.id ?? null;
+
+      // Fallback: buscar via listUsers da API admin
+      if (!userId) {
+        const { data: usersData } = await sb.auth.admin.listUsers({ perPage: 1000 });
+        const found = usersData?.users?.find((u: { email: string; id: string }) => u.email === email);
+        userId = found?.id ?? null;
+      }
+    } catch(e) {
+      console.warn('Erro ao buscar userId:', e);
+    }
 
     // Inserir pedido com status 'pago'
     const { data: pedido, error: pedErr } = await sb.from('pedidos').insert({
