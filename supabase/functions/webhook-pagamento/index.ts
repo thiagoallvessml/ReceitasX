@@ -52,24 +52,14 @@ serve(async (req) => {
     // Código de acesso único
     const cod = 'RX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    // Buscar user_id pelo email (tabela perfis)
+    // Buscar user_id pelo email via auth.admin
     let userId: string | null = null;
     try {
-      const { data: perfil } = await sb
-        .from('perfis')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-      userId = perfil?.id ?? null;
-
-      // Fallback: buscar via listUsers da API admin
-      if (!userId) {
-        const { data: usersData } = await sb.auth.admin.listUsers({ perPage: 1000 });
-        const found = usersData?.users?.find((u: { email: string; id: string }) => u.email === email);
-        userId = found?.id ?? null;
-      }
+      const { data: usersData } = await sb.auth.admin.listUsers({ perPage: 1000 });
+      const found = usersData?.users?.find((u: { email: string; id: string }) => u.email?.toLowerCase() === email.toLowerCase());
+      userId = found?.id ?? null;
     } catch(e) {
-      console.warn('Erro ao buscar userId:', e);
+      console.warn('Erro ao buscar userId via auth.admin:', e);
     }
 
     // ── Evita duplicata: verifica se billing_id já existe ────────────
