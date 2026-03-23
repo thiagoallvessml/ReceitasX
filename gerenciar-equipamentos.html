@@ -453,7 +453,11 @@ function calcCustoH(e) {
 /* ─── SUPABASE: CARREGAR ────────────────────────────────────────── */
 async function loadEquipamentos() {
     try {
-        const { data, error } = await sb.from('equipamentos').select('*').order('nome', { ascending: true });
+        const { data, error } = await sb
+            .from('equipamentos')
+            .select('*')
+            .eq('user_id', userId)
+            .order('nome', { ascending: true });
         if (error) throw error;
         equipamentos = data || [];
         renderList();
