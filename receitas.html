@@ -810,12 +810,12 @@ async function carregarCatalogos() {
             custo:   parseFloat(i.preco    || 0),
             peso:    parseFloat(i.peso_emb || 0),
         }));
-        // Normaliza embalagens: custo por unidade (preco = custo unitário)
+        // Normaliza embalagens: custo unitário = preco / quantidade
         embCatalogo = (resEmb.data || []).map(e => ({
             id:    e.id,
             nome:  e.nome,
             custo: parseFloat(e.preco || 0),
-            qtd:   1, // preço já é por unidade no Supabase
+            qtd:   parseInt(e.quantidade || 1),
         }));
         // Normaliza equipamentos: custo_hora direto
         eqpCatalogo = (resEqp.data || []).map(e => ({

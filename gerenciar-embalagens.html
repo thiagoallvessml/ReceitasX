@@ -389,7 +389,10 @@ function renderList() {
     }
     empty.classList.add('hidden');
 
-    tbody.innerHTML = list.map(e => `
+    tbody.innerHTML = list.map(e => {
+        const qtd = e.quantidade || 1;
+        const custoUn = qtd > 0 ? (e.preco || 0) / qtd : 0;
+        return `
     <tr>
         <td>
             <div style="display:flex;align-items:center;gap:.75rem">
@@ -399,10 +402,10 @@ function renderList() {
                 <span class="font-medium">${e.nome}</span>
             </div>
         </td>
-        <td class="text-slate-300">â€”</td>
+        <td class="text-slate-300">${qtd} un</td>
         <td class="font-semibold" style="color:#25f4f4">${fmtR(e.preco)}</td>
-        <td class="text-slate-400">â€”</td>
-        <td class="text-slate-400 text-xs">â€”</td>
+        <td class="text-slate-300 font-semibold">${fmtR(custoUn)}</td>
+        <td class="text-slate-400 text-xs">${e.fornecedor || '&#8212;'}</td>
         <td>
             <div style="display:flex;gap:.4rem;justify-content:flex-end">
                 <button class="action-btn" title="Editar" onclick="editarEmbalagem(${e.id})">
@@ -413,9 +416,13 @@ function renderList() {
                 </button>
             </div>
         </td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
 
-    cards.innerHTML = list.map(e => `
+    cards.innerHTML = list.map(e => {
+        const qtd = e.quantidade || 1;
+        const custoUn = qtd > 0 ? (e.preco || 0) / qtd : 0;
+        return `
     <div class="embal-card">
         <div class="card-header">
             <div class="card-icon" style="background:rgba(37,244,244,.08)">
@@ -429,14 +436,17 @@ function renderList() {
             </button>
         </div>
         <div class="card-kv">
-            <div class="kv"><span class="kv-lbl">Custo</span><span class="kv-val" style="color:#25f4f4">${fmtR(e.preco)}</span></div>
+            <div class="kv"><span class="kv-lbl">Qtd/Pacote</span><span class="kv-val">${qtd} un</span></div>
+            <div class="kv"><span class="kv-lbl">Custo Total</span><span class="kv-val" style="color:#25f4f4">${fmtR(e.preco)}</span></div>
+            <div class="kv"><span class="kv-lbl">Custo/Un</span><span class="kv-val" style="color:#34d399">${fmtR(custoUn)}</span></div>
         </div>
         <div class="card-actions">
             <button class="btn-detail" onclick="editarEmbalagem(${e.id})">
                 <span class="material-symbols-outlined">edit</span> Editar
             </button>
         </div>
-    </div>`).join('');
+    </div>`;
+    }).join('');
 }
 
 /* â”€â”€â”€ AÃ‡Ã•ES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -475,7 +485,10 @@ async function openCadastrar(id) {
         if (!e) return;
         document.getElementById('f-id').value        = e.id;
         document.getElementById('f-nome').value      = e.nome || '';
+        document.getElementById('f-qtd').value       = e.quantidade || '';
         document.getElementById('f-custo').value     = e.preco || '';
+        document.getElementById('f-fornecedor').value= e.fornecedor || '';
+        document.getElementById('f-obs').value       = e.obs || '';
         document.getElementById('modal-title').textContent    = 'Editar Embalagem';
         document.getElementById('btn-salvar-txt').textContent = 'Atualizar';
     } else {
@@ -500,7 +513,10 @@ async function salvarEmbalagem() {
 
     const payload = {
         nome,
-        preco:   parseFloat(document.getElementById('f-custo').value) || 0,
+        quantidade: parseInt(document.getElementById('f-qtd').value)  || 1,
+        preco:      parseFloat(document.getElementById('f-custo').value) || 0,
+        fornecedor: document.getElementById('f-fornecedor').value.trim() || null,
+        obs:        document.getElementById('f-obs').value.trim() || null,
         user_id: userId,
     };
     const idVal = document.getElementById('f-id').value;
