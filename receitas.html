@@ -782,9 +782,9 @@ function editarReceita(id) {
 /* ══════════════════════════════════════════════
    MODAL CADASTRAR RECEITA
 ══════════════════════════════════════════════ */
-const insumos   = JSON.parse(localStorage.getItem('receitasx_insumos')    || '[]');
-let embCatalogo = JSON.parse(localStorage.getItem('receitasx_embalagens') || '[]');
-let eqpCatalogo = JSON.parse(localStorage.getItem('receitasx_equipamentos')|| '[]');
+let insumos     = [];
+let embCatalogo = [];
+let eqpCatalogo = [];
 let ingRows   = [];
 let embalRows = [];
 let equipRows = [];
@@ -792,12 +792,47 @@ let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
 
+/* Carrega insumos, embalagens e equipamentos do Supabase */
+async function carregarCatalogos() {
+    try {
+        const user = await getUser();
+        if (!user) return;
+        const [resIns, resEmb, resEqp] = await Promise.all([
+            sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
+            sb.from('embalagens').select('id, nome, preco').eq('user_id', user.id).order('nome'),
+            sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
+        ]);
+        // Normaliza insumos para o formato esperado pelo modal
+        insumos = (resIns.data || []).map(i => ({
+            id:      i.id,
+            nome:    i.nome,
+            unidade: i.unidade || 'g',
+            custo:   parseFloat(i.preco    || 0),
+            peso:    parseFloat(i.peso_emb || 0),
+        }));
+        // Normaliza embalagens: custo por unidade (preco = custo unitário)
+        embCatalogo = (resEmb.data || []).map(e => ({
+            id:    e.id,
+            nome:  e.nome,
+            custo: parseFloat(e.preco || 0),
+            qtd:   1, // preço já é por unidade no Supabase
+        }));
+        // Normaliza equipamentos: custo_hora direto
+        eqpCatalogo = (resEqp.data || []).map(e => ({
+            id:     e.id,
+            nome:   e.nome,
+            custoH: parseFloat(e.custo_hora || 0),
+        }));
+    } catch(err) {
+        console.warn('Erro ao carregar catálogos:', err);
+    }
+}
+
 async function openCadastrar() {
     const ok = await podecriar('receitas');
     if (!ok) return;
-    // recarrega catálogos em tempo real
-    embCatalogo = JSON.parse(localStorage.getItem('receitasx_embalagens')  || '[]');
-    eqpCatalogo = JSON.parse(localStorage.getItem('receitasx_equipamentos')|| '[]');
+    // recarrega catálogos do Supabase em tempo real
+    await carregarCatalogos();
     ingRows = []; embalRows = []; equipRows = [];
     ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
     document.getElementById('form-receita').reset();
