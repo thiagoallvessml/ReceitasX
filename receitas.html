@@ -641,7 +641,7 @@ async function carregarReceitas() {
         receitas = (resRec.data || []).map(r => {
             const local = sbRowToLocal(r);
             const prodInfo = precoPorReceita[r.id];
-            if (prodInfo) local.precoTotal = prodInfo.preco; // usa preço do produto vinculado
+            if (prodInfo) local.precoTotal = prodInfo.preco * local.unidades; // preço unit × rendimento = preço total
             return local;
         });
         save();
