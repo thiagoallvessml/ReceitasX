@@ -466,6 +466,12 @@
               </div>
             </div>
             <div>
+              <label class="fl" for="r-produto">Produto Vinculado <span style="color:#475569;text-transform:none;font-weight:400">(preenche o preço automaticamente)</span></label>
+              <select id="r-produto" class="fi" onchange="onProdutoSelect()" style="-webkit-appearance:none;appearance:none">
+                <option value="">Nenhum / digitar preço manualmente</option>
+              </select>
+            </div>
+            <div>
               <label class="fl" for="r-preco">Preço de Venda Total <span style="color:#475569;text-transform:none;font-weight:400">(da leva inteira)</span></label>
               <div style="position:relative">
                 <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
@@ -623,24 +629,34 @@ function sbRowToLocal(r) {
     };
 }
 
-/* Carrega receitas do Supabase (autentica primeiro) */
+/* Carrega receitas do Supabase e cruza preço com produtos vinculados */
 async function carregarReceitas() {
     try {
         const user = await getUser();
         if (!user) {
-            // não logado — usar localStorage como fallback
             receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [];
             renderCards();
             return;
         }
-        const { data, error } = await sb
-            .from('receitas')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
-        if (error) throw error;
-        receitas = (data || []).map(sbRowToLocal);
-        save(); // sincroniza localStorage
+        const [resRec, resProd] = await Promise.all([
+            sb.from('receitas').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+            sb.from('produtos').select('id, nome, preco, receita_id').eq('user_id', user.id),
+        ]);
+        if (resRec.error) throw resRec.error;
+
+        // Mapeia receita_id → produto.preco
+        const precoPorReceita = {};
+        (resProd.data || []).forEach(p => {
+            if (p.receita_id) precoPorReceita[p.receita_id] = { preco: parseFloat(p.preco || 0), nome: p.nome };
+        });
+
+        receitas = (resRec.data || []).map(r => {
+            const local = sbRowToLocal(r);
+            const prodInfo = precoPorReceita[r.id];
+            if (prodInfo) local.precoTotal = prodInfo.preco; // usa preço do produto vinculado
+            return local;
+        });
+        save();
     } catch(err) {
         console.warn('Supabase indisponível, usando localStorage:', err);
         receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [];
@@ -795,6 +811,7 @@ function editarReceita(id) {
 let insumos     = [];
 let embCatalogo = [];
 let eqpCatalogo = [];
+let prodCatalogo = []; // produtos para o select do modal
 let ingRows   = [];
 let embalRows = [];
 let equipRows = [];
@@ -802,17 +819,18 @@ let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
 
-/* Carrega insumos, embalagens e equipamentos do Supabase */
+/* Carrega insumos, embalagens, equipamentos e produtos do Supabase */
 async function carregarCatalogos() {
     try {
         const user = await getUser();
         if (!user) return;
-        const [resIns, resEmb, resEqp] = await Promise.all([
+        const [resIns, resEmb, resEqp, resProd] = await Promise.all([
             sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
             sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
+            sb.from('produtos').select('id, nome, preco').eq('user_id', user.id).order('nome'),
         ]);
-        // Normaliza insumos para o formato esperado pelo modal
+        // Normaliza insumos
         insumos = (resIns.data || []).map(i => ({
             id:      i.id,
             nome:    i.nome,
@@ -833,8 +851,33 @@ async function carregarCatalogos() {
             nome:   e.nome,
             custoH: parseFloat(e.custo_hora || 0),
         }));
+        // Produtos para o select vinculado
+        prodCatalogo = (resProd.data || []).map(p => ({
+            id:    p.id,
+            nome:  p.nome,
+            preco: parseFloat(p.preco || 0),
+        }));
+        // Popula select de produto no modal
+        const sel = document.getElementById('r-produto');
+        if (sel) {
+            sel.innerHTML = '<option value="">Nenhum / digitar preço manualmente</option>' +
+                prodCatalogo.map(p =>
+                    `<option value="${p.id}" data-preco="${p.preco}">${p.nome} (${fmtR(p.preco)})</option>`
+                ).join('');
+        }
     } catch(err) {
         console.warn('Erro ao carregar catálogos:', err);
+    }
+}
+
+/* Ao selecionar produto, preenche o preço de venda automaticamente */
+function onProdutoSelect() {
+    const sel = document.getElementById('r-produto');
+    const opt = sel?.selectedOptions[0];
+    const preco = parseFloat(opt?.dataset.preco || 0);
+    if (preco > 0) {
+        document.getElementById('r-preco').value = preco.toFixed(2);
+        calcPrevia();
     }
 }
 
@@ -846,7 +889,8 @@ async function openCadastrar() {
     ingRows = []; embalRows = []; equipRows = [];
     ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
     document.getElementById('form-receita').reset();
-    document.getElementById('r-preco').value = '';
+    document.getElementById('r-preco').value   = '';
+    document.getElementById('r-produto').value = '';
     document.getElementById('ing-list').innerHTML   = '';
     document.getElementById('embal-list').innerHTML = '';
     document.getElementById('equip-list').innerHTML = '';
