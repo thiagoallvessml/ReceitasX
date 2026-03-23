@@ -38,7 +38,7 @@
         .user-info { flex:1;min-width:0; }
         .user-name { font-size:.9rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
         .user-email { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-        .user-meta { font-size:.65rem;color:#475569;margin-top:.2rem; }
+        .user-meta { font-size:.78rem;color:#64748b;margin-top:.2rem; }
 
         /* role select */
         .role-sel { padding:.35rem .6rem;border-radius:.5rem;border:1px solid #2A2A2A;background:#141414;color:#f1f5f9;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;transition:border-color .2s; }
@@ -79,6 +79,10 @@
         /* admin-only banner */
         .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c;margin-bottom:1.25rem; }
         .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* badge vitalicio */
+        .badge-vital { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3); }
+        .badge-vital .material-symbols-outlined { font-size:.75rem; }
     </style>
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
@@ -111,7 +115,19 @@
     <div class="grid grid-cols-3 gap-3" id="stats-row">
         <div class="stat-card">
             <div class="stat-val" id="stat-total">—</div>
-            <div class="stat-lbl">Total Usuários</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-gratuito" style="color:#94a3b8">—</div>
+            <div class="stat-lbl">Gratuito</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-vitalicio" style="color:#34d399">—</div>
+            <div class="stat-lbl">Vitálicio</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-pagantes" style="color:#a78bfa">—</div>
+            <div class="stat-lbl">Pagantes</div>
         </div>
         <div class="stat-card">
             <div class="stat-val" id="stat-admin" style="color:#fb923c">—</div>
@@ -129,10 +145,11 @@
             <span class="material-symbols-outlined ico">search</span>
             <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterUsuarios()" />
         </div>
-        <div class="flex gap-2 flex-shrink-0">
-            <button class="pill active" data-filter="todos" onclick="setFilter('todos', this)">Todos</button>
-            <button class="pill" data-filter="admin" onclick="setFilter('admin', this)">Admin</button>
-            <button class="pill" data-filter="afiliado" onclick="setFilter('afiliado', this)">Afiliado</button>
+        <div class="flex gap-2 flex-shrink-0 flex-wrap">
+            <button class="pill active" data-filter="todos"    onclick="setFilter('todos', this)">Todos</button>
+            <button class="pill" data-filter="pagantes"        onclick="setFilter('pagantes', this)">Pagantes</button>
+            <button class="pill" data-filter="admin"          onclick="setFilter('admin', this)">Admin</button>
+            <button class="pill" data-filter="afiliado"       onclick="setFilter('afiliado', this)">Afiliado</button>
         </div>
     </div>
 
@@ -150,9 +167,11 @@
 <!-- ══ Script ═══════════════════════════════════════════════════ -->
 <script>
 let allUsuarios = [];
+let emailsMap   = {};   // user_id → email
+let pagantesSet = new Set(); // emails de quem pagou
 let currentFilter = 'todos';
 
-// ── Guard: só admin pode acessar ─────────────────────────────────
+// ── Guard: só admin pode acessar ───────────────────────────────────
 (async () => {
     await _waitForRole(4000);
 
@@ -171,20 +190,57 @@ let currentFilter = 'todos';
     loadUsuarios();
 })();
 
-// ── Carregar usuários ─────────────────────────────────────────────
+// ── Carregar usuários ─────────────────────────────────────────────────────
+let _allEmails = []; // lista de {id, email} carregada do edge
 async function loadUsuarios() {
     showLoading();
     try {
+        // 1. Perfis do Supabase (inclui plano_ativo_em para detectar vitalício)
         const { data, error } = await sb
             .from('perfis')
-            .select('id, nome, sobrenome, telefone, negocio, plano, role, created_at')
+            .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at')
             .order('created_at', { ascending: false });
-
         if (error) throw error;
-
-        // Buscar e-mails via RPC (opcional — requer função edge ou service-role)
-        // Por simplicidade, mostramos só os dados do perfil
         allUsuarios = data || [];
+
+        // 2. Emails: busca via Edge Function listUsers (service-role)
+        try {
+            const resp = await fetch(
+                'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users',
+                { headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` } }
+            );
+            if (resp.ok) {
+                const body = await resp.json();
+                (body.users || []).forEach(u => { emailsMap[u.id] = u.email; });
+            }
+        } catch(_) {}
+
+        // 3. Pagantes via tabela pedidos (complemento — pode ser bloqueado por RLS se policy admin não existir)
+        //    SOLUÇÃO PRINCIPAL: usar plano='vitalicio' direto da tabela perfis (sempre funciona para admin)
+        try {
+            const { data: peds, error: pedErr } = await sb
+                .from('pedidos')
+                .select('email, user_id, status')
+                .eq('status', 'pago');
+            if (!pedErr && peds?.length) {
+                pagantesSet = new Set(
+                    peds.flatMap(p => [p.email?.toLowerCase(), p.user_id].filter(Boolean))
+                );
+            }
+        } catch(_) {}
+
+        // Marca _pagante usando AMBAS as fontes:
+        // • plano = 'vitalicio' na tabela perfis  ← fonte primária (sempre disponível para admin)
+        // • email ou user_id encontrado em pedidos ← complemento
+        allUsuarios.forEach(u => {
+            const email = (emailsMap[u.id] || '').toLowerCase();
+            if (u.plano === 'vitalicio' ||
+                pagantesSet.has(email) ||
+                pagantesSet.has(u.id)) {
+                u._pagante = true;
+            }
+        });
+
         updateStats();
         filterUsuarios();
     } catch (e) {
@@ -197,15 +253,14 @@ async function loadUsuarios() {
     }
 }
 
-// ── Stats ─────────────────────────────────────────────────────────
+// ── Stats ──────────────────────────────────────────────────────────────
 function updateStats() {
-    const total     = allUsuarios.length;
-    const admins    = allUsuarios.filter(u => u.role === 'admin').length;
-    const afiliados = allUsuarios.filter(u => u.role === 'afiliado').length;
-
-    document.getElementById('stat-total').textContent    = total;
-    document.getElementById('stat-admin').textContent    = admins;
-    document.getElementById('stat-afiliado').textContent = afiliados;
+    document.getElementById('stat-total').textContent    = allUsuarios.length;
+    document.getElementById('stat-gratuito').textContent = allUsuarios.filter(u => !u._pagante).length;
+    document.getElementById('stat-vitalicio').textContent= allUsuarios.filter(u => u.plano === 'vitalicio').length;
+    document.getElementById('stat-pagantes').textContent = allUsuarios.filter(u => u._pagante).length;
+    document.getElementById('stat-admin').textContent    = allUsuarios.filter(u => u.role === 'admin').length;
+    document.getElementById('stat-afiliado').textContent = allUsuarios.filter(u => u.role === 'afiliado').length;
 }
 
 // ── Filtro + busca ────────────────────────────────────────────────
@@ -221,7 +276,9 @@ function filterUsuarios() {
 
     let list = allUsuarios;
 
-    if (currentFilter !== 'todos') {
+    if (currentFilter === 'pagantes') {
+        list = list.filter(u => u._pagante);
+    } else if (currentFilter !== 'todos') {
         list = list.filter(u => u.role === currentFilter);
     }
 
@@ -229,14 +286,15 @@ function filterUsuarios() {
         list = list.filter(u => {
             const nome  = ((u.nome || '') + ' ' + (u.sobrenome || '')).toLowerCase();
             const neg   = (u.negocio || '').toLowerCase();
-            return nome.includes(q) || neg.includes(q);
+            const email = (emailsMap[u.id] || '').toLowerCase();
+            return nome.includes(q) || neg.includes(q) || email.includes(q);
         });
     }
 
     renderUsuarios(list);
 }
 
-// ── Render ────────────────────────────────────────────────────────
+// ── Render ──────────────────────────────────────────────────────────────
 function renderUsuarios(list) {
     const el = document.getElementById('user-list');
 
@@ -250,23 +308,33 @@ function renderUsuarios(list) {
     }
 
     el.innerHTML = list.map(u => {
-        const initials = getInitials(u.nome, u.sobrenome);
-        const badgeHtml = u.role === 'admin'
+        const initials    = getInitials(u.nome, u.sobrenome);
+        const nomeCompleto = [u.nome, u.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+        const criadoEm   = new Date(u.created_at).toLocaleDateString('pt-BR');
+        const emailExib  = esc(emailsMap[u.id] || '—');
+        const planoLabel = u._pagante ? 'Vitálicio' : (u.plano || 'gratuito');
+
+        const roleBadge = u.role === 'admin'
             ? `<span class="badge-admin"><span class="material-symbols-outlined">shield</span>Admin</span>`
             : `<span class="badge-afiliado"><span class="material-symbols-outlined">person</span>Afiliado</span>`;
-        const nomeCompleto = [u.nome, u.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
-        const criadoEm = new Date(u.created_at).toLocaleDateString('pt-BR');
+
+        const vitalBadge = u._pagante
+            ? `<span class="badge-vital"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">workspace_premium</span>Vitálicio</span>`
+            : '';
 
         return `
         <div class="user-card" id="card-${u.id}">
             <div class="avatar">${initials}</div>
             <div class="user-info">
                 <div class="user-name">${esc(nomeCompleto)}</div>
-                <div class="user-email">${esc(u.negocio || '—')}</div>
-                <div class="user-meta">Plano: ${esc(u.plano || 'gratuito')} · Desde ${criadoEm}</div>
+                <div class="user-email">${emailExib}</div>
+                <div class="user-meta">${esc(u.negocio || '—')} · Desde ${criadoEm}</div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;flex-shrink:0">
-                ${badgeHtml}
+                <div style="display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end">
+                    ${vitalBadge}
+                    ${roleBadge}
+                </div>
                 <select class="role-sel" id="sel-${u.id}"
                     onchange="changeRole('${u.id}', this.value)"
                     ${u.id === window.__userProfile?.id ? 'title="Não é possível alterar seu próprio role"' : ''}>
