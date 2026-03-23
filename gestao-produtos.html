@@ -415,10 +415,9 @@
 
 /* ─── RENDER ──────────────────────────────────────────────── */
 
-let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
-
-let receitas     = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
-let searchQ      = '';
+let produtos = [];
+let receitas  = [];
+let searchQ   = '';
 let pendingDelId = null;
 
 function save() { localStorage.setItem('receitasx_produtos', JSON.stringify(produtos)); }
@@ -508,23 +507,55 @@ function toggleAllStatus() {
 }
 
 /* ─── MODAL ──────────────────────────────────────────────────────── */
+/* ─── CARREGAR DADOS DO SUPABASE ─────────────────────────────── */
+async function carregarDados() {
+    try {
+        const user = await getUser();
+        if (!user) {
+            // fallback localStorage
+            produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+            receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+            render();
+            return;
+        }
+        const [resProd, resRec] = await Promise.all([
+            sb.from('produtos').select('*').eq('user_id', user.id).order('nome'),
+            sb.from('receitas').select('id, nome, unidades, custo_total').eq('user_id', user.id).order('nome'),
+        ]);
+        if (!resProd.error) {
+            produtos = (resProd.data || []).map(p => ({
+                id:        p.id,
+                nome:      p.nome,
+                preco:     parseFloat(p.preco || 0),
+                custo:     parseFloat(p.custo || 0),
+                obs:       p.obs || '',
+                img:       p.imagem_url || '',
+                disp:      p.ativo !== false,
+                receitaId: p.receita_id || null,
+                cat:       p.categoria || 'Gourmet',
+                _supabase: true,
+            }));
+            save();
+        }
+        if (!resRec.error) {
+            receitas = (resRec.data || []).map(r => ({
+                id:        r.id,
+                nome:      r.nome,
+                unidades:  r.unidades || 1,
+                custoTotal:parseFloat(r.custo_total || 0),
+            }));
+        }
+    } catch(e) {
+        console.warn('Supabase indisponível:', e);
+        produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+        receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+    }
+    render();
+}
+
 function populateReceitas() {
     const sel = document.getElementById('f-receita');
-    const stored = localStorage.getItem('receitasx_receitas');
-    if (stored) {
-        receitas = JSON.parse(stored);
-    } else {
-        // Dados padrão iguais ao receitas.html (sem sobrescrever o localStorage)
-        receitas = [
-            { id:1, nome:'Mini Pudins',       unidades:9,  custoTotal:44.55 },
-            { id:2, nome:'Abacaxi Cremoso',   unidades:12, custoTotal:62.87 },
-            { id:3, nome:'Goiaba Cremoso',    unidades:12, custoTotal:54.28 },
-            { id:4, nome:'Coco com Abacaxi',  unidades:10, custoTotal:38.00 },
-            { id:5, nome:'Morango Fitness',   unidades:8,  custoTotal:28.00 },
-            { id:6, nome:'Brigadeiro Vegano', unidades:20, custoTotal:45.00 },
-        ];
-    }
-    sel.innerHTML = '<option value="">— Nenhuma —</option>' +
+    sel.innerHTML = '<option value="">&#x2014; Nenhuma &#x2014;</option>' +
         receitas.map(r => {
             const custoUnit = r.unidades > 0 ? (r.custoTotal / r.unidades) : 0;
             const label = custoUnit > 0
@@ -564,6 +595,7 @@ async function openModal(id) {
         document.getElementById('f-id').value    = p.id;
         document.getElementById('f-nome').value  = p.nome;
         document.getElementById('f-preco').value = p.preco || '';
+        document.getElementById('f-custo').value = p.custo || '';
         document.getElementById('f-obs').value   = p.obs   || '';
         document.getElementById('f-disp').checked = p.disp !== false;
         if (p.img) {
@@ -573,8 +605,7 @@ async function openModal(id) {
             document.getElementById('img-placeholder-icon').style.display = 'none';
             document.getElementById('img-placeholder-txt').style.display  = 'none';
         }
-        if (p.receitaId) document.getElementById('f-receita').value = p.receitaId;
-        if (p.custo) document.getElementById('f-custo').value = p.custo;
+        if (p.receitaId) document.getElementById('f-receita').value = String(p.receitaId);
         document.getElementById('modal-title').textContent    = 'Editar Produto';
         document.getElementById('btn-salvar-txt').textContent = 'Atualizar';
     } else {
@@ -675,7 +706,7 @@ function handleImgUpload(e) {
 }
 
 
-function salvar() {
+async function salvar() {
     const nome = document.getElementById('f-nome').value.trim();
     if (!nome) {
         document.getElementById('f-nome').classList.add('error');
@@ -686,18 +717,53 @@ function salvar() {
     document.getElementById('f-nome').classList.remove('error');
     document.getElementById('f-nome-err').style.display = 'none';
 
-    const data = {
-        nome,
-        cat:      'Gourmet',
-        preco:    parseFloat(document.getElementById('f-preco').value) || 0,
-        custo:    parseFloat(document.getElementById('f-custo').value) || 0,
-        obs:      document.getElementById('f-obs').value.trim(),
-        img:      document.getElementById('f-img').value,
-        disp:     document.getElementById('f-disp').checked,
-        receitaId:document.getElementById('f-receita').value || null,
-    };
-
+    const receitaIdVal = document.getElementById('f-receita').value || null;
+    const preco = parseFloat(document.getElementById('f-preco').value) || 0;
+    const custo = parseFloat(document.getElementById('f-custo').value) || 0;
     const idVal = document.getElementById('f-id').value;
+
+    try {
+        const user = await getUser();
+        if (user) {
+            const payload = {
+                user_id:    user.id,
+                nome,
+                categoria:  'Gourmet',
+                preco,
+                custo,
+                obs:        document.getElementById('f-obs').value.trim() || null,
+                imagem_url: document.getElementById('f-img').value || null,
+                ativo:      document.getElementById('f-disp').checked,
+                receita_id: receitaIdVal || null,
+            };
+            if (idVal) {
+                // update
+                const { error } = await sb.from('produtos').update(payload).eq('id', idVal).eq('user_id', user.id);
+                if (error) throw error;
+            } else {
+                // insert
+                const { error } = await sb.from('produtos').insert(payload);
+                if (error) throw error;
+                registrarCriacao('produtos');
+            }
+            showToast(idVal ? `"${nome}" atualizado!` : `"${nome}" cadastrado!`);
+            closeModal();
+            await carregarDados();
+            return;
+        }
+    } catch(e) {
+        console.warn('Supabase falhou, salvando local:', e);
+        showToast('Erro ao salvar. Tente novamente.', 'error');
+        return;
+    }
+
+    // Fallback localStorage
+    const data = { nome, cat:'Gourmet', preco, custo,
+        obs: document.getElementById('f-obs').value.trim(),
+        img: document.getElementById('f-img').value,
+        disp: document.getElementById('f-disp').checked,
+        receitaId: receitaIdVal,
+    };
     if (idVal) {
         const idx = produtos.findIndex(x => x.id === parseInt(idVal));
         if (idx !== -1) produtos[idx] = { ...produtos[idx], ...data };
@@ -712,7 +778,7 @@ function salvar() {
 }
 
 /* ─── DELETE ─────────────────────────────────────────────────────── */
-function openDel(id) {
+async function openDel(id) {
     const p = produtos.find(x => x.id === id);
     if (!p) return;
     pendingDelId = id;
@@ -720,9 +786,19 @@ function openDel(id) {
     document.getElementById('modal-del').classList.add('open');
 }
 function closeDel() { document.getElementById('modal-del').classList.remove('open'); pendingDelId = null; }
-function confirmarDel() {
+async function confirmarDel() {
     if (!pendingDelId) return;
     const p = produtos.find(x => x.id === pendingDelId);
+    try {
+        const user = await getUser();
+        if (user) {
+            await sb.from('produtos').delete().eq('id', pendingDelId).eq('user_id', user.id);
+            await carregarDados();
+            closeDel();
+            showToast(`"${p?.nome}" excluído!`, 'error');
+            return;
+        }
+    } catch(e) { console.warn('Supabase delete falhou:', e); }
     produtos = produtos.filter(x => x.id !== pendingDelId);
     save(); render(); closeDel();
     showToast(`"${p?.nome}" excluído!`, 'error');
@@ -765,7 +841,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
-render();
+carregarDados();
 injetarAviso('produtos');
 </script>
 </body>
