@@ -799,7 +799,7 @@ async function carregarCatalogos() {
         if (!user) return;
         const [resIns, resEmb, resEqp] = await Promise.all([
             sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
-            sb.from('embalagens').select('id, nome, preco').eq('user_id', user.id).order('nome'),
+            sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
         ]);
         // Normaliza insumos para o formato esperado pelo modal
