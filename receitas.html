@@ -458,25 +458,16 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
               <div>
                 <label class="fl" for="r-rend">Rendimento (un)</label>
-                <input id="r-rend" type="number" min="1" class="fi" placeholder="Ex: 10" />
+                <input id="r-rend" type="number" min="1" class="fi" placeholder="Ex: 10" oninput="calcPrevia()" />
               </div>
               <div>
                 <label class="fl" for="r-tempo">Preparo (min)</label>
                 <input id="r-tempo" type="number" min="1" class="fi" placeholder="Ex: 45" />
               </div>
             </div>
-            <div>
-              <label class="fl" for="r-produto">Produto Vinculado <span style="color:#475569;text-transform:none;font-weight:400">(preenche o preço automaticamente)</span></label>
-              <select id="r-produto" class="fi" onchange="onProdutoSelect()" style="-webkit-appearance:none;appearance:none">
-                <option value="">Nenhum / digitar preço manualmente</option>
-              </select>
-            </div>
-            <div>
-              <label class="fl" for="r-preco">Preço de Venda Total <span style="color:#475569;text-transform:none;font-weight:400">(da leva inteira)</span></label>
-              <div style="position:relative">
-                <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
-                <input id="r-preco" type="number" min="0" step="0.01" class="fi" placeholder="Ex: 89,90" style="padding-left:2.2rem" oninput="calcPrevia()" />
-              </div>
+            <div class="warn-row" style="gap:.5rem">
+              <span class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">info</span>
+              <span style="color:#94a3b8;font-size:.78rem">O preço de venda é definido em <strong style="color:#25f4f4">Gestão de Produtos</strong>. Vincule um produto à receita lá para ver o preço aqui.</span>
             </div>
             <div>
               <label class="fl" for="r-desc">Descrição <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
@@ -554,9 +545,6 @@
               <div class="cost-row"><span class="lbl">Custo Equipamentos:</span><span class="val" id="cv-eqp">R$ 0,00</span></div>
               <div class="cost-row"><span class="lbl">Custo Mão de Obra:</span><span class="val" id="cv-mob">R$ 0,00</span></div>
               <div class="cost-row total"><span class="lbl">Custo Total da Receita:</span><span class="val" id="cv-tot">R$ 0,00</span></div>
-              <div class="cost-row" style="margin-top:.5rem"><span class="lbl" style="color:#25f4f4">Preço de Venda (total):</span><span class="val" id="cv-preco" style="color:#25f4f4">R$ 0,00</span></div>
-              <div class="cost-row"><span class="lbl" style="color:#4ade80">Lucro Total:</span><span class="val" id="cv-lucro" style="color:#4ade80">R$ 0,00</span></div>
-              <div class="cost-row"><span class="lbl" style="color:#fbbf24">Margem (%):</span><span class="val" id="cv-margem" style="color:#fbbf24">0%</span></div>
             </div>
             <div class="unit-box">
               <div style="display:flex;flex-direction:column;gap:.15rem">
@@ -811,7 +799,6 @@ function editarReceita(id) {
 let insumos     = [];
 let embCatalogo = [];
 let eqpCatalogo = [];
-let prodCatalogo = []; // produtos para o select do modal
 let ingRows   = [];
 let embalRows = [];
 let equipRows = [];
@@ -819,16 +806,15 @@ let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
 
-/* Carrega insumos, embalagens, equipamentos e produtos do Supabase */
+/* Carrega insumos, embalagens e equipamentos do Supabase */
 async function carregarCatalogos() {
     try {
         const user = await getUser();
         if (!user) return;
-        const [resIns, resEmb, resEqp, resProd] = await Promise.all([
+        const [resIns, resEmb, resEqp] = await Promise.all([
             sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
             sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
-            sb.from('produtos').select('id, nome, preco').eq('user_id', user.id).order('nome'),
         ]);
         // Normaliza insumos
         insumos = (resIns.data || []).map(i => ({
@@ -851,46 +837,18 @@ async function carregarCatalogos() {
             nome:   e.nome,
             custoH: parseFloat(e.custo_hora || 0),
         }));
-        // Produtos para o select vinculado
-        prodCatalogo = (resProd.data || []).map(p => ({
-            id:    p.id,
-            nome:  p.nome,
-            preco: parseFloat(p.preco || 0),
-        }));
-        // Popula select de produto no modal
-        const sel = document.getElementById('r-produto');
-        if (sel) {
-            sel.innerHTML = '<option value="">Nenhum / digitar preço manualmente</option>' +
-                prodCatalogo.map(p =>
-                    `<option value="${p.id}" data-preco="${p.preco}">${p.nome} (${fmtR(p.preco)})</option>`
-                ).join('');
-        }
     } catch(err) {
         console.warn('Erro ao carregar catálogos:', err);
-    }
-}
-
-/* Ao selecionar produto, preenche o preço de venda automaticamente */
-function onProdutoSelect() {
-    const sel = document.getElementById('r-produto');
-    const opt = sel?.selectedOptions[0];
-    const preco = parseFloat(opt?.dataset.preco || 0);
-    if (preco > 0) {
-        document.getElementById('r-preco').value = preco.toFixed(2);
-        calcPrevia();
     }
 }
 
 async function openCadastrar() {
     const ok = await podecriar('receitas');
     if (!ok) return;
-    // recarrega catálogos do Supabase em tempo real
     await carregarCatalogos();
     ingRows = []; embalRows = []; equipRows = [];
     ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
     document.getElementById('form-receita').reset();
-    document.getElementById('r-preco').value   = '';
-    document.getElementById('r-produto').value = '';
     document.getElementById('ing-list').innerHTML   = '';
     document.getElementById('embal-list').innerHTML = '';
     document.getElementById('equip-list').innerHTML = '';
@@ -1186,22 +1144,14 @@ function calcPrevia() {
     const total = costIng + costEmb + costEqp;
     const rend  = parseInt(document.getElementById('r-rend')?.value) || 1;
     const unit  = total / rend;
-    const preco = parseFloat(document.getElementById('r-preco')?.value) || 0;
-    const lucro = preco - total;
-    const margem = preco > 0 ? (lucro / preco) * 100 : 0;
 
-    document.getElementById('cv-ing').textContent    = fmtR(costIng);
-    document.getElementById('cv-emb').textContent    = fmtR(costEmb);
-    document.getElementById('cv-eqp').textContent    = fmtR(costEqp);
-    document.getElementById('cv-mob').textContent    = fmtR(0);
-    document.getElementById('cv-tot').textContent    = fmtR(total);
-    document.getElementById('cv-preco').textContent  = fmtR(preco);
-    document.getElementById('cv-lucro').textContent  = fmtR(lucro);
-    document.getElementById('cv-lucro').style.color  = lucro >= 0 ? '#4ade80' : '#f87171';
-    document.getElementById('cv-margem').textContent = margem.toFixed(1) + '%';
-    document.getElementById('cv-margem').style.color = margem >= 30 ? '#4ade80' : margem >= 15 ? '#fbbf24' : '#f87171';
-    document.getElementById('cv-unit').textContent   = fmtR(unit);
-    document.getElementById('cv-rend').textContent   = rend + ' un';
+    document.getElementById('cv-ing').textContent  = fmtR(costIng);
+    document.getElementById('cv-emb').textContent  = fmtR(costEmb);
+    document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
+    document.getElementById('cv-mob').textContent  = fmtR(0);
+    document.getElementById('cv-tot').textContent  = fmtR(total);
+    document.getElementById('cv-unit').textContent = fmtR(unit);
+    document.getElementById('cv-rend').textContent = rend + ' un';
 }
 
 
@@ -1280,7 +1230,7 @@ async function salvarReceita(e) {
                 categoria:    'gourmet',
                 unidades:     rend,
                 tempo,
-                preco_total:  parseFloat(document.getElementById('r-preco')?.value) || 0,
+                preco_total:  0,
                 custo_total:  custoTotal,
                 custo_ing:    custoIng,
                 custo_emb:    custoEmb,
