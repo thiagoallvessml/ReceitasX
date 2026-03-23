@@ -142,8 +142,18 @@
             <p class="canal-label">Canal Selecionado</p>
             <p class="canal-nome" id="canal-nome-txt">—</p>
         </div>
-        <div class="canal-ico" id="canal-ico" style="background:rgba(37,244,244,.1)">
-            <span class="material-symbols-outlined" style="color:#25f4f4">storefront</span>
+        <div style="display:flex;align-items:center;gap:.6rem">
+            <button id="btn-del-cat"
+                onclick="openModalExcluirCat()"
+                title="Excluir esta categoria"
+                style="display:none;width:2rem;height:2rem;border-radius:.5rem;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .15s"
+                onmouseover="this.style.background='rgba(248,113,113,.25)'"
+                onmouseout="this.style.background='rgba(248,113,113,.12)'">
+                <span class="material-symbols-outlined" style="font-size:.95rem;color:#f87171;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">delete</span>
+            </button>
+            <div class="canal-ico" id="canal-ico" style="background:rgba(37,244,244,.1)">
+                <span class="material-symbols-outlined" style="color:#25f4f4">storefront</span>
+            </div>
         </div>
     </div>
 
@@ -259,22 +269,12 @@ function getPrecoProd(mktId, prodId) {
 
 /* ─── TABS ───────────────────────────────────────────────────────── */
 function renderTabs() {
-    const IDS_FIXOS = ['casa', 'ifood']; // categorias que não podem ser excluídas
     const wrap = document.getElementById('tabs-wrap');
-    wrap.innerHTML = marketplaces.map((m, i) => {
-        const isCustom = !IDS_FIXOS.includes(m.id);
-        const delBtn = isCustom
-            ? `<button class="tab-del-btn" onclick="openModalExcluirCat(event, '${m.id}')" title="Excluir categoria">
-                 <span class="material-symbols-outlined">close</span>
-               </button>`
-            : '';
-        return `
+    wrap.innerHTML = marketplaces.map((m, i) => `
     <button class="mkt-tab ${i===currentMktIdx?'active':''}" onclick="selectMkt(${i})">
       <span class="material-symbols-outlined">${m.icon}</span>
       ${m.nome}
-      ${delBtn}
-    </button>`;
-    }).join('') +
+    </button>`).join('') +
     `<button class="btn-criar-cat" onclick="openModalCat()">
       <span class="material-symbols-outlined">add_circle</span>
       Criar Categoria
@@ -289,6 +289,7 @@ function selectMkt(i) {
 }
 
 /* ─── BANNER ─────────────────────────────────────────────────────── */
+const IDS_FIXOS = ['casa', 'ifood'];
 function renderBanner() {
     const m = getMkt();
     const taxa = m.taxa ?? 0;
@@ -297,6 +298,9 @@ function renderBanner() {
     const ico = document.getElementById('canal-ico');
     ico.style.background = m.bg || 'rgba(37,244,244,.1)';
     ico.innerHTML = `<span class="material-symbols-outlined" style="color:${m.color||'#25f4f4'}">${m.icon}</span>`;
+    // Exibe ou oculta o botão excluir
+    const delBtn = document.getElementById('btn-del-cat');
+    delBtn.style.display = IDS_FIXOS.includes(m.id) ? 'none' : 'flex';
 }
 
 /* ─── GRID ───────────────────────────────────────────────────────── */
@@ -465,11 +469,10 @@ async function criarCategoria() {
 
 /* ── EXCLUIR CATEGORIA ────────────────────────────────────────────── */
 let pendingDelCatId = null;
-function openModalExcluirCat(e, mktId) {
-    e.stopPropagation();
-    const m = marketplaces.find(x => x.id === mktId);
-    if (!m) return;
-    pendingDelCatId = mktId;
+function openModalExcluirCat() {
+    const m = getMkt();
+    if (!m || IDS_FIXOS.includes(m.id)) return;
+    pendingDelCatId = m.id;
     document.getElementById('cat-del-nome').textContent = `"${m.nome}"`;
     document.getElementById('modal-excluir-cat').classList.add('open');
 }
