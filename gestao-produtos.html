@@ -294,24 +294,28 @@
         </div>
       </div>
 
-      <!-- Custo unitário -->
-      <div>
-        <label class="field-label" for="f-custo">Custo Unitário (R$) <span style="color:#475569;font-weight:400;text-transform:none">(Opcional)</span></label>
-        <div style="position:relative">
-          <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
-          <input id="f-custo" type="number" min="0" step="0.01" class="fc" placeholder="0,00" style="padding-left:2.2rem" oninput="calcPreview()" />
-        </div>
-      </div>
-
       <!-- Receita vinculada -->
       <div>
         <label class="field-label" for="f-receita">Receita Vinculada <span style="color:#475569;font-weight:400;text-transform:none">(Opcional)</span></label>
         <div class="select-wrap">
-          <select id="f-receita" class="fc">
+          <select id="f-receita" class="fc" onchange="onReceitaChange()">
             <option value="">— Nenhuma —</option>
           </select>
           <span class="chev material-symbols-outlined">expand_more</span>
         </div>
+      </div>
+
+      <!-- Custo unitário automático -->
+      <div id="custo-auto-wrap" style="display:none">
+        <label class="field-label">Custo Unitário (automático)</label>
+        <div style="display:flex;align-items:center;gap:.65rem;padding:.7rem .9rem;border-radius:.7rem;border:1px solid rgba(37,244,244,.2);background:rgba(37,244,244,.04)">
+          <span class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">calculate</span>
+          <div style="flex:1">
+            <p id="custo-auto-val" class="font-bold" style="color:#25f4f4;font-size:.95rem">R$ 0,00</p>
+            <p id="custo-auto-desc" class="text-xs" style="color:#64748b;margin-top:.1rem"></p>
+          </div>
+        </div>
+        <input type="hidden" id="f-custo" />
       </div>
 
       <!-- Observações -->
@@ -580,6 +584,7 @@ function resetModal() {
     document.getElementById('img-placeholder-icon').style.display = '';
     document.getElementById('img-placeholder-txt').style.display  = '';
     document.getElementById('preview-box').classList.remove('show');
+    document.getElementById('custo-auto-wrap').style.display = 'none';
 }
 
 async function openModal(id) {
@@ -605,7 +610,10 @@ async function openModal(id) {
             document.getElementById('img-placeholder-icon').style.display = 'none';
             document.getElementById('img-placeholder-txt').style.display  = 'none';
         }
-        if (p.receitaId) document.getElementById('f-receita').value = String(p.receitaId);
+        if (p.receitaId) {
+            document.getElementById('f-receita').value = String(p.receitaId);
+            onReceitaChange();
+        }
         document.getElementById('modal-title').textContent    = 'Editar Produto';
         document.getElementById('btn-salvar-txt').textContent = 'Atualizar';
     } else {
@@ -617,6 +625,28 @@ async function openModal(id) {
 }
 
 function closeModal() { document.getElementById('modal-prod').classList.remove('open'); }
+
+/* ─── CUSTO AUTOMÁTICO AO SELECIONAR RECEITA ─────────────────────── */
+function onReceitaChange() {
+    const receitaId = document.getElementById('f-receita').value;
+    const wrap      = document.getElementById('custo-auto-wrap');
+    if (!receitaId) {
+        wrap.style.display = 'none';
+        document.getElementById('f-custo').value = '';
+        calcPreview();
+        return;
+    }
+    const rec = receitas.find(r => String(r.id) === String(receitaId));
+    if (!rec) { wrap.style.display = 'none'; return; }
+    const custoUnit = rec.unidades > 0 ? rec.custoTotal / rec.unidades : 0;
+    document.getElementById('f-custo').value = custoUnit.toFixed(2);
+    document.getElementById('custo-auto-val').textContent =
+        'R$ ' + custoUnit.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('custo-auto-desc').textContent =
+        `Calculado de "${rec.nome}" — R$ ${rec.custoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})} ÷ ${rec.unidades} un`;
+    wrap.style.display = '';
+    calcPreview();
+}
 
 /* ─── PREVIEW MARKETPLACE ───────────────────────────────────────── */
 function fmtR2(v) { return 'R$\u00a0' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -632,7 +662,7 @@ function getMarketplacesLocal() {
 
 function calcPreview() {
     const preco = parseFloat(document.getElementById('f-preco').value) || 0;
-    const custo = parseFloat(document.getElementById('f-custo').value) || 0;
+    const custo = parseFloat(document.getElementById('f-custo').value) || 0; // preenchido automaticamente
     const box   = document.getElementById('preview-box');
 
     if (preco <= 0 && custo <= 0) { box.classList.remove('show'); return; }
