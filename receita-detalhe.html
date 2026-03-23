@@ -208,22 +208,32 @@ let receitaAtual = null;
 async function carregarReceita() {
     if (!receitaId) { mostrarNotFound(); return; }
 
-    // Tenta Supabase
     try {
-        const { data, error } = await sb
-            .from('receitas')
-            .select('*')
-            .eq('id', receitaId)
-            .single();
+        // Busca receita e produto vinculado em paralelo
+        const user = await getUser();
+        const [resRec, resProd] = await Promise.all([
+            sb.from('receitas').select('*').eq('id', receitaId).single(),
+            user
+                ? sb.from('produtos').select('id, nome, preco').eq('receita_id', receitaId).eq('user_id', user.id).maybeSingle()
+                : Promise.resolve({ data: null }),
+        ]);
 
-        if (!error && data) {
+        if (!resRec.error && resRec.data) {
+            const data = resRec.data;
+            const prodPrecoUnit = parseFloat(resRec.data.preco_total || 0); // fallback do campo salvo
+            const prodVinculado = resProd.data ? parseFloat(resProd.data.preco || 0) : 0;
+            // Usa preço do produto vinculado se existir; senão usa o campo preco_total da receita
+            const precoUnit = prodVinculado > 0 ? prodVinculado : prodPrecoUnit;
+            const unidades  = data.unidades || 1;
+
             receitaAtual = {
                 id:          data.id,
                 nome:        data.nome,
                 categoria:   data.categoria  || 'gourmet',
-                unidades:    data.unidades   || 1,
+                unidades,
                 tempo:       data.tempo      || 0,
-                precoTotal:  parseFloat(data.preco_total || 0),
+                precoUnit,                          // preço por unidade (do produto)
+                precoTotal:  precoUnit * unidades,  // total calculado
                 custoTotal:  parseFloat(data.custo_total || 0),
                 custoIng:    parseFloat(data.custo_ing   || 0),
                 custoEmb:    parseFloat(data.custo_emb   || 0),
@@ -234,6 +244,7 @@ async function carregarReceita() {
                 equipamentos: data.equipamentos  || [],
                 maoDeObra:    data.mao_de_obra   || [],
                 grad:         data.grad || GRADIENTS[0],
+                produtoVinculado: resProd.data?.nome || null,
             };
             render();
             return;
@@ -269,12 +280,14 @@ function salvarReceitas(arr) {
 /* ── cálculos ── */
 function calc(r) {
     const unidades    = r.unidades || 1;
-    const precoTotal  = r.precoTotal  || 0;
-    const custoTotal  = r.custoTotal  || 0;
-    const precoUnit   = precoTotal  / unidades;
-    const custoUnit   = custoTotal  / unidades;
-    const lucroTotal  = precoTotal  - custoTotal;
-    const lucroUnit   = lucroTotal  / unidades;
+    // precoUnit: vem do produto vinculado (já é por unidade)
+    // precoTotal: precoUnit × unidades (ou o campo salvo para fallback)
+    const precoUnit   = r.precoUnit  || (r.precoTotal / unidades) || 0;
+    const precoTotal  = r.precoTotal || (precoUnit * unidades)    || 0;
+    const custoTotal  = r.custoTotal || 0;
+    const custoUnit   = custoTotal   / unidades;
+    const lucroTotal  = precoTotal   - custoTotal;
+    const lucroUnit   = precoUnit    - custoUnit;
     const margem      = precoTotal > 0 ? (lucroTotal / precoTotal) * 100 : 0;
     const markup      = custoTotal > 0 ? precoTotal / custoTotal : 0;
     return { precoTotal, custoTotal, precoUnit, custoUnit, lucroTotal, lucroUnit, margem, markup };
