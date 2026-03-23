@@ -35,7 +35,8 @@ let _planoPago = null;   // true | false | null (não verificado ainda)
 let _planoChecando = false;
 
 /**
- * Retorna true se o usuário tem plano pago (pedido com status='pago').
+ * Retorna true se o usuário tem plano pago.
+ * Verifica primeiro o campo perfis.plano (rápido) e depois pedidos (fallback).
  * Usa cache para evitar múltiplas chamadas.
  */
 async function isPlanoPago() {
@@ -46,7 +47,6 @@ async function isPlanoPago() {
   }
   _planoChecando = true;
   try {
-    // Supabase pode não estar carregado em páginas sem supabase-client.js
     if (typeof getUser !== 'function' || typeof sb === 'undefined') {
       _planoPago = false;
       return false;
@@ -54,6 +54,22 @@ async function isPlanoPago() {
     const user = await getUser();
     if (!user) { _planoPago = false; return false; }
 
+    // 1️⃣ Verificação rápida: campo plano na tabela perfis
+    try {
+      const { data: perfil } = await sb
+        .from('perfis')
+        .select('plano')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (perfil?.plano === 'vitalicio') {
+        _planoPago = true;
+        return true;
+      }
+    } catch(e) {
+      console.warn('plano-guard: erro ao verificar perfis', e);
+    }
+
+    // 2️⃣ Fallback: verifica tabela pedidos
     const { data } = await sb
       .from('pedidos')
       .select('id')

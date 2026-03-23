@@ -72,20 +72,72 @@ serve(async (req) => {
       console.warn('Erro ao buscar userId:', e);
     }
 
-    // Inserir pedido com status 'pago'
-    const { data: pedido, error: pedErr } = await sb.from('pedidos').insert({
-      email,
-      valor_pago:    valorReal,
-      metodo_pag:    'pix',
-      status:        'pago',
-      codigo_acesso: cod,
-      billing_id:    billingId,
-      ...(userId ? { user_id: userId } : {}),
-    }).select().single();
+    // ── Evita duplicata: verifica se billing_id já existe ────────────
+    if (billingId) {
+      const { data: existente } = await sb
+        .from('pedidos')
+        .select('id')
+        .eq('billing_id', billingId)
+        .eq('status', 'pago')
+        .maybeSingle();
+      if (existente) {
+        console.log(`Billing ${billingId} já processado — ignorando`);
+        return new Response(JSON.stringify({ ok: true, duplicated: true }), {
+          headers: { ...CORS, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // ── Atualiza pedido pendente existente OU insere novo ────────────
+    let pedido = null;
+    let pedErr = null;
+
+    // Tenta atualizar registro pendente pelo billing_id
+    if (billingId) {
+      const { data: upd, error: updE } = await sb
+        .from('pedidos')
+        .update({ status: 'pago', codigo_acesso: cod, ...(userId ? { user_id: userId } : {}) })
+        .eq('billing_id', billingId)
+        .eq('status', 'pendente')
+        .select()
+        .maybeSingle();
+      pedido = upd;
+      pedErr = updE;
+    }
+
+    // Se não havia pendente, insere novo
+    if (!pedido) {
+      const { data: ins, error: insE } = await sb.from('pedidos').insert({
+        email,
+        valor_pago:    valorReal,
+        metodo_pag:    'pix',
+        status:        'pago',
+        codigo_acesso: cod,
+        billing_id:    billingId,
+        ...(userId ? { user_id: userId } : {}),
+      }).select().single();
+      pedido = ins;
+      pedErr = insE;
+    }
 
     if (pedErr) {
-      console.error('Erro ao inserir pedido:', pedErr.message);
-      // Não retorna erro — AbacatePay pode retentar e duplicar; só loga
+      console.error('Erro ao salvar pedido:', pedErr.message);
+    }
+
+    // ── Atualiza perfis com plano vitalicio ──────────────────────────
+    if (userId) {
+      try {
+        const { error: pErr } = await sb
+          .from('perfis')
+          .update({ plano: 'vitalicio', plano_ativo_em: new Date().toISOString() })
+          .eq('id', userId);
+        if (pErr) console.error('Erro ao atualizar perfis:', pErr.message);
+        else console.log(`Perfil ${userId} atualizado para plano vitalicio`);
+      } catch(e) {
+        console.error('Erro ao atualizar perfis:', e);
+      }
+    } else {
+      console.warn(`user_id não encontrado para email ${email} — perfis não atualizado`);
     }
 
     // ── Comissão do afiliado ─────────────────────────────────────────
