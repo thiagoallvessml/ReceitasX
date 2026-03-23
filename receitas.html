@@ -466,6 +466,13 @@
               </div>
             </div>
             <div>
+              <label class="fl" for="r-preco">Preço de Venda Total <span style="color:#475569;text-transform:none;font-weight:400">(da leva inteira)</span></label>
+              <div style="position:relative">
+                <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
+                <input id="r-preco" type="number" min="0" step="0.01" class="fi" placeholder="Ex: 89,90" style="padding-left:2.2rem" oninput="calcPrevia()" />
+              </div>
+            </div>
+            <div>
               <label class="fl" for="r-desc">Descrição <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
               <textarea id="r-desc" class="fi" placeholder="Descreva a receita..."></textarea>
             </div>
@@ -541,6 +548,9 @@
               <div class="cost-row"><span class="lbl">Custo Equipamentos:</span><span class="val" id="cv-eqp">R$ 0,00</span></div>
               <div class="cost-row"><span class="lbl">Custo Mão de Obra:</span><span class="val" id="cv-mob">R$ 0,00</span></div>
               <div class="cost-row total"><span class="lbl">Custo Total da Receita:</span><span class="val" id="cv-tot">R$ 0,00</span></div>
+              <div class="cost-row" style="margin-top:.5rem"><span class="lbl" style="color:#25f4f4">Preço de Venda (total):</span><span class="val" id="cv-preco" style="color:#25f4f4">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl" style="color:#4ade80">Lucro Total:</span><span class="val" id="cv-lucro" style="color:#4ade80">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl" style="color:#fbbf24">Margem (%):</span><span class="val" id="cv-margem" style="color:#fbbf24">0%</span></div>
             </div>
             <div class="unit-box">
               <div style="display:flex;flex-direction:column;gap:.15rem">
@@ -836,6 +846,7 @@ async function openCadastrar() {
     ingRows = []; embalRows = []; equipRows = [];
     ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
     document.getElementById('form-receita').reset();
+    document.getElementById('r-preco').value = '';
     document.getElementById('ing-list').innerHTML   = '';
     document.getElementById('embal-list').innerHTML = '';
     document.getElementById('equip-list').innerHTML = '';
@@ -1131,14 +1142,22 @@ function calcPrevia() {
     const total = costIng + costEmb + costEqp;
     const rend  = parseInt(document.getElementById('r-rend')?.value) || 1;
     const unit  = total / rend;
+    const preco = parseFloat(document.getElementById('r-preco')?.value) || 0;
+    const lucro = preco - total;
+    const margem = preco > 0 ? (lucro / preco) * 100 : 0;
 
-    document.getElementById('cv-ing').textContent  = fmtR(costIng);
-    document.getElementById('cv-emb').textContent  = fmtR(costEmb);
-    document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
-    document.getElementById('cv-mob').textContent  = fmtR(0);
-    document.getElementById('cv-tot').textContent  = fmtR(total);
-    document.getElementById('cv-unit').textContent = fmtR(unit);
-    document.getElementById('cv-rend').textContent = rend + ' un';
+    document.getElementById('cv-ing').textContent    = fmtR(costIng);
+    document.getElementById('cv-emb').textContent    = fmtR(costEmb);
+    document.getElementById('cv-eqp').textContent    = fmtR(costEqp);
+    document.getElementById('cv-mob').textContent    = fmtR(0);
+    document.getElementById('cv-tot').textContent    = fmtR(total);
+    document.getElementById('cv-preco').textContent  = fmtR(preco);
+    document.getElementById('cv-lucro').textContent  = fmtR(lucro);
+    document.getElementById('cv-lucro').style.color  = lucro >= 0 ? '#4ade80' : '#f87171';
+    document.getElementById('cv-margem').textContent = margem.toFixed(1) + '%';
+    document.getElementById('cv-margem').style.color = margem >= 30 ? '#4ade80' : margem >= 15 ? '#fbbf24' : '#f87171';
+    document.getElementById('cv-unit').textContent   = fmtR(unit);
+    document.getElementById('cv-rend').textContent   = rend + ' un';
 }
 
 
@@ -1217,7 +1236,7 @@ async function salvarReceita(e) {
                 categoria:    'gourmet',
                 unidades:     rend,
                 tempo,
-                preco_total:  0,
+                preco_total:  parseFloat(document.getElementById('r-preco')?.value) || 0,
                 custo_total:  custoTotal,
                 custo_ing:    custoIng,
                 custo_emb:    custoEmb,
