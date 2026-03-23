@@ -104,6 +104,12 @@
         /* toast */
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* excluir tab */
+        .tab-del-btn { width:1rem;height:1rem;border-radius:50%;background:rgba(0,0,0,.25);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:.15rem;flex-shrink:0;transition:background .15s;padding:0; }
+        .tab-del-btn:hover { background:rgba(248,113,113,.5); }
+        .tab-del-btn .material-symbols-outlined { font-size:.65rem;color:inherit;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        .mkt-tab.active .tab-del-btn { background:rgba(0,0,0,.2); }
     </style>
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
@@ -182,6 +188,26 @@
   </div>
 </div>
 
+<!-- ══ Modal Excluir Categoria ══════════════════════════════════════ -->
+<div id="modal-excluir-cat" class="modal-bg">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <div style="width:2.5rem;height:2.5rem;border-radius:.6rem;background:rgba(248,113,113,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span class="material-symbols-outlined" style="color:#f87171;font-size:1.2rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">delete</span>
+      </div>
+      <div>
+        <p class="font-bold text-sm">Excluir Categoria?</p>
+        <p class="text-xs text-slate-400 mt-0.5">Esta ação não pode ser desfeita.</p>
+      </div>
+    </div>
+    <p class="text-sm text-slate-300 mb-5">Deseja excluir o canal <strong id="cat-del-nome" class="text-white"></strong>? Os preços salvos nesta categoria também serão removidos.</p>
+    <div style="display:flex;gap:.6rem">
+      <button onclick="closeModalExcluirCat()" style="flex:1;padding:.7rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-size:.85rem;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onclick="excluirCategoria()" style="flex:1;padding:.7rem;border-radius:.65rem;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.15);color:#f87171;font-size:.85rem;font-weight:700;cursor:pointer">Excluir</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ Toast ════════════════════════════════════════════════════════ -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
@@ -233,12 +259,22 @@ function getPrecoProd(mktId, prodId) {
 
 /* ─── TABS ───────────────────────────────────────────────────────── */
 function renderTabs() {
+    const IDS_FIXOS = ['casa', 'ifood']; // categorias que não podem ser excluídas
     const wrap = document.getElementById('tabs-wrap');
-    wrap.innerHTML = marketplaces.map((m, i) => `
+    wrap.innerHTML = marketplaces.map((m, i) => {
+        const isCustom = !IDS_FIXOS.includes(m.id);
+        const delBtn = isCustom
+            ? `<button class="tab-del-btn" onclick="openModalExcluirCat(event, '${m.id}')" title="Excluir categoria">
+                 <span class="material-symbols-outlined">close</span>
+               </button>`
+            : '';
+        return `
     <button class="mkt-tab ${i===currentMktIdx?'active':''}" onclick="selectMkt(${i})">
       <span class="material-symbols-outlined">${m.icon}</span>
       ${m.nome}
-    </button>`).join('') +
+      ${delBtn}
+    </button>`;
+    }).join('') +
     `<button class="btn-criar-cat" onclick="openModalCat()">
       <span class="material-symbols-outlined">add_circle</span>
       Criar Categoria
@@ -427,7 +463,36 @@ async function criarCategoria() {
     showToast(`"${nome}" criado!`);
 }
 
-/* ─── TOAST ──────────────────────────────────────────────────────── */
+/* ── EXCLUIR CATEGORIA ────────────────────────────────────────────── */
+let pendingDelCatId = null;
+function openModalExcluirCat(e, mktId) {
+    e.stopPropagation();
+    const m = marketplaces.find(x => x.id === mktId);
+    if (!m) return;
+    pendingDelCatId = mktId;
+    document.getElementById('cat-del-nome').textContent = `"${m.nome}"`;
+    document.getElementById('modal-excluir-cat').classList.add('open');
+}
+function closeModalExcluirCat() {
+    document.getElementById('modal-excluir-cat').classList.remove('open');
+    pendingDelCatId = null;
+}
+function excluirCategoria() {
+    if (!pendingDelCatId) return;
+    const mktId = pendingDelCatId;
+    const m = marketplaces.find(x => x.id === mktId);
+    marketplaces = marketplaces.filter(x => x.id !== mktId);
+    const stored = JSON.parse(localStorage.getItem(MKT_KEY) || '[]');
+    localStorage.setItem(MKT_KEY, JSON.stringify(stored.filter(x => x.id !== mktId)));
+    delete precificacao[mktId];
+    localStorage.setItem(PREC_KEY, JSON.stringify(precificacao));
+    if (currentMktIdx >= marketplaces.length) currentMktIdx = Math.max(0, marketplaces.length - 1);
+    closeModalExcluirCat();
+    renderTabs(); renderBanner(); renderGrid();
+    showToast(`"${m?.nome}" excluído!`, 'error');
+}
+
+/* ── TOAST ──────────────────────────────────────────────────────────── */
 let toastTimer;
 function showToast(msg, type='success') {
     const t = document.getElementById('toast');
@@ -439,7 +504,9 @@ function showToast(msg, type='success') {
     toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
 }
 
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalCat(); });
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModalCat(); closeModalExcluirCat(); }
+});
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
 renderTabs();
