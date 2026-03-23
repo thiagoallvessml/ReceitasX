@@ -142,6 +142,16 @@
         .vit-feat { display:flex; align-items:center; gap:.45rem; font-size:.75rem; color:#e2e8f0; padding:.2rem 0; }
         .vit-feat .material-symbols-outlined { font-size:.9rem; color:#25f4f4; flex-shrink:0; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
 
+        /* modal senha */
+        .modal-senha-bg { position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:120;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem; }
+        .modal-senha-bg.open { opacity:1;pointer-events:auto; }
+        .modal-senha-box { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;max-width:380px;width:100%;animation:fadeUp .2s ease both; }
+        .pass-wrap { position:relative; }
+        .pass-wrap .eye { position:absolute;right:.85rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;padding:0;display:flex;align-items:center; }
+        .pass-wrap .eye .material-symbols-outlined { font-size:1.1rem; }
+        .pass-wrap input { padding-right:2.8rem !important; }
+        .senha-err { font-size:.72rem;color:#f87171;margin-top:.3rem;display:none; }
+
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to { transform: rotate(360deg); } }
         .page-enter { animation:fadeUp .3s ease both; }
@@ -311,6 +321,12 @@
     <!-- Sair da conta -->
     <div class="danger-zone">
         <p style="font-size:.72rem;color:#94a3b8;margin-bottom:.75rem;font-weight:600">SESSÃO</p>
+        <button class="danger-btn" onclick="openModalSenha()" style="margin-bottom:.5rem;color:#60a5fa;border-color:rgba(96,165,250,.3);"
+            onmouseover="this.style.background='rgba(96,165,250,.08)';this.style.borderColor='rgba(96,165,250,.5)'"
+            onmouseout="this.style.background='transparent';this.style.borderColor='rgba(96,165,250,.3)'">
+            <span class="material-symbols-outlined">lock_reset</span>
+            Alterar senha
+        </button>
         <button class="danger-btn" onclick="sairDaConta()" id="btn-sair">
             <span class="material-symbols-outlined">logout</span>
             Sair da conta
@@ -318,6 +334,47 @@
     </div>
 
 </main>
+
+<!-- ══ Modal Alterar Senha ═══════════════════════════════════════════ -->
+<div id="modal-senha" class="modal-senha-bg">
+  <div class="modal-senha-box">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+      <div style="width:2.5rem;height:2.5rem;border-radius:.6rem;background:rgba(96,165,250,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span class="material-symbols-outlined" style="color:#60a5fa;font-size:1.2rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">lock_reset</span>
+      </div>
+      <div>
+        <p class="font-bold text-sm">Alterar Senha</p>
+        <p class="text-xs text-slate-400 mt-0.5">Escolha uma nova senha segura.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.85rem">
+      <div>
+        <label class="field-label">Nova senha</label>
+        <div class="pass-wrap">
+          <input id="ms-nova" type="password" class="fc" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+          <button class="eye" type="button" onclick="toggleEye('ms-nova','eye1')">
+            <span class="material-symbols-outlined" id="eye1">visibility</span>
+          </button>
+        </div>
+        <p class="senha-err" id="ms-nova-err">Informe a nova senha (mín. 6 caracteres).</p>
+      </div>
+      <div>
+        <label class="field-label">Confirmar nova senha</label>
+        <div class="pass-wrap">
+          <input id="ms-conf" type="password" class="fc" placeholder="Repita a senha" autocomplete="new-password" />
+          <button class="eye" type="button" onclick="toggleEye('ms-conf','eye2')">
+            <span class="material-symbols-outlined" id="eye2">visibility</span>
+          </button>
+        </div>
+        <p class="senha-err" id="ms-conf-err">As senhas não conferem.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1.25rem">
+      <button onclick="closeModalSenha()" style="flex:1;padding:.7rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-size:.85rem;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onclick="alterarSenha()" id="btn-alterar-senha" style="flex:1;padding:.7rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-size:.85rem;font-weight:700;cursor:pointer">Alterar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ Toast ════════════════════════════════════════════════════════ -->
 <div id="toast">
@@ -656,6 +713,58 @@ function showToast(msg, type = 'success') {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
+/* ── MODAL ALTERAR SENHA ────────────────────────────────────── */
+function openModalSenha() {
+    document.getElementById('ms-nova').value  = '';
+    document.getElementById('ms-conf').value  = '';
+    document.getElementById('ms-nova-err').style.display = 'none';
+    document.getElementById('ms-conf-err').style.display = 'none';
+    ['ms-nova','ms-conf'].forEach(id => { document.getElementById(id).type = 'password'; });
+    ['eye1','eye2'].forEach(id => { document.getElementById(id).textContent = 'visibility'; });
+    document.getElementById('modal-senha').classList.add('open');
+    setTimeout(() => document.getElementById('ms-nova').focus(), 80);
+}
+function closeModalSenha() {
+    document.getElementById('modal-senha').classList.remove('open');
+}
+function toggleEye(inputId, eyeId) {
+    const inp = document.getElementById(inputId);
+    const ico = document.getElementById(eyeId);
+    if (inp.type === 'password') { inp.type = 'text'; ico.textContent = 'visibility_off'; }
+    else                         { inp.type = 'password'; ico.textContent = 'visibility'; }
+}
+async function alterarSenha() {
+    const nova = document.getElementById('ms-nova').value;
+    const conf = document.getElementById('ms-conf').value;
+    let ok = true;
+    document.getElementById('ms-nova-err').style.display = 'none';
+    document.getElementById('ms-conf-err').style.display = 'none';
+    if (nova.length < 6) {
+        document.getElementById('ms-nova-err').style.display = 'block'; ok = false;
+    }
+    if (nova !== conf) {
+        document.getElementById('ms-conf-err').style.display = 'block'; ok = false;
+    }
+    if (!ok) return;
+    const btn = document.getElementById('btn-alterar-senha');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+    try {
+        const { error } = await sb.auth.updateUser({ password: nova });
+        if (error) throw error;
+        closeModalSenha();
+        showToast('Senha alterada com sucesso! 🔒');
+    } catch(e) {
+        showToast('Erro: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Alterar';
+    }
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModalSenha();
+});
+
 </script>
 </body>
 </html>
