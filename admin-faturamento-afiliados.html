@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -184,6 +184,11 @@
         <button class="tab" onclick="setTab('indicacoes', this)" id="tab-indicacoes">
             Indicações
         </button>
+        <button class="tab" onclick="setTab('pagamento', this)" id="tab-pagamento" style="border:1px solid rgba(52,211,153,.3);color:#34d399;">
+            <span class="material-symbols-outlined" style="font-size:.85rem;vertical-align:middle;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
+            Pagamento
+            <span id="badge-pagar" style="display:none;margin-left:.3rem;background:#34d399;color:#0a0a0a;font-size:.6rem;font-weight:800;padding:.1rem .4rem;border-radius:9999px;"></span>
+        </button>
     </div>
 
     <!-- Search + Export row -->
@@ -268,6 +273,48 @@
                 </thead>
                 <tbody id="tbody-indicacoes">
                     <tr><td colspan="6"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── Painel: Pagamento Admin ── -->
+    <div id="painel-pagamento" style="display:none">
+        <!-- Cabeçalho da rodada -->
+        <div style="background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(52,211,153,.02));border:1px solid rgba(52,211,153,.25);border-radius:1rem;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+            <div>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+                    <span class="material-symbols-outlined" style="font-size:1.1rem;color:#34d399;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">event_repeat</span>
+                    <p style="font-size:.78rem;font-weight:800;color:#34d399;letter-spacing:.04em">RODADA DE PAGAMENTO</p>
+                </div>
+                <p style="font-size:.75rem;color:#64748b;">Afiliados com saldo positivo — sem exigir mínimo de solicitação</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+                <div style="text-align:right">
+                    <p style="font-size:.65rem;color:#64748b;">Total a pagar</p>
+                    <p id="pag-total" style="font-size:1.3rem;font-weight:900;color:#34d399;">R$ 0,00</p>
+                </div>
+                <button id="btn-pagar-todos" onclick="pagarTodos()" style="display:flex;align-items:center;gap:.4rem;padding:.65rem 1.15rem;border-radius:.75rem;border:none;background:linear-gradient(135deg,#34d399,#059669);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;transition:opacity .15s;white-space:nowrap;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" disabled>
+                    <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">payments</span>
+                    Pagar Todos
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="tbl-wrap">
+            <table id="tbl-pagamento">
+                <thead>
+                    <tr>
+                        <th>Afiliado</th>
+                        <th>Saldo Disponível</th>
+                        <th>Chave Pix</th>
+                        <th>Saques Pendentes</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-pagamento">
+                    <tr><td colspan="5"><div class="shimmer" style="margin:.5rem"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -451,6 +498,12 @@ function atualizarBadgePendente() {
     const b = document.getElementById('badge-pendente');
     if (n > 0) { b.textContent = n; b.style.display = ''; }
     else        { b.style.display = 'none'; }
+
+    // Badge na aba Pagamento: afiliados com saldo > 0
+    const saldos = calcularSaldos();
+    const nPag   = Object.values(saldos).filter(s => s > 0).length;
+    const bp     = document.getElementById('badge-pagar');
+    if (bp) { if (nPag > 0) { bp.textContent = nPag; bp.style.display = ''; } else { bp.style.display = 'none'; } }
 }
 
 // ── Tabs ──────────────────────────────────────────────────────
@@ -461,6 +514,7 @@ function setTab(aba, btn) {
     document.getElementById('painel-afiliados').style.display  = aba === 'afiliados'  ? '' : 'none';
     document.getElementById('painel-saques').style.display     = aba === 'saques'     ? '' : 'none';
     document.getElementById('painel-indicacoes').style.display = aba === 'indicacoes' ? '' : 'none';
+    document.getElementById('painel-pagamento').style.display  = aba === 'pagamento'  ? '' : 'none';
     document.getElementById('search').value = '';
     renderAtivo();
 }
@@ -470,6 +524,136 @@ function renderAtivo() {
     if (abaAtiva === 'afiliados')  renderAfiliados(q);
     if (abaAtiva === 'saques')     renderSaques(q);
     if (abaAtiva === 'indicacoes') renderIndicacoes(q);
+    if (abaAtiva === 'pagamento')  renderPagamento(q);
+}
+
+// ── Calcula saldo disponível por afiliado (ganhos - saques já processados) ──
+function calcularSaldos() {
+    const saldos = {};
+    allAfiliados.forEach(a => {
+        const ganhos = Number(a.total_ganhos || 0);
+        const sacado = allSaques
+            .filter(s => s.user_id === a.user_id && s.status !== 'cancelado')
+            .reduce((acc, s) => acc + Number(s.valor || 0), 0);
+        saldos[a.user_id] = Math.max(0, ganhos - sacado);
+    });
+    return saldos;
+}
+
+// ── Render Pagamento Admin ───────────────────────────────────────
+function renderPagamento(q = '') {
+    const saldos = calcularSaldos();
+
+    // Ultima chave Pix cadastrada por afiliado
+    const ultimaChave = {};
+    const ultimoTipo  = {};
+    [...allSaques].reverse().forEach(s => {
+        if (s.pix_chave) { ultimaChave[s.user_id] = s.pix_chave; ultimoTipo[s.user_id] = s.pix_tipo || 'PIX'; }
+    });
+
+    let list = allAfiliados.filter(a => (saldos[a.user_id] || 0) > 0);
+    if (q) list = list.filter(a => nomeAfiliado(a).toLowerCase().includes(q) || a.email.toLowerCase().includes(q));
+
+    const total = list.reduce((acc, a) => acc + (saldos[a.user_id] || 0), 0);
+    document.getElementById('pag-total').textContent = fmtR(total);
+    const btnTodos = document.getElementById('btn-pagar-todos');
+    if (btnTodos) btnTodos.disabled = list.length === 0;
+
+    // Saques pendentes por user
+    const pendPorUser = {};
+    allSaques.filter(s => s.status === 'pendente').forEach(s => {
+        pendPorUser[s.user_id] = (pendPorUser[s.user_id] || 0) + 1;
+    });
+
+    const tbody = document.getElementById('tbody-pagamento');
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><span class="material-symbols-outlined">check_circle</span><p>Nenhum afiliado com saldo positivo.</p></div></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = list.map(a => {
+        const saldo = saldos[a.user_id] || 0;
+        const chave = ultimaChave[a.user_id];
+        const tipo  = ultimoTipo[a.user_id];
+        const pend  = pendPorUser[a.user_id] || 0;
+        return `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:.6rem">
+                    <div class="av-sm">${initials(nomeAfiliado(a))}</div>
+                    <div>
+                        <div class="td-bold" style="font-size:.85rem">${esc(nomeAfiliado(a))}</div>
+                        <div style="font-size:.7rem;color:#64748b">${esc(a.email)}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="td-bold" style="color:#34d399;font-size:1rem">${fmtR(saldo)}</td>
+            <td>
+                ${chave
+                    ? `<div class="pix-row"><span class="pix-chip">${esc((tipo||'PIX').toUpperCase())}</span><span style="font-size:.78rem;color:#94a3b8">${esc(chave)}</span></div>`
+                    : `<span style="font-size:.75rem;color:#475569;font-style:italic">(sem chave cadastrada)</span>`}
+            </td>
+            <td>
+                ${pend > 0
+                    ? `<span class="s-badge s-pendente"><span class="material-symbols-outlined">schedule</span>${pend} pendente${pend>1?'s':''}</span>`
+                    : `<span style="font-size:.72rem;color:#475569">—</span>`}
+            </td>
+            <td>
+                <button class="btn-pagar" onclick="pagarAfiliado('${a.user_id}','${esc(a.email)}',${saldo})">
+                    <span class="material-symbols-outlined">paid</span>${fmtR(saldo)}
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function pagarAfiliado(userId, email, valor) {
+    if (!confirm(`Confirmar pagamento de ${fmtR(valor)} para ${email}?`)) return;
+    try {
+        const { error } = await sb.from('saques_afiliado').insert({
+            user_id: userId,
+            email,
+            valor,
+            status: 'pago',
+            obs:    'Pagamento admin — rodada semanal',
+        });
+        if (error) throw error;
+        showToast(`\u2713 ${email} pago com sucesso!`);
+        await loadTudo();
+    } catch(e) {
+        console.error(e);
+        showToast('Erro: ' + e.message, 'error');
+    }
+}
+
+async function pagarTodos() {
+    const saldos = calcularSaldos();
+    const lista  = allAfiliados.filter(a => (saldos[a.user_id] || 0) > 0);
+    const total  = lista.reduce((acc, a) => acc + (saldos[a.user_id] || 0), 0);
+    if (!lista.length) { showToast('Nenhum afiliado com saldo.', 'error'); return; }
+    if (!confirm(`Confirmar pagamento de ${fmtR(total)} para ${lista.length} afiliado(s) na rodada semanal?`)) return;
+
+    const btn = document.getElementById('btn-pagar-todos');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Processando...';
+
+    let ok = 0, err = 0;
+    for (const a of lista) {
+        try {
+            const { error } = await sb.from('saques_afiliado').insert({
+                user_id: a.user_id,
+                email:   a.email,
+                valor:   saldos[a.user_id],
+                status:  'pago',
+                obs:     'Pagamento admin — rodada semanal',
+            });
+            if (error) throw error;
+            ok++;
+        } catch { err++; }
+    }
+    showToast(`\u2713 ${ok} pagamento(s) registrado(s)${err ? ' | ' + err + ' erro(s)' : ''}`);
+    await loadTudo();
+    btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Pagar Todos';
 }
 
 // ── Render Afiliados ──────────────────────────────────────────
