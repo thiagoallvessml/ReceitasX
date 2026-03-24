@@ -812,15 +812,15 @@ async function carregarCatalogos() {
     try {
         const user = await getUser();
         if (!user) return;
-        const [resIns, resEmb, resEqp, resCfg] = await Promise.all([
+        const [resIns, resEmb, resEqp] = await Promise.all([
             sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
             sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
-            sb.from('configuracoes').select('mao_obra_hora').eq('user_id', user.id).maybeSingle(),
         ]);
-        // Mão de obra por hora das configurações
-        maoObraHora = parseFloat(resCfg?.data?.mao_obra_hora || 0);
-        console.log('[ReceitasX] maoObraHora carregado:', maoObraHora, '| resCfg.data:', resCfg?.data);
+        // Mão de obra: lida do localStorage (configuracoes.html salva lá, campo horaFinal)
+        const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
+        maoObraHora = parseFloat(_cfg.horaFinal || 0);
+        console.log('[ReceitasX] maoObraHora carregado do localStorage:', maoObraHora, '| cfg:', _cfg);
         // Atualiza label de debug na UI
         const taxaEl = document.getElementById('cv-mob-taxa');
         if (taxaEl) taxaEl.textContent = maoObraHora > 0 ? `(R$${maoObraHora}/h)` : '(não configurado)';

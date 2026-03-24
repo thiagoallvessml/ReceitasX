@@ -211,15 +211,15 @@ async function carregarReceita() {
     try {
         // Busca receita, produto vinculado e configurações em paralelo
         const user = await getUser();
-        const [resRec, resProd, resCfg] = await Promise.all([
+        const [resRec, resProd] = await Promise.all([
             sb.from('receitas').select('*').eq('id', receitaId).single(),
             user
                 ? sb.from('produtos').select('id, nome, preco').eq('receita_id', receitaId).eq('user_id', user.id).maybeSingle()
                 : Promise.resolve({ data: null }),
-            user
-                ? sb.from('configuracoes').select('mao_obra_hora').eq('user_id', user.id).maybeSingle()
-                : Promise.resolve({ data: null }),
         ]);
+        // Mão de obra: lida do localStorage (configuracoes.html salva lá, campo horaFinal)
+        const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
+        const maoObraHoraLocal = parseFloat(_cfg.horaFinal || 0);
 
         if (!resRec.error && resRec.data) {
             const data = resRec.data;
@@ -229,8 +229,8 @@ async function carregarReceita() {
             const unidades  = data.unidades || 1;
             const tempo     = data.tempo || 0;
 
-            // Mão de obra: mao_obra_hora (R$/h) × tempo em horas
-            const maoObraHora = parseFloat(resCfg?.data?.mao_obra_hora || 0);
+            // Mão de obra: maoObraHora (R$/h) × tempo em horas
+            const maoObraHora = maoObraHoraLocal;
             const custoMobCalc = maoObraHora > 0 ? (tempo / 60) * maoObraHora : parseFloat(data.custo_mob || 0);
             const maoDeObraItens = maoObraHora > 0 && tempo > 0
                 ? [{ nome: 'Mão de obra', qty: `${tempo} min`, valor: custoMobCalc }]
