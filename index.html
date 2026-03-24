@@ -302,8 +302,9 @@
                     .maybeSingle();
 
                 if (perfilPlano?.plano === 'vitalicio') {
-                    const secao = document.getElementById('secao-financeiro');
-                    if (secao) secao.style.display = 'none';
+                    // Oculta só o card de compra — mantém Extrato de Vendas visível
+                    const card = document.getElementById('card-acesso-vitalicio');
+                    if (card) card.style.display = 'none';
                 }
             } catch(_) {}
 
