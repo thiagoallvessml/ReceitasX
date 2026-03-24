@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -137,6 +137,71 @@
         .btn-saque:active { transform: scale(.97); }
         .btn-saque:disabled { opacity: .45; cursor: not-allowed; transform: none; }
         .btn-saque .material-symbols-outlined { font-size: 1.1rem; font-variation-settings: 'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* Modal de Saque */
+        .modal-saque-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,.75);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity .25s;
+        }
+        .modal-saque-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-saque {
+            background: #0f0f0f;
+            border: 1px solid #1E1E1E;
+            border-radius: 1.5rem 1.5rem 0 0;
+            width: 100%; max-width: 520px;
+            padding: 1.5rem 1.5rem 2rem;
+            display: flex; flex-direction: column; gap: 1.25rem;
+            transform: translateY(40px);
+            transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+            max-height: 92dvh; overflow-y: auto;
+        }
+        .modal-saque-overlay.open .modal-saque { transform: translateY(0); }
+        @media (min-width: 600px) {
+            .modal-saque-overlay { align-items: center; }
+            .modal-saque { border-radius: 1.5rem; max-height: 90vh; }
+        }
+        .ms-lbl { font-size: .62rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #64748b; margin-bottom: .4rem; display: block; }
+        .ms-input {
+            width: 100%; padding: .85rem 1rem;
+            border-radius: .85rem; border: 1px solid #1E1E1E;
+            background: #141414; color: #f1f5f9; font-size: .95rem;
+            outline: none; transition: border-color .2s;
+        }
+        .ms-input:focus { border-color: rgba(37,244,244,.5); box-shadow: 0 0 0 3px rgba(37,244,244,.06); }
+        .ms-input.err { border-color: rgba(248,113,113,.5); }
+        .pix-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+        .pix-type-btn {
+            padding: .65rem .5rem; border-radius: .75rem;
+            border: 1px solid #1E1E1E; background: #141414;
+            color: #64748b; font-size: .78rem; font-weight: 600;
+            cursor: pointer; text-align: center; transition: all .15s;
+        }
+        .pix-type-btn.active { border-color: rgba(37,244,244,.5); background: rgba(37,244,244,.06); color: #25f4f4; }
+        .ms-avisos {
+            background: rgba(37,244,244,.04);
+            border: 1px solid rgba(37,244,244,.15);
+            border-radius: .85rem; padding: 1rem;
+        }
+        .ms-avisos li { display: flex; align-items: flex-start; gap: .4rem; font-size: .75rem; color: #94a3b8; line-height: 1.55; margin-bottom: .4rem; }
+        .ms-avisos li:last-child { margin-bottom: 0; }
+        .ms-avisos li span.dot { color: #25f4f4; flex-shrink: 0; margin-top: .1rem; }
+        .btn-confirmar-saque {
+            width: 100%; padding: 1rem;
+            border-radius: .85rem; border: none;
+            background: linear-gradient(135deg, #25f4f4, #0dc8c8);
+            color: #0a0a0a; font-weight: 800; font-size: .95rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem;
+            box-shadow: 0 4px 20px rgba(37,244,244,.3);
+            transition: opacity .15s, transform .15s;
+        }
+        .btn-confirmar-saque:hover { opacity: .9; }
+        .btn-confirmar-saque:active { transform: scale(.97); }
+        .btn-confirmar-saque:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+        .btn-confirmar-saque .material-symbols-outlined { font-size: 1.05rem; font-variation-settings: 'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
         /* Desktop layout */
         .page-wrapper {
             max-width: 1100px;
@@ -227,7 +292,7 @@
             <div class="prog-track">
                 <div class="prog-fill" id="prog-fill-d" style="width:0%"></div>
             </div>
-            <button class="btn-saque" id="btn-saque-d" onclick="solicitarSaque()" disabled>
+            <button class="btn-saque" id="btn-saque-d" onclick="abrirModalSaque()" disabled>
                 <span class="material-symbols-outlined">payments</span>
                 <span id="btn-saque-txt-d">Solicitar Saque via Pix</span>
             </button>
@@ -282,10 +347,84 @@
         <div class="prog-track">
             <div class="prog-fill" id="prog-fill" style="width:0%"></div>
         </div>
-        <button class="btn-saque" id="btn-saque" onclick="solicitarSaque()" disabled>
+        <button class="btn-saque" id="btn-saque" onclick="abrirModalSaque()" disabled>
             <span class="material-symbols-outlined">payments</span>
             <span id="btn-saque-txt">Solicitar Saque via Pix</span>
         </button>
+    </div>
+</div>
+
+<!-- ══ Modal de Saque ══════════════════════════════════════════ -->
+<div class="modal-saque-overlay" id="modal-saque" onclick="_fecharModalSe(event)">
+    <div class="modal-saque">
+
+        <!-- Header do modal -->
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h2 style="font-size:1rem;font-weight:800;">Solicitar Saque</h2>
+            <button onclick="fecharModalSaque()" style="background:none;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;padding:0;transition:color .15s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#64748b'">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+            </button>
+        </div>
+
+        <!-- Saldo disponível -->
+        <div style="background:linear-gradient(135deg,#0f1a1a,#111f1f);border:1px solid rgba(37,244,244,.18);border-radius:1rem;padding:1rem 1.15rem;display:flex;align-items:center;gap:.85rem;">
+            <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.2rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
+            </div>
+            <div>
+                <p style="font-size:.65rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Saldo Disponível</p>
+                <p id="ms-saldo" style="font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#25f4f4,#0dc8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1">—</p>
+            </div>
+        </div>
+
+        <!-- Valor -->
+        <div>
+            <label class="ms-lbl">Valor do Saque</label>
+            <div style="position:relative;">
+                <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:#25f4f4;font-weight:800;font-size:1rem;">R$</span>
+                <input id="ms-valor" class="ms-input" type="number" step="0.01" min="50" placeholder="0,00"
+                    style="padding-left:2.8rem;font-size:1.35rem;font-weight:800;"
+                    oninput="validarModalSaque()" />
+            </div>
+            <p id="ms-valor-hint" style="font-size:.68rem;color:#64748b;margin-top:.3rem;">Mínimo: <span style="color:rgba(37,244,244,.8)">R$ 50,00</span></p>
+        </div>
+
+        <!-- Tipo de chave Pix -->
+        <div>
+            <label class="ms-lbl">Tipo de Chave Pix</label>
+            <div class="pix-type-grid">
+                <button class="pix-type-btn active" onclick="selecionarPixTipo('cpf', this)">CPF / CNPJ</button>
+                <button class="pix-type-btn" onclick="selecionarPixTipo('email', this)">E-mail</button>
+                <button class="pix-type-btn" onclick="selecionarPixTipo('celular', this)">Celular</button>
+                <button class="pix-type-btn" onclick="selecionarPixTipo('aleatoria', this)">Aleatória</button>
+            </div>
+        </div>
+
+        <!-- Chave Pix -->
+        <div>
+            <label class="ms-lbl" id="ms-chave-lbl">Sua Chave Pix (CPF / CNPJ)</label>
+            <input id="ms-chave" class="ms-input" type="text" placeholder="000.000.000-00" oninput="validarModalSaque()" />
+        </div>
+
+        <!-- Avisos -->
+        <div class="ms-avisos">
+            <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.65rem;">
+                <span class="material-symbols-outlined" style="font-size:.95rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">info</span>
+                <span style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#25f4f4">Avisos Importantes</span>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0">
+                <li class="ms-avisos li"><span class="dot">•</span><span>O prazo de pagamento é de até <strong style="color:#f1f5f9">48h úteis</strong> após a solicitação.</span></li>
+                <li class="ms-avisos li"><span class="dot">•</span><span>Certifique-se de que a chave Pix está <strong style="color:#f1f5f9">correta e ativa</strong> para evitar estornos.</span></li>
+                <li class="ms-avisos li"><span class="dot">•</span><span>O valor mínimo para saque é de <strong style="color:#25f4f4">R$ 50,00</strong>.</span></li>
+            </ul>
+        </div>
+
+        <!-- Botão confirmar -->
+        <button class="btn-confirmar-saque" id="btn-confirmar-saque" onclick="confirmarSaque()" disabled>
+            <span class="material-symbols-outlined">send</span>
+            <span id="btn-confirmar-txt">Confirmar Solicitação de Saque</span>
+        </button>
+
     </div>
 </div>
 
@@ -379,60 +518,59 @@ function filtrar(tipo, btn) {
     renderLista(items);
 }
 
-/* ── Solicitar saque ── */
-async function solicitarSaque() {
-    // Sincroniza ambos os botões (desktop e mobile)
-    ['btn-saque','btn-saque-d'].forEach(id => {
-        const b = document.getElementById(id);
-        if (b) b.disabled = true;
-    });
-    ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
-        const t = document.getElementById(id);
-        if (t) t.textContent = 'Processando...';
-    });
-    if (_saldoDisponivel < SAQUE_MINIMO) return;
-
+/* -- Modal Saque -- */
+let _pixTipoAtivo = 'cpf';
+const PIX_PH = { cpf:'000.000.000-00', email:'seu@email.com', celular:'(11) 99999-9999', aleatoria:'chave-aleatoria' };
+const PIX_LB = { cpf:'CPF / CNPJ', email:'E-mail', celular:'Celular', aleatoria:'Chave Aleatoria' };
+function abrirModalSaque() {
+    document.getElementById('ms-saldo').textContent = fmtR(_saldoDisponivel);
+    document.getElementById('ms-valor').value = _saldoDisponivel.toFixed(2);
+    document.getElementById('ms-chave').value = '';
+    selecionarPixTipo('cpf', document.querySelector('.pix-type-btn'));
+    validarModalSaque();
+    document.getElementById('modal-saque').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function fecharModalSaque() { document.getElementById('modal-saque').classList.remove('open'); document.body.style.overflow = ''; }
+function _fecharModalSe(e) { if (e.target === document.getElementById('modal-saque')) fecharModalSaque(); }
+function selecionarPixTipo(tipo, btn) {
+    _pixTipoAtivo = tipo;
+    document.querySelectorAll('.pix-type-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('ms-chave-lbl').textContent = 'Sua Chave Pix (' + (PIX_LB[tipo] || tipo) + ')';
+    document.getElementById('ms-chave').placeholder = PIX_PH[tipo] || '';
+    document.getElementById('ms-chave').value = '';
+    validarModalSaque();
+}
+function validarModalSaque() {
+    const valor = parseFloat(document.getElementById('ms-valor').value) || 0;
+    const chave = document.getElementById('ms-chave').value.trim();
+    const hint  = document.getElementById('ms-valor-hint');
+    const btn   = document.getElementById('btn-confirmar-saque');
+    let ok = true;
+    if (valor < SAQUE_MINIMO) { hint.style.color='#f87171'; hint.textContent='Minimo R$ 50,00'; ok=false; }
+    else if (valor > _saldoDisponivel) { hint.style.color='#f87171'; hint.textContent='Valor maior que saldo disponivel'; ok=false; }
+    else { hint.style.color='#64748b'; hint.textContent='Minimo: R$ 50,00'; }
+    if (!chave) ok=false;
+    btn.disabled = !ok;
+}
+async function confirmarSaque() {
+    const valor = parseFloat(document.getElementById('ms-valor').value) || 0;
+    const chave = document.getElementById('ms-chave').value.trim();
+    const btn   = document.getElementById('btn-confirmar-saque');
+    const txt   = document.getElementById('btn-confirmar-txt');
+    if (valor < SAQUE_MINIMO || !chave) return;
+    btn.disabled = true; txt.textContent = 'Processando...';
     try {
         const { data: { user } } = await sb.auth.getUser();
-        if (!user) throw new Error('Não autenticado');
-
-        const { error } = await sb.from('saques_afiliado').insert({
-            user_id: user.id,
-            valor:   _saldoDisponivel,
-            status:  'pendente',
-        });
+        if (!user) throw new Error('Nao autenticado');
+        const { error } = await sb.from('saques_afiliado').insert({ user_id:user.id, valor, status:'pendente', pix_tipo:_pixTipoAtivo, pix_chave:chave });
         if (error) throw error;
-
-        ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
-            const t = document.getElementById(id);
-            if (t) t.textContent = 'Saque Solicitado! ✅';
-        });
-        setTimeout(() => {
-            ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
-                const t = document.getElementById(id);
-                if (t) t.textContent = 'Solicitar Saque via Pix';
-            });
-            ['btn-saque','btn-saque-d'].forEach(id => {
-                const b = document.getElementById(id);
-                if (b) b.disabled = false;
-            });
-        }, 3000);
+        txt.textContent = 'Solicitado com Sucesso!';
+        setTimeout(() => { fecharModalSaque(); txt.textContent='Confirmar Solicitacao de Saque'; btn.disabled=false; }, 2000);
     } catch(e) {
-        console.error(e);
-        ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
-            const t = document.getElementById(id);
-            if (t) t.textContent = 'Erro — tente novamente';
-        });
-        setTimeout(() => {
-            ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
-                const t = document.getElementById(id);
-                if (t) t.textContent = 'Solicitar Saque via Pix';
-            });
-            ['btn-saque','btn-saque-d'].forEach(id => {
-                const b = document.getElementById(id);
-                if (b) b.disabled = false;
-            });
-        }, 3000);
+        console.error(e); txt.textContent='Erro - tente novamente'; btn.disabled=false;
+        setTimeout(() => { txt.textContent='Confirmar Solicitacao de Saque'; }, 3000);
     }
 }
 
