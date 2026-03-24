@@ -627,16 +627,9 @@ async function finalizarCompra() {
         const telefone = document.getElementById('f-tel').value.trim();
         const cpf      = document.getElementById('f-cpf').value.replace(/\D/g,'');
 
-        // Pega o token de sessão para autenticar na Edge Function
-        const { data: { session } } = await sb.auth.getSession();
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}),
-        };
-
         const resp = await fetch(EDGE_URL, {
             method:  'POST',
-            headers,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 nome,
                 email,
