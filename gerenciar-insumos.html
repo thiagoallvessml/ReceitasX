@@ -831,14 +831,24 @@ let acItems  = [];
 async function buscarCatalogo(q) {
     if (!q || q.length < 2) return [];
     try {
+        // Busca mais resultados para poder reordenar no cliente
         const { data, error } = await sb
             .from('insumos_catalogo')
             .select('nome')
             .ilike('nome', `%${q}%`)
             .order('nome')
-            .limit(8);
+            .limit(30);
         if (error) return [];
-        return (data || []).map(r => r.nome);
+
+        const ql = q.toLowerCase();
+        const nomes = (data || []).map(r => r.nome);
+
+        // Divide em: começa com a query vs. contém no meio
+        const comecam = nomes.filter(n => n.toLowerCase().startsWith(ql));
+        const contem  = nomes.filter(n => !n.toLowerCase().startsWith(ql));
+
+        // Retorna os que começam primeiro, depois os que contêm — máx. 8
+        return [...comecam, ...contem].slice(0, 8);
     } catch { return []; }
 }
 
