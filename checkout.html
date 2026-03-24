@@ -427,19 +427,7 @@ let codigoAfiliado = null;
         if (p.get('ref')) {
             (async () => {
                 try {
-                    const { data: af } = await sb
-                        .from('afiliados')
-                        .select('id, total_cliques')
-                        .eq('codigo', codigoAfiliado)
-                        .single();
-
-                    if (af) {
-                        // total_cliques = cliques via link
-                        await sb
-                            .from('afiliados')
-                            .update({ total_cliques: (af.total_cliques || 0) + 1 })
-                            .eq('id', af.id);
-                    }
+                    await sb.rpc('registrar_clique_afiliado', { p_codigo: codigoAfiliado });
                 } catch(e) { /* silencia */ }
             })();
         }
@@ -525,11 +513,9 @@ async function aplicarCupom() {
                 codigoAfiliado = codigo; // rastreia para crédito de comissão
                 sessionStorage.setItem('ref_afiliado', codigo);
 
-                // Registra uso de CUPOM — digitou o código manualmente
+                // Registra uso de CUPOM via rpc SECURITY DEFINER
                 try {
-                    await sb.from('afiliados')
-                        .update({ total_cupons: (af.total_cupons || 0) + 1 })
-                        .eq('id', af.id);
+                    await sb.rpc('registrar_cupom_afiliado', { p_id: af.id });
                 } catch(_) {}
             }
         } catch(e) {}
