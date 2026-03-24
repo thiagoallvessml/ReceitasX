@@ -627,9 +627,16 @@ async function finalizarCompra() {
         const telefone = document.getElementById('f-tel').value.trim();
         const cpf      = document.getElementById('f-cpf').value.replace(/\D/g,'');
 
+        // Pega o token de sessão para autenticar na Edge Function
+        const { data: { session } } = await sb.auth.getSession();
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {}),
+        };
+
         const resp = await fetch(EDGE_URL, {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
                 nome,
                 email,
@@ -640,10 +647,20 @@ async function finalizarCompra() {
             }),
         });
 
-        const data = await resp.json();
+        const rawText = await resp.text();
+        console.log('[Checkout] Status:', resp.status, '| Body:', rawText);
+
+        let data;
+        try { data = JSON.parse(rawText); }
+        catch(e) {
+            throw new Error(`Resposta inválida (status ${resp.status}): ${rawText.slice(0,200)}`);
+        }
 
         if (!resp.ok || !data.url) {
-            const msg = data.error || (data.raw ? JSON.stringify(data.raw) : 'Erro ao gerar cobrança');
+            const msg = data.error || data.message
+                || (data.debug ? JSON.stringify(data.debug).slice(0,300) : null)
+                || `Erro ${resp.status}: sem URL de pagamento`;
+            console.error('[Checkout] Erro da Edge Function:', data);
             throw new Error(msg);
         }
 
@@ -652,6 +669,7 @@ async function finalizarCompra() {
 
     } catch (err) {
         showToast('Erro: ' + (err.message || 'Tente novamente'), 'error');
+        console.error('[Checkout] finalizarCompra erro:', err);
         btn.disabled          = false;
         spinner.style.display = 'none';
         bico.style.display    = '';
