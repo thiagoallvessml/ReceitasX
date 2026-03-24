@@ -269,6 +269,32 @@
 
         .divider { border:none; border-top:1px solid #2A2A2A; }
 
+        /* ── Autocomplete ── */
+        .autocomplete-wrap { position: relative; }
+        .autocomplete-list {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: #252525; border: 1px solid #2A2A2A;
+            border-radius: .7rem; z-index: 200; max-height: 220px;
+            overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.55);
+            display: none;
+        }
+        .autocomplete-list.visible { display: block; }
+        .autocomplete-item {
+            padding: .6rem .9rem; font-size: .85rem; cursor: pointer;
+            color: #cbd5e1; border-bottom: 1px solid #1f1f1f;
+            transition: background .1s; display: flex; align-items: center; gap: .5rem;
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.selected {
+            background: rgba(37,244,244,.09); color: #f1f5f9;
+        }
+        .autocomplete-item .ac-icon { font-size: .9rem; color: #25f4f4; flex-shrink: 0; }
+        .ac-loading { padding: .7rem .9rem; font-size: .8rem; color: #475569;
+            display: flex; align-items: center; gap: .5rem; }
+        .ac-spin { width: 14px; height: 14px; border: 2px solid #2A2A2A;
+            border-top-color: #25f4f4; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink:0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         .page-enter { animation:fadeUp .35s ease both; }
 
@@ -431,10 +457,16 @@
         <div class="modal-sheet-body">
             <form id="form-cadastrar" novalidate onsubmit="salvarInsumo(event)" style="display:flex;flex-direction:column;gap:1.1rem">
 
-                <!-- Nome -->
+                <!-- Nome com Autocomplete -->
                 <div>
                     <label class="field-label" for="f-nome">Nome do Insumo</label>
-                    <input id="f-nome" type="text" class="fc" placeholder="Ex: Leite Condensado" autocomplete="off" required />
+                    <div class="autocomplete-wrap">
+                        <input id="f-nome" type="text" class="fc" placeholder="Ex: Farinha de Trigo" autocomplete="off" required
+                            oninput="acOnInput(this.value)"
+                            onkeydown="acOnKeydown(event)"
+                            onblur="acOnBlur()" />
+                        <div id="ac-list" class="autocomplete-list" role="listbox"></div>
+                    </div>
                     <p id="f-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome do insumo.</p>
                 </div>
 
@@ -789,6 +821,88 @@ function showToast(msg, type='success') {
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+/* ─── AUTOCOMPLETE ───────────────────────────────────────────────── */
+let acTimer = null;
+let acIndex  = -1;
+let acItems  = [];
+
+async function buscarCatalogo(q) {
+    if (!q || q.length < 2) return [];
+    try {
+        const { data, error } = await sb
+            .from('insumos_catalogo')
+            .select('nome')
+            .ilike('nome', `%${q}%`)
+            .order('nome')
+            .limit(8);
+        if (error) return [];
+        return (data || []).map(r => r.nome);
+    } catch { return []; }
+}
+
+function acRenderLoading() {
+    const list = document.getElementById('ac-list');
+    list.innerHTML = '<div class="ac-loading"><div class="ac-spin"></div>Buscando...</div>';
+    list.classList.add('visible');
+}
+
+function acRender(sugestoes) {
+    const list = document.getElementById('ac-list');
+    acItems = sugestoes;
+    acIndex = -1;
+    if (!sugestoes.length) { list.classList.remove('visible'); return; }
+    list.innerHTML = sugestoes.map((s, i) =>
+        `<div class="autocomplete-item" role="option" data-i="${i}" onmousedown="acSelect(event, '${s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">` +
+        `<span class="material-symbols-outlined ac-icon">grocery</span>${esc(s)}</div>`
+    ).join('');
+    list.classList.add('visible');
+}
+
+function acHide() {
+    document.getElementById('ac-list').classList.remove('visible');
+    acIndex = -1;
+}
+
+function acSelect(e, nome) {
+    if (e) e.preventDefault();
+    document.getElementById('f-nome').value = nome;
+    acHide();
+}
+
+function acOnInput(val) {
+    clearTimeout(acTimer);
+    if (!val || val.length < 2) { acHide(); return; }
+    acRenderLoading();
+    acTimer = setTimeout(async () => {
+        const sugestoes = await buscarCatalogo(val);
+        acRender(sugestoes);
+    }, 250);
+}
+
+function acOnKeydown(e) {
+    const list = document.getElementById('ac-list');
+    if (!list.classList.contains('visible')) return;
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acIndex = Math.min(acIndex + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('selected', i === acIndex));
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acIndex = Math.max(acIndex - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('selected', i === acIndex));
+    } else if (e.key === 'Enter' && acIndex >= 0) {
+        e.preventDefault();
+        acSelect(null, acItems[acIndex]);
+    } else if (e.key === 'Escape') {
+        acHide();
+    }
+}
+
+function acOnBlur() {
+    setTimeout(acHide, 200);
 }
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
