@@ -519,6 +519,29 @@
 <div style="height:5rem"></div>
 
 <script>
+// ── Guard: redireciona vitalício de volta ao app ──────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return; // não logado: deixa ver a página normalmente
+
+        const { data: perfil } = await sb
+            .from('perfis')
+            .select('plano')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (perfil?.plano === 'vitalicio') {
+            // Usuário já é vitalício — redireciona para o app
+            sessionStorage.setItem('rx_toast', 'Você já tem Acesso Vitalício ativo! 🎉');
+            location.href = 'index.html';
+        }
+    } catch(e) {
+        // Silencia erro — deixa a página carregar normalmente
+        console.warn('[AcessoVitalicio] Guard check error:', e);
+    }
+});
+
 function toggleFaq(el) {
     el.classList.toggle('open');
 }
