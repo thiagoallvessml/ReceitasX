@@ -805,17 +805,21 @@ let equipRows = [];
 let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
+let maoObraHora = 0; // carregado das configurações ao abrir modal
 
 /* Carrega insumos, embalagens e equipamentos do Supabase */
 async function carregarCatalogos() {
     try {
         const user = await getUser();
         if (!user) return;
-        const [resIns, resEmb, resEqp] = await Promise.all([
+        const [resIns, resEmb, resEqp, resCfg] = await Promise.all([
             sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
             sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
+            sb.from('configuracoes').select('mao_obra_hora').eq('user_id', user.id).maybeSingle(),
         ]);
+        // Mão de obra por hora das configurações
+        maoObraHora = parseFloat(resCfg?.data?.mao_obra_hora || 0);
         // Normaliza insumos
         insumos = (resIns.data || []).map(i => ({
             id:      i.id,
@@ -1141,14 +1145,18 @@ function calcPrevia() {
         costEqp += (mins / 60) * custoH;
     });
 
-    const total = costIng + costEmb + costEqp;
+    // ── mão de obra: (tempo/60) × maoObraHora ──
+    const tempo   = parseFloat(document.getElementById('r-tempo')?.value) || 0;
+    const costMob = maoObraHora > 0 ? (tempo / 60) * maoObraHora : 0;
+
+    const total = costIng + costEmb + costEqp + costMob;
     const rend  = parseInt(document.getElementById('r-rend')?.value) || 1;
     const unit  = total / rend;
 
     document.getElementById('cv-ing').textContent  = fmtR(costIng);
     document.getElementById('cv-emb').textContent  = fmtR(costEmb);
     document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
-    document.getElementById('cv-mob').textContent  = fmtR(0);
+    document.getElementById('cv-mob').textContent  = fmtR(costMob);
     document.getElementById('cv-tot').textContent  = fmtR(total);
     document.getElementById('cv-unit').textContent = fmtR(unit);
     document.getElementById('cv-rend').textContent = rend + ' un';
@@ -1224,6 +1232,11 @@ async function salvarReceita(e) {
     try {
         const user = await getUser();
         if (user) {
+            const tempoVal   = parseInt(document.getElementById('r-tempo').value) || 0;
+            const custoMobVal = maoObraHora > 0 ? (tempoVal / 60) * maoObraHora : 0;
+            const mobItem     = custoMobVal > 0
+                ? [{ nome: 'Mão de obra', qty: `${tempoVal} min`, valor: custoMobVal }]
+                : [];
             const payload = {
                 user_id:      user.id,
                 nome,
@@ -1231,16 +1244,16 @@ async function salvarReceita(e) {
                 unidades:     rend,
                 tempo,
                 preco_total:  0,
-                custo_total:  custoTotal,
+                custo_total:  custoTotal + custoMobVal,
                 custo_ing:    custoIng,
                 custo_emb:    custoEmb,
                 custo_eqp:    custoEqp,
-                custo_mob:    0,
+                custo_mob:    custoMobVal,
                 grad,
                 ingredientes: ingList,
                 embalagens:   embList,
                 equipamentos: eqpList,
-                mao_de_obra:  [],
+                mao_de_obra:  mobItem,
             };
             const { data: nova, error } = await sb.from('receitas').insert(payload).select().single();
             if (error) throw error;
