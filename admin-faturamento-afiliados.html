@@ -148,6 +148,10 @@
         </button>
         <span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
         <h1 class="text-base font-semibold flex-1">Faturamento de Afiliados</h1>
+        <a href="admin-historico-pagamentos.html" id="btn-historico" style="display:none;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:.65rem;border:1px solid rgba(52,211,153,.3);background:transparent;color:#34d399;font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s">
+            <span class="material-symbols-outlined" style="font-size:.95rem">receipt_long</span>
+            Histórico
+        </a>
         <button class="btn-export" onclick="exportarCSV()" id="btn-export" style="display:none">
             <span class="material-symbols-outlined">download</span>
             Exportar CSV
@@ -420,6 +424,8 @@ let saqueAtivoId  = null; // id do saque sendo processado no modal
     }
 
     document.getElementById('btn-export').style.display = '';
+    const bh = document.getElementById('btn-historico');
+    if (bh) bh.style.display = 'flex';
     await loadTudo();
 })();
 

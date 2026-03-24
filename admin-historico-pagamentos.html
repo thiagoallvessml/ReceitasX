@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Histórico de Pagamentos · Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* Back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* KPIs */
+        .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem; }
+        @media(min-width:640px){ .kpi-grid { grid-template-columns:repeat(4,1fr); } }
+        .kpi { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem 1.1rem;position:relative;overflow:hidden; }
+        .kpi::after { content:'';position:absolute;top:-30px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.07;pointer-events:none; }
+        .kpi-green::after  { background:#25f4f4; }
+        .kpi-blue::after   { background:#818cf8; }
+        .kpi-yellow::after { background:#fbbf24; }
+        .kpi-pink::after   { background:#f472b6; }
+        .kpi-lbl { font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b;margin-bottom:.4rem; }
+        .kpi-val { font-size:1.5rem;font-weight:800;line-height:1;color:#f1f5f9; }
+        .kpi-val.green  { color:#25f4f4; }
+        .kpi-val.blue   { color:#818cf8; }
+        .kpi-val.yellow { color:#fbbf24; }
+        .kpi-val.pink   { color:#f472b6; }
+        .kpi-sub { font-size:.68rem;color:#475569;margin-top:.3rem; }
+
+        /* Search + Filter */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A !important;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.88rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important; }
+
+        /* Date inputs */
+        .date-input { padding:.6rem .8rem;border-radius:.65rem;border:1px solid #2A2A2A !important;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.82rem;outline:none;transition:border-color .2s; }
+        .date-input:focus { border-color:rgba(37,244,244,.4) !important; }
+        .date-input::-webkit-calendar-picker-indicator { filter:invert(1) opacity(.4); cursor:pointer; }
+
+        /* Table */
+        .tbl-wrap { overflow-x:auto;border-radius:.85rem;border:1px solid #2A2A2A; }
+        table { width:100%;border-collapse:collapse;font-size:.82rem; }
+        thead th { background:#1A1A1A;padding:.75rem 1rem;text-align:left;font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#475569;white-space:nowrap;border-bottom:1px solid #2A2A2A; }
+        tbody tr { border-bottom:1px solid #1E1E1E;transition:background .1s; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover { background:#1A1A1A; }
+        tbody td { padding:.75rem 1rem;color:#cbd5e1;vertical-align:middle; }
+        .td-bold { font-weight:700;color:#f1f5f9; }
+
+        /* Badges */
+        .s-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:.4rem;white-space:nowrap; }
+        .s-pago   { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
+        .s-admin  { background:rgba(129,140,248,.1);color:#818cf8;border:1px solid rgba(129,140,248,.25); }
+        .s-badge .material-symbols-outlined { font-size:.75rem; }
+
+        /* Avatar */
+        .av-sm { width:2rem;height:2rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.2),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#25f4f4;flex-shrink:0;text-transform:uppercase; }
+
+        /* Pix chip */
+        .pix-chip { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:.35rem;background:rgba(37,244,244,.08);color:#25f4f4;border:1px solid rgba(37,244,244,.2); }
+
+        /* Empty */
+        .empty { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* Shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.65rem;height:3.2rem; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* Admin banner */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c; }
+
+        /* Export btn */
+        .btn-export { display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .btn-export:hover { border-color:#475569;color:#94a3b8; }
+
+        /* Toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* Sec title */
+        .sec-title { font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem; }
+        .sec-title .material-symbols-outlined { font-size:.9rem;color:#25f4f4; }
+
+        /* Agrupamento por afiliado */
+        .group-header { background:rgba(37,244,244,.04);border-bottom:1px solid rgba(37,244,244,.1); }
+        .group-header td { padding:.55rem 1rem;font-size:.72rem;font-weight:700;color:#64748b; }
+
+        /* Linha de total */
+        .row-total td { background:rgba(52,211,153,.04);font-weight:700;color:#34d399 !important;border-top:1px solid rgba(52,211,153,.15); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- Header -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#34d399;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
+        <h1 class="text-base font-semibold flex-1">Histórico de Pagamentos</h1>
+        <button class="btn-export" id="btn-export" onclick="exportarCSV()" style="display:none">
+            <span class="material-symbols-outlined">download</span>
+            Exportar CSV
+        </button>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
+
+    <!-- Banner admin -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">lock</span>
+        <span>Área exclusiva para administradores — histórico completo de pagamentos a afiliados.</span>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi kpi-green shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-blue shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-yellow shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-pink shimmer" style="min-height:5rem"></div>
+    </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar por afiliado, e-mail ou chave Pix…" oninput="renderTabela()" />
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+            <label style="font-size:.72rem;color:#64748b;white-space:nowrap">De:</label>
+            <input id="filtro-de"  class="date-input" type="date" onchange="renderTabela()" />
+            <label style="font-size:.72rem;color:#64748b;white-space:nowrap">Até:</label>
+            <input id="filtro-ate" class="date-input" type="date" onchange="renderTabela()" />
+            <button onclick="limparFiltros()" style="padding:.55rem .85rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">
+                Limpar
+            </button>
+        </div>
+    </div>
+
+    <!-- Contador + Agrupamento toggle -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+        <div class="sec-title">
+            <span class="material-symbols-outlined">payments</span>
+            <span id="count-label">Carregando…</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+            <label style="font-size:.72rem;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:.35rem;">
+                <input type="checkbox" id="toggle-grupo" onchange="renderTabela()" style="accent-color:#25f4f4" />
+                Agrupar por afiliado
+            </label>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="tbl-wrap">
+        <table id="tbl-historico">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Afiliado</th>
+                    <th>Valor Pago</th>
+                    <th>Chave Pix</th>
+                    <th>Origem</th>
+                    <th>Obs</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-historico">
+                <tr><td colspan="6"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   admin-historico-pagamentos.html
+   Histórico completo de pagamentos efetuados a afiliados
+════════════════════════════════════════════════════════════ */
+
+let allPagamentos = [];
+let allAfiliados  = [];
+
+// Guard admin
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('btn-export').style.display = '';
+    await loadDados();
+})();
+
+// ── Carregar dados ──────────────────────────────────────────
+async function loadDados() {
+    try {
+        const [resSaques, resAfil] = await Promise.all([
+            sb.from('saques_afiliado')
+              .select('*')
+              .eq('status', 'pago')
+              .order('created_at', { ascending: false }),
+
+            sb.from('afiliados')
+              .select('user_id, email, codigo'),
+        ]);
+
+        if (resSaques.error) throw resSaques.error;
+        if (resAfil.error)   throw resAfil.error;
+
+        allPagamentos = resSaques.data || [];
+        allAfiliados  = resAfil.data  || [];
+
+        renderKPIs();
+        renderTabela();
+    } catch (e) {
+        console.error(e);
+        showToast('Erro ao carregar: ' + e.message, 'error');
+    }
+}
+
+// ── KPIs ─────────────────────────────────────────────────
+function renderKPIs() {
+    const total       = allPagamentos.reduce((s, p) => s + Number(p.valor || 0), 0);
+    const afiliSet    = new Set(allPagamentos.map(p => p.user_id));
+    const media       = allPagamentos.length ? total / allPagamentos.length : 0;
+    const maisPago    = [...afiliSet].map(uid => ({
+        uid,
+        total: allPagamentos.filter(p => p.user_id === uid).reduce((s, p) => s + Number(p.valor || 0), 0)
+    })).sort((a, b) => b.total - a.total)[0];
+
+    const emailMaisPago = maisPago
+        ? (allAfiliados.find(a => a.user_id === maisPago.uid)?.email || '—').split('@')[0]
+        : '—';
+
+    document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi kpi-green">
+            <div class="kpi-lbl">Total Pago</div>
+            <div class="kpi-val green">${fmtR(total)}</div>
+            <div class="kpi-sub">${allPagamentos.length} pagamento(s)</div>
+        </div>
+        <div class="kpi kpi-blue">
+            <div class="kpi-lbl">Afiliados Pagos</div>
+            <div class="kpi-val blue">${afiliSet.size}</div>
+            <div class="kpi-sub">afiliados distintos</div>
+        </div>
+        <div class="kpi kpi-yellow">
+            <div class="kpi-lbl">Ticket Médio</div>
+            <div class="kpi-val yellow">${fmtR(media)}</div>
+            <div class="kpi-sub">por pagamento</div>
+        </div>
+        <div class="kpi kpi-pink">
+            <div class="kpi-lbl">Maior Recebedor</div>
+            <div class="kpi-val pink" style="font-size:1rem">${esc(emailMaisPago)}</div>
+            <div class="kpi-sub">${maisPago ? fmtR(maisPago.total) : '—'} no total</div>
+        </div>`;
+}
+
+// ── Filtros utilitários ───────────────────────────────────
+function filtrados() {
+    const q   = (document.getElementById('search').value || '').toLowerCase().trim();
+    const de  = document.getElementById('filtro-de').value;
+    const ate = document.getElementById('filtro-ate').value;
+
+    // Mapa user_id → afiliado
+    const afilMap = {};
+    allAfiliados.forEach(a => { afilMap[a.user_id] = a; });
+
+    return allPagamentos.filter(p => {
+        const af    = afilMap[p.user_id];
+        const email = (p.email || af?.email || '').toLowerCase();
+        const chave = (p.pix_chave || '').toLowerCase();
+        const cod   = (af?.codigo || '').toLowerCase();
+
+        if (q && !email.includes(q) && !chave.includes(q) && !cod.includes(q)) return false;
+
+        const dt = p.created_at ? p.created_at.slice(0, 10) : '';
+        if (de  && dt < de)  return false;
+        if (ate && dt > ate) return false;
+
+        return true;
+    });
+}
+
+function limparFiltros() {
+    document.getElementById('search').value = '';
+    document.getElementById('filtro-de').value  = '';
+    document.getElementById('filtro-ate').value = '';
+    renderTabela();
+}
+
+// ── Render tabela ─────────────────────────────────────────
+function renderTabela() {
+    const lista    = filtrados();
+    const agrupar  = document.getElementById('toggle-grupo').checked;
+    const afilMap  = {};
+    allAfiliados.forEach(a => { afilMap[a.user_id] = a; });
+
+    document.getElementById('count-label').textContent =
+        `${lista.length} pagamento${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}`;
+
+    const tbody = document.getElementById('tbody-historico');
+    if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><span class="material-symbols-outlined">receipt_long</span><p>Nenhum pagamento encontrado.</p></div></td></tr>`;
+        return;
+    }
+
+    if (agrupar) {
+        renderAgrupado(lista, afilMap, tbody);
+    } else {
+        renderFlat(lista, afilMap, tbody);
+    }
+}
+
+function renderFlat(lista, afilMap, tbody) {
+    tbody.innerHTML = lista.map(p => {
+        const af = afilMap[p.user_id];
+        const email  = p.email || af?.email || '—';
+        const initl  = initials(email.split('@')[0]);
+        const isAdmin = (p.obs || '').toLowerCase().includes('admin');
+        return `
+        <tr>
+            <td style="color:#64748b;font-size:.78rem;white-space:nowrap">${fmtDate(p.created_at)}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:.6rem">
+                    <div class="av-sm">${initl}</div>
+                    <div>
+                        <div class="td-bold" style="font-size:.83rem">${esc(email)}</div>
+                        ${af?.codigo ? `<div style="font-size:.68rem;color:#64748b">cód: ${esc(af.codigo)}</div>` : ''}
+                    </div>
+                </div>
+            </td>
+            <td class="td-bold" style="color:#34d399;font-size:.95rem;white-space:nowrap">${fmtR(p.valor)}</td>
+            <td>
+                ${p.pix_chave
+                    ? `<div style="display:flex;align-items:center;gap:.35rem"><span class="pix-chip">${esc((p.pix_tipo||'PIX').toUpperCase())}</span><span style="font-size:.78rem;color:#94a3b8">${esc(p.pix_chave)}</span></div>`
+                    : `<span style="font-size:.75rem;color:#475569">—</span>`}
+            </td>
+            <td>
+                ${isAdmin
+                    ? `<span class="s-badge s-admin"><span class="material-symbols-outlined">admin_panel_settings</span>Admin</span>`
+                    : `<span class="s-badge s-pago"><span class="material-symbols-outlined">person</span>Solicitado</span>`}
+            </td>
+            <td style="font-size:.75rem;color:#64748b;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.obs || '—')}</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderAgrupado(lista, afilMap, tbody) {
+    // Agrupa por user_id
+    const grupos = {};
+    lista.forEach(p => {
+        if (!grupos[p.user_id]) grupos[p.user_id] = [];
+        grupos[p.user_id].push(p);
+    });
+
+    let html = '';
+    Object.entries(grupos).forEach(([uid, pagamentos]) => {
+        const af    = afilMap[uid];
+        const email = pagamentos[0]?.email || af?.email || '—';
+        const total = pagamentos.reduce((s, p) => s + Number(p.valor || 0), 0);
+
+        html += `
+        <tr class="group-header">
+            <td colspan="2">
+                <div style="display:flex;align-items:center;gap:.5rem">
+                    <div class="av-sm" style="width:1.6rem;height:1.6rem;font-size:.6rem">${initials(email.split('@')[0])}</div>
+                    <span style="color:#94a3b8">${esc(email)}</span>
+                    ${af?.codigo ? `<span style="background:#111;border:1px solid #2A2A2A;border-radius:.35rem;padding:.1rem .4rem;font-size:.65rem;color:#25f4f4">${esc(af.codigo)}</span>` : ''}
+                </div>
+            </td>
+            <td colspan="4" style="text-align:right;color:#64748b">${pagamentos.length} pagamento${pagamentos.length!==1?'s':''} · Total: <strong style="color:#34d399">${fmtR(total)}</strong></td>
+        </tr>`;
+
+        pagamentos.forEach(p => {
+            const isAdmin = (p.obs || '').toLowerCase().includes('admin');
+            html += `
+            <tr>
+                <td style="color:#64748b;font-size:.78rem;white-space:nowrap;padding-left:1.5rem">${fmtDate(p.created_at)}</td>
+                <td style="color:#475569;font-size:.75rem">—</td>
+                <td class="td-bold" style="color:#34d399">${fmtR(p.valor)}</td>
+                <td>
+                    ${p.pix_chave
+                        ? `<div style="display:flex;align-items:center;gap:.35rem"><span class="pix-chip">${esc((p.pix_tipo||'PIX').toUpperCase())}</span><span style="font-size:.78rem;color:#94a3b8">${esc(p.pix_chave)}</span></div>`
+                        : `<span style="font-size:.75rem;color:#475569">—</span>`}
+                </td>
+                <td>
+                    ${isAdmin
+                        ? `<span class="s-badge s-admin"><span class="material-symbols-outlined">admin_panel_settings</span>Admin</span>`
+                        : `<span class="s-badge s-pago"><span class="material-symbols-outlined">person</span>Solicitado</span>`}
+                </td>
+                <td style="font-size:.75rem;color:#64748b;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.obs || '—')}</td>
+            </tr>`;
+        });
+    });
+
+    tbody.innerHTML = html;
+}
+
+// ── Exportar CSV ──────────────────────────────────────────
+function exportarCSV() {
+    const lista = filtrados();
+    const afilMap = {};
+    allAfiliados.forEach(a => { afilMap[a.user_id] = a; });
+
+    const rows = [['Data','Email','Código','Valor (R$)','Tipo Pix','Chave Pix','Origem','Obs']];
+    lista.forEach(p => {
+        const af = afilMap[p.user_id];
+        const isAdmin = (p.obs||'').toLowerCase().includes('admin');
+        rows.push([
+            fmtDate(p.created_at),
+            p.email || af?.email || '',
+            af?.codigo || '',
+            Number(p.valor).toFixed(2),
+            p.pix_tipo || '',
+            p.pix_chave || '',
+            isAdmin ? 'Admin' : 'Solicitado',
+            p.obs || '',
+        ]);
+    });
+
+    const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {
+        href: url,
+        download: `pagamentos-afiliados-${new Date().toISOString().slice(0,10)}.csv`
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exportado!');
+}
+
+// ── Utilitários ───────────────────────────────────────────
+function fmtR(v) {
+    return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' })
+        + ' ' + new Date(d).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+}
+function initials(nome) {
+    const p = (nome || '').split(/[\s_\-\.]/);
+    return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).toUpperCase() || '?';
+}
+function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color  = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent   = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
