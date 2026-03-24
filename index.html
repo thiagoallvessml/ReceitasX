@@ -118,8 +118,8 @@
             </a>
         </div>
     </section>
-    <!-- ── Financeiro ───────────────────────────────────────── -->
-    <section>
+    <!-- ── Financeiro ─────────────────────────────────────────────── -->
+    <section id="secao-financeiro">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">payments</span>
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Financeiro</h2>
@@ -127,6 +127,7 @@
         <div class="grid grid-cols-1 gap-3">
             <!-- Acesso Vitalício -->
             <a href="acesso-vitalicio.html"
+                id="card-acesso-vitalicio"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(167,139,250,.02));border-color:rgba(167,139,250,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(167,139,250,.1);color:#a78bfa;">
@@ -275,6 +276,20 @@
                 const allowed = el.dataset.role.split(',').map(r => r.trim());
                 el.style.display = allowed.includes(role) ? '' : 'none';
             });
+
+            // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
+            try {
+                const { data: perfilPlano } = await sb
+                    .from('perfis')
+                    .select('plano')
+                    .eq('id', session.user.id)
+                    .maybeSingle();
+
+                if (perfilPlano?.plano === 'vitalicio') {
+                    const secao = document.getElementById('secao-financeiro');
+                    if (secao) secao.style.display = 'none';
+                }
+            } catch(_) {}
 
             // Buscar saldo do afiliado para exibir no badge
             try {
