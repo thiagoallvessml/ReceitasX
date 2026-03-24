@@ -468,25 +468,25 @@ function renderReceitas(lista) {
 
         const ingRows = ings.map(i => `
             <div class="ing-item">
-                <span class="name">${esc(i.nome || i.insumo_nome || '—')}</span>
-                <span class="val">${i.quantidade ? `${i.quantidade}${i.unidade ? ' '+i.unidade : ''}` : '—'}
-                    ${i.custo ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(i.custo)}</span>` : ''}
+                <span class="name">${esc(i.nome || '—')}</span>
+                <span class="val">${i.qty ? esc(i.qty) : '—'}
+                    ${i.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(i.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
 
         const embRows = embs.map(e => `
             <div class="ing-item">
-                <span class="name">${esc(e.nome || e.embalagem_nome || '—')}</span>
-                <span class="val">${e.quantidade ? `${e.quantidade}x` : '—'}
-                    ${e.custo ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(e.custo)}</span>` : ''}
+                <span class="name">${esc(e.nome || '—')}</span>
+                <span class="val">${e.qty ? esc(e.qty) : '—'}
+                    ${e.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(e.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
 
         const eqpRows = eqps.map(e => `
             <div class="ing-item">
-                <span class="name">${esc(e.nome || e.equipamento_nome || '—')}</span>
-                <span class="val">${e.horas ? `${e.horas}h` : '—'}
-                    ${e.custo ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(e.custo)}</span>` : ''}
+                <span class="name">${esc(e.nome || '—')}</span>
+                <span class="val">${e.qty ? esc(e.qty) : '—'}
+                    ${e.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(e.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
 
