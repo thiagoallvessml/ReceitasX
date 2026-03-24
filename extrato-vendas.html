@@ -137,6 +137,32 @@
         .btn-saque:active { transform: scale(.97); }
         .btn-saque:disabled { opacity: .45; cursor: not-allowed; transform: none; }
         .btn-saque .material-symbols-outlined { font-size: 1.1rem; font-variation-settings: 'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        /* Desktop layout */
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 2rem;
+        }
+        .desktop-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        /* Coluna esquerda (resumo + saque) fica fixa no desktop */
+        .left-panel { display: flex; flex-direction: column; gap: 1.25rem; }
+        .right-panel { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+
+        @media (min-width: 860px) {
+            body { padding-bottom: 2rem !important; }
+            .desktop-grid { flex-direction: row; align-items: flex-start; }
+            .left-panel { width: 340px; flex-shrink: 0; position: sticky; top: 4rem; }
+            .right-panel { flex: 1; }
+            .glass-footer { display: none !important; } /* footer fixo some no desktop */
+            .saque-desktop { display: flex !important; } /* painel de saque inline aparece */
+        }
+        @media (max-width: 859px) {
+            .saque-desktop { display: none !important; } /* esconde no mobile; usa footer */
+        }
     </style>
 </head>
 <body style="padding-bottom: 10rem;">
@@ -152,63 +178,90 @@
     </button>
 </header>
 
-<main style="padding: 1.25rem 1rem; display: flex; flex-direction: column; gap: 1.25rem; max-width: 560px; margin: 0 auto;">
+<main class="page-wrapper">
+<div class="desktop-grid">
 
-    <!-- ── Resumo ─────────────────────────────────────────────────── -->
-    <div class="summary-card" style="position:relative;z-index:1;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
-            <p style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b">Resumo Geral</p>
-            <span class="material-symbols-outlined" style="font-size:1.3rem;color:rgba(37,244,244,.4);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
+    <!-- ══ Coluna Esquerda ══════════════════════════════════════════ -->
+    <div class="left-panel">
+
+        <!-- ── Resumo ─────────────────────────────────────────────── -->
+        <div class="summary-card" style="position:relative;z-index:1;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
+                <p style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b">Resumo Geral</p>
+                <span class="material-symbols-outlined" style="font-size:1.3rem;color:rgba(37,244,244,.4);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div>
+                    <p style="font-size:.72rem;color:#64748b;margin-bottom:.25rem">Total em Comissões</p>
+                    <p id="total-ganhos" style="font-size:1.75rem;font-weight:900;background:linear-gradient(135deg,#25f4f4,#0dc8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">—</p>
+                </div>
+                <div style="border-left:1px solid rgba(255,255,255,.07);padding-left:1rem;">
+                    <p style="font-size:.72rem;color:#64748b;margin-bottom:.25rem">A Receber</p>
+                    <p id="a-receber" style="font-size:1.75rem;font-weight:900;color:#fbbf24;line-height:1">—</p>
+                </div>
+            </div>
+            <div style="display:flex;gap:1.5rem;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.06);">
+                <div>
+                    <p style="font-size:.68rem;color:#64748b;">Vendas Confirmadas</p>
+                    <p id="total-vendas" style="font-size:.9rem;font-weight:700;color:#f1f5f9;">—</p>
+                </div>
+                <div>
+                    <p style="font-size:.68rem;color:#64748b;">Em Processamento</p>
+                    <p id="total-pendentes" style="font-size:.9rem;font-weight:700;color:#fbbf24;">—</p>
+                </div>
+            </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-            <div>
-                <p style="font-size:.72rem;color:#64748b;margin-bottom:.25rem">Total em Comissões</p>
-                <p id="total-ganhos" style="font-size:1.75rem;font-weight:900;background:linear-gradient(135deg,#25f4f4,#0dc8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">—</p>
+
+        <!-- ── Painel de Saque (desktop only) ─────────────────────── -->
+        <div class="saque-desktop" style="background:#141414;border:1px solid #1E1E1E;border-radius:1.1rem;padding:1.25rem;flex-direction:column;gap:.75rem;">
+            <p style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;">Próximo Saque</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.78rem;">
+                <span style="color:#64748b;">Mínimo R$ 50,00</span>
+                <span id="prog-label-d" style="font-weight:700;color:#25f4f4;">—</span>
             </div>
-            <div style="border-left:1px solid rgba(255,255,255,.07);padding-left:1rem;">
-                <p style="font-size:.72rem;color:#64748b;margin-bottom:.25rem">A Receber</p>
-                <p id="a-receber" style="font-size:1.75rem;font-weight:900;color:#fbbf24;line-height:1">—</p>
+            <div class="prog-track">
+                <div class="prog-fill" id="prog-fill-d" style="width:0%"></div>
             </div>
+            <button class="btn-saque" id="btn-saque-d" onclick="solicitarSaque()" disabled>
+                <span class="material-symbols-outlined">payments</span>
+                <span id="btn-saque-txt-d">Solicitar Saque via Pix</span>
+            </button>
         </div>
-        <div style="display:flex;gap:1.5rem;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.06);">
-            <div>
-                <p style="font-size:.68rem;color:#64748b;">Vendas Confirmadas</p>
-                <p id="total-vendas" style="font-size:.9rem;font-weight:700;color:#f1f5f9;">—</p>
-            </div>
-            <div>
-                <p style="font-size:.68rem;color:#64748b;">Em Processamento</p>
-                <p id="total-pendentes" style="font-size:.9rem;font-weight:700;color:#fbbf24;">—</p>
-            </div>
-        </div>
+
     </div>
 
-    <!-- ── Tabs filtro ────────────────────────────────────────────── -->
-    <div style="display:flex;gap:.4rem;background:#141414;border:1px solid #1E1E1E;border-radius:9999px;padding:.3rem;">
-        <button class="tab-btn active" data-filtro="todos" onclick="filtrar('todos', this)">Todas</button>
-        <button class="tab-btn" data-filtro="converteu" onclick="filtrar('converteu', this)">Confirmadas</button>
-        <button class="tab-btn" data-filtro="pendente" onclick="filtrar('pendente', this)">Pendentes</button>
+    <!-- ══ Coluna Direita ═══════════════════════════════════════════ -->
+    <div class="right-panel">
+
+        <!-- ── Tabs filtro ────────────────────────────────────────── -->
+        <div style="display:flex;gap:.4rem;background:#141414;border:1px solid #1E1E1E;border-radius:9999px;padding:.3rem;">
+            <button class="tab-btn active" data-filtro="todos" onclick="filtrar('todos', this)">Todas</button>
+            <button class="tab-btn" data-filtro="converteu" onclick="filtrar('converteu', this)">Confirmadas</button>
+            <button class="tab-btn" data-filtro="pendente" onclick="filtrar('pendente', this)">Pendentes</button>
+        </div>
+
+        <!-- ── Lista de atividades ────────────────────────────────── -->
+        <section>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;padding:0 .1rem;">
+                <h3 style="font-size:.88rem;font-weight:700;color:#cbd5e1;">Atividades</h3>
+                <span id="count-label" style="font-size:.72rem;color:#475569;">Carregando...</span>
+            </div>
+            <div id="lista-atividades" style="display:flex;flex-direction:column;gap:.65rem;">
+                <!-- Skeletons -->
+                <div class="skeleton" style="height:74px;"></div>
+                <div class="skeleton" style="height:74px;"></div>
+                <div class="skeleton" style="height:74px;"></div>
+            </div>
+        </section>
+
     </div>
 
-    <!-- ── Lista de atividades ────────────────────────────────────── -->
-    <section>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;padding:0 .1rem;">
-            <h3 style="font-size:.88rem;font-weight:700;color:#cbd5e1;">Atividades</h3>
-            <span id="count-label" style="font-size:.72rem;color:#475569;">Carregando...</span>
-        </div>
-        <div id="lista-atividades" style="display:flex;flex-direction:column;gap:.65rem;">
-            <!-- Skeletons -->
-            <div class="skeleton" style="height:74px;"></div>
-            <div class="skeleton" style="height:74px;"></div>
-            <div class="skeleton" style="height:74px;"></div>
-        </div>
-    </section>
-
+</div>
 </main>
 
-<!-- ══ Footer Fixo ═══════════════════════════════════════════════════ -->
+<!-- ══ Footer Fixo (mobile only) ══════════════════════════════════ -->
 <div class="glass-footer" style="position:fixed;bottom:0;left:0;right:0;padding:1rem 1.15rem 1.5rem;">
     <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:.75rem;">
-        <!-- Progresso saque -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem;font-size:.75rem;">
             <span style="color:#64748b;">Progresso para próximo saque (min. R$ 50)</span>
             <span id="prog-label" style="font-weight:700;color:#25f4f4;">—</span>
@@ -311,12 +364,16 @@ function filtrar(tipo, btn) {
 
 /* ── Solicitar saque ── */
 async function solicitarSaque() {
-    const btn = document.getElementById('btn-saque');
-    const txt = document.getElementById('btn-saque-txt');
+    // Sincroniza ambos os botões (desktop e mobile)
+    ['btn-saque','btn-saque-d'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.disabled = true;
+    });
+    ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+        const t = document.getElementById(id);
+        if (t) t.textContent = 'Processando...';
+    });
     if (_saldoDisponivel < SAQUE_MINIMO) return;
-
-    btn.disabled = true;
-    txt.textContent = 'Processando...';
 
     try {
         const { data: { user } } = await sb.auth.getUser();
@@ -329,16 +386,36 @@ async function solicitarSaque() {
         });
         if (error) throw error;
 
-        txt.textContent = 'Saque Solicitado! ✅';
+        ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+            const t = document.getElementById(id);
+            if (t) t.textContent = 'Saque Solicitado! ✅';
+        });
         setTimeout(() => {
-            txt.textContent = 'Solicitar Saque via Pix';
-            btn.disabled = false;
+            ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+                const t = document.getElementById(id);
+                if (t) t.textContent = 'Solicitar Saque via Pix';
+            });
+            ['btn-saque','btn-saque-d'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.disabled = false;
+            });
         }, 3000);
     } catch(e) {
         console.error(e);
-        txt.textContent = 'Erro — tente novamente';
-        btn.disabled = false;
-        setTimeout(() => { txt.textContent = 'Solicitar Saque via Pix'; }, 3000);
+        ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+            const t = document.getElementById(id);
+            if (t) t.textContent = 'Erro — tente novamente';
+        });
+        setTimeout(() => {
+            ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+                const t = document.getElementById(id);
+                if (t) t.textContent = 'Solicitar Saque via Pix';
+            });
+            ['btn-saque','btn-saque-d'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.disabled = false;
+            });
+        }, 3000);
     }
 }
 
@@ -403,18 +480,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('total-vendas').textContent   = confirmadas.length + ' venda' + (confirmadas.length !== 1 ? 's' : '');
         document.getElementById('total-pendentes').textContent = pendentes.length;
 
-        // Progresso saque
+        // Progresso saque — atualiza mobile e desktop
         const pct = Math.min(100, (_saldoDisponivel / SAQUE_MINIMO) * 100);
-        document.getElementById('prog-fill').style.width = pct + '%';
-        document.getElementById('prog-label').textContent = fmtR(_saldoDisponivel) + ' / ' + fmtR(SAQUE_MINIMO);
+        const progLabel = fmtR(_saldoDisponivel) + ' / ' + fmtR(SAQUE_MINIMO);
+        ['prog-fill','prog-fill-d'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.width = pct + '%';
+        });
+        ['prog-label','prog-label-d'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = progLabel;
+        });
 
-        // Habilita botão se saldo suficiente
-        const btnSaque = document.getElementById('btn-saque');
-        if (_saldoDisponivel >= SAQUE_MINIMO) {
-            btnSaque.disabled = false;
-        } else {
-            document.getElementById('btn-saque-txt').textContent =
-                'Saldo insuficiente (mín. ' + fmtR(SAQUE_MINIMO) + ')';
+        // Habilita botões se saldo suficiente
+        const insufTxt = 'Saldo insuficiente (mín. ' + fmtR(SAQUE_MINIMO) + ')';
+        ['btn-saque','btn-saque-d'].forEach(id => {
+            const b = document.getElementById(id);
+            if (!b) return;
+            if (_saldoDisponivel >= SAQUE_MINIMO) { b.disabled = false; }
+        });
+        if (_saldoDisponivel < SAQUE_MINIMO) {
+            ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+                const t = document.getElementById(id);
+                if (t) t.textContent = insufTxt;
+            });
         }
 
         // Renderiza lista
