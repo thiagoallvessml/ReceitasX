@@ -9,3 +9,11 @@ Thumbs.db
 .vscode/
 *.suo
 *.user
+
+# Node
+node_modules/
+package-lock.json
+
+# Env
+.env
+.env.local
