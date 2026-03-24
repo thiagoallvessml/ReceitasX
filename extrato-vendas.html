@@ -564,7 +564,7 @@ async function confirmarSaque() {
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) throw new Error('Nao autenticado');
-        const { error } = await sb.from('saques_afiliado').insert({ user_id:user.id, valor, status:'pendente', pix_tipo:_pixTipoAtivo, pix_chave:chave });
+        const { error } = await sb.from('saques_afiliado').insert({ user_id:user.id, email:user.email, valor, status:'pendente', pix_tipo:_pixTipoAtivo, pix_chave:chave });
         if (error) throw error;
         txt.textContent = 'Solicitado com Sucesso!';
         setTimeout(() => { fecharModalSaque(); txt.textContent='Confirmar Solicitacao de Saque'; btn.disabled=false; }, 2000);
