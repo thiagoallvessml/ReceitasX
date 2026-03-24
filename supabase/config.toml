@@ -386,3 +386,11 @@ s3_region = "env(S3_REGION)"
 s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
+
+# ── Edge Functions - JWT verification ───────────────────────────────────────
+# O webhook do AbacatePay e o checkout não enviam JWT, então devem ser públicos
+[functions.webhook-pagamento]
+verify_jwt = false
+
+[functions.criar-cobranca]
+verify_jwt = false

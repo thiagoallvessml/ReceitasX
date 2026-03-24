@@ -17,30 +17,53 @@ serve(async (req) => {
 
   try {
     const payload = await req.json();
-    console.log('Webhook recebido:', JSON.stringify(payload));
+
+    // Log COMPLETO para diagnóstico da estrutura do AbacatePay
+    console.log('Webhook payload COMPLETO:', JSON.stringify(payload, null, 2));
 
     const event = payload?.event as string;
+    console.log('Evento recebido:', event);
 
     // Aceita billing.paid (v1)
     if (event !== 'billing.paid') {
+      console.log('Evento ignorado:', event);
       return new Response(JSON.stringify({ ok: true, ignored: event }), {
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
     // ── Extrair dados do billing ─────────────────────────────────────
-    const billing  = (payload?.data?.billing ?? payload?.data ?? {}) as Record<string, unknown>;
-    const metadata = (billing?.metadata ?? {}) as Record<string, string>;
-    const customer = (billing?.customer ?? {}) as Record<string, string>;
+    // AbacatePay pode enviar em estruturas diferentes — cobrimos todas
+    const billing  = (payload?.data?.billing ?? payload?.data ?? payload ?? {}) as Record<string, unknown>;
+    const metadata = (billing?.metadata ?? payload?.metadata ?? {}) as Record<string, string>;
+    const customer = (billing?.customer ?? payload?.customer ?? {}) as Record<string, unknown>;
+    // O AbacatePay coloca o email dentro de customer.metadata (não customer.email direto!)
+    const customerMeta = (customer?.metadata ?? {}) as Record<string, string>;
 
-    const email      = metadata?.email  || customer?.email  || '';
-    const ref        = metadata?.ref    || '';
-    const billingId  = billing?.id as string || '';
-    const valorCents = billing?.amount  as number || 0;
+    console.log('billing keys:', Object.keys(billing));
+    console.log('metadata:', JSON.stringify(metadata));
+    console.log('customer:', JSON.stringify(customer));
+    console.log('customerMeta:', JSON.stringify(customerMeta));
+
+    // Tenta extrair email de todos os locais possíveis
+    const email =
+      customerMeta?.email           ||  // ← estrutura real do AbacatePay
+      metadata?.email               ||
+      (customer?.email as string)   ||
+      (billing?.email as string)    ||
+      (payload?.email as string)    ||
+      '';
+
+    const ref        = metadata?.ref    || customerMeta?.ref || (billing?.ref as string) || '';
+    const billingId  = (billing?.id ?? payload?.id) as string || '';
+    const valorCents = (billing?.amount ?? billing?.value ?? payload?.amount) as number || 0;
     const valorReal  = valorCents / 100;
 
+
+    console.log(`Extraído — email: ${email} | billingId: ${billingId} | valor: ${valorReal} | ref: ${ref}`);
+
     if (!email) {
-      console.error('Email não encontrado no webhook');
+      console.error('Email não encontrado no webhook. Payload completo:', JSON.stringify(payload));
       return new Response(JSON.stringify({ error: 'email ausente' }), { status: 400, headers: CORS });
     }
 

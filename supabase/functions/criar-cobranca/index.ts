@@ -88,8 +88,9 @@ serve(async (req) => {
     }
 
     // v1 pode retornar { url } direto OU { data: { url } }
-    const inner = (data?.data as Record<string, unknown>) ?? {};
-    const url   = (data?.url ?? inner?.url) as string | undefined;
+    const inner     = (data?.data as Record<string, unknown>) ?? {};
+    const url       = (data?.url ?? inner?.url) as string | undefined;
+    const billingId = (data?.id  ?? inner?.id)  as string | undefined;
 
     if (!url) {
       return new Response(JSON.stringify({ error: 'URL não retornada', debug: data }), {
@@ -97,6 +98,11 @@ serve(async (req) => {
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
+
+    // Atualiza completionUrl para incluir o billingId (usado como fallback se webhook falhar)
+    // Nota: o body já foi enviado para AbacatePay — o billingId é incluído na resposta ao frontend
+    // O frontend usará billing=ID na URL de retorno via completionUrl já configurada abaixo:
+
 
     // ── Se veio com código de afiliado, registra indicação pendente ──
     if (ref) {

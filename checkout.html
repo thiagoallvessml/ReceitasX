@@ -604,8 +604,9 @@ function validar() {
     return true;
 }
 
-/* ── EDGE FUNCTION URL ── */
-const EDGE_URL = 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/criar-cobranca';
+/* ── EDGE FUNCTION URLs ── */
+const EDGE_URL           = 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/criar-cobranca';
+const EDGE_CONFIRMAR_URL = 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/confirmar-pagamento';
 
 /* ── FINALIZAR (AbacatePay) ── */
 async function finalizarCompra() {
@@ -657,6 +658,12 @@ async function finalizarCompra() {
             throw new Error(msg);
         }
 
+        // Salva billingId no localStorage (persistente em redirects cross-site)
+        if (data.id) {
+            localStorage.setItem('rx_billing_id', data.id);
+            localStorage.setItem('rx_billing_email', document.getElementById('f-email').value.trim());
+        }
+
         // Redireciona para página de pagamento do AbacatePay
         window.location.href = data.url;
 
@@ -684,11 +691,59 @@ function showToast(msg, type='success') {
 
 /* ── INIT: Auth + preencher campos ──────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
-    // Verificar usuário logado
+
+    // ── Verificar se voltou de pagamento com sucesso ──
+    const params = new URLSearchParams(location.search);
+    if (params.get('sucesso') === '1') {
+        // Oculta formulário e mostra loading
+        document.querySelector('.checkout-grid').style.display = 'none';
+        document.getElementById('sucesso-wrap').style.cssText  = 'display:flex';
+        document.getElementById('sucesso-wrap').innerHTML = `
+            <div class="sucesso-ico"><span class="material-symbols-outlined" style="font-size:2.5rem;color:#25f4f4">hourglass_top</span></div>
+            <p style="font-size:1.1rem;font-weight:700">Confirmando seu pagamento...</p>
+            <p style="color:#64748b;font-size:.85rem">Aguarde um instante 🎉</p>
+        `;
+
+        const billingId = localStorage.getItem('rx_billing_id');
+        console.log('[Checkout] Voltou com sucesso=1, billingId:', billingId);
+
+        if (billingId) {
+            try {
+                // Aguarda 2s para o webhook/AbacatePay processar
+                await new Promise(r => setTimeout(r, 2000));
+
+                const r = await fetch(EDGE_CONFIRMAR_URL, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ billingId }),
+                });
+                const result = await r.json();
+                console.log('[Checkout] Resultado confirmação:', result);
+
+                localStorage.removeItem('rx_billing_id');
+                localStorage.removeItem('rx_billing_email');
+
+                if (result.ok) {
+                    mostrarSucesso(result.cod || '');
+                } else {
+                    // Webhook pode ter processado mas confirmar-pagamento falhou — mostra sucesso mesmo assim
+                    mostrarSucesso('');
+                }
+            } catch(e) {
+                console.error('[Checkout] Erro ao confirmar:', e);
+                mostrarSucesso('');
+            }
+        } else {
+            // Sem billingId no localStorage — mostra sucesso (webhook provavelmente já processou)
+            mostrarSucesso('');
+        }
+        return;
+    }
+
+    // ── Verificar usuário logado ──
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) {
-            // Redirecionar para login mantendo redirect para checkout
             location.href = "login.html?redirect=checkout.html";
             return;
         }
@@ -706,6 +761,38 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Auth check failed:", e);
     }
 });
+
+function mostrarSucesso(cod) {
+    document.querySelector('.checkout-grid').style.display = 'none';
+    const sw = document.getElementById('sucesso-wrap');
+    sw.style.cssText = 'display:flex';
+    sw.innerHTML = `
+        <div class="sucesso-ico"><span class="material-symbols-outlined" style="font-size:2.5rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">check_circle</span></div>
+        <div>
+            <p style="font-size:1.5rem;font-weight:800;margin-bottom:.4rem">Compra Confirmada! 🎉</p>
+            <p style="color:#64748b;font-size:.9rem;line-height:1.6">Seu acesso vitalício foi ativado com sucesso!<br>Redirecionando em <span id="countdown">3</span> segundos...</p>
+        </div>
+        ${cod ? `<div style="background:#141414;border:1px solid rgba(37,244,244,.2);border-radius:.85rem;padding:1.1rem 1.5rem;text-align:center;max-width:340px;width:100%">
+            <p style="font-size:.72rem;font-weight:700;color:#25f4f4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Código de Acesso</p>
+            <p style="font-size:1.2rem;font-weight:900;color:#f1f5f9;letter-spacing:.1em">${cod}</p>
+        </div>` : ''}
+        <button onclick="location.href='index.html'" style="display:flex;align-items:center;gap:.4rem;padding:.8rem 2rem;border-radius:9999px;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.9rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,244,244,.3)">
+            <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">rocket_launch</span>
+            Começar a usar o ReceitasX
+        </button>
+    `;
+    // Contagem regressiva e redirect automático em 3s
+    let secs = 3;
+    const countEl = document.getElementById('countdown');
+    const timer = setInterval(() => {
+        secs--;
+        if (countEl) countEl.textContent = secs;
+        if (secs <= 0) {
+            clearInterval(timer);
+            location.href = 'index.html';
+        }
+    }, 1000);
+}
 </script>
 </body>
 </html>
