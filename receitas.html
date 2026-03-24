@@ -543,7 +543,7 @@
               <div class="cost-row"><span class="lbl">Custo Ingredientes:</span><span class="val" id="cv-ing">R$ 0,00</span></div>
               <div class="cost-row"><span class="lbl">Custo Embalagens:</span><span class="val" id="cv-emb">R$ 0,00</span></div>
               <div class="cost-row"><span class="lbl">Custo Equipamentos:</span><span class="val" id="cv-eqp">R$ 0,00</span></div>
-              <div class="cost-row"><span class="lbl">Custo Mão de Obra:</span><span class="val" id="cv-mob">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Mão de Obra:<span id="cv-mob-taxa" style="font-size:.65rem;color:#475569;margin-left:.3rem"></span></span><span class="val" id="cv-mob">R$ 0,00</span></div>
               <div class="cost-row total"><span class="lbl">Custo Total da Receita:</span><span class="val" id="cv-tot">R$ 0,00</span></div>
             </div>
             <div class="unit-box">
@@ -820,6 +820,10 @@ async function carregarCatalogos() {
         ]);
         // Mão de obra por hora das configurações
         maoObraHora = parseFloat(resCfg?.data?.mao_obra_hora || 0);
+        console.log('[ReceitasX] maoObraHora carregado:', maoObraHora, '| resCfg.data:', resCfg?.data);
+        // Atualiza label de debug na UI
+        const taxaEl = document.getElementById('cv-mob-taxa');
+        if (taxaEl) taxaEl.textContent = maoObraHora > 0 ? `(R$${maoObraHora}/h)` : '(não configurado)';
         // Normaliza insumos
         insumos = (resIns.data || []).map(i => ({
             id:      i.id,
@@ -1148,6 +1152,7 @@ function calcPrevia() {
     // ── mão de obra: (tempo/60) × maoObraHora ──
     const tempo   = parseFloat(document.getElementById('r-tempo')?.value) || 0;
     const costMob = maoObraHora > 0 ? (tempo / 60) * maoObraHora : 0;
+    console.log('[ReceitasX] calcPrevia | tempo:', tempo, 'maoObraHora:', maoObraHora, 'costMob:', costMob);
 
     const total = costIng + costEmb + costEqp + costMob;
     const rend  = parseInt(document.getElementById('r-rend')?.value) || 1;
