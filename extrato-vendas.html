@@ -6,6 +6,7 @@
     <title>Extrato de Vendas · ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
+    <script src="config-loader.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -429,7 +430,7 @@
 </div>
 
 <script>
-const SAQUE_MINIMO = 50;
+let SAQUE_MINIMO = 50; // sera sobrescrito pelo AppConfig
 let _todasIndicacoes = [];
 let _saldoDisponivel = 0;
 let _filtroAtivo = 'todos';
@@ -576,6 +577,13 @@ async function confirmarSaque() {
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', async () => {
+    // Aguarda config carregar e atualiza SAQUE_MINIMO
+    await new Promise(r => {
+        if (window.AppConfig && window.AppConfig.loaded) { r(); return; }
+        document.addEventListener('appconfig:loaded', r, { once: true });
+        setTimeout(r, 3000); // fallback
+    });
+    SAQUE_MINIMO = (window.AppConfig && window.AppConfig.saqueMinimo) ? window.AppConfig.saqueMinimo : 50;
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { location.href = 'login.html'; return; }
