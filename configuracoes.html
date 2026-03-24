@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Configurações - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -470,9 +472,46 @@ function delMkt(i) {
 }
 
 /* ─── LOAD ───────────────────────────────────────────────────── */
-function load() {
+async function load() {
+    // 1. Tenta carregar do Supabase
+    try {
+        const user = await getUser();
+        if (user) {
+            const { data, error } = await sb.from('configuracoes')
+                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem')
+                .eq('user_id', user.id).maybeSingle();
+            if (!error && data) {
+                // Reconstrói o objeto no formato local
+                const gasPeso  = parseFloat(data.gas_rendimento || DEFAULTS.gasPeso);
+                const gasPreco = parseFloat(data.gas_custo      || 0) * gasPeso; // custo total = custo/kg × peso
+                const cfg = {
+                    gasPeso,
+                    gasPreco,
+                    kwh:       parseFloat(data.energia_kwh  || DEFAULTS.kwh),
+                    precBaixa: DEFAULTS.precBaixa,
+                    precRazo:  DEFAULTS.precRazo,
+                    precExcel: parseFloat(data.meta_margem  || DEFAULTS.precExcel),
+                    combBaixa: DEFAULTS.combBaixa,
+                    combRazo:  DEFAULTS.combRazo,
+                    combExcel: DEFAULTS.combExcel,
+                    salario:   DEFAULTS.salario,
+                    horaFinal: parseFloat(data.mao_obra_hora || DEFAULTS.horaFinal),
+                };
+                applyConfig(cfg);
+                // Atualiza localStorage como cache
+                localStorage.setItem(KEY, JSON.stringify(cfg));
+                return;
+            }
+        }
+    } catch(e) {
+        console.warn('Supabase indisponível, usando localStorage:', e);
+    }
+    // 2. Fallback: localStorage
     const cfg = JSON.parse(localStorage.getItem(KEY) || 'null') || DEFAULTS;
+    applyConfig(cfg);
+}
 
+function applyConfig(cfg) {
     document.getElementById('gas-peso').value   = cfg.gasPeso;
     document.getElementById('gas-preco').value  = cfg.gasPreco;
     document.getElementById('kwh').value        = cfg.kwh;
@@ -484,17 +523,18 @@ function load() {
     document.getElementById('comb-excel').value = cfg.combExcel;
     document.getElementById('salario').value    = cfg.salario;
     document.getElementById('hora-final').value = cfg.horaFinal;
-
     calcHora();
     updateGasKg();
     renderMkts();
 }
 
 /* ─── SALVAR ─────────────────────────────────────────────────────── */
-function salvar() {
+async function salvar() {
+    const gasPeso  = parseFloat(document.getElementById('gas-peso').value)   || DEFAULTS.gasPeso;
+    const gasPreco = parseFloat(document.getElementById('gas-preco').value)  || DEFAULTS.gasPreco;
     const cfg = {
-        gasPeso:   parseFloat(document.getElementById('gas-peso').value)   || DEFAULTS.gasPeso,
-        gasPreco:  parseFloat(document.getElementById('gas-preco').value)  || DEFAULTS.gasPreco,
+        gasPeso,
+        gasPreco,
         kwh:       parseFloat(document.getElementById('kwh').value)        || DEFAULTS.kwh,
         precBaixa: parseFloat(document.getElementById('prec-baixa').value) || DEFAULTS.precBaixa,
         precRazo:  parseFloat(document.getElementById('prec-razo').value)  || DEFAULTS.precRazo,
@@ -505,8 +545,35 @@ function salvar() {
         salario:   parseFloat(document.getElementById('salario').value)    || DEFAULTS.salario,
         horaFinal: parseFloat(document.getElementById('hora-final').value) || DEFAULTS.horaFinal,
     };
+
+    // 1. Salva no localStorage (leitura rápida offline / fallback)
     localStorage.setItem(KEY, JSON.stringify(cfg));
-    showToast('Configurações salvas!');
+
+    // 2. Salva no Supabase (persistência real entre dispositivos)
+    try {
+        const user = await getUser();
+        if (user) {
+            const custoKg = gasPeso > 0 ? gasPreco / gasPeso : 0;
+            const payload = {
+                user_id:       user.id,
+                gas_custo:     custoKg,            // custo por kg
+                gas_rendimento: gasPeso,           // peso do botiajão
+                energia_kwh:   cfg.kwh,
+                mao_obra_hora: cfg.horaFinal,
+                meta_margem:   cfg.precExcel,
+                updated_at:    new Date().toISOString(),
+            };
+            const { error } = await sb.from('configuracoes')
+                .upsert(payload, { onConflict: 'user_id' });
+            if (error) throw error;
+            showToast('Configurações salvas! ☁️');
+        } else {
+            showToast('Configurações salvas localmente!');
+        }
+    } catch(e) {
+        console.warn('Erro ao salvar no Supabase:', e);
+        showToast('Salvo localmente (offline)');
+    }
 }
 
 /* ─── CALCULADORA HORA ───────────────────────────────────────────── */
