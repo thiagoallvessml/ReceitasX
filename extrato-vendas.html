@@ -326,6 +326,7 @@
             <button class="tab-btn active" data-filtro="todos" onclick="filtrar('todos', this)">Todas</button>
             <button class="tab-btn" data-filtro="converteu" onclick="filtrar('converteu', this)">Confirmadas</button>
             <button class="tab-btn" data-filtro="pendente" onclick="filtrar('pendente', this)">Pendentes</button>
+            <button class="tab-btn" data-filtro="recebido" onclick="filtrar('recebido', this)">Recebidos</button>
         </div>
 
         <!-- ── Lista de atividades ────────────────────────────────── -->
@@ -441,6 +442,7 @@
 <script>
 let SAQUE_MINIMO = 50; // sera sobrescrito pelo AppConfig
 let _todasIndicacoes = [];
+let _todosSaquesPagos = [];
 let _saldoDisponivel = 0;
 let _filtroAtivo = 'todos';
 
@@ -466,127 +468,85 @@ function fmtData(iso) {
         + ' • ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
 }
 
-/* ── Renderiza lista ── */
+/* -- Renderiza lista (indicacoes + saques recebidos) -- */
+function renderItem(item, i) {
+    if (item._tipo === 'recebido') {
+        return `
+        <div class="activity-item" style="animation-delay:${i * 0.05}s">
+            <div class="ico-wrap" style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25)">
+                <span class="material-symbols-outlined" style="font-size:1.2rem;color:#34d399;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <p style="font-size:.85rem;font-weight:600;">Pagamento Recebido</p>
+                <p style="font-size:.68rem;color:#475569;margin-top:.1rem">${fmtData(item.created_at)}</p>
+                ${item.pix_chave ? `<p style="font-size:.65rem;color:#64748b;margin-top:.1rem">${(item.pix_tipo||'').toUpperCase()}: ${item.pix_chave}</p>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+                <p style="font-size:.88rem;font-weight:800;color:#34d399;">+ ${fmtR(item.valor)}</p>
+                <span class="badge-status" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2)">Recebido</span>
+            </div>
+        </div>`;
+    }
+    const pago     = !!item.converteu;
+    const email    = mascaraEmail(item.indicado_email);
+    const data     = fmtData(item.created_at);
+    const comissao = Number(item.comissao || 0);
+    const valorV   = Number(item.valor_pago || 0);
+    const icoClass  = pago ? 'pago'        : 'pending';
+    const icoName   = pago ? 'check_circle': 'pending';
+    const icoColor  = pago ? '#25f4f4'     : '#fbbf24';
+    const badgeClass = pago? 'badge-pago'  : 'badge-pendente';
+    const badgeText  = pago? 'Confirmada'  : 'Em Processamento';
+    return `
+    <div class="activity-item" style="animation-delay:${i * 0.05}s">
+        <div class="ico-wrap ${icoClass}">
+            <span class="material-symbols-outlined" style="font-size:1.2rem;color:${icoColor};font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">${icoName}</span>
+        </div>
+        <div style="flex:1;min-width:0;">
+            <p style="font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${email}</p>
+            <p style="font-size:.68rem;color:#475569;margin-top:.1rem">${data}</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+            ${valorV > 0 ? `<p style="font-size:.7rem;color:#64748b;">Venda ${fmtR(valorV)}</p>` : ''}
+            <p style="font-size:.88rem;font-weight:800;color:#25f4f4;">${comissao > 0 ? '+ ' + fmtR(comissao) : '—'}</p>
+            <span class="badge-status ${badgeClass}">${badgeText}</span>
+        </div>
+    </div>`;
+}
+
 function renderLista(items) {
     const el = document.getElementById('lista-atividades');
     document.getElementById('count-label').textContent = items.length + ' registro' + (items.length !== 1 ? 's' : '');
-
     if (!items.length) {
-        el.innerHTML = `
-            <div class="empty-state">
-                <span class="material-symbols-outlined" style="color:#334155">receipt_long</span>
-                <p style="font-size:.88rem;font-weight:600;color:#475569">Nenhuma atividade encontrada</p>
-                <p style="font-size:.78rem;color:#334155;margin-top:.3rem">Compartilhe seu link para começar a ganhar!</p>
-            </div>`;
+        el.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined" style="color:#334155">receipt_long</span><p style="font-size:.88rem;font-weight:600;color:#475569">Nenhuma atividade encontrada</p></div>';
         return;
     }
-
-    el.innerHTML = items.map((ind, i) => {
-        const pago    = !!ind.converteu;
-        const email   = mascaraEmail(ind.indicado_email);
-        const data    = fmtData(ind.created_at);
-        const comissao = Number(ind.comissao || 0);
-        const valorV   = Number(ind.valor_pago || 0);
-
-        const icoClass  = pago   ? 'pago'    : 'pending';
-        const icoName   = pago   ? 'check_circle' : 'pending';
-        const icoColor  = pago   ? '#25f4f4' : '#fbbf24';
-        const badgeClass = pago  ? 'badge-pago' : 'badge-pendente';
-        const badgeText  = pago  ? 'Confirmada'  : 'Em Processamento';
-
-        return `
-        <div class="activity-item" style="animation-delay:${i * 0.05}s">
-            <div class="ico-wrap ${icoClass}">
-                <span class="material-symbols-outlined" style="font-size:1.2rem;color:${icoColor};font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">${icoName}</span>
-            </div>
-            <div style="flex:1;min-width:0;">
-                <p style="font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${email}</p>
-                <p style="font-size:.68rem;color:#475569;margin-top:.1rem">${data}</p>
-            </div>
-            <div style="text-align:right;flex-shrink:0;">
-                ${valorV > 0 ? `<p style="font-size:.7rem;color:#64748b;">Venda ${fmtR(valorV)}</p>` : ''}
-                <p style="font-size:.88rem;font-weight:800;color:#25f4f4;">${comissao > 0 ? '+ ' + fmtR(comissao) : '—'}</p>
-                <span class="badge-status ${badgeClass}">${badgeText}</span>
-            </div>
-        </div>`;
-    }).join('');
+    el.innerHTML = items.map((it, i) => renderItem(it, i)).join('');
 }
 
-/* ── Filtrar ── */
+/* -- Filtrar -- */
 function filtrar(tipo, btn) {
     _filtroAtivo = tipo;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    // Mostra aviso quando tab pendentes está ativa
     const av = document.getElementById('aviso-pendentes');
     if (av) av.style.display = (tipo === 'pendente') ? 'flex' : (_todasIndicacoes.some(i => !i.converteu) ? 'flex' : 'none');
+
+    if (tipo === 'recebido') { renderLista(_todosSaquesPagos); return; }
+
+    if (tipo === 'todos') {
+        const tudo = [..._todasIndicacoes, ..._todosSaquesPagos]
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        renderLista(tudo);
+        return;
+    }
 
     let items = _todasIndicacoes;
     if (tipo === 'converteu') items = items.filter(i => i.converteu);
     if (tipo === 'pendente')  items = items.filter(i => !i.converteu);
     renderLista(items);
 }
-
-/* -- Modal Saque -- */
-let _pixTipoAtivo = 'cpf';
-const PIX_PH = { cpf:'000.000.000-00', email:'seu@email.com', celular:'(11) 99999-9999', aleatoria:'chave-aleatoria' };
-const PIX_LB = { cpf:'CPF / CNPJ', email:'E-mail', celular:'Celular', aleatoria:'Chave Aleatoria' };
-function abrirModalSaque() {
-    document.getElementById('ms-saldo').textContent = fmtR(_saldoDisponivel);
-    document.getElementById('ms-valor').value = _saldoDisponivel.toFixed(2);
-    document.getElementById('ms-chave').value = '';
-    selecionarPixTipo('cpf', document.querySelector('.pix-type-btn'));
-    validarModalSaque();
-    document.getElementById('modal-saque').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-function fecharModalSaque() { document.getElementById('modal-saque').classList.remove('open'); document.body.style.overflow = ''; }
-function _fecharModalSe(e) { if (e.target === document.getElementById('modal-saque')) fecharModalSaque(); }
-function selecionarPixTipo(tipo, btn) {
-    _pixTipoAtivo = tipo;
-    document.querySelectorAll('.pix-type-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    document.getElementById('ms-chave-lbl').textContent = 'Sua Chave Pix (' + (PIX_LB[tipo] || tipo) + ')';
-    document.getElementById('ms-chave').placeholder = PIX_PH[tipo] || '';
-    document.getElementById('ms-chave').value = '';
-    validarModalSaque();
-}
-function validarModalSaque() {
-    const valor = parseFloat(document.getElementById('ms-valor').value) || 0;
-    const chave = document.getElementById('ms-chave').value.trim();
-    const hint  = document.getElementById('ms-valor-hint');
-    const btn   = document.getElementById('btn-confirmar-saque');
-    let ok = true;
-    if (valor < SAQUE_MINIMO) { hint.style.color='#f87171'; hint.textContent='Minimo R$ 50,00'; ok=false; }
-    else if (valor > _saldoDisponivel) { hint.style.color='#f87171'; hint.textContent='Valor maior que saldo disponivel'; ok=false; }
-    else { hint.style.color='#64748b'; hint.textContent='Minimo: R$ 50,00'; }
-    if (!chave) ok=false;
-    btn.disabled = !ok;
-}
-async function confirmarSaque() {
-    const valor = parseFloat(document.getElementById('ms-valor').value) || 0;
-    const chave = document.getElementById('ms-chave').value.trim();
-    const btn   = document.getElementById('btn-confirmar-saque');
-    const txt   = document.getElementById('btn-confirmar-txt');
-    if (valor < SAQUE_MINIMO || !chave) return;
-    btn.disabled = true; txt.textContent = 'Processando...';
-    try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) throw new Error('Nao autenticado');
-        const { error } = await sb.from('saques_afiliado').insert({ user_id:user.id, email:user.email, valor, status:'pendente', pix_tipo:_pixTipoAtivo, pix_chave:chave });
-        if (error) throw error;
-        txt.textContent = 'Solicitado com Sucesso!';
-        setTimeout(() => { fecharModalSaque(); txt.textContent='Confirmar Solicitacao de Saque'; btn.disabled=false; }, 2000);
-    } catch(e) {
-        console.error(e); txt.textContent='Erro - tente novamente'; btn.disabled=false;
-        setTimeout(() => { txt.textContent='Confirmar Solicitacao de Saque'; }, 3000);
-    }
-}
-
-/* ── Init ── */
-document.addEventListener('DOMContentLoaded', async () => {
-    // Aguarda config carregar e atualiza SAQUE_MINIMO
     await new Promise(r => {
         if (window.AppConfig && window.AppConfig.loaded) { r(); return; }
         document.addEventListener('appconfig:loaded', r, { once: true });
@@ -628,11 +588,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         _todasIndicacoes = indicacoes || [];
 
-        // Busca saques já solicitados
+        // Busca todos os saques do afiliado (incluindo pagos para exibir como Recebidos)
         const { data: saques } = await sb
             .from('saques_afiliado')
-            .select('valor, status')
-            .eq('user_id', user.id);
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        // Marca saques pagos como tipo recebido para mostrar nas atividades
+        _todosSaquesPagos = (saques || [])
+            .filter(s => s.status === 'pago')
+            .map(s => ({ ...s, _tipo: 'recebido' }));
 
         const sacado = (saques || []).reduce((acc, s) => {
             if (s.status !== 'cancelado') acc += parseFloat(s.valor || 0);
