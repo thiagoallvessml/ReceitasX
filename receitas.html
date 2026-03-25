@@ -1433,7 +1433,15 @@ function showToast(msg, type='success') {
 }
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
-carregarReceitas();
+carregarReceitas().then(() => {
+    // Verifica se veio da tela de detalhe para editar uma receita específica
+    const editarId = sessionStorage.getItem('receitasx_editar_id');
+    if (editarId) {
+        sessionStorage.removeItem('receitasx_editar_id');
+        const r = receitas.find(x => String(x.id) === String(editarId));
+        if (r) editarReceita(r.id);
+    }
+});
 injetarAviso('receitas');
 </script>
 </body>

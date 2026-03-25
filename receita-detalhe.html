@@ -476,8 +476,10 @@ function render() {
 /* ── ações ── */
 function editarReceita() {
     fecharDropdown();
-    showToast('Edição disponível na tela de Receitas!');
-    setTimeout(() => { location.href = 'receitas.html'; }, 1500);
+    if (!receitaId) return;
+    // Sinaliza para receitas.html abrir o modal de edição automaticamente
+    sessionStorage.setItem('receitasx_editar_id', receitaId);
+    location.href = 'receitas.html';
 }
 
 function abrirModalExcluir() {
