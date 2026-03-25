@@ -820,6 +820,7 @@ let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
 let maoObraHora = 0; // carregado das configurações ao abrir modal
+let _editandoId = null; // UUID da receita sendo editada (null = nova)
 
 /* Carrega insumos, embalagens e equipamentos do Supabase */
 async function carregarCatalogos() {
@@ -884,6 +885,9 @@ async function carregarCatalogos() {
 async function openCadastrar() {
     const ok = await podecriar('receitas');
     if (!ok) return;
+    _editandoId = null;
+    document.getElementById('msheet-title').textContent = 'Cadastrar Receita';
+    document.querySelector('.btn-save').textContent = 'Salvar Receita';
     await carregarCatalogos();
     ingRows = []; embalRows = []; equipRows = [];
     ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
@@ -894,6 +898,89 @@ async function openCadastrar() {
     document.getElementById('ing-warn').style.display    = 'flex';
     document.getElementById('embal-empty').style.display = 'block';
     document.getElementById('equip-empty').style.display = 'block';
+    calcPrevia();
+    document.getElementById('msheet-bg').classList.add('open');
+    setTimeout(() => document.getElementById('r-nome').focus(), 80);
+}
+
+async function editarReceita(id) {
+    const r = receitas.find(x => x.id === id);
+    if (!r) { showToast('Receita não encontrada', 'error'); return; }
+
+    await carregarCatalogos();
+    _editandoId = id;
+    ingRows = []; embalRows = []; equipRows = [];
+    ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
+
+    // Título e botão
+    document.getElementById('msheet-title').textContent = 'Editar Receita';
+    document.querySelector('.btn-save').textContent = 'Atualizar Receita';
+
+    // Campos básicos
+    document.getElementById('r-nome').value  = r.nome  || '';
+    document.getElementById('r-rend').value  = r.unidades || 1;
+    document.getElementById('r-tempo').value = r.tempo || '';
+    document.getElementById('r-desc').value  = '';
+
+    // Limpa listas
+    document.getElementById('ing-list').innerHTML   = '';
+    document.getElementById('embal-list').innerHTML = '';
+    document.getElementById('equip-list').innerHTML = '';
+    document.getElementById('ing-warn').style.display    = 'flex';
+    document.getElementById('embal-empty').style.display = 'block';
+    document.getElementById('equip-empty').style.display = 'block';
+
+    // Preenche ingredientes salvos
+    (r.ingredientes || []).forEach(ing => {
+        addIngrediente();
+        const rowId = ingRows[ingRows.length - 1];
+        // Seleciona o insumo pelo nome
+        const sel = document.querySelector(`[data-ingid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().startsWith(ing.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; onIngSelect(rowId); }
+        }
+        // Preenche quantidade e unidade
+        const qtyParts = (ing.qty || '').split(' ');
+        const qtyVal   = qtyParts[0] || '';
+        const qtyUn    = qtyParts[1] || 'g';
+        const qtyInput = document.querySelector(`[data-qty="${rowId}"]`);
+        if (qtyInput) { qtyInput.value = qtyVal; }
+        const unSel = document.getElementById(`ing-un-${rowId}`);
+        if (unSel && qtyUn) { unSel.value = qtyUn; unSel.style.color = '#f1f5f9'; }
+        updateIngCusto(rowId);
+    });
+
+    // Preenche embalagens salvas
+    (r.embalagens || []).forEach(emb => {
+        addEmbalagem();
+        const rowId = embalRows[embalRows.length - 1];
+        const sel = document.querySelector(`[data-embid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().startsWith(emb.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const qtyParts = (emb.qty || '').split(' ');
+        const qtyInput = document.querySelector(`[data-emb-qty="${rowId}"]`);
+        if (qtyInput) qtyInput.value = qtyParts[0] || 1;
+        updateEmbCusto(rowId);
+    });
+
+    // Preenche equipamentos salvos
+    (r.equipamentos || []).forEach(eqp => {
+        addEquipamento();
+        const rowId = equipRows[equipRows.length - 1];
+        const sel = document.querySelector(`[data-eqpid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().includes(eqp.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const minsParts = (eqp.qty || '').split(' ');
+        const minsInput = document.querySelector(`[data-eqp-min="${rowId}"]`);
+        if (minsInput) minsInput.value = minsParts[0] || 0;
+        updateEqpCusto(rowId);
+    });
+
     calcPrevia();
     document.getElementById('msheet-bg').classList.add('open');
     setTimeout(() => document.getElementById('r-nome').focus(), 80);
@@ -1211,7 +1298,9 @@ async function salvarReceita(e) {
     }
     const rend  = parseInt(document.getElementById('r-rend').value)  || 1;
     const tempo = parseInt(document.getElementById('r-tempo').value) || 0;
-    const grad  = GRADIENTS[receitas.length % GRADIENTS.length];
+    const grad = _editandoId
+        ? (receitas.find(x => x.id === _editandoId)?.grad || GRADIENTS[receitas.length % GRADIENTS.length])
+        : GRADIENTS[receitas.length % GRADIENTS.length];
 
     // ─ custo de ingredientes ─
     let custoIng = 0, ingList = [];
@@ -1291,9 +1380,24 @@ async function salvarReceita(e) {
                 equipamentos: eqpList,
                 mao_de_obra:  mobItem,
             };
-            const { data: nova, error } = await sb.from('receitas').insert(payload).select().single();
-            if (error) throw error;
-            receitas.unshift(sbRowToLocal(nova));
+            if (_editandoId) {
+                // EDITAR: UPDATE
+                const { data: atualizada, error } = await sb
+                    .from('receitas')
+                    .update(payload)
+                    .eq('id', _editandoId)
+                    .select()
+                    .single();
+                if (error) throw error;
+                const idx = receitas.findIndex(x => x.id === _editandoId);
+                if (idx >= 0) receitas[idx] = sbRowToLocal(atualizada);
+            } else {
+                // CADASTRAR: INSERT
+                const { data: nova, error } = await sb.from('receitas').insert(payload).select().single();
+                if (error) throw error;
+                receitas.unshift(sbRowToLocal(nova));
+                registrarCriacao('receitas');
+            }
         } else {
             throw new Error('não logado');
         }
@@ -1307,10 +1411,11 @@ async function salvarReceita(e) {
     }
 
     save();
-    registrarCriacao('receitas');
+    if (!_editandoId) registrarCriacao('receitas');
     renderCards();
     closeModal();
-    showToast(`"‏${nome}‏" cadastrada!`);
+    showToast(_editandoId ? `"${nome}" atualizada! ✓` : `"${nome}" cadastrada!`);
+    _editandoId = null;
 }
 
 /* ─── TOAST ──────────────────────────────────────────────────────── */
