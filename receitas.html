@@ -189,6 +189,24 @@
         @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
         .page-enter { animation:fadeUp .35s ease both; }
 
+        /* ── Grid mobile: 2 colunas ── */
+        @media (max-width: 639px) {
+            #recipe-grid { grid-template-columns: repeat(2, 1fr) !important; gap: .6rem !important; }
+            .card-cover { height: 110px; }
+            .card-cover .cover-icon { font-size: 2.2rem; }
+            .card-body { padding: .65rem; gap: .5rem; }
+            .card-body h2 { font-size: .8rem; }
+            .card-meta { font-size: .65rem; gap: .4rem; }
+            .stat-grid { grid-template-columns: 1fr 1fr; gap: .25rem; }
+            .stat-cell { padding: .35rem .45rem; }
+            .stat-cell .lbl { font-size: .48rem; }
+            .stat-cell .val { font-size: .75rem; }
+            .card-actions { padding: .5rem .65rem; gap: .3rem; }
+            .btn-detail, .btn-edit { font-size: .68rem; padding: .45rem .3rem; }
+            .btn-detail .material-symbols-outlined,
+            .btn-edit .material-symbols-outlined { font-size: .8rem; }
+        }
+
         /* ── Stat separador ── */
         .stat-divider { grid-column:1/-1; border:none; border-top:1px solid #222; margin:.15rem 0; }
 
