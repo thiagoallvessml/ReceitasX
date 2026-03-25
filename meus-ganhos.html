@@ -55,16 +55,7 @@
         .stat-pendente .stat-icon .material-symbols-outlined{ color:#fbbf24;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
         .stat-cliques .stat-icon .material-symbols-outlined { color:#a78bfa;font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
 
-        /* ── saque ── */
-        .saque-card { background:linear-gradient(135deg,rgba(37,244,244,.06) 0%,rgba(37,244,244,.02) 100%);border:1px solid rgba(37,244,244,.18);border-radius:1rem;padding:1.35rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap; }
-        .saque-info { flex:1;min-width:200px; }
-        .saque-label { font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem; }
-        .saque-val { font-size:2.2rem;font-weight:900;color:#f1f5f9;line-height:1; }
-        .saque-sub { font-size:.72rem;color:#64748b;margin-top:.3rem; }
-        .btn-saque { padding:.85rem 1.6rem;border-radius:.85rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 4px 20px rgba(37,244,244,.25);transition:all .15s;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:.45rem; }
-        .btn-saque:hover { opacity:.9;box-shadow:0 6px 28px rgba(37,244,244,.4); }
-        .btn-saque:disabled { opacity:.4;cursor:not-allowed;box-shadow:none; }
-        .btn-saque .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
 
         /* ── tabela de indicações ── */
         .table-card { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden;margin-bottom:1.5rem; }
@@ -98,31 +89,7 @@
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
 
-        /* ── modal saque ── */
-        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px); }
-        .modal-overlay.open { display:flex; }
-        .modal-box { background:#141414;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:440px;overflow:hidden;animation:slideUp .2s ease; }
-        .modal-box-head { display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid #1E1E1E; }
-        .modal-box-head h3 { font-size:.95rem;font-weight:700; }
-        .modal-close { width:2rem;height:2rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s; }
-        .modal-close:hover { color:#f1f5f9;border-color:#3A3A3A; }
-        .modal-close .material-symbols-outlined { font-size:1rem; }
-        .modal-body { padding:1.25rem; }
-        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:.3rem;display:block; }
-        .fc { width:100%;padding:.72rem .9rem;border-radius:.65rem;border:1px solid #2A2A2A !important;background:#0f0f0f !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
-        .fc::placeholder { color:#334155 !important; }
-        .fc:focus { border-color:rgba(37,244,244,.5) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
-        .modal-footer { display:flex;gap:.6rem;padding:.85rem 1.25rem;border-top:1px solid #1E1E1E; }
-        .btn-cancel { flex:1;padding:.72rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s; }
-        .btn-cancel:hover { border-color:#3A3A3A;color:#94a3b8; }
-        .btn-confirm { flex:1;padding:.72rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.85rem;cursor:pointer;transition:opacity .15s; }
-        .btn-confirm:hover { opacity:.9; }
 
-        /* ── badge de progresso saque ── */
-        .progress-wrap { margin-top:.85rem; }
-        .progress-bar-bg { height:6px;background:#1E1E1E;border-radius:999px;overflow:hidden; }
-        .progress-bar-fill { height:100%;background:linear-gradient(90deg,#25f4f4,#0dc8c8);border-radius:999px;transition:width .6s ease; }
-        .progress-label { display:flex;justify-content:space-between;font-size:.65rem;color:#475569;margin-top:.3rem; }
     </style>
 </head>
 <body style="visibility:hidden">
@@ -191,27 +158,7 @@
         </div>
     </div>
 
-    <!-- SALDO + BOTÃO SOLICITAR SAQUE -->
-    <div class="saque-card" id="saque-card">
-        <div class="saque-info">
-            <div class="saque-label">💰 Saldo disponível para saque</div>
-            <div class="saque-val" id="saldo-saque">R$ 0,00</div>
-            <div class="saque-sub" id="saque-sub-txt">Carregando valor mínimo...</div>
-            <div class="progress-wrap" id="progress-wrap">
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-                </div>
-                <div class="progress-label">
-                    <span id="progress-text">R$ 0,00</span>
-                    <span id="progress-pct">0%</span>
-                </div>
-            </div>
-        </div>
-        <button class="btn-saque" id="btn-saque" onclick="abrirModalSaque()" disabled>
-            <span class="material-symbols-outlined">account_balance_wallet</span>
-            Solicitar Saque
-        </button>
-    </div>
+
 
     <!-- HISTÓRICO DE INDICAÇÕES -->
     <div class="table-card">
@@ -248,36 +195,7 @@
 
 </div><!-- /container -->
 
-<!-- ── MODAL DE SAQUE ── -->
-<div class="modal-overlay" id="modal-saque">
-    <div class="modal-box">
-        <div class="modal-box-head">
-            <h3>Solicitar Saque</h3>
-            <button class="modal-close" onclick="fecharModalSaque()">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <div class="modal-body" style="display:flex;flex-direction:column;gap:.85rem">
-            <div style="background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.15);border-radius:.75rem;padding:.85rem 1rem;display:flex;align-items:center;gap:.65rem">
-                <span class="material-symbols-outlined" style="color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">account_balance_wallet</span>
-                <div>
-                    <p style="font-size:.7rem;color:#64748b">Saldo disponível</p>
-                    <p style="font-size:1.1rem;font-weight:800;color:#25f4f4" id="modal-saldo">R$ 0,00</p>
-                </div>
-            </div>
-            <p style="font-size:.82rem;color:#94a3b8;line-height:1.6">
-                Ao solicitar o saque, nossa equipe entrará em contato pelo e-mail cadastrado para combinar a forma de pagamento.
-            </p>
-            <p style="font-size:.72rem;color:#475569;line-height:1.5">
-                ⏱️ O pagamento é processado em até <strong style="color:#94a3b8">3 dias úteis</strong>. Você receberá uma confirmação por e-mail.
-            </p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="fecharModalSaque()">Cancelar</button>
-            <button class="btn-confirm" id="btn-confirmar-saque" onclick="solicitarSaque()">Solicitar Saque</button>
-        </div>
-    </div>
-</div>
+
 
 <!-- ── TOAST ── -->
 <div id="toast">
@@ -312,72 +230,7 @@ function showToast(msg, type='success') {
     toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-/* ── PROGRESS BAR ── */
-function atualizarProgress(saldo) {
-    if (saqueMinimo === null) {
-        document.getElementById('progress-fill').style.width  = '0%';
-        document.getElementById('progress-text').textContent  = fmtR(saldo);
-        document.getElementById('progress-pct').textContent   = '–';
-        return;
-    }
-    const meta = saqueMinimo;
-    const pct  = meta > 0 ? Math.min(100, (saldo / meta) * 100) : 100;
-    document.getElementById('progress-fill').style.width  = pct + '%';
-    document.getElementById('progress-text').textContent  = `${fmtR(saldo)} de ${fmtR(meta)}`;
-    document.getElementById('progress-pct').textContent   = Math.round(pct) + '%';
-}
 
-/* ── ATUALIZAR TEXTOS COM VALOR MÍNIMO ── */
-function aplicarConfiguracoes() {
-    const sub = document.getElementById('saque-sub-txt');
-    if (sub) {
-        sub.textContent = saqueMinimo !== null
-            ? `Mínimo de ${fmtR(saqueMinimo)} para solicitar saque via Pix`
-            : 'Valor mínimo configurado pelo administrador';
-    }
-}
-
-/* ── MODAL SAQUE ── */
-function abrirModalSaque() {
-    document.getElementById('modal-saldo').textContent = fmtR(saldoDisp);
-    document.getElementById('modal-saque').classList.add('open');
-}
-function fecharModalSaque() {
-    document.getElementById('modal-saque').classList.remove('open');
-}
-
-async function solicitarSaque() {
-    if (saqueMinimo === null) { showToast('Valor mínimo ainda não configurado', 'error'); return; }
-    if (saldoDisp < saqueMinimo) { showToast(`Saldo mínimo de ${fmtR(saqueMinimo)} para saque`, 'error'); return; }
-
-    const btn = document.getElementById('btn-confirmar-saque');
-    btn.disabled = true;
-    btn.textContent = 'Solicitando...';
-
-    try {
-        const { error } = await sb.from('saques_afiliado').insert({
-            user_id: userId,
-            email:   userEmail,
-            valor:   saldoDisp,
-            status:  'pendente',
-        });
-        if (error) throw error;
-
-        fecharModalSaque();
-        showToast('Saque solicitado com sucesso! 🎉 Entraremos em contato em até 3 dias úteis.');
-        saldoDisp = 0;
-        document.getElementById('saldo-saque').textContent = fmtR(0);
-        document.getElementById('stat-pendente').textContent = fmtR(0);
-        document.getElementById('btn-saque').disabled = true;
-        atualizarProgress(0);
-    } catch(e) {
-        fecharModalSaque();
-        showToast('Solicitação enviada! Entraremos em contato por e-mail. 😊');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Solicitar Saque';
-    }
-}
 
 /* ── RENDERIZAR TABELA ── */
 function renderTabela(indicacoes) {
@@ -484,8 +337,6 @@ function renderStats({ ganhos, vendas, pendente, cliques, cupons }) {
     document.getElementById('stat-pendente').textContent = fmtR(pendente);
     document.getElementById('stat-cliques').textContent  = cliques.toString();
     document.getElementById('stat-cupons').textContent   = (cupons || 0).toString();
-    document.getElementById('saldo-saque').textContent   = fmtR(pendente);
-    document.getElementById('modal-saldo').textContent   = fmtR(pendente);
 }
 
 /* ── CARREGAR CONFIG DO BANCO ── */
@@ -524,18 +375,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         userEmail = user.email;
         userNome  = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split('@')[0];
 
-        // 3. Carrega config (saque mínimo) e dados em paralelo
-        await Promise.all([carregarConfig(), carregarDados(user)]);
+        // 3. Carrega dados
+        await carregarDados(user);
     } catch(e) {
         console.error('Auth error:', e);
         location.href = 'login.html';
     }
 });
 
-// Fechar modal ao clicar no overlay
-document.getElementById('modal-saque').addEventListener('click', function(e) {
-    if (e.target === this) fecharModalSaque();
-});
+
 </script>
 </body>
 </html>
