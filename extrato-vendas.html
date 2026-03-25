@@ -547,6 +547,9 @@ function filtrar(tipo, btn) {
     if (tipo === 'pendente')  items = items.filter(i => !i.converteu);
     renderLista(items);
 }
+
+/* -- Init -- */
+document.addEventListener('DOMContentLoaded', async () => {
     await new Promise(r => {
         if (window.AppConfig && window.AppConfig.loaded) { r(); return; }
         document.addEventListener('appconfig:loaded', r, { once: true });
