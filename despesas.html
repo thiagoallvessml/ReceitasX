@@ -399,13 +399,7 @@
 /* ─── DADOS ──────────────────────────────────────────────────────── */
 const KEY = 'receitasx_despesas';
 
-let despesas = JSON.parse(localStorage.getItem(KEY) || 'null') || [
-    { id:1, nome:'Aluguel do Espaço',    cat:'Aluguel',    tipo:'fixa',    valor:800,  freq:'mensal',    venc:5,  obs:'' },
-    { id:2, nome:'Conta de Energia',     cat:'Energia',    tipo:'fixa',    valor:180,  freq:'mensal',    venc:10, obs:'' },
-    { id:3, nome:'Internet',             cat:'Internet',   tipo:'fixa',    valor:99,   freq:'mensal',    venc:15, obs:'' },
-    { id:4, nome:'Embalagens mês',       cat:'Embalagens', tipo:'variavel',valor:250,  freq:'mensal',    venc:1,  obs:'' },
-    { id:5, nome:'Impulsionamento Redes',cat:'Marketing',  tipo:'variavel',valor:150,  freq:'mensal',    venc:20, obs:'' },
-];
+let despesas = JSON.parse(localStorage.getItem(KEY) || 'null') || [];
 
 let currentFilter = 'todas';
 let pendingDelId  = null;
