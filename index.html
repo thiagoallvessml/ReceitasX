@@ -129,7 +129,7 @@
             <a href="acesso-vitalicio.html"
                 id="card-acesso-vitalicio"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
-                style="background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(167,139,250,.02));border-color:rgba(167,139,250,.2);">
+                style="background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(167,139,250,.02));border-color:rgba(167,139,250,.2);display:none">
                 <div class="p-2 rounded-lg" style="background:rgba(167,139,250,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">diamond</span>
                 </div>
@@ -302,9 +302,12 @@
                     .maybeSingle();
 
                 if (perfilPlano?.plano === 'vitalicio') {
-                    // Oculta só o card de compra — mantém Extrato de Vendas visível
+                    // Usuário já é vitalício — mantém card oculto
+                    // (o card já começa com display:none no HTML)
+                } else {
+                    // Não é vitalício — exibe o card de compra
                     const card = document.getElementById('card-acesso-vitalicio');
-                    if (card) card.style.display = 'none';
+                    if (card) card.style.display = '';
                 }
             } catch(_) {}
 
