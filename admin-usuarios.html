@@ -342,7 +342,7 @@ function renderUsuarios(list) {
                     ${roleBadge}
                 </div>
                 <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-                    <button class="btn-vital${u._pagante ? ' revoke' : '}" onclick="toggleVitalicio('${u.id}', ${u._pagante})">
+                    <button class="btn-vital${u._pagante ? ' revoke' : ''}" onclick="toggleVitalicio('${u.id}', ${u._pagante})">
                         <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">${u._pagante ? 'remove_circle' : 'workspace_premium'}</span>
                         ${u._pagante ? 'Revogar Vit\u00e1licio' : 'Dar Vit\u00e1licio'}
                     </button>
