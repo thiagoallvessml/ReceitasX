@@ -319,11 +319,6 @@ async function carregarDados(user) {
 
         renderStats({ ganhos, vendas, pendente: saldoDisp, cliques, cupons });
         renderTabela(indicacoes || []);
-        atualizarProgress(saldoDisp);
-
-        if (saqueMinimo !== null && saldoDisp >= saqueMinimo) {
-            document.getElementById('btn-saque').disabled = false;
-        }
     } catch(e) {
         console.error('Erro ao carregar dados:', e);
         renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0, cupons:0 });
