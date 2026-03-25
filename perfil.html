@@ -460,25 +460,34 @@ async function loadPerfil() {
     }
 }
 
-/* ─── Carregar plano real via pedidos ───────────────────────────────── */
+/* ─── Carregar plano real (perfis.plano + pedidos como fallback) ──────── */
 async function loadPlano() {
     try {
         const session = await getSession();
         if (!session) return renderPlanoGratuito();
 
-        const { data } = await sb
+        // 1. Verifica diretamente em perfis.plano (admin pode conceder manualmente)
+        const { data: perfil } = await sb
+            .from('perfis')
+            .select('plano')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+        if (perfil?.plano === 'vitalicio') {
+            _aplicarVitalicio();
+            return;
+        }
+
+        // 2. Fallback: verifica se há pedido pago (compra via AbacatePay)
+        const { data: peds } = await sb
             .from('pedidos')
             .select('id')
             .eq('status', 'pago')
             .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
             .limit(1);
 
-        if (data && data.length > 0) {
-            renderPlanoVitalicio();
-            // atualiza badge no hero
-            const badge = document.getElementById('plan-badge');
-            badge.className = 'plan-badge plan-premium';
-            badge.innerHTML = '<span class="material-symbols-outlined">workspace_premium</span> Acesso Vitálicio';
+        if (peds && peds.length > 0) {
+            _aplicarVitalicio();
         } else {
             renderPlanoGratuito();
         }
@@ -486,6 +495,13 @@ async function loadPlano() {
         console.warn('Erro ao verificar plano:', e);
         renderPlanoGratuito();
     }
+}
+
+function _aplicarVitalicio() {
+    renderPlanoVitalicio();
+    const badge = document.getElementById('plan-badge');
+    badge.className = 'plan-badge plan-premium';
+    badge.innerHTML = '<span class="material-symbols-outlined">workspace_premium</span> Acesso Vitálicio';
 }
 
 /* ─── Limites do plano gratuito (espelho do plano-guard.js) ────────── */
