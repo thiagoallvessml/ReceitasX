@@ -831,11 +831,28 @@ async function carregarCatalogos() {
             sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
         ]);
-        // Mão de obra: lida do localStorage (configuracoes.html salva lá, campo horaFinal)
+        // Mão de obra: tenta localStorage primeiro, depois busca do Supabase
         const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
-        maoObraHora = parseFloat(_cfg.horaFinal || 0);
-        console.log('[ReceitasX] maoObraHora carregado do localStorage:', maoObraHora, '| cfg:', _cfg);
-        // Atualiza label de debug na UI
+        maoObraHora = parseFloat(_cfg.horaFinal || _cfg.mao_obra_hora || 0);
+
+        // Fallback: busca do Supabase se não tiver no localStorage
+        if (!maoObraHora && user) {
+            try {
+                const { data: cfgSb } = await sb
+                    .from('configuracoes')
+                    .select('mao_obra_hora')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (cfgSb?.mao_obra_hora) {
+                    maoObraHora = parseFloat(cfgSb.mao_obra_hora);
+                    // Atualiza o localStorage para próximas vezes
+                    _cfg.horaFinal = maoObraHora;
+                    localStorage.setItem('receitasx_config', JSON.stringify(_cfg));
+                }
+            } catch(_) {}
+        }
+
+        console.log('[ReceitasX] maoObraHora:', maoObraHora);
         const taxaEl = document.getElementById('cv-mob-taxa');
         if (taxaEl) taxaEl.textContent = maoObraHora > 0 ? `(R$${maoObraHora}/h)` : '(não configurado)';
         // Normaliza insumos
