@@ -168,6 +168,30 @@
         const fmtVal = Number(comissao || 0)
             .toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+        // Persiste no histórico do sino (index.html)
+        if (typeof window.adicionarNotificacao === 'function') {
+            window.adicionarNotificacao({
+                tipo:   'comissao',
+                titulo: '🎉 Comissão Confirmada!',
+                desc:   `Você ganhou R$ ${fmtVal} de comissão. Saldo atualizado!`,
+                href:   'extrato-vendas.html',
+            });
+        } else {
+            // Salva direto no localStorage para estar disponível quando abrir index
+            const KEY  = 'receitasx_notificacoes';
+            const list = JSON.parse(localStorage.getItem(KEY) || '[]');
+            list.unshift({
+                id:     Date.now().toString(),
+                tipo:   'comissao',
+                titulo: '🎉 Comissão Confirmada!',
+                desc:   `Você ganhou R$ ${fmtVal} de comissão. Saldo atualizado!`,
+                href:   'extrato-vendas.html',
+                ts:     Date.now(),
+                lido:   false,
+            });
+            localStorage.setItem(KEY, JSON.stringify(list.slice(0, 50)));
+        }
+
         const overlay = document.createElement('div');
         overlay.id = 'notif-afil-overlay';
         overlay.innerHTML = `
