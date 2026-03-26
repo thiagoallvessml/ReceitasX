@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -177,5 +177,35 @@ Ponto de Equilíbrio (unidades) = Custos Fixos ÷ Margem de Contribuição
     <p><a href="../landing.html">Início</a> &nbsp;·&nbsp; <a href="../blog.html">Blog</a> &nbsp;·&nbsp; <a href="../acesso-vitalicio.html">Começar grátis</a></p>
     <p style="margin-top:.75rem;font-size:.68rem;color:#334155">© 2025 ReceitasX · Todos os direitos reservados</p>
 </footer>
+
+<!-- Sticky CTA Banner -->
+<div id="sticky-cta" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:linear-gradient(90deg,#0a1f1f,#0d2e2e);border-top:1px solid rgba(37,244,244,.25);padding:.85rem 1.25rem;box-shadow:0 -4px 32px rgba(0,0,0,.5)">
+  <div style="max-width:760px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <div style="flex:1;min-width:0">
+      <p style="margin:0;font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        ðŸš€ <span style="color:#25f4f4">ReceitasX</span> â€” Calcule o custo de qualquer receita em segundos
+      </p>
+      <p style="margin:0;font-size:.72rem;color:#64748b">Sem planilha. Sem erro. PreÃ§o certo sempre.</p>
+    </div>
+    <a href="../acesso-vitalicio.html" style="display:inline-flex;align-items:center;gap:.35rem;padding:.55rem 1.1rem;border-radius:.6rem;background:#25f4f4;color:#050505;font-weight:800;font-size:.8rem;text-decoration:none;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 16px rgba(37,244,244,.3)">
+      ComeÃ§ar grÃ¡tis â†’
+    </a>
+    <button onclick="document.getElementById('sticky-cta').style.display='none';sessionStorage.setItem('cta-closed','1')" style="background:none;border:none;color:#64748b;font-size:1.1rem;cursor:pointer;padding:.25rem;line-height:1;flex-shrink:0" aria-label="Fechar">âœ•</button>
+  </div>
+</div>
+<script>
+(function(){
+  if(sessionStorage.getItem('cta-closed')) return;
+  var el = document.getElementById('sticky-cta');
+  var shown = false;
+  window.addEventListener('scroll', function(){
+    if(!shown && window.scrollY > 400){
+      el.style.display = 'block';
+      shown = true;
+    }
+  }, {passive:true});
+})();
+</script>
 </body>
 </html>
+
