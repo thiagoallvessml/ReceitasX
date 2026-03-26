@@ -496,8 +496,8 @@
             const icoBg    = n.tipo === 'comissao' ? 'rgba(37,244,244,.1)' : 'rgba(251,191,36,.1)';
             const ico      = n.tipo === 'comissao' ? 'payments' : 'notifications';
             return `
-            <div class="notif-item ${n.lido ? '' : 'unread'}" onclick="marcarLida('${n.id}')"
-                style="${n.href ? 'cursor:pointer' : ''}">
+            <div class="notif-item ${n.lido ? '' : 'unread'}" onclick="marcarLidaENavegar('${n.id}', '${n.href || 'extrato-vendas.html'}')"
+                style="cursor:pointer">
                 <span class="notif-dot"></span>
                 <div class="notif-ico" style="background:${icoBg}">
                     <span class="material-symbols-outlined" style="color:${icoColor};font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">${ico}</span>
@@ -536,6 +536,11 @@
         saveNotifs(list);
         renderNotifPanel();
         renderSinoBadge();
+    }
+
+    function marcarLidaENavegar(id, href) {
+        marcarLida(id);
+        if (href) location.href = href;
     }
 
     function marcarTodasLidas() {
