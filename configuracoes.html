@@ -473,17 +473,26 @@ function delMkt(i) {
 
 /* ─── LOAD ───────────────────────────────────────────────────── */
 async function load() {
-    // 1. Tenta carregar do Supabase
     try {
         const user = await getUser();
         if (user) {
+            // Detecta troca de usuário: limpa localStorage se o user_id mudou
+            const cachedUid = localStorage.getItem('receitasx_uid');
+            if (cachedUid && cachedUid !== user.id) {
+                localStorage.removeItem(KEY);
+                localStorage.removeItem(MKT_KEY);
+                marketplaces = MKT_DEFAULTS;
+            }
+            localStorage.setItem('receitasx_uid', user.id);
+
             const { data, error } = await sb.from('configuracoes')
                 .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem')
                 .eq('user_id', user.id).maybeSingle();
+
             if (!error && data) {
-                // Reconstrói o objeto no formato local
+                // Usuário tem dados salvos — carrega normalmente
                 const gasPeso  = parseFloat(data.gas_rendimento || DEFAULTS.gasPeso);
-                const gasPreco = parseFloat(data.gas_custo      || 0) * gasPeso; // custo total = custo/kg × peso
+                const gasPreco = parseFloat(data.gas_custo      || 0) * gasPeso;
                 const cfg = {
                     gasPeso,
                     gasPreco,
@@ -498,31 +507,35 @@ async function load() {
                     horaFinal: parseFloat(data.mao_obra_hora || DEFAULTS.horaFinal),
                 };
                 applyConfig(cfg);
-                // Atualiza localStorage como cache
                 localStorage.setItem(KEY, JSON.stringify(cfg));
-                return;
+            } else {
+                // Novo usuário: campos em branco (sem DEFAULTS)
+                applyConfig(null);
             }
+            return;
         }
     } catch(e) {
         console.warn('Supabase indisponível, usando localStorage:', e);
     }
-    // 2. Fallback: localStorage
+    // Offline: usa localStorage ou DEFAULTS
     const cfg = JSON.parse(localStorage.getItem(KEY) || 'null') || DEFAULTS;
     applyConfig(cfg);
 }
 
 function applyConfig(cfg) {
-    document.getElementById('gas-peso').value   = cfg.gasPeso;
-    document.getElementById('gas-preco').value  = cfg.gasPreco;
-    document.getElementById('kwh').value        = cfg.kwh;
-    document.getElementById('prec-baixa').value = cfg.precBaixa;
-    document.getElementById('prec-razo').value  = cfg.precRazo;
-    document.getElementById('prec-excel').value = cfg.precExcel;
-    document.getElementById('comb-baixa').value = cfg.combBaixa;
-    document.getElementById('comb-razo').value  = cfg.combRazo;
-    document.getElementById('comb-excel').value = cfg.combExcel;
-    document.getElementById('salario').value    = cfg.salario;
-    document.getElementById('hora-final').value = cfg.horaFinal;
+    // cfg = null significa novo usuário — deixa campos em branco
+    const v = (val, def = '') => cfg ? (val ?? def) : '';
+    document.getElementById('gas-peso').value   = v(cfg?.gasPeso);
+    document.getElementById('gas-preco').value  = v(cfg?.gasPreco);
+    document.getElementById('kwh').value        = v(cfg?.kwh);
+    document.getElementById('prec-baixa').value = v(cfg?.precBaixa);
+    document.getElementById('prec-razo').value  = v(cfg?.precRazo);
+    document.getElementById('prec-excel').value = v(cfg?.precExcel);
+    document.getElementById('comb-baixa').value = v(cfg?.combBaixa);
+    document.getElementById('comb-razo').value  = v(cfg?.combRazo);
+    document.getElementById('comb-excel').value = v(cfg?.combExcel);
+    document.getElementById('salario').value    = v(cfg?.salario);
+    document.getElementById('hora-final').value = v(cfg?.horaFinal);
     calcHora();
     updateGasKg();
     renderMkts();
