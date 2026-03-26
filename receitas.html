@@ -390,25 +390,6 @@
 <!-- ══ Main ═════════════════════════════════════════════════════════ -->
 <main class="max-w-7xl mx-auto px-4 py-5 space-y-4 page-enter">
 
-    <!-- Stats strip -->
-    <div class="flex gap-3 overflow-x-auto pb-1">
-        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[100px]">
-            <p class="text-xs text-slate-500 mb-0.5">Total</p>
-            <p class="text-2xl font-bold" id="stat-total">0</p>
-        </div>
-        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[120px]">
-            <p class="text-xs text-slate-500 mb-0.5">Custo médio</p>
-            <p class="text-2xl font-bold" style="color:#f87171" id="stat-custo">R$ 0</p>
-        </div>
-        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[120px]">
-            <p class="text-xs text-slate-500 mb-0.5">Lucro médio</p>
-            <p class="text-2xl font-bold" style="color:#4ade80" id="stat-lucro">R$ 0</p>
-        </div>
-        <div class="flex-shrink-0 bg-card-dark border border-border-dark rounded-xl px-4 py-3 min-w-[110px]">
-            <p class="text-xs text-slate-500 mb-0.5">Margem média</p>
-            <p class="text-2xl font-bold" style="color:#fbbf24" id="stat-margem">0%</p>
-        </div>
-    </div>
 
     <!-- Search mobile -->
     <div class="md:hidden" style="position:relative">
@@ -731,22 +712,8 @@ function fmt(v, prefix='R$ ') {
     return prefix + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-/* ─── STATS ──────────────────────────────────────────────────────── */
-function updateStats(list) {
-    document.getElementById('stat-total').textContent = list.length;
-    if (!list.length) {
-        document.getElementById('stat-custo').textContent  = 'R$ 0';
-        document.getElementById('stat-lucro').textContent  = 'R$ 0';
-        document.getElementById('stat-margem').textContent = '0%';
-        return;
-    }
-    const avgCusto  = list.reduce((s,r)=>s+r.custoTotal,0)/list.length;
-    const avgLucro  = list.reduce((s,r)=>s+(r.precoTotal-r.custoTotal),0)/list.length;
-    const avgMargem = list.reduce((s,r)=>s+calc(r).margem,0)/list.length;
-    document.getElementById('stat-custo').textContent  = fmt(avgCusto);
-    document.getElementById('stat-lucro').textContent  = fmt(avgLucro);
-    document.getElementById('stat-margem').textContent = avgMargem.toFixed(0)+'%';
-}
+/* ─── STATS removido — médias agora em renderMedias() ── */
+function updateStats() {}
 
 /* ─── RENDER ─────────────────────────────────────────────────────── */
 function getFiltered() {
