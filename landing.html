@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReceitasX – Sistema de Precificação para Confeitaria</title>
+    <meta name="description" content="Calcule o custo real das suas receitas, descubra sua margem de lucro e precifique com confiança. O sistema completo para confeiteiras que querem lucrar de verdade." />
+    <meta name="keywords" content="precificação confeitaria, sistema para confeiteira, calcular custo de receita, gestão confeitaria, margem de lucro bolo" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://receitasx.vercel.app/landing.html" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="ReceitasX – Precifique suas receitas com inteligência" />
+    <meta property="og:description" content="Calcule custos, descubra sua margem real e pare de trabalhar no prejuízo. O sistema que confeiteiras profissionais usam." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://receitasx.vercel.app/landing.html" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --cyan: #25f4f4;
+            --bg: #080808;
+            --bg2: #0f0f0f;
+            --card: #141414;
+            --border: #1E1E1E;
+            --text: #f1f5f9;
+            --muted: #64748b;
+            --green: #34d399;
+            --yellow: #fbbf24;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center;
+            padding: 0 2rem; height: 3.75rem;
+            background: rgba(8,8,8,.9); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,.05);
+        }
+        .nav-logo {
+            font-size: 1.1rem; font-weight: 900;
+            flex: 1; letter-spacing: -.02em;
+        }
+        .nav-logo span:first-child { color: var(--cyan); }
+        .nav-cta {
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .5rem 1.15rem; border-radius: .6rem;
+            background: var(--cyan); color: #050505;
+            font-size: .85rem; font-weight: 700; text-decoration: none;
+            transition: opacity .15s, box-shadow .2s;
+            box-shadow: 0 0 20px rgba(37,244,244,.25);
+        }
+        .nav-cta:hover { opacity: .9; box-shadow: 0 0 32px rgba(37,244,244,.4); }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
+            padding: 7rem 1.5rem 5rem;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+            width: 900px; height: 900px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,244,244,.07) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+            background: linear-gradient(to bottom, transparent, var(--bg));
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: .4rem;
+            background: rgba(37,244,244,.08); border: 1px solid rgba(37,244,244,.2);
+            border-radius: 9999px; padding: .35rem 1rem;
+            font-size: .72rem; font-weight: 700; color: var(--cyan);
+            letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1.5rem;
+            animation: fadeUp .5s ease both;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 7vw, 4.5rem);
+            font-weight: 900; line-height: 1.1; letter-spacing: -.03em;
+            max-width: 820px; margin-bottom: 1.25rem;
+            animation: fadeUp .5s .1s ease both;
+        }
+        .hero h1 em { font-style: normal; color: var(--cyan); }
+        .hero-sub {
+            font-size: clamp(.9rem, 2.5vw, 1.15rem);
+            color: #94a3b8; max-width: 560px; line-height: 1.7;
+            margin-bottom: 2.5rem;
+            animation: fadeUp .5s .2s ease both;
+        }
+        .hero-btns {
+            display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+            animation: fadeUp .5s .3s ease both;
+        }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: .45rem;
+            padding: .85rem 2rem; border-radius: .75rem;
+            background: var(--cyan); color: #050505;
+            font-size: 1rem; font-weight: 800; text-decoration: none;
+            transition: opacity .15s, box-shadow .2s, transform .15s;
+            box-shadow: 0 4px 32px rgba(37,244,244,.3);
+        }
+        .btn-primary:hover { opacity: .92; box-shadow: 0 8px 48px rgba(37,244,244,.45); transform: translateY(-2px); }
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: .45rem;
+            padding: .85rem 2rem; border-radius: .75rem;
+            border: 1px solid rgba(255,255,255,.12); color: #f1f5f9;
+            font-size: 1rem; font-weight: 600; text-decoration: none;
+            background: rgba(255,255,255,.04);
+            transition: border-color .15s, background .15s;
+        }
+        .btn-secondary:hover { border-color: rgba(37,244,244,.4); background: rgba(37,244,244,.05); }
+
+        /* stats bar */
+        .hero-stats {
+            display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center;
+            margin-top: 3.5rem; padding-top: 3rem;
+            border-top: 1px solid rgba(255,255,255,.06);
+            animation: fadeUp .5s .4s ease both;
+        }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 1.75rem; font-weight: 900; color: var(--cyan); }
+        .stat-lbl { font-size: .72rem; color: var(--muted); margin-top: .2rem; font-weight: 500; }
+
+        /* ── SECTIONS ── */
+        section { padding: 5rem 1.5rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .sec-eyebrow {
+            font-size: .68rem; font-weight: 800; letter-spacing: .12em;
+            text-transform: uppercase; color: var(--cyan); margin-bottom: .6rem;
+        }
+        .sec-title {
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 900; line-height: 1.2; letter-spacing: -.02em;
+            margin-bottom: .75rem;
+        }
+        .sec-sub { font-size: 1rem; color: #94a3b8; line-height: 1.7; max-width: 520px; }
+
+        /* ── PROBLEMA ── */
+        .pain-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem; margin-top: 3rem;
+        }
+        .pain-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 1rem; padding: 1.5rem;
+            display: flex; gap: 1rem; align-items: flex-start;
+        }
+        .pain-icon {
+            width: 2.5rem; height: 2.5rem; border-radius: .65rem; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(248,113,113,.1); color: #f87171;
+        }
+        .pain-icon .material-symbols-outlined { font-size: 1.2rem; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .pain-title { font-size: .9rem; font-weight: 700; margin-bottom: .3rem; }
+        .pain-desc  { font-size: .78rem; color: var(--muted); line-height: 1.6; }
+
+        /* ── FEATURES ── */
+        .features-bg { background: var(--bg2); }
+        .feat-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem; margin-top: 3rem;
+        }
+        .feat-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 1.25rem; padding: 1.75rem;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+        }
+        .feat-card:hover {
+            border-color: rgba(37,244,244,.25);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,.4);
+        }
+        .feat-icon {
+            width: 3rem; height: 3rem; border-radius: .85rem;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.1rem;
+        }
+        .feat-icon .material-symbols-outlined { font-size: 1.4rem; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .feat-title { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; }
+        .feat-desc  { font-size: .82rem; color: #94a3b8; line-height: 1.65; }
+
+        /* ── COMO FUNCIONA ── */
+        .steps { display: flex; flex-direction: column; gap: 0; margin-top: 3rem; }
+        .step {
+            display: flex; gap: 1.5rem; align-items: flex-start;
+            padding: 0 0 2.5rem;
+            position: relative;
+        }
+        .step:not(:last-child)::before {
+            content: '';
+            position: absolute; left: 1.4rem; top: 3rem; bottom: 0;
+            width: 1px; background: linear-gradient(to bottom, rgba(37,244,244,.25), transparent);
+        }
+        .step-num {
+            width: 2.85rem; height: 2.85rem; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(37,244,244,.08); border: 2px solid rgba(37,244,244,.3);
+            font-size: .9rem; font-weight: 900; color: var(--cyan);
+        }
+        .step-body {}
+        .step-title { font-size: 1rem; font-weight: 700; margin-bottom: .3rem; }
+        .step-desc  { font-size: .82rem; color: #94a3b8; line-height: 1.65; }
+
+        /* números grandes destaque */
+        .numbers-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+            margin-top: 2.5rem;
+        }
+        @media (min-width: 768px) { .numbers-grid { grid-template-columns: repeat(4, 1fr); } }
+        .number-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 1rem; padding: 1.5rem; text-align: center;
+        }
+        .number-big { font-size: 2.25rem; font-weight: 900; color: var(--cyan); }
+        .number-lbl { font-size: .72rem; color: var(--muted); margin-top: .25rem; line-height: 1.5; }
+
+        /* ── DEPOIMENTOS ── */
+        .testi-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem; margin-top: 3rem;
+        }
+        .testi-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 1.25rem; padding: 1.5rem;
+        }
+        .testi-stars { color: var(--yellow); font-size: .85rem; margin-bottom: .85rem; }
+        .testi-text { font-size: .85rem; color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem; font-style: italic; }
+        .testi-author { display: flex; align-items: center; gap: .75rem; }
+        .testi-avatar {
+            width: 2.25rem; height: 2.25rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .8rem; font-weight: 800; flex-shrink: 0;
+        }
+        .testi-name { font-size: .82rem; font-weight: 700; }
+        .testi-role { font-size: .72rem; color: var(--muted); }
+
+        /* ── PRICING / CTA ── */
+        .cta-section {
+            text-align: center; padding: 6rem 1.5rem;
+            background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+            position: relative; overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
+            width: 700px; height: 700px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,244,244,.06) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .cta-box {
+            max-width: 640px; margin: 0 auto;
+            background: linear-gradient(135deg, #0d2626, #0a1818);
+            border: 1px solid rgba(37,244,244,.2);
+            border-radius: 1.75rem; padding: 3rem 2rem;
+            position: relative;
+        }
+        .price-big { font-size: 3.5rem; font-weight: 900; color: var(--cyan); line-height: 1; }
+        .price-small { font-size: .9rem; color: var(--muted); }
+        .price-label { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--cyan); margin-bottom: .5rem; }
+        .feature-list { list-style: none; text-align: left; margin: 1.75rem 0; display: flex; flex-direction: column; gap: .65rem; }
+        .feature-list li { display: flex; align-items: center; gap: .6rem; font-size: .88rem; color: #cbd5e1; }
+        .feature-list li .material-symbols-outlined { font-size: 1rem; color: var(--green); font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 1.5rem; text-align: center;
+            font-size: .78rem; color: var(--muted);
+        }
+        footer a { color: var(--cyan); text-decoration: none; }
+
+        /* ── UTILS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+            nav { padding: 0 1rem; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero-stats { gap: 1.5rem; }
+            section { padding: 3.5rem 1rem; }
+            .cta-box { padding: 2rem 1.25rem; }
+            .price-big { font-size: 2.75rem; }
+        }
+
+        /* ── HIGHLIGHT ── */
+        .hl { color: var(--cyan); }
+        .hl-green { color: var(--green); }
+        .hl-yellow { color: var(--yellow); }
+    </style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+    <div class="nav-logo"><span>Receitas</span><span style="color:#f1f5f9">X</span></div>
+    <div style="display:flex;align-items:center;gap:1rem">
+        <a href="login.html" style="font-size:.85rem;color:#94a3b8;text-decoration:none;font-weight:500;transition:color .15s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">Entrar</a>
+        <a href="acesso-vitalicio.html" class="nav-cta">Começar grátis</a>
+    </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+    <div class="hero-badge">
+        <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">star</span>
+        Para confeiteiras que querem lucrar de verdade
+    </div>
+
+    <h1>Precifique suas receitas<br><em>com inteligência</em></h1>
+
+    <p class="hero-sub">
+        Calcule o custo real de cada receita, descubra sua margem de lucro e pare de cobrar errado.
+        O sistema completo para confeiteiras profissionais.
+    </p>
+
+    <div class="hero-btns">
+        <a href="acesso-vitalicio.html" class="btn-primary">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24">rocket_launch</span>
+            Começar agora
+        </a>
+        <a href="#como-funciona" class="btn-secondary">
+            <span class="material-symbols-outlined" style="font-size:1rem">play_circle</span>
+            Como funciona
+        </a>
+    </div>
+
+    <div class="hero-stats">
+        <div class="stat-item">
+            <div class="stat-num">+100</div>
+            <div class="stat-lbl">Confeiteiras cadastradas</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">+1.200</div>
+            <div class="stat-lbl">Receitas precificadas</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">30%</div>
+            <div class="stat-lbl">Aumento médio na margem</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">100%</div>
+            <div class="stat-lbl">Feito para confeitaria</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ PROBLEMA ══ -->
+<section>
+    <div class="container">
+        <div class="reveal">
+            <p class="sec-eyebrow">O problema</p>
+            <h2 class="sec-title">Você já se pegou fazendo isso?</h2>
+            <p class="sec-sub">Muitas confeiteiras trabalham muito e lucram pouco — não por falta de talento, mas por calcular errado.</p>
+        </div>
+        <div class="pain-grid">
+            <div class="pain-card reveal">
+                <div class="pain-icon"><span class="material-symbols-outlined">calculate</span></div>
+                <div>
+                    <p class="pain-title">Chuta o preço "no feeling"</p>
+                    <p class="pain-desc">Cobra baseada no que a concorrência cobra, sem saber se está no lucro ou no prejuízo.</p>
+                </div>
+            </div>
+            <div class="pain-card reveal">
+                <div class="pain-icon"><span class="material-symbols-outlined">work</span></div>
+                <div>
+                    <p class="pain-title">Esquece de cobrar a mão de obra</p>
+                    <p class="pain-desc">Conta os ingredientes mas esquece que seu tempo tem valor. O maior custo fica de fora.</p>
+                </div>
+            </div>
+            <div class="pain-card reveal">
+                <div class="pain-icon"><span class="material-symbols-outlined">receipt_long</span></div>
+                <div>
+                    <p class="pain-title">Não sabe o custo real por unidade</p>
+                    <p class="pain-desc">Fez 12 brigadeiros sem saber quanto custou cada um — e sem saber se teve lucro.</p>
+                </div>
+            </div>
+            <div class="pain-card reveal">
+                <div class="pain-icon"><span class="material-symbols-outlined">trending_down</span></div>
+                <div>
+                    <p class="pain-title">Desconto sem base nenhuma</p>
+                    <p class="pain-desc">Dá desconto para fechar venda sem saber se ainda sobra alguma margem de lucro.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FEATURES ══ -->
+<section class="features-bg">
+    <div class="container">
+        <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto">
+            <p class="sec-eyebrow">Funcionalidades</p>
+            <h2 class="sec-title">Tudo que você precisa para gerir sua confeitaria</h2>
+        </div>
+        <div class="feat-grid">
+            <div class="feat-card reveal">
+                <div class="feat-icon" style="background:rgba(37,244,244,.1)">
+                    <span class="material-symbols-outlined" style="color:#25f4f4">menu_book</span>
+                </div>
+                <p class="feat-title">Gestão de Receitas</p>
+                <p class="feat-desc">Cadastre seus insumos e o sistema calcula automaticamente o custo total, custo por unidade, margem e markup de cada receita.</p>
+            </div>
+            <div class="feat-card reveal">
+                <div class="feat-icon" style="background:rgba(52,211,153,.1)">
+                    <span class="material-symbols-outlined" style="color:#34d399">sell</span>
+                </div>
+                <p class="feat-title">Precificação Inteligente</p>
+                <p class="feat-desc">Veja a margem de cada receita colorida — verde, amarela ou vermelha — e saiba exatamente o preço mínimo para não ter prejuízo.</p>
+            </div>
+            <div class="feat-card reveal">
+                <div class="feat-icon" style="background:rgba(251,191,36,.1)">
+                    <span class="material-symbols-outlined" style="color:#fbbf24">balance</span>
+                </div>
+                <p class="feat-title">Ponto de Equilíbrio</p>
+                <p class="feat-desc">Descubra quantas unidades você precisa vender por mês para cobrir todos os seus custos fixos e começar a lucrar.</p>
+            </div>
+            <div class="feat-card reveal">
+                <div class="feat-icon" style="background:rgba(167,139,250,.1)">
+                    <span class="material-symbols-outlined" style="color:#a78bfa">storefront</span>
+                </div>
+                <p class="feat-title">Marketplaces e Taxas</p>
+                <p class="feat-desc">Configure iFood, Rappi e outros apps. Veja o lucro líquido real de cada venda depois das taxas do marketplace.</p>
+            </div>
+            <div class="feat-card reveal">
+                <div class="feat-icon" style="background:rgba(251,113,133,.1)">
+                    <span class="material-symbols-outlined" style="color:#fb7185">package_2</span>
+                </div>
+                <p class="feat-title">Gestão de Insumos</p>
+                <p class="feat-desc">Catálogo com mais de 240 mil produtos. Busca automática por nome, cálculo de custo por grama/ml e atualização de preços em lote.</p>
+            </div>
+            <div class="feat-card reveal">
+                <div class="feat-icon" style="background:rgba(56,189,248,.1)">
+                    <span class="material-symbols-outlined" style="color:#38bdf8">monetization_on</span>
+                </div>
+                <p class="feat-title">Programa de Afiliados</p>
+                <p class="feat-desc">Indique amigas e ganhe 10% de comissão em Pix a cada nova venda. Acompanhe seus ganhos em tempo real com notificações automáticas.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ COMO FUNCIONA ══ -->
+<section id="como-funciona">
+    <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center">
+        <div class="reveal">
+            <p class="sec-eyebrow">Como funciona</p>
+            <h2 class="sec-title">Em 3 passos você já está precificando</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <p class="step-title">Cadastre seus insumos</p>
+                        <p class="step-desc">Adicione os ingredientes e embalagens com preços reais de compra. O sistema calcula o custo por grama automaticamente.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <p class="step-title">Monte sua receita</p>
+                        <p class="step-desc">Escolha os insumos, informe as quantidades, tempo de preparo e rendimento. O custo aparece em tempo real.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <p class="step-title">Defina o preço e lucre</p>
+                        <p class="step-desc">Veja a margem de lucro imediatamente. Saiba o preço mínimo e o ideal para sua categoria de produto.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual / mockup simulado -->
+        <div class="reveal" style="background:#141414;border:1px solid #1E1E1E;border-radius:1.25rem;padding:1.5rem;position:relative">
+            <div style="font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#475569;margin-bottom:.85rem">📊 Exemplo — Bolo de Brigadeiro</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem">
+                <div style="background:#1a1a1a;border:1px solid rgba(37,244,244,.15);border-radius:.7rem;padding:.85rem">
+                    <p style="font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem">Preço de venda</p>
+                    <p style="font-size:1.35rem;font-weight:900;color:#f1f5f9">R$ 95,00</p>
+                </div>
+                <div style="background:#1a1a1a;border:1px solid #1E1E1E;border-radius:.7rem;padding:.85rem">
+                    <p style="font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:.25rem">Custo total</p>
+                    <p style="font-size:1.35rem;font-weight:900;color:#f1f5f9">R$ 63,40</p>
+                </div>
+                <div style="background:#1a1a1a;border:1px solid rgba(52,211,153,.2);border-radius:.7rem;padding:.85rem">
+                    <p style="font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#34d399;margin-bottom:.25rem">Lucro total</p>
+                    <p style="font-size:1.35rem;font-weight:900;color:#34d399">R$ 31,60</p>
+                </div>
+                <div style="background:#1a1a1a;border:1px solid rgba(251,191,36,.2);border-radius:.7rem;padding:.85rem">
+                    <p style="font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fbbf24;margin-bottom:.25rem">Margem</p>
+                    <p style="font-size:1.35rem;font-weight:900;color:#fbbf24">33,3%</p>
+                </div>
+            </div>
+            <div style="background:#1a1a1a;border:1px solid #1E1E1E;border-radius:.7rem;padding:.75rem .9rem;display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:.75rem;color:#94a3b8">12 fatias × R$ 7,92/un</span>
+                <span style="font-size:.65rem;font-weight:700;background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25);padding:.2rem .55rem;border-radius:.4rem">✓ Excelente</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ NÚMEROS ══ -->
+<section style="background:var(--bg2);padding:4rem 1.5rem">
+    <div class="container">
+        <div class="reveal" style="text-align:center;margin-bottom:0">
+            <p class="sec-eyebrow">Resultados reais</p>
+            <h2 class="sec-title">O impacto que o ReceitasX gera</h2>
+        </div>
+        <div class="numbers-grid reveal">
+            <div class="number-card">
+                <div class="number-big">+30%</div>
+                <div class="number-lbl">Aumento médio na margem após 30 dias</div>
+            </div>
+            <div class="number-card">
+                <div class="number-big">3min</div>
+                <div class="number-lbl">Para precificar uma nova receita do zero</div>
+            </div>
+            <div class="number-card">
+                <div class="number-big">240k</div>
+                <div class="number-lbl">Produtos no catálogo de insumos</div>
+            </div>
+            <div class="number-card">
+                <div class="number-big">10%</div>
+                <div class="number-lbl">Comissão em Pix no programa de afiliados</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ DEPOIMENTOS ══ -->
+<section>
+    <div class="container">
+        <div class="reveal" style="text-align:center;margin-bottom:0">
+            <p class="sec-eyebrow">Depoimentos</p>
+            <h2 class="sec-title">O que as confeiteiras dizem</h2>
+        </div>
+        <div class="testi-grid">
+            <div class="testi-card reveal">
+                <div class="testi-stars">★★★★★</div>
+                <p class="testi-text">"Antes eu cobrava R$ 80 pelo meu bolo e achava que estava lucrando. Depois do ReceitasX, descobri que o custo real era R$ 72. Agora cobro R$ 115 com segurança."</p>
+                <div class="testi-author">
+                    <div class="testi-avatar" style="background:rgba(37,244,244,.12);color:#25f4f4">AK</div>
+                    <div>
+                        <p class="testi-name">Ana K.</p>
+                        <p class="testi-role">Confeiteira artesanal, São Paulo</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card reveal">
+                <div class="testi-stars">★★★★★</div>
+                <p class="testi-text">"O cálculo do ponto de equilíbrio foi revelador. Descobri que precisava vender 28 bolos por mês só para pagar minhas despesas fixas. Agora planejo com meta."</p>
+                <div class="testi-author">
+                    <div class="testi-avatar" style="background:rgba(52,211,153,.12);color:#34d399">MP</div>
+                    <div>
+                        <p class="testi-name">Maria P.</p>
+                        <p class="testi-role">Confeiteira, Belo Horizonte</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card reveal">
+                <div class="testi-stars">★★★★★</div>
+                <p class="testi-text">"A integração com iFood foi o que me convenceu. Vejo exatamente quanto sobra depois das taxas do app. Sem isso eu estava entregando prejuízo sem saber."</p>
+                <div class="testi-author">
+                    <div class="testi-avatar" style="background:rgba(251,191,36,.12);color:#fbbf24">CL</div>
+                    <div>
+                        <p class="testi-name">Carol L.</p>
+                        <p class="testi-role">Confeiteira no iFood, Curitiba</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ CTA / PRICING ══ -->
+<section class="cta-section">
+    <div class="cta-box reveal">
+        <p class="price-label">Acesso Vitalício</p>
+        <div class="price-big">R$ 97</div>
+        <p class="price-small" style="margin-top:.5rem">Pagamento único · Sem mensalidade · Para sempre</p>
+
+        <ul class="feature-list">
+            <li><span class="material-symbols-outlined">check_circle</span> Receitas ilimitadas</li>
+            <li><span class="material-symbols-outlined">check_circle</span> Catálogo com +240k insumos</li>
+            <li><span class="material-symbols-outlined">check_circle</span> Calculadora de ponto de equilíbrio</li>
+            <li><span class="material-symbols-outlined">check_circle</span> Integração com marketplaces</li>
+            <li><span class="material-symbols-outlined">check_circle</span> Programa de afiliados (ganhe 10%)</li>
+            <li><span class="material-symbols-outlined">check_circle</span> Acesso a todas as atualizações futuras</li>
+        </ul>
+
+        <a href="acesso-vitalicio.html" class="btn-primary" style="width:100%;justify-content:center;font-size:1.05rem;padding:1rem">
+            <span class="material-symbols-outlined" style="font-size:1.2rem;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24">rocket_launch</span>
+            Quero acesso vitalício agora
+        </a>
+
+        <p style="font-size:.75rem;color:#475569;margin-top:1rem;text-align:center">
+            Pagamento seguro via Pix ou cartão · Garantia de 7 dias
+        </p>
+    </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+    <p style="margin-bottom:.5rem">
+        <span style="font-weight:800;color:#f1f5f9"><span style="color:#25f4f4">Receitas</span>X</span>
+    </p>
+    <p>O sistema de precificação para confeiteiras profissionais.</p>
+    <p style="margin-top:.75rem">
+        <a href="login.html">Entrar</a> &nbsp;·&nbsp;
+        <a href="acesso-vitalicio.html">Cadastrar</a> &nbsp;·&nbsp;
+        <a href="indique-ganhe.html">Indique e Ganhe</a>
+    </p>
+    <p style="margin-top:1rem;font-size:.68rem;color:#334155">© 2025 ReceitasX · Todos os direitos reservados</p>
+</footer>
+
+<script>
+// Reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+}, { threshold: 0.1 });
+revealEls.forEach(el => io.observe(el));
+</script>
+</body>
+</html>

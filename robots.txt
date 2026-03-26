@@ -1,0 +1,28 @@
+User-agent: *
+
+# Páginas públicas — liberar para indexação
+Allow: /landing.html
+Allow: /acesso-vitalicio.html
+Allow: /login.html
+Allow: /checkout.html
+
+# Páginas do app — bloquear para não indexar páginas de login
+Disallow: /index.html
+Disallow: /receitas.html
+Disallow: /configuracoes.html
+Disallow: /gerenciar-insumos.html
+Disallow: /gerenciar-equipamentos.html
+Disallow: /gerenciar-embalagens.html
+Disallow: /gestao-produtos.html
+Disallow: /combos.html
+Disallow: /despesas.html
+Disallow: /extrato-vendas.html
+Disallow: /indique-ganhe.html
+Disallow: /meus-ganhos.html
+Disallow: /perfil.html
+Disallow: /ponto-equilibrio.html
+Disallow: /precificacao-marketplace.html
+Disallow: /admin-
+Disallow: /receita-detalhe.html
+
+Sitemap: https://receitasx.vercel.app/sitemap.xml
