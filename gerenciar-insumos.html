@@ -475,17 +475,15 @@
                     <label class="field-label">Peso da Embalagem <span style="color:#475569;text-transform:none;font-weight:400">(Compra)</span></label>
                     <div style="display:flex;gap:.5rem">
                         <input id="f-peso" type="number" step="0.001" min="0" class="fc" placeholder="Ex: 1000" style="flex:1" />
-                        <div class="select-wrap" style="width:100px;flex-shrink:0">
-                            <select id="f-unidade" class="fc select-placeholder" style="padding-right:2rem" onchange="updateSelectColor(this)">
-                                <option value="" disabled selected>Unidade</option>
-                                <option value="g">g</option>
-                                <option value="kg">kg</option>
-                                <option value="ml">ml</option>
-                                <option value="l">l</option>
-                                <option value="un">un</option>
-                            </select>
-                            <span class="chev material-symbols-outlined">expand_more</span>
-                        </div>
+                        <select id="f-unidade" class="fc select-placeholder" onchange="updateSelectColor(this)"
+                            style="width:120px;flex-shrink:0;padding-right:2rem;-webkit-appearance:none;appearance:none;cursor:pointer">
+                            <option value="" disabled selected>Unidade</option>
+                            <option value="g">g (grama)</option>
+                            <option value="kg">kg (quilo)</option>
+                            <option value="ml">ml</option>
+                            <option value="l">l (litro)</option>
+                            <option value="un">un</option>
+                        </select>
                     </div>
                 </div>
 
