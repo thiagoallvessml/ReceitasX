@@ -189,22 +189,12 @@
         @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
         .page-enter { animation:fadeUp .35s ease both; }
 
-        /* ── Grid mobile: 2 colunas ── */
+        /* ── Grid: 1 coluna no mobile, até 3 no desktop ── */
         @media (max-width: 639px) {
-            #recipe-grid { grid-template-columns: repeat(2, 1fr) !important; gap: .6rem !important; }
-            .card-cover { height: 110px; }
-            .card-cover .cover-icon { font-size: 2.2rem; }
-            .card-body { padding: .65rem; gap: .5rem; }
-            .card-body h2 { font-size: .8rem; }
-            .card-meta { font-size: .65rem; gap: .4rem; }
-            .stat-grid { grid-template-columns: 1fr 1fr; gap: .25rem; }
-            .stat-cell { padding: .35rem .45rem; }
-            .stat-cell .lbl { font-size: .48rem; }
-            .stat-cell .val { font-size: .75rem; }
-            .card-actions { padding: .5rem .65rem; gap: .3rem; }
-            .btn-detail, .btn-edit { font-size: .68rem; padding: .45rem .3rem; }
-            .btn-detail .material-symbols-outlined,
-            .btn-edit .material-symbols-outlined { font-size: .8rem; }
+            #recipe-grid { grid-template-columns: 1fr !important; gap: .75rem !important; }
+        }
+        @media (min-width: 1024px) {
+            #recipe-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
 
         /* ── Stat separador ── */
@@ -421,7 +411,7 @@
     </div>
 
     <!-- Cards grid -->
-    <div id="recipe-grid" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+    <div id="recipe-grid" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))"></div>
 
     <!-- Empty -->
     <div id="empty-state" class="empty-state hidden">
