@@ -200,6 +200,21 @@
         /* ── Stat separador ── */
         .stat-divider { grid-column:1/-1; border:none; border-top:1px solid #222; margin:.15rem 0; }
 
+        /* ── Médias cards ── */
+        .mcard {
+            background: #111; border: 1px solid #1E1E1E;
+            border-radius: .75rem; padding: .75rem .9rem;
+        }
+        .mlbl {
+            font-size: .58rem; font-weight: 700; letter-spacing: .07em;
+            text-transform: uppercase; color: #475569; margin-bottom: .25rem;
+        }
+        .mval { font-size: 1rem; font-weight: 800; color: #f1f5f9; line-height: 1.2; }
+        @media (max-width: 639px) {
+            #medias-wrap > div:last-child { grid-template-columns: repeat(2, 1fr) !important; }
+            .mval { font-size: .9rem; }
+        }
+
         /* ══════════════════════════════════════
            MODAL SHEET — Cadastrar Receita
         ══════════════════════════════════════ */
@@ -408,6 +423,51 @@
         <button class="chip" data-filter="classica"  onclick="setFilter('classica',this)">Clássica</button>
         <button class="chip" data-filter="fitness"   onclick="setFilter('fitness',this)">Fitness</button>
         <button class="chip" data-filter="vegana"    onclick="setFilter('vegana',this)">Vegana</button>
+    </div>
+
+    <!-- Médias das Receitas -->
+    <div id="medias-wrap" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <span class="material-symbols-outlined" style="font-size:.95rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">bar_chart</span>
+                <span style="font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#475569">Médias das Receitas</span>
+            </div>
+            <span id="medias-count" style="font-size:.68rem;color:#334155"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.25rem">
+            <div class="mcard" style="border-color:rgba(37,244,244,.2)">
+                <p class="mlbl">Preço Total Médio</p>
+                <p class="mval" id="m-preco-total" style="color:#25f4f4">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(37,244,244,.15)">
+                <p class="mlbl">Preço Unit. Médio</p>
+                <p class="mval" id="m-preco-un" style="color:#25f4f4">—</p>
+            </div>
+            <div class="mcard">
+                <p class="mlbl">Custo Total Médio</p>
+                <p class="mval" id="m-custo-total">—</p>
+            </div>
+            <div class="mcard">
+                <p class="mlbl">Custo Unit. Médio</p>
+                <p class="mval" id="m-custo-un">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(52,211,153,.2)">
+                <p class="mlbl">Lucro Total Médio</p>
+                <p class="mval" id="m-lucro-total" style="color:#34d399">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(52,211,153,.15)">
+                <p class="mlbl">Lucro Unit. Médio</p>
+                <p class="mval" id="m-lucro-un" style="color:#34d399">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(251,191,36,.2)">
+                <p class="mlbl">Margem Média</p>
+                <p class="mval" id="m-margem" style="color:#fbbf24">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(167,139,250,.2)">
+                <p class="mlbl">Markup Médio</p>
+                <p class="mval" id="m-markup" style="color:#a78bfa">—</p>
+            </div>
+        </div>
     </div>
 
     <!-- Cards grid -->
@@ -697,6 +757,36 @@ function getFiltered() {
     });
 }
 
+/* ── MÉDIAS ─────────────────────────────────────────────────────── */
+function renderMedias(list) {
+    const wrap = document.getElementById('medias-wrap');
+    // Filtra apenas receitas com preço cadastrado
+    const com = list.filter(r => parseFloat(r.precoTotal) > 0);
+    if (!com.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    document.getElementById('medias-count').textContent = com.length + ' receita' + (com.length > 1 ? 's' : '') + ' com produto';
+
+    const avg = arr => arr.reduce((s, v) => s + v, 0) / arr.length;
+
+    const preTotais = com.map(r => parseFloat(r.precoTotal) || 0);
+    const preUnits  = com.map(r => { const c = calc(r); return c.precoUnit || 0; });
+    const custoTots = com.map(r => parseFloat(r.custoTotal) || 0);
+    const custoUns  = com.map(r => { const c = calc(r); return c.custoUnit || 0; });
+    const lucroTots = com.map(r => { const c = calc(r); return c.lucroTotal || 0; });
+    const lucroUns  = com.map(r => { const c = calc(r); return c.lucroUnit || 0; });
+    const margens   = com.map(r => { const c = calc(r); return c.margem || 0; });
+    const markups   = com.map(r => { const c = calc(r); return c.markup || 0; });
+
+    document.getElementById('m-preco-total').textContent = 'R$ ' + fmt(avg(preTotais));
+    document.getElementById('m-preco-un').textContent    = 'R$ ' + fmt(avg(preUnits));
+    document.getElementById('m-custo-total').textContent = 'R$ ' + fmt(avg(custoTots));
+    document.getElementById('m-custo-un').textContent    = 'R$ ' + fmt(avg(custoUns));
+    document.getElementById('m-lucro-total').textContent = 'R$ ' + fmt(avg(lucroTots));
+    document.getElementById('m-lucro-un').textContent    = 'R$ ' + fmt(avg(lucroUns));
+    document.getElementById('m-margem').textContent      = avg(margens).toFixed(1) + '%';
+    document.getElementById('m-markup').textContent      = avg(markups).toFixed(2) + 'x';
+}
+
 function catLabel(c) {
     return {gourmet:'Receita Gourmet',classica:'Receita Clássica',fitness:'Receita Fitness',vegana:'Receita Vegana'}[c] || c;
 }
@@ -707,8 +797,9 @@ function renderCards() {
     const empty = document.getElementById('empty-state');
     updateStats(list);
 
-    if (!list.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    if (!list.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); renderMedias([]); return; }
     empty.classList.add('hidden');
+    renderMedias(list);
 
     grid.innerHTML = list.map(r => {
         const c = calc(r);
