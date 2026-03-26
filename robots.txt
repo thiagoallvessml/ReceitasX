@@ -25,4 +25,4 @@ Disallow: /precificacao-marketplace.html
 Disallow: /admin-
 Disallow: /receita-detalhe.html
 
-Sitemap: https://receitasx.vercel.app/sitemap.xml
+Sitemap: https://receitasx.com.br/sitemap.xml
