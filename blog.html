@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog ReceitasX – Dicas de Precificação para Confeitaria</title>
+    <meta name="description" content="Artigos práticos sobre precificação, gestão e lucro para confeiteiras. Aprenda a cobrar o preço certo e lucrar de verdade." />
+    <meta name="google-site-verification" content="u0POsj17QqD4iukUlLzIayovjOOk-s_nhfizVgi6ak0" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://receitasx.com.br/blog.html" />
+    <meta property="og:title" content="Blog ReceitasX – Dicas de Precificação para Confeitaria" />
+    <meta property="og:description" content="Artigos práticos sobre precificação, gestão e lucro para confeiteiras." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://receitasx.com.br/blog.html" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--cyan:#25f4f4;--bg:#080808;--bg2:#0f0f0f;--card:#141414;--border:#1E1E1E;--text:#f1f5f9;--muted:#64748b}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+        .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle}
+        a{text-decoration:none;color:inherit}
+
+        nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;padding:0 2rem;height:3.75rem;background:rgba(8,8,8,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05)}
+        .nav-logo{font-size:1.1rem;font-weight:900;flex:1;letter-spacing:-.02em}
+        .nav-logo span:first-child{color:var(--cyan)}
+        .nav-links{display:flex;align-items:center;gap:1.5rem}
+        .nav-links a{font-size:.85rem;color:#94a3b8;font-weight:500;transition:color .15s}
+        .nav-links a:hover,.nav-links a.active{color:#f1f5f9}
+        .nav-cta{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.15rem;border-radius:.6rem;background:var(--cyan);color:#050505;font-size:.85rem;font-weight:700;transition:opacity .15s,box-shadow .2s;box-shadow:0 0 20px rgba(37,244,244,.25)}
+        .nav-cta:hover{opacity:.9}
+
+        .hero-blog{padding:5rem 1.5rem 3rem;text-align:center;border-bottom:1px solid var(--border)}
+        .hero-blog .eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:.6rem}
+        .hero-blog h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;line-height:1.15;letter-spacing:-.02em;margin-bottom:.75rem}
+        .hero-blog p{color:#94a3b8;max-width:500px;margin:0 auto;font-size:.95rem;line-height:1.7}
+
+        .container{max-width:960px;margin:0 auto;padding:0 1.5rem}
+        .blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem;padding:3rem 0 5rem}
+
+        .post-card{background:var(--card);border:1px solid var(--border);border-radius:1.25rem;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+        .post-card:hover{border-color:rgba(37,244,244,.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+        .post-cover{height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+        .post-cover .material-symbols-outlined{font-size:3rem;color:rgba(255,255,255,.3);font-variation-settings:'FILL' 1,'wght' 200,'GRAD' 0,'opsz' 48}
+        .post-body{padding:1.25rem;flex:1;display:flex;flex-direction:column;gap:.5rem}
+        .post-tag{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)}
+        .post-title{font-size:1rem;font-weight:800;line-height:1.35;color:#f1f5f9}
+        .post-excerpt{font-size:.78rem;color:#94a3b8;line-height:1.65;flex:1}
+        .post-meta{display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border)}
+        .post-date{font-size:.68rem;color:var(--muted)}
+        .post-read{font-size:.68rem;font-weight:700;color:var(--cyan);display:flex;align-items:center;gap:.2rem}
+        .post-read .material-symbols-outlined{font-size:.8rem}
+
+        footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted)}
+        footer a{color:var(--cyan)}
+
+        @media(max-width:600px){nav{padding:0 1rem}.nav-links{gap:.85rem}}
+    </style>
+</head>
+<body>
+<nav>
+    <a href="landing.html" class="nav-logo"><span>Receitas</span><span style="color:#f1f5f9">X</span></a>
+    <div class="nav-links">
+        <a href="landing.html">Início</a>
+        <a href="blog.html" class="active">Blog</a>
+        <a href="acesso-vitalicio.html" class="nav-cta">Começar grátis</a>
+    </div>
+</nav>
+
+<div class="hero-blog">
+    <div class="eyebrow">Blog</div>
+    <h1>Dicas para confeiteiras que<br>querem lucrar de verdade</h1>
+    <p>Artigos práticos sobre precificação, margem de lucro, gestão e muito mais.</p>
+</div>
+
+<div class="container">
+    <div class="blog-grid">
+
+        <a href="blog/como-calcular-preco-bolo.html" class="post-card">
+            <div class="post-cover" style="background:linear-gradient(135deg,#0ea5e9,#10b981)">
+                <span class="material-symbols-outlined">calculate</span>
+            </div>
+            <div class="post-body">
+                <p class="post-tag">Precificação</p>
+                <h2 class="post-title">Como calcular o preço de um bolo: guia completo para confeiteiras</h2>
+                <p class="post-excerpt">Aprenda a calcular o custo real de cada receita — ingredientes, embalagem, mão de obra e margem de lucro — sem deixar nenhum centavo passar.</p>
+                <div class="post-meta">
+                    <span class="post-date">26 Mar 2025 · 8 min</span>
+                    <span class="post-read">Ler <span class="material-symbols-outlined">arrow_forward</span></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="blog/ponto-de-equilibrio-confeitaria.html" class="post-card">
+            <div class="post-cover" style="background:linear-gradient(135deg,#f59e0b,#f97316)">
+                <span class="material-symbols-outlined">balance</span>
+            </div>
+            <div class="post-body">
+                <p class="post-tag">Gestão</p>
+                <h2 class="post-title">Ponto de equilíbrio na confeitaria: quantos bolos você precisa vender?</h2>
+                <p class="post-excerpt">Descubra quantas unidades você precisa vender por mês para pagar todos os seus custos fixos e começar a lucrar de verdade.</p>
+                <div class="post-meta">
+                    <span class="post-date">26 Mar 2025 · 6 min</span>
+                    <span class="post-read">Ler <span class="material-symbols-outlined">arrow_forward</span></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="blog/margem-de-lucro-confeitaria.html" class="post-card">
+            <div class="post-cover" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">
+                <span class="material-symbols-outlined">trending_up</span>
+            </div>
+            <div class="post-body">
+                <p class="post-tag">Finanças</p>
+                <h2 class="post-title">Margem de lucro na confeitaria: o que é e quanto você deveria ter</h2>
+                <p class="post-excerpt">Entenda a diferença entre markup e margem, qual percentual é saudável para confeitaria e como melhorar sua rentabilidade sem aumentar muito o preço.</p>
+                <div class="post-meta">
+                    <span class="post-date">26 Mar 2025 · 7 min</span>
+                    <span class="post-read">Ler <span class="material-symbols-outlined">arrow_forward</span></span>
+                </div>
+            </div>
+        </a>
+
+    </div>
+</div>
+
+<footer>
+    <p style="margin-bottom:.5rem;font-weight:800;color:#f1f5f9"><span style="color:#25f4f4">Receitas</span>X</p>
+    <p><a href="landing.html">Início</a> &nbsp;·&nbsp; <a href="blog.html">Blog</a> &nbsp;·&nbsp; <a href="acesso-vitalicio.html">Começar grátis</a></p>
+    <p style="margin-top:.75rem;font-size:.68rem;color:#334155">© 2025 ReceitasX · Todos os direitos reservados</p>
+</footer>
+</body>
+</html>

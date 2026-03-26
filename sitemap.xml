@@ -6,6 +6,26 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://receitasx.com.br/blog.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://receitasx.com.br/blog/como-calcular-preco-bolo.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://receitasx.com.br/blog/ponto-de-equilibrio-confeitaria.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://receitasx.com.br/blog/margem-de-lucro-confeitaria.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://receitasx.com.br/acesso-vitalicio.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
