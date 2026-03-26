@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Ponto de Equilíbrio - ReceitasX</title>
+    <meta name="description" content="Descubra quantas unidades você precisa vender por mês para cobrir todos os seus custos." />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #0a0a0a;
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding-bottom: 3rem;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* ── Header ── */
+        header {
+            position: sticky; top: 0; z-index: 40;
+            background: rgba(10,10,10,.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid #1A1A1A;
+        }
+        .hdr-inner {
+            max-width: 900px; margin: 0 auto;
+            padding: 0 1.25rem; height: 3.5rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .btn-back {
+            display: flex; align-items: center; gap: .3rem;
+            color: #94a3b8; font-size: .85rem; cursor: pointer;
+            background: none; border: none; transition: color .15s;
+        }
+        .btn-back:hover { color: #25f4f4; }
+
+        /* ── Layout ── */
+        .container { max-width: 900px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(135deg, #0d2626, #0a1616 60%, #0a0a0a);
+            border: 1px solid rgba(37,244,244,.15);
+            border-radius: 1.25rem; padding: 1.75rem;
+            margin-bottom: 1.5rem; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: -60px; right: -60px;
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,244,244,.12), transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: .35rem;
+            background: rgba(37,244,244,.1); border: 1px solid rgba(37,244,244,.25);
+            border-radius: 9999px; padding: .3rem .85rem;
+            font-size: .68rem; font-weight: 700; color: #25f4f4;
+            letter-spacing: .06em; text-transform: uppercase; margin-bottom: .75rem;
+        }
+        .hero h1 { font-size: 1.5rem; font-weight: 900; line-height: 1.25; margin-bottom: .4rem; }
+        .hero h1 span { color: #25f4f4; }
+        .hero p { font-size: .85rem; color: #64748b; line-height: 1.6; max-width: 520px; }
+
+        /* ── Cards ── */
+        .card {
+            background: #141414; border: 1px solid #1E1E1E;
+            border-radius: 1rem; padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .card-title {
+            display: flex; align-items: center; gap: .5rem;
+            font-size: .82rem; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase; color: #475569;
+            margin-bottom: 1rem;
+        }
+        .card-title .material-symbols-outlined { font-size: .9rem; color: #25f4f4; }
+
+        /* ── Form ── */
+        .field-group { display: flex; flex-direction: column; gap: .85rem; }
+        .field { display: flex; flex-direction: column; gap: .35rem; }
+        .field-label { font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #25f4f4; }
+        .field-hint { font-size: .68rem; color: #475569; margin-top: -.2rem; }
+        .input-wrap { position: relative; }
+        .prefix {
+            position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+            color: #64748b; font-size: .85rem; pointer-events: none;
+        }
+        .fc {
+            width: 100%; padding: .75rem .9rem .75rem 2.4rem;
+            border-radius: .7rem; border: 1px solid #2A2A2A;
+            background: #1E1E1E; color: #f1f5f9; font-size: .9rem;
+            font-family: 'Inter', sans-serif;
+            outline: none; transition: border-color .2s, box-shadow .2s;
+        }
+        .fc:focus { border-color: rgba(37,244,244,.55); box-shadow: 0 0 0 3px rgba(37,244,244,.07); }
+        .fc::placeholder { color: #475569; }
+        .fc-no-prefix { padding-left: .9rem; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+        @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        /* ── Despesas import ── */
+        .import-btn {
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .55rem 1rem; border-radius: .6rem;
+            border: 1px solid rgba(37,244,244,.3);
+            background: rgba(37,244,244,.06); color: #25f4f4;
+            font-size: .75rem; font-weight: 700; cursor: pointer;
+            transition: all .15s;
+        }
+        .import-btn:hover { background: rgba(37,244,244,.12); border-color: rgba(37,244,244,.5); }
+        .import-btn .material-symbols-outlined { font-size: .9rem; }
+
+        /* ── Resultado ── */
+        .result-box {
+            background: #0d2626; border: 1px solid rgba(37,244,244,.25);
+            border-radius: 1rem; padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .result-empty {
+            display: flex; flex-direction: column; align-items: center;
+            gap: .5rem; padding: 2rem; text-align: center; color: #334155;
+        }
+        .result-empty .material-symbols-outlined { font-size: 2.5rem; }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+        @media (max-width: 520px) { .result-grid { grid-template-columns: 1fr; } }
+
+        .metric-card {
+            background: rgba(0,0,0,.3); border: 1px solid rgba(37,244,244,.12);
+            border-radius: .85rem; padding: 1rem;
+        }
+        .metric-label { font-size: .65rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #475569; margin-bottom: .35rem; }
+        .metric-value { font-size: 1.65rem; font-weight: 900; color: #25f4f4; line-height: 1; }
+        .metric-value small { font-size: .8rem; font-weight: 600; color: #64748b; margin-right: .2rem; }
+        .metric-sub { font-size: .68rem; color: #475569; margin-top: .3rem; }
+
+        .metric-card.green  { border-color: rgba(52,211,153,.2);  }
+        .metric-card.green .metric-value { color: #34d399; }
+        .metric-card.yellow { border-color: rgba(251,191,36,.2); }
+        .metric-card.yellow .metric-value { color: #fbbf24; }
+        .metric-card.red    { border-color: rgba(248,113,113,.2); }
+        .metric-card.red .metric-value { color: #f87171; }
+
+        /* Status banner */
+        .status-banner {
+            display: flex; align-items: center; gap: .75rem;
+            padding: 1rem 1.25rem; border-radius: .85rem;
+            margin-bottom: 1rem; font-size: .85rem; font-weight: 600;
+        }
+        .status-banner.deficit  { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: #f87171; }
+        .status-banner.equilibrio { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.25); color: #fbbf24; }
+        .status-banner.lucro    { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: #34d399; }
+        .status-banner .material-symbols-outlined { font-size: 1.4rem; }
+
+        /* ── Gráfico ── */
+        #grafico-wrap {
+            background: #0f0f0f; border: 1px solid #1E1E1E;
+            border-radius: 1rem; padding: 1rem;
+            overflow: hidden; margin-bottom: 1rem;
+        }
+        svg#grafico { width: 100%; height: 260px; display: block; }
+        .chart-legend {
+            display: flex; gap: 1.25rem; flex-wrap: wrap;
+            padding: .75rem 1rem 0;
+        }
+        .legend-item { display: flex; align-items: center; gap: .35rem; font-size: .72rem; color: #64748b; }
+        .legend-dot { width: 10px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+
+        /* ── Dicas ── */
+        .tips-list { display: flex; flex-direction: column; gap: .6rem; }
+        .tip-item { display: flex; gap: .65rem; align-items: flex-start; }
+        .tip-icon {
+            width: 1.6rem; height: 1.6rem; border-radius: .4rem;
+            background: rgba(37,244,244,.08); border: 1px solid rgba(37,244,244,.15);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .tip-icon .material-symbols-outlined { font-size: .8rem; color: #25f4f4; font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+        .tip-text { font-size: .78rem; color: #64748b; line-height: 1.55; }
+        .tip-text strong { color: #94a3b8; }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed; bottom: 1.5rem; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #141414; border: 1px solid rgba(37,244,244,.35);
+            color: #f1f5f9; padding: .65rem 1.2rem; border-radius: .75rem;
+            font-size: .85rem; font-weight: 500;
+            display: flex; align-items: center; gap: .5rem;
+            z-index: 50; opacity: 0;
+            transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+            box-shadow: 0 8px 32px rgba(0,0,0,.5); white-space: nowrap;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .page-enter { animation: fadeUp .35s ease both; }
+    </style>
+</head>
+<body style="visibility:hidden">
+
+<!-- Header -->
+<header>
+    <div class="hdr-inner">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <div style="flex:1">
+            <span style="font-size:.95rem;font-weight:700">Ponto de Equilíbrio</span>
+        </div>
+    </div>
+</header>
+
+<div class="container page-enter">
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-badge">
+            <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">balance</span>
+            Análise financeira
+        </div>
+        <h1>Descubra seu <span>ponto de equilíbrio</span></h1>
+        <p>Quantas unidades você precisa vender por mês para cobrir todos os seus custos? Preencha os campos abaixo e veja o resultado em tempo real.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+
+        <!-- Coluna esquerda: Inputs -->
+        <div>
+
+            <!-- Custos Fixos -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="material-symbols-outlined">home_work</span>
+                    Custos Fixos Mensais
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem">
+                    <span style="font-size:.72rem;color:#475569">Aluguel, energia, pró-labore, etc.</span>
+                    <button class="import-btn" onclick="importarDespesas()">
+                        <span class="material-symbols-outlined">download</span>
+                        Importar de Despesas
+                    </button>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="f-custos-fixos">Total de custos fixos / mês</label>
+                    <div class="input-wrap">
+                        <span class="prefix">R$</span>
+                        <input id="f-custos-fixos" type="number" min="0" step="0.01" class="fc" placeholder="0,00" oninput="calcular()" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produto / Receita -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="material-symbols-outlined">bakery_dining</span>
+                    Por Unidade Vendida
+                </div>
+                <div class="field-group">
+                    <div class="field">
+                        <label class="field-label" for="f-preco">Preço de venda (por unidade)</label>
+                        <div class="input-wrap">
+                            <span class="prefix">R$</span>
+                            <input id="f-preco" type="number" min="0" step="0.01" class="fc" placeholder="0,00" oninput="calcular()" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="f-custo-var">Custo variável (por unidade)</label>
+                        <span class="field-hint">Ingredientes + embalagem + comissão</span>
+                        <div class="input-wrap">
+                            <span class="prefix">R$</span>
+                            <input id="f-custo-var" type="number" min="0" step="0.01" class="fc" placeholder="0,00" oninput="calcular()" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendas atuais (opcional) -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                    Vendas Atuais <span style="color:#334155;font-weight:400;text-transform:none;letter-spacing:0"> (opcional)</span>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="f-vendas-atuais">Unidades que vende por mês</label>
+                    <div class="input-wrap">
+                        <input id="f-vendas-atuais" type="number" min="0" step="1" class="fc fc-no-prefix" placeholder="Ex: 50" oninput="calcular()" style="padding-left:.9rem" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Coluna direita: Resultados -->
+        <div>
+
+            <!-- Status -->
+            <div id="status-banner" style="display:none" class="status-banner"></div>
+
+            <!-- Resultado principal -->
+            <div class="result-box">
+                <div id="result-empty" class="result-empty">
+                    <span class="material-symbols-outlined">calculate</span>
+                    <p style="font-size:.82rem;font-weight:600">Preencha os campos ao lado</p>
+                    <p style="font-size:.7rem">Os resultados aparecerão aqui.</p>
+                </div>
+                <div id="result-content" style="display:none">
+                    <div class="result-grid">
+                        <div class="metric-card" style="grid-column:1/-1">
+                            <p class="metric-label">🎯 Ponto de equilíbrio (unidades / mês)</p>
+                            <p class="metric-value" id="r-unidades">—</p>
+                            <p class="metric-sub" id="r-unidades-sub"></p>
+                        </div>
+                        <div class="metric-card green">
+                            <p class="metric-label">Faturamento mínimo</p>
+                            <p class="metric-value"><small>R$</small><span id="r-faturamento">—</span></p>
+                            <p class="metric-sub">Para cobrir todos os custos</p>
+                        </div>
+                        <div class="metric-card yellow">
+                            <p class="metric-label">Margem de contribuição</p>
+                            <p class="metric-value"><span id="r-margem-pct">—</span><small style="margin-left:.1rem;margin-right:0">%</small></p>
+                            <p class="metric-sub" id="r-margem-val"></p>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-label">Lucro / mês (atual)</p>
+                            <p class="metric-value" id="r-lucro">—</p>
+                            <p class="metric-sub" id="r-lucro-sub"></p>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-label">Falta vender</p>
+                            <p class="metric-value" id="r-falta">—</p>
+                            <p class="metric-sub" id="r-falta-sub"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            <div id="grafico-wrap" style="display:none">
+                <p style="font-size:.72rem;font-weight:700;color:#475569;letter-spacing:.05em;text-transform:uppercase;padding:.25rem .25rem .75rem">Gráfico de equilíbrio</p>
+                <svg id="grafico" viewBox="0 0 540 220" preserveAspectRatio="none"></svg>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:#25f4f4"></div>Receita</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Custo Total</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#475569;border:1px dashed #475569;height:1px"></div>Custos Fixos</div>
+                    <div class="legend-item">
+                        <div style="width:10px;height:10px;border-radius:50%;background:#fbbf24;flex-shrink:0"></div>Equilíbrio
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Dicas -->
+    <div class="card" style="margin-top:1rem">
+        <div class="card-title">
+            <span class="material-symbols-outlined">lightbulb</span>
+            Como interpretar os resultados
+        </div>
+        <div class="tips-list">
+            <div class="tip-item">
+                <div class="tip-icon"><span class="material-symbols-outlined">balance</span></div>
+                <p class="tip-text"><strong>Ponto de Equilíbrio</strong> é a quantidade mínima que você precisa vender para não ter prejuízo. Abaixo disso = prejuízo. Acima = lucro.</p>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon"><span class="material-symbols-outlined">trending_up</span></div>
+                <p class="tip-text"><strong>Margem de Contribuição</strong> é quanto cada venda contribui para pagar os custos fixos. Quanto maior, mais rápido você atinge o equilíbrio.</p>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon"><span class="material-symbols-outlined">info</span></div>
+                <p class="tip-text"><strong>Custo Variável</strong> inclui tudo que varia com cada unidade produzida: ingredientes, embalagem e eventuais comissões de entrega.</p>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon"><span class="material-symbols-outlined">savings</span></div>
+                <p class="tip-text"><strong>Dica prática:</strong> se o ponto de equilíbrio estiver muito alto, tente <strong>reduzir custos fixos</strong> ou <strong>aumentar o preço de venda</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" role="status" aria-live="polite">
+    <span class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ── TOAST ── */
+let toastTimer;
+function showToast(msg, type = 'ok') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.querySelector('.material-symbols-outlined').textContent = type === 'error' ? 'cancel' : 'check_circle';
+    t.querySelector('.material-symbols-outlined').style.color  = type === 'error' ? '#f87171' : '#25f4f4';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ── IMPORTAR DESPESAS DO SUPABASE ── */
+async function importarDespesas() {
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { showToast('Faça login para importar', 'error'); return; }
+
+        const { data, error } = await sb
+            .from('despesas')
+            .select('valor, tipo')
+            .eq('user_id', session.user.id);
+
+        if (error) throw error;
+
+        const total = (data || []).reduce((s, d) => s + parseFloat(d.valor || 0), 0);
+        if (total <= 0) { showToast('Nenhuma despesa encontrada', 'error'); return; }
+
+        document.getElementById('f-custos-fixos').value = total.toFixed(2);
+        showToast(`R$ ${total.toFixed(2).replace('.', ',')} importado de Despesas!`);
+        calcular();
+    } catch (e) {
+        // Fallback: tenta ler do localStorage
+        try {
+            const despesas = JSON.parse(localStorage.getItem('despesas') || '[]');
+            const total = despesas.reduce((s, d) => s + parseFloat(d.valor || 0), 0);
+            if (total > 0) {
+                document.getElementById('f-custos-fixos').value = total.toFixed(2);
+                showToast(`R$ ${total.toFixed(2).replace('.', ',')} importado!`);
+                calcular();
+            } else {
+                showToast('Nenhuma despesa encontrada', 'error');
+            }
+        } catch(_) {
+            showToast('Erro ao importar despesas', 'error');
+        }
+    }
+}
+
+/* ── FORMATAÇÃO ── */
+function fmt(v) {
+    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtInt(v) {
+    return Math.ceil(v).toLocaleString('pt-BR');
+}
+
+/* ── CALCULADORA ── */
+function calcular() {
+    const CF  = parseFloat(document.getElementById('f-custos-fixos').value)   || 0;
+    const PV  = parseFloat(document.getElementById('f-preco').value)           || 0;
+    const CV  = parseFloat(document.getElementById('f-custo-var').value)       || 0;
+    const VA  = parseFloat(document.getElementById('f-vendas-atuais').value)   || 0;
+
+    const empty = document.getElementById('result-empty');
+    const content = document.getElementById('result-content');
+    const grafico = document.getElementById('grafico-wrap');
+    const banner  = document.getElementById('status-banner');
+
+    // Valida mínimo
+    if (CF <= 0 || PV <= 0 || CV < 0) {
+        empty.style.display = 'flex';
+        content.style.display = 'none';
+        grafico.style.display = 'none';
+        banner.style.display  = 'none';
+        return;
+    }
+
+    const MC     = PV - CV;          // Margem de Contribuição por unidade (R$)
+    if (MC <= 0) {
+        empty.style.display = 'flex';
+        empty.innerHTML = `
+            <span class="material-symbols-outlined" style="color:#f87171;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">error</span>
+            <p style="font-size:.82rem;font-weight:600;color:#f87171">Preço de venda ≤ Custo variável</p>
+            <p style="font-size:.7rem;color:#64748b">Cada venda gera prejuízo. Aumente o preço ou reduza o custo.</p>`;
+        content.style.display = 'none';
+        grafico.style.display = 'none';
+        banner.style.display  = 'none';
+        return;
+    }
+
+    const MC_PCT = (MC / PV) * 100;                         // Margem %
+    const PE_UN  = CF / MC;                                  // Ponto equilíbrio em unidades
+    const PE_FAT = PE_UN * PV;                               // Ponto equilíbrio em R$
+
+    // Situação atual
+    const receitaAtual = VA * PV;
+    const custoAtual   = CF + VA * CV;
+    const lucroAtual   = receitaAtual - custoAtual;
+    const falta        = PE_UN - VA;
+
+    // Exibe resultados
+    empty.style.display = 'none';
+    content.style.display = 'block';
+    grafico.style.display = 'block';
+
+    document.getElementById('r-unidades').textContent    = fmtInt(PE_UN) + ' un.';
+    document.getElementById('r-unidades-sub').textContent = `Ou R$ ${fmt(PE_FAT)} de faturamento mínimo`;
+    document.getElementById('r-faturamento').textContent = fmt(PE_FAT);
+    document.getElementById('r-margem-pct').textContent  = MC_PCT.toFixed(1);
+    document.getElementById('r-margem-val').textContent  = `R$ ${fmt(MC)} por unidade`;
+
+    // Lucro / falta
+    const lucroEl   = document.getElementById('r-lucro');
+    const lucroSub  = document.getElementById('r-lucro-sub');
+    const faltaEl   = document.getElementById('r-falta');
+    const faltaSub  = document.getElementById('r-falta-sub');
+
+    if (VA > 0) {
+        lucroEl.textContent  = (lucroAtual >= 0 ? '+' : '') + 'R$ ' + fmt(lucroAtual);
+        lucroEl.style.color  = lucroAtual >= 0 ? '#34d399' : '#f87171';
+        lucroSub.textContent = VA + ' un. vendidas / mês';
+
+        if (falta > 0) {
+            faltaEl.textContent  = fmtInt(falta) + ' un.';
+            faltaEl.style.color  = '#f87171';
+            faltaSub.textContent = `Para zerar o prejuízo`;
+        } else {
+            faltaEl.textContent  = fmtInt(Math.abs(falta)) + ' un. acima';
+            faltaEl.style.color  = '#34d399';
+            faltaSub.textContent = `Parabéns! Você está no lucro`;
+        }
+    } else {
+        lucroEl.textContent  = '—';
+        lucroEl.style.color  = '#25f4f4';
+        lucroSub.textContent = 'Preencha as vendas atuais';
+        faltaEl.textContent  = fmtInt(PE_UN) + ' un.';
+        faltaEl.style.color  = '#25f4f4';
+        faltaSub.textContent = 'Para atingir o equilíbrio';
+    }
+
+    // Status banner
+    banner.style.display = 'flex';
+    if (VA <= 0 || Math.abs(lucroAtual) < 0.01) {
+        banner.className = 'status-banner equilibrio';
+        banner.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">balance</span>
+            <span>Seu ponto de equilíbrio é <strong>${fmtInt(PE_UN)} unidades</strong> por mês (R$ ${fmt(PE_FAT)})</span>`;
+    } else if (lucroAtual < 0) {
+        banner.className = 'status-banner deficit';
+        banner.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">trending_down</span>
+            <span>Você está vendendo abaixo do equilíbrio. Faltam <strong>${fmtInt(falta)} unidades</strong> para cobrir os custos.</span>`;
+    } else {
+        banner.className = 'status-banner lucro';
+        banner.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">celebration</span>
+            <span>Você está <strong>${fmtInt(Math.abs(falta))} unidades acima</strong> do equilíbrio. Lucro de R$ ${fmt(lucroAtual)}/mês!</span>`;
+    }
+
+    // Gráfico
+    desenharGrafico(CF, PV, CV, PE_UN, VA);
+}
+
+/* ── GRÁFICO SVG ── */
+function desenharGrafico(CF, PV, CV, PE_UN, VA) {
+    const svg = document.getElementById('grafico');
+    const W = 540, H = 220;
+    const pad = { top: 15, right: 20, bottom: 30, left: 60 };
+
+    // Define o range X: de 0 até 2× o ponto de equilíbrio (mínimo 10)
+    const maxX = Math.max(PE_UN * 2, 10, VA * 1.5);
+    const maxY = maxX * PV;
+
+    function xP(v) { return pad.left + (v / maxX) * (W - pad.left - pad.right); }
+    function yP(v) { return H - pad.bottom - (v / maxY) * (H - pad.top - pad.bottom); }
+
+    // Pontos da linha de Receita (de 0 até maxX)
+    const recX0 = xP(0), recY0 = yP(0);
+    const recX1 = xP(maxX), recY1 = yP(maxX * PV);
+
+    // Pontos da linha de Custo Total (CF + CV*x)
+    const ctX0 = xP(0), ctY0 = yP(CF);
+    const ctX1 = xP(maxX), ctY1 = yP(CF + maxX * CV);
+
+    // Ponto de equilíbrio
+    const peX = xP(PE_UN), peY = yP(PE_UN * PV);
+
+    // Grade Y (3 linhas)
+    let grade = '';
+    for (let i = 1; i <= 3; i++) {
+        const yv = (maxY / 3) * i;
+        const yc = yP(yv);
+        const label = yv >= 1000
+            ? 'R$' + (yv / 1000).toLocaleString('pt-BR', {maximumFractionDigits:1}) + 'k'
+            : 'R$' + yv.toFixed(0);
+        grade += `<line x1="${pad.left}" y1="${yc}" x2="${W - pad.right}" y2="${yc}" stroke="#1f1f1f" stroke-width="1"/>
+                  <text x="${pad.left - 5}" y="${yc + 4}" text-anchor="end" fill="#334155" font-size="9" font-family="Inter">${label}</text>`;
+    }
+
+    // Grade X (4 labels)
+    let gradeX = '';
+    for (let i = 0; i <= 4; i++) {
+        const xv = (maxX / 4) * i;
+        const xc = xP(xv);
+        gradeX += `<text x="${xc}" y="${H - pad.bottom + 14}" text-anchor="middle" fill="#334155" font-size="9" font-family="Inter">${Math.round(xv)} un</text>`;
+    }
+
+    // Linha da venda atual
+    let vaLine = '';
+    if (VA > 0) {
+        const vx = xP(VA);
+        vaLine = `<line x1="${vx}" y1="${pad.top}" x2="${vx}" y2="${H - pad.bottom}" stroke="#475569" stroke-width="1" stroke-dasharray="3,3"/>
+                  <text x="${vx + 4}" y="${pad.top + 12}" fill="#475569" font-size="8" font-family="Inter">atual</text>`;
+    }
+
+    svg.innerHTML = `
+        <!-- Grade -->
+        ${grade}
+        ${gradeX}
+        <!-- Eixos -->
+        <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${H - pad.bottom}" stroke="#2A2A2A" stroke-width="1"/>
+        <line x1="${pad.left}" y1="${H - pad.bottom}" x2="${W - pad.right}" y2="${H - pad.bottom}" stroke="#2A2A2A" stroke-width="1"/>
+        <!-- Custos fixos (dashed) -->
+        <line x1="${xP(0)}" y1="${yP(CF)}" x2="${xP(maxX)}" y2="${yP(CF)}" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <!-- Custo total (vermelho) -->
+        <line x1="${ctX0}" y1="${ctY0}" x2="${ctX1}" y2="${ctY1}" stroke="#f87171" stroke-width="2"/>
+        <!-- Receita (ciano) -->
+        <line x1="${recX0}" y1="${recY0}" x2="${recX1}" y2="${recY1}" stroke="#25f4f4" stroke-width="2"/>
+        <!-- Área de lucro (fill) -->
+        <polygon points="${peX},${peY} ${recX1},${recY1} ${ctX1},${ctY1}" fill="rgba(52,211,153,.07)" stroke="none"/>
+        <!-- Área de prejuízo -->
+        <polygon points="${xP(0)},${yP(0)} ${peX},${peY} ${ctX0},${ctY0}" fill="rgba(248,113,113,.07)" stroke="none"/>
+        <!-- Venda atual vertical -->
+        ${vaLine}
+        <!-- Ponto de equilíbrio -->
+        <circle cx="${peX}" cy="${peY}" r="6" fill="#0a0a0a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="${peX}" cy="${peY}" r="2.5" fill="#fbbf24"/>
+        <!-- Label do ponto -->
+        <text x="${peX + 9}" y="${peY - 6}" fill="#fbbf24" font-size="9" font-weight="700" font-family="Inter">${Math.ceil(PE_UN)} un.</text>
+    `;
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+            location.href = 'login.html?redirect=ponto-equilibrio.html';
+            return;
+        }
+        document.body.style.visibility = 'visible';
+    } catch(e) {
+        document.body.style.visibility = 'visible';
+    }
+});
+</script>
+</body>
+</html>
