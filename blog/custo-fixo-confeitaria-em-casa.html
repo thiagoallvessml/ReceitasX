@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custo Fixo Confeitaria em Casa: o que é e como calcular – ReceitasX</title>
+    <meta name="description" content="Saiba quais são os custos fixos de uma confeitaria em casa, como calculá-los e como rateá-los corretamente no preço de cada produto." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://receitasx.com.br/blog/custo-fixo-confeitaria-em-casa.html" />
+    <meta property="og:title" content="Custo Fixo Confeitaria em Casa: o que é e como calcular" />
+    <meta property="og:description" content="Saiba quais são os custos fixos de uma confeitaria em casa, como calculá-los e como rateá-los corretamente no preço de cada produto." />
+    <meta property="og:type" content="article" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--cyan:#25f4f4;--bg:#080808;--border:#1E1E1E;--text:#f1f5f9;--muted:#64748b}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:1rem;line-height:1.75}
+        .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle}
+        a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
+        nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;padding:0 2rem;height:3.75rem;background:rgba(8,8,8,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05)}
+        .nav-logo{font-size:1.1rem;font-weight:900;flex:1;letter-spacing:-.02em;text-decoration:none;color:inherit}
+        .nav-logo span:first-child{color:var(--cyan)}
+        .nav-links{display:flex;align-items:center;gap:1.5rem}
+        .nav-links a{font-size:.85rem;color:#94a3b8;font-weight:500;transition:color .15s;text-decoration:none}
+        .nav-links a:hover{color:#f1f5f9;text-decoration:none}
+        .nav-cta{display:inline-flex;align-items:center;padding:.5rem 1.15rem;border-radius:.6rem;background:var(--cyan);color:#050505 !important;font-size:.85rem;font-weight:700}
+        .nav-cta:hover{opacity:.9;text-decoration:none}
+        .article-wrap{max-width:720px;margin:0 auto;padding:4rem 1.5rem 6rem}
+        .article-tag{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);margin-bottom:.75rem}
+        .article-title{font-size:clamp(1.6rem,5vw,2.4rem);font-weight:900;line-height:1.2;letter-spacing:-.02em;margin-bottom:1rem}
+        .article-meta{font-size:.78rem;color:var(--muted);margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);display:flex;gap:1rem;flex-wrap:wrap}
+        .article-body h2{font-size:1.35rem;font-weight:800;margin:2.25rem 0 .75rem;color:#f1f5f9}
+        .article-body h3{font-size:1.05rem;font-weight:700;margin:1.75rem 0 .5rem;color:#e2e8f0}
+        .article-body p{color:#cbd5e1;margin-bottom:1.1rem}
+        .article-body strong{color:#f1f5f9}
+        .article-body ul,.article-body ol{padding-left:1.5rem;margin-bottom:1.1rem;color:#cbd5e1}
+        .article-body li{margin-bottom:.4rem}
+        .callout{background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.18);border-left:3px solid var(--cyan);border-radius:.65rem;padding:1rem 1.1rem;margin:1.5rem 0;color:#94a3b8;font-size:.88rem}
+        .callout strong{color:var(--cyan)}
+        .formula-box{background:#111;border:1px solid rgba(37,244,244,.2);border-radius:.85rem;padding:1.1rem 1.25rem;margin:1.5rem 0;font-family:monospace;font-size:.9rem;color:var(--cyan);line-height:1.6}
+        .checklist{list-style:none;padding:0;margin:1.25rem 0}
+        .checklist li{display:flex;align-items:flex-start;gap:.75rem;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);color:#cbd5e1;font-size:.88rem}
+        .checklist li:last-child{border-bottom:none}
+        .checklist .ico{color:var(--cyan);font-size:.9rem;flex-shrink:0;margin-top:.1rem}
+        .checklist .valor{margin-left:auto;font-weight:700;color:#f1f5f9;white-space:nowrap;font-size:.85rem}
+        .total-row{display:flex;justify-content:space-between;background:#1a1a1a;border:1px solid rgba(37,244,244,.2);border-radius:.65rem;padding:.75rem 1rem;margin-top:.5rem}
+        .total-row span:first-child{font-weight:700;color:#f1f5f9}
+        .total-row span:last-child{font-weight:900;color:var(--cyan)}
+        .cta-box{background:linear-gradient(135deg,#0d2626,#0a1818);border:1px solid rgba(37,244,244,.2);border-radius:1.25rem;padding:2rem;margin-top:3rem;text-align:center}
+        .cta-box h3{font-size:1.25rem;font-weight:800;margin-bottom:.5rem}
+        .cta-box p{color:#94a3b8;font-size:.85rem;margin-bottom:1.25rem}
+        .btn-cta{display:inline-flex;align-items:center;gap:.4rem;padding:.75rem 1.75rem;border-radius:.75rem;background:var(--cyan);color:#050505;font-weight:800;font-size:.9rem;text-decoration:none;transition:opacity .15s;box-shadow:0 4px 24px rgba(37,244,244,.25)}
+        .btn-cta:hover{opacity:.9;text-decoration:none}
+        .breadcrumb{font-size:.75rem;color:var(--muted);margin-bottom:1.5rem}
+        .breadcrumb a{color:var(--muted);text-decoration:none} .breadcrumb a:hover{color:var(--cyan)}
+        footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted)}
+        footer a{color:var(--cyan)}
+        @media(max-width:600px){nav{padding:0 1rem}.nav-links{gap:.75rem}.article-wrap{padding:3rem 1rem 4rem}}
+    </style>
+</head>
+<body>
+<nav>
+    <a href="../landing.html" class="nav-logo"><span>Receitas</span><span style="color:#f1f5f9">X</span></a>
+    <div class="nav-links">
+        <a href="../landing.html">Início</a>
+        <a href="../blog.html">Blog</a>
+        <a href="../acesso-vitalicio.html" class="nav-cta">Começar grátis</a>
+    </div>
+</nav>
+
+<article class="article-wrap">
+    <div class="breadcrumb"><a href="../landing.html">Início</a> › <a href="../blog.html">Blog</a> › Custo fixo confeitaria em casa</div>
+    <p class="article-tag">Gestão</p>
+    <h1 class="article-title">Custo fixo confeitaria em casa: o que é, como calcular e como ratear</h1>
+    <div class="article-meta">
+        <span>✍️ ReceitasX</span>
+        <span>📅 26 de março de 2025</span>
+        <span>⏱️ 6 min de leitura</span>
+    </div>
+
+    <div class="article-body">
+
+        <p>Trabalhar com confeitaria em casa tem muitas vantagens — sem aluguel de cozinha, sem deslocamento, mais flexibilidade. Mas existe um erro que a maioria comete: <strong>não incluir os custos fixos no preço dos produtos</strong>. E isso faz com que o negócio pareça lucrativo quando na verdade está no zero a zero.</p>
+
+        <h2>O que são custos fixos?</h2>
+        <p>São todos os gastos que você tem <strong>independente de produzir ou não</strong>. Mesmo que você não venda um único bolo no mês, esses custos continuam existindo.</p>
+
+        <h2>Quais são os custos fixos de uma confeitaria em casa?</h2>
+
+        <ul class="checklist">
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">bolt</span><span>Energia elétrica (adicional pela produção)</span><span class="valor">~ R$ 120–250</span></li>
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">local_fire_department</span><span>Gás de cozinha</span><span class="valor">~ R$ 80–160</span></li>
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">smartphone</span><span>Celular e internet</span><span class="valor">~ R$ 100–200</span></li>
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span><span>Marketing (impulsionamento, anúncios)</span><span class="valor">~ R$ 50–300</span></li>
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span><span>Embalagens básicas (estoque fixo)</span><span class="valor">~ R$ 80–150</span></li>
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">build</span><span>Manutenção de equipamentos</span><span class="valor">~ R$ 30–80</span></li>
+            <li><span class="material-symbols-outlined ico" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">person</span><span>Pró-labore (seu salário)</span><span class="valor">R$ 1.500–3.000</span></li>
+        </ul>
+
+        <div class="total-row">
+            <span>Total estimado / mês</span>
+            <span>R$ 1.960 – R$ 4.140</span>
+        </div>
+
+        <div class="callout">
+            <strong>Importante:</strong> o pró-labore (seu salário) é o maior custo fixo e o mais esquecido. Se você não se paga um salário, está apenas "vivendo do negócio" sem construir riqueza real.
+        </div>
+
+        <h2>Como ratear os custos fixos nos produtos</h2>
+
+        <p>Ratear significa dividir os custos fixos entre todos os produtos que você vende, para que cada item contribua com a sua parte.</p>
+
+        <div class="formula-box">
+Rateio por produto = Custos Fixos Mensais ÷ Unidades Produzidas por mês
+
+Exemplo: R$ 2.500 fixos ÷ 300 bolinhos = R$ 8,33 por bolinho
+        </div>
+
+        <h3>Exemplo prático</h3>
+        <p>Suponha que seus custos fixos mensais somam R$ 2.500 e você produz em média 50 bolos por mês:</p>
+
+        <div class="formula-box">
+Rateio = R$ 2.500 ÷ 50 bolos = R$ 50 por bolo
+
+Isso significa que cada bolo precisa contribuir com R$ 50
+só para cobrir os custos fixos — antes de qualquer lucro.
+        </div>
+
+        <h2>Como reduzir os custos fixos</h2>
+        <ul>
+            <li>Use equipamentos mais eficientes (forno elétrico com timer, batedeira planetária)</li>
+            <li>Negocie planos mais baratos de celular e internet</li>
+            <li>Invista em marketing orgânico (Instagram, TikTok) antes de pagar anúncios</li>
+            <li>Compre embalagens em maior quantidade para reduzir o custo unitário</li>
+        </ul>
+
+        <h2>Aumentar a produção também ajuda</h2>
+        <p>Quanto mais você produz, menos cada unidade carrega de custo fixo. Com R$ 2.500 de fixos e 100 bolos/mês, o rateio cai para R$ 25 — metade! Por isso escalar a produção <strong>sem aumentar os custos fixos</strong> é uma das estratégias mais poderosas para aumentar a margem.</p>
+
+        <div class="cta-box">
+            <h3>Gerencie seus custos fixos no ReceitasX</h3>
+            <p>Cadastre suas despesas mensais e o sistema rateia automaticamente em cada receita.</p>
+            <a href="../acesso-vitalicio.html" class="btn-cta">
+                <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24">rocket_launch</span>
+                Começar agora
+            </a>
+        </div>
+    </div>
+</article>
+
+<footer>
+    <p style="margin-bottom:.5rem;font-weight:800;color:#f1f5f9"><span style="color:#25f4f4">Receitas</span>X</p>
+    <p><a href="../landing.html">Início</a> &nbsp;·&nbsp; <a href="../blog.html">Blog</a> &nbsp;·&nbsp; <a href="../acesso-vitalicio.html">Começar grátis</a></p>
+    <p style="margin-top:.75rem;font-size:.68rem;color:#334155">© 2025 ReceitasX · Todos os direitos reservados</p>
+</footer>
+</body>
+</html>
