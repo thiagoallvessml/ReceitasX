@@ -83,50 +83,35 @@
         @media(max-width:540px) { .drawer { max-width:100%;border-left:none;border-top:1px solid #2A2A2A;border-radius:1.1rem 1.1rem 0 0;height:92%;top:auto;bottom:0; } .drawer-bg { align-items:flex-end; } }
 
         .drawer-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0; }
-        .drawer-body { flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:.75rem; }
+        .drawer-body { flex:1;overflow-y:auto;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.5rem; }
 
         /* insumo card in drawer */
-        .ins-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;overflow:hidden;transition:border-color .18s,box-shadow .18s; }
-        .ins-card:hover { border-color:rgba(37,244,244,.25);box-shadow:0 2px 16px rgba(0,0,0,.3); }
+        .ins-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;overflow:hidden;transition:border-color .18s; }
+        .ins-card:hover { border-color:rgba(37,244,244,.25); }
 
-        .ins-card-top { display:flex;align-items:center;gap:.65rem;padding:.8rem 1rem .55rem; }
-        .ins-card-icon { width:2.4rem;height:2.4rem;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-        .ins-card-icon .material-symbols-outlined { font-size:1.15rem; }
-        .ins-card-icon.ico-g   { background:rgba(37,244,244,.10);color:#25f4f4; }
+        .ins-card-row { display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem; }
+        .ins-card-icon { width:2rem;height:2rem;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .ins-card-icon .material-symbols-outlined { font-size:1rem; }
+        .ins-card-icon.ico-g   { background:rgba(37,244,244,.10); }
         .ins-card-icon.ico-g .material-symbols-outlined { color:#25f4f4; }
-        .ins-card-icon.ico-ml  { background:rgba(139,92,246,.10);color:#a78bfa; }
+        .ins-card-icon.ico-ml  { background:rgba(139,92,246,.10); }
         .ins-card-icon.ico-ml .material-symbols-outlined { color:#a78bfa; }
-        .ins-card-icon.ico-un  { background:rgba(251,191,36,.10);color:#fbbf24; }
+        .ins-card-icon.ico-un  { background:rgba(251,191,36,.10); }
         .ins-card-icon.ico-un .material-symbols-outlined { color:#fbbf24; }
-        .ins-card-icon.ico-kg  { background:rgba(16,185,129,.10);color:#34d399; }
+        .ins-card-icon.ico-kg  { background:rgba(16,185,129,.10); }
         .ins-card-icon.ico-kg .material-symbols-outlined { color:#34d399; }
-        .ins-card-icon.ico-l   { background:rgba(56,189,248,.10);color:#38bdf8; }
+        .ins-card-icon.ico-l   { background:rgba(56,189,248,.10); }
         .ins-card-icon.ico-l .material-symbols-outlined { color:#38bdf8; }
 
-        .ins-card-header { flex:1;min-width:0;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap; }
-        .ins-card-name { font-size:.88rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .ins-card-info { flex:1;min-width:0; }
+        .ins-card-name { font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .ins-card-sub  { display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-top:.2rem; }
+        .ins-sub-tag { font-size:.62rem;font-weight:500;color:#475569; }
+        .ins-sub-dot { width:2px;height:2px;border-radius:50%;background:#334155;flex-shrink:0; }
 
-        .ins-card-price-area { flex-shrink:0;text-align:right; }
-        .ins-card-price { font-size:.95rem;font-weight:800;color:#25f4f4;line-height:1; }
-        .ins-card-price-sub { font-size:.62rem;color:#475569;margin-top:.15rem;font-weight:500; }
-
-        /* detail grid inside card */
-        .ins-detail-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#2A2A2A;border-top:1px solid #2A2A2A; }
-        .ins-detail-cell { background:#1A1A1A;padding:.5rem .7rem;display:flex;flex-direction:column;gap:.1rem; }
-        .ins-detail-cell:first-child { border-radius:0 0 0 .85rem; }
-        .ins-detail-cell:last-child { border-radius:0 0 .85rem 0; }
-        .ins-detail-lbl { font-size:.52rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;line-height:1; }
-        .ins-detail-val { font-size:.78rem;font-weight:600;color:#94a3b8;line-height:1.2; }
-        .ins-detail-val.highlight { color:#f1f5f9; }
-
-        /* cost bar */
-        .cost-bar-wrap { padding:.15rem 1rem .6rem;display:flex;align-items:center;gap:.5rem; }
-        .cost-bar-track { flex:1;height:3px;background:#1E1E1E;border-radius:2px;overflow:hidden; }
-        .cost-bar-fill { height:100%;border-radius:2px;transition:width .4s ease; }
-        .cost-bar-fill.low    { background:linear-gradient(90deg,#34d399,#25f4f4); }
-        .cost-bar-fill.medium { background:linear-gradient(90deg,#fbbf24,#f59e0b); }
-        .cost-bar-fill.high   { background:linear-gradient(90deg,#f87171,#ef4444); }
-        .cost-bar-label { font-size:.6rem;font-weight:600;color:#475569;white-space:nowrap; }
+        .ins-card-right { flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.1rem; }
+        .ins-card-price { font-size:.85rem;font-weight:800;color:#25f4f4;line-height:1; }
+        .ins-card-price-sub { font-size:.58rem;color:#475569;font-weight:500; }
 
         .meta-tag { display:inline-flex;align-items:center;gap:.2rem;font-size:.65rem;font-weight:600;padding:.18rem .5rem;border-radius:.35rem;background:#1E1E1E;border:1px solid #2A2A2A;color:#64748b; }
         .meta-tag .material-symbols-outlined { font-size:.72rem; }
@@ -605,10 +590,13 @@ function renderInsumos(lista) {
         return;
     }
 
-    // Find max price for relative cost bar
-    const maxPreco = Math.max(...lista.map(i => Number(i.preco || 0)), 1);
+    // Count label
+    const countHtml = `<div style="font-size:.68rem;font-weight:600;color:#475569;padding:0 .2rem .15rem;display:flex;align-items:center;justify-content:space-between">
+        <span>${lista.length} insumo${lista.length !== 1 ? 's' : ''}</span>
+        <span style="color:#334155">● custo embalagem</span>
+    </div>`;
 
-    body.innerHTML = lista.map((ins, idx) => {
+    const rows = lista.map((ins, idx) => {
         const preco   = Number(ins.preco || 0);
         const pesoEmb = Number(ins.peso_emb || 0);
         const unidade = (ins.unidade || '—').toLowerCase();
@@ -623,73 +611,46 @@ function renderInsumos(lista) {
         const icoName = icoNameMap[unidade] || 'grocery';
 
         // Cost per base unit
-        let custoBaseLabel = '';
-        let custoBaseVal   = '';
+        let custoBaseTxt = '';
         if (preco > 0 && pesoEmb > 0) {
             const custoPerUnit = preco / pesoEmb;
             if (custoPerUnit < 0.01) {
-                custoBaseVal = (custoPerUnit * 1000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-                custoBaseLabel = unidade === 'ml' ? '/litro' : '/kg';
+                const val = (custoPerUnit * 1000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+                custoBaseTxt = `R$ ${val}${unidade === 'ml' ? '/l' : '/kg'}`;
             } else {
-                custoBaseVal = custoPerUnit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4});
-                custoBaseLabel = `/${unidade}`;
+                const val = custoPerUnit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+                custoBaseTxt = `R$ ${val}/${unidade}`;
             }
         }
 
-        // Relative cost bar
-        const barPct = preco > 0 ? Math.round((preco / maxPreco) * 100) : 0;
-        const barClass = barPct <= 33 ? 'low' : barPct <= 66 ? 'medium' : 'high';
+        // Embalagem display
+        const embTxt = pesoEmb > 0 ? `${pesoEmb.toLocaleString('pt-BR')}${unidade}` : '';
 
-        // Format embalagem display
-        const embDisplay = pesoEmb > 0
-            ? `${pesoEmb.toLocaleString('pt-BR')} ${esc(unidade)}`
-            : 'Não informado';
-
-        const delay = Math.min(idx * 0.04, 0.4);
+        const delay = Math.min(idx * 0.03, 0.3);
 
         return `
-        <div class="ins-card" style="animation:fadeUp .25s ease both;animation-delay:${delay}s">
-            <!-- Top: icon + name + unit badge + price -->
-            <div class="ins-card-top">
+        <div class="ins-card" style="animation:fadeUp .2s ease both;animation-delay:${delay}s">
+            <div class="ins-card-row">
                 <div class="ins-card-icon ${icoCls}">
                     <span class="material-symbols-outlined">${icoName}</span>
                 </div>
-                <div class="ins-card-header">
-                    <span class="ins-card-name" title="${esc(ins.nome || '')}">${esc(ins.nome || 'Sem nome')}</span>
-                    <span class="badge-unit ${badgeUnitCls(unidade)}">${esc(unidade)}</span>
+                <div class="ins-card-info">
+                    <div class="ins-card-name" title="${esc(ins.nome || '')}">${esc(ins.nome || 'Sem nome')}</div>
+                    <div class="ins-card-sub">
+                        <span class="badge-unit ${badgeUnitCls(unidade)}">${esc(unidade)}</span>
+                        ${embTxt ? `<span class="ins-sub-dot"></span><span class="ins-sub-tag">${embTxt}</span>` : ''}
+                        ${custoBaseTxt ? `<span class="ins-sub-dot"></span><span class="ins-sub-tag">${custoBaseTxt}</span>` : ''}
+                        <span class="ins-sub-dot"></span><span class="ins-sub-tag">${data}</span>
+                    </div>
                 </div>
-                <div class="ins-card-price-area">
-                    <div class="ins-card-price">${preco > 0 ? fmtR(preco) : '<span style="color:#334155;font-weight:600">—</span>'}</div>
-                    ${custoBaseVal ? `<div class="ins-card-price-sub">R$ ${custoBaseVal} ${custoBaseLabel}</div>` : ''}
-                </div>
-            </div>
-
-            ${preco > 0 ? `
-            <!-- Cost bar -->
-            <div class="cost-bar-wrap">
-                <div class="cost-bar-track">
-                    <div class="cost-bar-fill ${barClass}" style="width:${barPct}%"></div>
-                </div>
-                <span class="cost-bar-label">${barPct}% do maior</span>
-            </div>` : ''}
-
-            <!-- Detail grid -->
-            <div class="ins-detail-grid">
-                <div class="ins-detail-cell">
-                    <span class="ins-detail-lbl">Embalagem</span>
-                    <span class="ins-detail-val highlight">${embDisplay}</span>
-                </div>
-                <div class="ins-detail-cell">
-                    <span class="ins-detail-lbl">Custo / ${esc(unidade)}</span>
-                    <span class="ins-detail-val ${custoBaseVal ? 'highlight' : ''}">${custoBaseVal ? `R$ ${custoBaseVal}` : '—'}</span>
-                </div>
-                <div class="ins-detail-cell">
-                    <span class="ins-detail-lbl">Cadastrado</span>
-                    <span class="ins-detail-val">${data}</span>
+                <div class="ins-card-right">
+                    <div class="ins-card-price">${preco > 0 ? fmtR(preco) : '<span style="color:#334155">—</span>'}</div>
                 </div>
             </div>
         </div>`;
     }).join('');
+
+    body.innerHTML = countHtml + rows;
 }
 
 // ── Shimmer loading ────────────────────────────────────────────────
