@@ -583,17 +583,17 @@ function renderInsumos(lista) {
 
     if (!lista.length) {
         body.innerHTML = `
-            <div class="empty-state">
-                <span class="material-symbols-outlined">inventory_2</span>
+            <div style="text-align:center;padding:3rem 1rem;color:#475569">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem">inventory_2</span>
                 <p>${currentUserInsumos.length === 0 ? 'Este usuário ainda não cadastrou insumos.' : 'Nenhum insumo encontrado.'}</p>
             </div>`;
         return;
     }
 
-    // Count label
-    const countHtml = `<div style="font-size:.68rem;font-weight:600;color:#475569;padding:0 .2rem .15rem;display:flex;align-items:center;justify-content:space-between">
-        <span>${lista.length} insumo${lista.length !== 1 ? 's' : ''}</span>
-        <span style="color:#334155">● custo embalagem</span>
+    // Tabela header
+    const headerHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding:0 .4rem .4rem;flex-shrink:0">
+        <span style="font-size:.7rem;font-weight:700;color:#64748b">${lista.length} insumo${lista.length !== 1 ? 's' : ''}</span>
+        <span style="font-size:.65rem;color:#475569">Preço emb.</span>
     </div>`;
 
     const rows = lista.map((ins, idx) => {
@@ -602,55 +602,41 @@ function renderInsumos(lista) {
         const unidade = (ins.unidade || '—').toLowerCase();
         const data    = new Date(ins.created_at).toLocaleDateString('pt-BR');
 
-        // Icon class by unit
-        const icoMap = { g:'ico-g', ml:'ico-ml', un:'ico-un', kg:'ico-kg', l:'ico-l' };
-        const icoCls = icoMap[unidade] || 'ico-g';
-
-        // Material icon by unit type
-        const icoNameMap = { g:'scale', ml:'water_drop', un:'tag', kg:'fitness_center', l:'water_drop' };
-        const icoName = icoNameMap[unidade] || 'grocery';
-
         // Cost per base unit
-        let custoBaseTxt = '';
+        let custoTxt = '';
         if (preco > 0 && pesoEmb > 0) {
-            const custoPerUnit = preco / pesoEmb;
-            if (custoPerUnit < 0.01) {
-                const val = (custoPerUnit * 1000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-                custoBaseTxt = `R$ ${val}${unidade === 'ml' ? '/l' : '/kg'}`;
+            const cpu = preco / pesoEmb;
+            if (cpu < 0.01) {
+                custoTxt = `R$ ${(cpu*1000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}${unidade === 'ml' ? '/l' : '/kg'}`;
             } else {
-                const val = custoPerUnit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-                custoBaseTxt = `R$ ${val}/${unidade}`;
+                custoTxt = `R$ ${cpu.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}/${unidade}`;
             }
         }
 
-        // Embalagem display
+        // Embalagem
         const embTxt = pesoEmb > 0 ? `${pesoEmb.toLocaleString('pt-BR')}${unidade}` : '';
 
-        const delay = Math.min(idx * 0.03, 0.3);
+        // Unit color
+        const unitColors = { g:'#25f4f4', ml:'#a78bfa', un:'#fbbf24', kg:'#34d399', l:'#38bdf8' };
+        const unitCol = unitColors[unidade] || '#25f4f4';
 
-        return `
-        <div class="ins-card" style="animation:fadeUp .2s ease both;animation-delay:${delay}s">
-            <div class="ins-card-row">
-                <div class="ins-card-icon ${icoCls}">
-                    <span class="material-symbols-outlined">${icoName}</span>
+        return `<div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.65rem;padding:.55rem .75rem;display:flex;align-items:center;gap:.6rem;min-height:3rem">
+            <div style="width:1.8rem;height:1.8rem;border-radius:.45rem;background:${unitCol}15;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <span style="font-size:.55rem;font-weight:800;color:${unitCol};text-transform:uppercase">${esc(unidade)}</span>
+            </div>
+            <div style="flex:1;min-width:0;overflow:hidden">
+                <div style="font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(ins.nome || 'Sem nome')}</div>
+                <div style="font-size:.62rem;color:#64748b;margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    ${embTxt ? embTxt + ' · ' : ''}${custoTxt ? custoTxt + ' · ' : ''}${data}
                 </div>
-                <div class="ins-card-info">
-                    <div class="ins-card-name" title="${esc(ins.nome || '')}">${esc(ins.nome || 'Sem nome')}</div>
-                    <div class="ins-card-sub">
-                        <span class="badge-unit ${badgeUnitCls(unidade)}">${esc(unidade)}</span>
-                        ${embTxt ? `<span class="ins-sub-dot"></span><span class="ins-sub-tag">${embTxt}</span>` : ''}
-                        ${custoBaseTxt ? `<span class="ins-sub-dot"></span><span class="ins-sub-tag">${custoBaseTxt}</span>` : ''}
-                        <span class="ins-sub-dot"></span><span class="ins-sub-tag">${data}</span>
-                    </div>
-                </div>
-                <div class="ins-card-right">
-                    <div class="ins-card-price">${preco > 0 ? fmtR(preco) : '<span style="color:#334155">—</span>'}</div>
-                </div>
+            </div>
+            <div style="flex-shrink:0;text-align:right">
+                <div style="font-size:.85rem;font-weight:800;color:${preco > 0 ? '#25f4f4' : '#334155'}">${preco > 0 ? fmtR(preco) : '—'}</div>
             </div>
         </div>`;
     }).join('');
 
-    body.innerHTML = countHtml + rows;
+    body.innerHTML = headerHtml + rows;
 }
 
 // ── Shimmer loading ────────────────────────────────────────────────
