@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -174,6 +174,7 @@
 <script>
 let allUsuarios = [];
 let emailsMap   = {};   // user_id → email
+let lastLoginMap = {};  // user_id → last_sign_in_at
 let pagantesSet = new Set(); // emails de quem pagou
 let currentFilter = 'todos';
 
@@ -209,7 +210,7 @@ async function loadUsuarios() {
         if (error) throw error;
         allUsuarios = data || [];
 
-        // 2. Emails: busca via Edge Function listUsers (service-role)
+        // 2. Emails e Último Login: busca via Edge Function list-users (service-role)
         try {
             const resp = await fetch(
                 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users',
@@ -217,7 +218,10 @@ async function loadUsuarios() {
             );
             if (resp.ok) {
                 const body = await resp.json();
-                (body.users || []).forEach(u => { emailsMap[u.id] = u.email; });
+                (body.users || []).forEach(u => { 
+                    emailsMap[u.id] = u.email; 
+                    if (u.last_sign_in_at) lastLoginMap[u.id] = u.last_sign_in_at;
+                });
             }
         } catch(_) {}
 
@@ -320,6 +324,13 @@ function renderUsuarios(list) {
         const emailExib  = esc(emailsMap[u.id] || '—');
         const planoLabel = u._pagante ? 'Vitálicio' : (u.plano || 'gratuito');
 
+        const ultimoLoginDate = lastLoginMap[u.id] ? new Date(lastLoginMap[u.id]) : null;
+        let ultimoLoginStr = 'Nunca fez login';
+        if (ultimoLoginDate) {
+            const d = ultimoLoginDate;
+            ultimoLoginStr = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+        }
+
         const roleBadge = u.role === 'admin'
             ? `<span class="badge-admin"><span class="material-symbols-outlined">shield</span>Admin</span>`
             : `<span class="badge-afiliado"><span class="material-symbols-outlined">person</span>Afiliado</span>`;
@@ -335,6 +346,9 @@ function renderUsuarios(list) {
                 <div class="user-name">${esc(nomeCompleto)}</div>
                 <div class="user-email">${emailExib}</div>
                 <div class="user-meta">${esc(u.negocio || '—')} · Desde ${criadoEm}</div>
+                <div class="user-meta" style="font-size:0.7rem;margin-top:0.2rem;color:#475569">
+                    Último login: <span style="color:#64748b;font-weight:500">${ultimoLoginStr}</span>
+                </div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;flex-shrink:0">
                 <div style="display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end">

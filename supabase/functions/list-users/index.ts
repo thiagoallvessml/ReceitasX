@@ -43,10 +43,11 @@ serve(async (req) => {
 
     // Lista todos os usuários
     const { data: usersData } = await sbAdmin.auth.admin.listUsers({ perPage: 1000 });
-    const users = (usersData?.users || []).map((u: { id: string; email: string; created_at: string }) => ({
+    const users = (usersData?.users || []).map((u: { id: string; email: string; created_at: string; last_sign_in_at?: string }) => ({
       id:         u.id,
       email:      u.email,
       created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at,
     }));
 
     return new Response(JSON.stringify({ users }), {
