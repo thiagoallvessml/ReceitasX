@@ -110,6 +110,9 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
         @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
 
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+        @media (max-width: 800px) { .main-grid { grid-template-columns: 1fr; } }
+
         /* ── Despesas import ── */
         .import-btn {
             display: inline-flex; align-items: center; gap: .4rem;
@@ -234,7 +237,7 @@
         <p>Quantas unidades você precisa vender por mês para cobrir todos os seus custos? Preencha os campos abaixo e veja o resultado em tempo real.</p>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div class="main-grid">
 
         <!-- Coluna esquerda: Inputs -->
         <div>
@@ -647,10 +650,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         document.body.style.visibility = 'visible';
+        
+        // Marca que o usuário já acessou a ferramenta (para o guia de configuração)
+        localStorage.setItem('receitasx_peq_hit', 'true');
     } catch(e) {
         document.body.style.visibility = 'visible';
     }
 });
 </script>
+<script src="guia-banner.js"></script>
 </body>
 </html>
