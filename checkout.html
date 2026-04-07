@@ -170,22 +170,19 @@
             </div>
             <div class="ck-body" style="display:flex;flex-direction:column;gap:.7rem">
 
-                <!-- Banner do usuário logado -->
-                <div id="user-banner" style="display:flex;align-items:center;gap:.85rem;background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.15);border-radius:.75rem;padding:.85rem 1rem">
-                    <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                        <span class="material-symbols-outlined" style="font-size:1.3rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">person</span>
-                    </div>
-                    <div style="flex:1;min-width:0">
-                        <p id="user-nome-display" style="font-size:.88rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Carregando...</p>
-                        <p id="user-email-display" style="font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
-                    </div>
-                    <span class="material-symbols-outlined" style="font-size:.9rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">verified</span>
+                <!-- Campos normais em vez de hidden/banner -->
+                <div>
+                    <label class="field-label" for="f-nome">Nome Completo <span style="color:#f87171;font-weight:700">*</span></label>
+                    <input id="f-nome" type="text" class="fc" placeholder="Ex: Maria da Silva" autocomplete="name" required />
                 </div>
-
-                <!-- Campos ocultos para uso interno -->
-                <input type="hidden" id="f-nome" />
-                <input type="hidden" id="f-email" />
-
+                <div>
+                    <label class="field-label" for="f-email">E-mail <span style="color:#f87171;font-weight:700">*</span></label>
+                    <input id="f-email" type="email" class="fc" placeholder="seu@email.com" autocomplete="email" required />
+                </div>
+                <div>
+                    <label class="field-label" for="f-senha">Crie sua Senha <span style="color:#f87171;font-weight:700">*</span></label>
+                    <input id="f-senha" type="password" class="fc" placeholder="Para acessar a plataforma depois" required />
+                </div>
                 <div>
                     <label class="field-label" for="f-cpf">CPF <span style="color:#f87171;font-weight:700">*</span></label>
                     <input id="f-cpf" type="text" class="fc" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" autocomplete="off" required />
@@ -304,6 +301,15 @@
 
     <!-- ── Coluna Direita: Order Summary ───────────────────────────── -->
     <div>
+        <div id="cupom-timer-container" style="display:none;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.3);border-radius:.85rem;padding:.85rem 1.1rem;margin-bottom:1rem;color:#fed7aa;font-size:.8rem;align-items:flex-start;gap:.6rem;animation:pulseTimer 2s infinite">
+            <span class="material-symbols-outlined" style="font-size:1.3rem;color:#fb923c;flex-shrink:0">timer</span>
+            <div>
+                <p style="font-weight:700;margin-bottom:.1rem;color:#fb923c">Oferta expirando!</p>
+                <p>Seu desconto termina em <strong id="cupom-time-left" style="font-size:.9rem;color:#fff;letter-spacing:.05em">...</strong>. Finalize agora antes que acabe!</p>
+            </div>
+            <style>@keyframes pulseTimer{0%{box-shadow:0 0 0 0 rgba(251,146,60,.2)}70%{box-shadow:0 0 0 6px rgba(251,146,60,0)}100%{box-shadow:0 0 0 0 rgba(251,146,60,0)}}</style>
+        </div>
+
         <div class="order-card" id="order-card">
             <div class="order-head">Resumo do Pedido</div>
             <div class="order-body">
@@ -328,8 +334,8 @@
                         <span class="val" id="val-preco-orig" style="min-width:4rem;display:inline-block">...</span>
                     </div>
                     <div class="order-row">
-                        <span class="label">Desconto</span>
-                        <span class="val" id="val-desconto" style="color:#34d399;min-width:4rem;display:inline-block">...</span>
+                        <span class="label">Novo preço com desconto</span>
+                        <span class="val" id="val-desconto" style="color:#f1f5f9;font-weight:700;min-width:4rem;display:inline-block">...</span>
                     </div>
                     <div class="order-row discount" id="row-cupom" style="display:none">
                         <span class="label">Cupom <span id="cupom-aplicado" style="color:#25f4f4;font-weight:700"></span></span>
@@ -407,13 +413,19 @@ document.addEventListener('appconfig:loaded', () => {
     const origEl = document.getElementById('val-preco-orig');
     const descEl = document.getElementById('val-desconto');
     if (origEl) origEl.textContent = fmtR(PRECO_ORIG);
-    if (descEl) descEl.textContent = '- ' + fmtR(desconto);
+    if (descEl) descEl.textContent = fmtR(PRECO_BASE);
 
     updateTotal();
+
+    if (codigoAfiliado && !cupomAplicado) {
+        document.getElementById('f-cupom').value = codigoAfiliado;
+        aplicarCupom();
+    }
 });
 let cupomAplicado  = null;
 const metodoPag    = 'pix';
 let codigoAfiliado = null;
+let timerInterval  = null;
 
 /* ── INIT: capturar afiliado da URL ─────────────────── */
 (function() {
@@ -428,7 +440,14 @@ let codigoAfiliado = null;
             (async () => {
                 try {
                     await sb.rpc('registrar_clique_afiliado', { p_codigo: codigoAfiliado });
-                } catch(e) { /* silencia */ }
+                    // Também salva histórico detalhado na nova tabela
+                    await sb.from('cliques_afiliados').insert({
+                        afiliado_codigo: codigoAfiliado,
+                        pagina_destino: window.location.pathname,
+                        referrer: document.referrer || null,
+                        user_agent: navigator.userAgent || null
+                    });
+                } catch(e) { console.error('Erro clique', e); }
             })();
         }
     }
@@ -489,15 +508,43 @@ async function aplicarCupom() {
 
     let cupomData = null;
 
-    // 1️⃣ Busca na tabela cupons (cupons de desconto normais)
+    // 1️⃣ Busca na tabela cupons (cupons de desconto normais ou criados pelo admin)
     try {
         const { data, error } = await sb.from('cupons')
-            .select('*')
+            .select('*, afiliados(id, codigo)')
             .eq('codigo', codigo)
             .eq('ativo', true)
             .single();
         if (!error && data) {
-            cupomData = { tipo: data.tipo, valor: parseFloat(data.valor), label: null };
+            // Verifica data_expiracao e data_inicio
+            const agora = new Date();
+            if (data.data_inicio) {
+                const dataInicio = new Date(data.data_inicio);
+                if (agora < dataInicio) {
+                    showFeedback('error', 'Este cupom ainda não está ativo.');
+                    return;
+                }
+            }
+            if (data.data_expiracao) {
+                const dataExp = new Date(data.data_expiracao);
+                if (agora > dataExp) {
+                    showFeedback('error', 'Este cupom já expirou.');
+                    return;
+                }
+            }
+
+            cupomData = { 
+                tipo: data.tipo, 
+                valor: parseFloat(data.valor), 
+                label: null,
+                dataExp: data.data_expiracao || null
+            };
+            // Se o cupom tiver afiliado vinculado, atrela a comissão a ele
+            if (data.afiliados) {
+                cupomData.afiliadoId = data.afiliados.id;
+                codigoAfiliado = data.afiliados.codigo;
+                sessionStorage.setItem('ref_afiliado', codigoAfiliado);
+            }
         }
     } catch(e) {}
 
@@ -533,7 +580,6 @@ async function aplicarCupom() {
         showFeedback('error', 'Cupom inválido ou expirado.');
         document.getElementById('row-cupom').style.display = 'none';
         updateTotal();
-        updateParcelas();
         return;
     }
 
@@ -552,7 +598,48 @@ async function aplicarCupom() {
     document.getElementById('f-cupom').disabled    = true;
     document.getElementById('btn-aplicar').disabled = true;
     updateTotal();
-    updateParcelas();
+
+    if (cupomData.dataExp) {
+        startCouponTimer(cupomData.dataExp);
+    } else {
+        clearInterval(timerInterval);
+        document.getElementById('cupom-timer-container').style.display = 'none';
+    }
+}
+
+function startCouponTimer(expDateStr) {
+    const expDate = new Date(expDateStr).getTime();
+    const container = document.getElementById('cupom-timer-container');
+    const label = document.getElementById('cupom-time-left');
+    
+    clearInterval(timerInterval);
+    container.style.display = 'flex';
+
+    function updateTimer() {
+        const now = new Date().getTime();
+        const diff = expDate - now;
+
+        if (diff <= 0) {
+            clearInterval(timerInterval);
+            container.style.display = 'none';
+            // Recarrega a página ao expirar (limpa cupom)
+            location.reload();
+            return;
+        }
+
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        let timeStr = '';
+        if (hours > 0) timeStr += `${hours}h `;
+        timeStr += `${String(minutes).padStart(2,'0')}m ${String(seconds).padStart(2,'0')}s`;
+        
+        label.textContent = timeStr;
+    }
+
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
 }
 
 
@@ -569,8 +656,14 @@ function validar() {
     const cpf      = document.getElementById('f-cpf').value.replace(/\D/g,'');
     const telefone = document.getElementById('f-tel').value.replace(/\D/g,'');
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showToast('Você precisa estar logado para finalizar a compra.', 'error');
-        setTimeout(() => { location.href = 'login.html'; }, 2000);
+        showToast('E-mail inválido.', 'error');
+        document.getElementById('f-email').focus();
+        return false;
+    }
+    const senhaStr = document.getElementById('f-senha') ? document.getElementById('f-senha').value : '';
+    if (document.getElementById('f-senha') && document.getElementById('f-senha').closest('div').style.display !== 'none' && senhaStr.length < 6) {
+        showToast('A senha precisa ter pelo menos 6 caracteres.', 'error');
+        document.getElementById('f-senha').focus();
         return false;
     }
     if (cpf.length !== 11) {
@@ -613,6 +706,8 @@ async function finalizarCompra() {
         const email    = document.getElementById('f-email').value.trim();
         const telefone = document.getElementById('f-tel').value.trim();
         const cpf      = document.getElementById('f-cpf').value.replace(/\D/g,'');
+        const senhaEl  = document.getElementById('f-senha');
+        const senha    = (senhaEl && senhaEl.closest('div').style.display !== 'none') ? senhaEl.value : null;
 
         const resp = await fetch(EDGE_URL, {
             method:  'POST',
@@ -621,9 +716,11 @@ async function finalizarCompra() {
                 nome,
                 email,
                 telefone,
+                senha,
                 taxId:  cpf,
                 valor:  precoFinal,
                 ref:    codigoAfiliado || null,
+                cupom:  cupomAplicado?.codigo || null,
             }),
         });
 
@@ -726,23 +823,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // ── Verificar usuário logado ──
+    // ── Preencher campos se já estiver logado ──
     try {
         const { data: { user } } = await sb.auth.getUser();
-        if (!user) {
-            location.href = "login.html?redirect=checkout.html";
-            return;
+        if (user) {
+            const nome = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split("@")[0];
+            document.getElementById("f-nome").value  = nome;
+            document.getElementById("f-email").value = user.email;
+            
+            // Se já está logado, mascara a senha ou esconde
+            const s = document.getElementById("f-senha");
+            if(s) {
+                s.value = '********';
+                s.closest('div').style.display = 'none'; // esconde o campo se já logado
+            }
         }
-
-        // Preencher campos hidden
-        const nome = user.user_metadata?.nome || user.user_metadata?.full_name || user.email.split("@")[0];
-        document.getElementById("f-nome").value  = nome;
-        document.getElementById("f-email").value = user.email;
-
-        // Mostrar banner do usuário
-        document.getElementById("user-nome-display").textContent  = nome;
-        document.getElementById("user-email-display").textContent = user.email;
-
     } catch(e) {
         console.error("Auth check failed:", e);
     }
