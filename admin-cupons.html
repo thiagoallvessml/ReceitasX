@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gerenciar Cupons - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.2);border-radius:.75rem;font-size:.78rem;color:#a78bfa; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* form */
+        .form-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;margin-bottom:1.25rem; }
+        .form-title { font-size:.95rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem; }
+        .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:.75rem; }
+        @media(max-width:540px) { .form-grid { grid-template-columns:1fr; } }
+        .form-group { display:flex;flex-direction:column;gap:.3rem; }
+        .form-group.full { grid-column:1/-1; }
+        .form-label { font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b; }
+        .form-input { padding:.65rem .85rem;border-radius:.65rem;border:1px solid #2A2A2A;background:#141414 !important;color:#f1f5f9 !important;font-size:.88rem;outline:none;transition:border-color .2s;font-weight:500; }
+        .form-input::placeholder { color:#475569 !important; }
+        .form-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        select.form-input { cursor:pointer; }
+
+        .btn-criar { display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem 1.5rem;border-radius:.75rem;border:none;background:#25f4f4;color:#050505;font-weight:800;font-size:.9rem;cursor:pointer;transition:opacity .15s,box-shadow .2s;box-shadow:0 2px 16px rgba(37,244,244,.2);width:100%; }
+        .btn-criar:hover { opacity:.9;box-shadow:0 4px 24px rgba(37,244,244,.35); }
+        .btn-criar:disabled { opacity:.5;cursor:not-allowed; }
+
+        /* cupom card */
+        .cupom-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;transition:border-color .15s;display:flex;align-items:center;gap:1rem; }
+        .cupom-card:hover { border-color:rgba(37,244,244,.2); }
+        .cupom-card.inativo { opacity:.5; }
+
+        .cupom-icon { width:2.8rem;height:2.8rem;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .cupom-icon .material-symbols-outlined { font-size:1.3rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        .cupom-info { flex:1;min-width:0; }
+        .cupom-code { font-size:1rem;font-weight:800;color:#f1f5f9;letter-spacing:.05em;font-family:'Courier New',monospace; }
+        .cupom-meta { font-size:.72rem;color:#64748b;margin-top:.2rem;display:flex;gap:.75rem;flex-wrap:wrap; }
+        .cupom-meta span { display:inline-flex;align-items:center;gap:.2rem; }
+        .cupom-meta .material-symbols-outlined { font-size:.75rem; }
+
+        .cupom-valor { text-align:right;flex-shrink:0; }
+        .cupom-valor-num { font-size:1.2rem;font-weight:900; }
+        .cupom-valor-tipo { font-size:.65rem;color:#64748b;font-weight:600; }
+
+        .cupom-actions { display:flex;flex-direction:column;gap:.35rem;flex-shrink:0; }
+        .btn-toggle { display:flex;align-items:center;justify-content:center;gap:.25rem;padding:.35rem .65rem;border-radius:.5rem;border:1px solid;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .btn-toggle.ativar { border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:#34d399; }
+        .btn-toggle.ativar:hover { background:rgba(52,211,153,.18); }
+        .btn-toggle.desativar { border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08);color:#f87171; }
+        .btn-toggle.desativar:hover { background:rgba(248,113,113,.18); }
+        .btn-del { display:flex;align-items:center;justify-content:center;gap:.25rem;padding:.35rem .65rem;border-radius:.5rem;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.05);color:#f87171;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .15s; }
+        .btn-del:hover { background:rgba(248,113,113,.15); }
+
+        .badge-ativo { display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
+        .badge-inativo { display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.25); }
+
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;margin-bottom:.5rem; }
+
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4.5rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* copy btn */
+        .btn-copy { display:inline-flex;align-items:center;gap:.2rem;padding:.2rem .4rem;border-radius:.35rem;border:none;background:rgba(37,244,244,.08);color:#25f4f4;font-size:.65rem;font-weight:600;cursor:pointer;transition:all .15s;margin-left:.35rem; }
+        .btn-copy:hover { background:rgba(37,244,244,.2); }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .pill.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        input,select { background-color:#141414 !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder { color:#475569 !important; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#a78bfa;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">confirmation_number</span>
+        <h1 class="text-base font-semibold flex-1">Gerenciar Cupons</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">confirmation_number</span>
+        <span>Crie, ative/desative e gerencie cupons de desconto. Execute <strong>fix_cupons_admin_rls.sql</strong> no Supabase.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="stats-row">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-ativos" style="color:#34d399">—</div>
+            <div class="stat-lbl">Ativos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-inativos" style="color:#f87171">—</div>
+            <div class="stat-lbl">Inativos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-usos" style="color:#a78bfa">—</div>
+            <div class="stat-lbl">Usos totais</div>
+        </div>
+    </div>
+
+    <!-- Form criar cupom -->
+    <div class="form-card">
+        <div class="form-title">
+            <span class="material-symbols-outlined" style="color:#a78bfa;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">add_circle</span>
+            Criar Novo Cupom
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Código</label>
+                <input id="inp-codigo" class="form-input" type="text" placeholder="Ex: DESCONTO20" style="text-transform:uppercase;letter-spacing:.05em;font-family:'Courier New',monospace" maxlength="30" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo de desconto</label>
+                <select id="inp-tipo" class="form-input">
+                    <option value="%">Porcentagem (%)</option>
+                    <option value="R$">Valor fixo (R$)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Valor</label>
+                <input id="inp-valor" class="form-input" type="number" placeholder="Ex: 15" min="1" step="1" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Limite de usos <span style="font-weight:400;text-transform:none;color:#475569">(vazio = ilimitado)</span></label>
+                <input id="inp-usos" class="form-input" type="number" placeholder="Ilimitado" min="1" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Início <span style="font-weight:400;text-transform:none;color:#475569">(vazio = imediato)</span></label>
+                <input id="inp-inicio" class="form-input" type="datetime-local" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expiração <span style="font-weight:400;text-transform:none;color:#475569">(vazio = sem limite)</span></label>
+                <input id="inp-expiracao" class="form-input" type="datetime-local" />
+            </div>
+            <div class="form-group full">
+                <label class="form-label">Afiliado Vinculado <span style="font-weight:400;text-transform:none;color:#475569">(insira o código do afiliado, se houver)</span></label>
+                <input id="inp-afiliado" class="form-input" type="text" placeholder="Ex: THIAGO0183" style="text-transform:uppercase" />
+            </div>
+            <div class="form-group full" style="margin-top:.25rem">
+                <button id="btn-criar" class="btn-criar" onclick="criarCupom()">
+                    <span class="material-symbols-outlined" style="font-size:1.1rem">add</span>
+                    Criar Cupom
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Busca + filtro -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div class="search-wrap flex-1 w-full">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar cupom…" oninput="filtrar()" />
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+            <button class="pill active" onclick="setFilter('todos',this)">Todos</button>
+            <button class="pill" onclick="setFilter('ativos',this)">Ativos</button>
+            <button class="pill" onclick="setFilter('inativos',this)">Inativos</button>
+        </div>
+    </div>
+
+    <!-- Lista -->
+    <div id="cupom-list" class="space-y-2">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+    </div>
+</main>
+
+<!-- Toast -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+let allCupons = [];
+let currentFilter = 'todos';
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    carregarCupons();
+})();
+
+async function carregarCupons() {
+    try {
+        const { data, error } = await sb
+            .from('cupons')
+            .select('*, afiliados(codigo)')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        allCupons = data || [];
+        updateStats();
+        filtrar();
+    } catch (e) {
+        document.getElementById('cupom-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">error</span>
+                <p style="font-weight:600">Erro ao carregar cupons</p>
+                <p style="font-size:.8rem;margin-top:.3rem;color:#94a3b8">${esc(e.message)}</p>
+            </div>`;
+    }
+}
+
+function updateStats() {
+    document.getElementById('stat-total').textContent = allCupons.length;
+    document.getElementById('stat-ativos').textContent = allCupons.filter(c => c.ativo).length;
+    document.getElementById('stat-inativos').textContent = allCupons.filter(c => !c.ativo).length;
+    document.getElementById('stat-usos').textContent = allCupons.reduce((s, c) => s + (c.usos_atual || 0), 0);
+}
+
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let list = allCupons;
+
+    if (currentFilter === 'ativos') list = list.filter(c => c.ativo);
+    if (currentFilter === 'inativos') list = list.filter(c => !c.ativo);
+
+    if (q) list = list.filter(c => (c.codigo || '').toLowerCase().includes(q));
+
+    renderList(list);
+}
+
+function renderList(list) {
+    const el = document.getElementById('cupom-list');
+
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">confirmation_number</span>
+                <p style="font-weight:600">Nenhum cupom encontrado</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(c => {
+        const isPercent = c.tipo === '%';
+        const valorDisplay = isPercent ? `${Number(c.valor)}%` : `R$ ${Number(c.valor).toFixed(2).replace('.',',')}`;
+        const valorColor = isPercent ? '#a78bfa' : '#34d399';
+        const iconBg = c.ativo ? 'rgba(167,139,250,.1)' : 'rgba(100,116,139,.1)';
+        const iconColor = c.ativo ? '#a78bfa' : '#475569';
+        const dt = new Date(c.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+
+        const usosLabel = c.usos_max
+            ? `${c.usos_atual || 0}/${c.usos_max} usos`
+            : `${c.usos_atual || 0} usos`;
+
+        const esgotado = c.usos_max && (c.usos_atual || 0) >= c.usos_max;
+        const statusBadge = !c.ativo
+            ? `<span class="badge-inativo">Inativo</span>`
+            : esgotado
+                ? `<span class="badge-inativo">Esgotado</span>`
+                : `<span class="badge-ativo">Ativo</span>`;
+
+        return `
+        <div class="cupom-card ${!c.ativo ? 'inativo' : ''}">
+            <div class="cupom-icon" style="background:${iconBg}">
+                <span class="material-symbols-outlined" style="color:${iconColor}">confirmation_number</span>
+            </div>
+            <div class="cupom-info">
+                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                    <span class="cupom-code">${esc(c.codigo)}</span>
+                    <button class="btn-copy" onclick="copiar('${esc(c.codigo)}')" title="Copiar código">
+                        <span class="material-symbols-outlined" style="font-size:.7rem">content_copy</span>
+                        Copiar
+                    </button>
+                    ${statusBadge}
+                </div>
+                <div class="cupom-meta">
+                    <span><span class="material-symbols-outlined">calendar_today</span>Criado ${dt}</span>
+                    <span><span class="material-symbols-outlined">group</span>${usosLabel}</span>
+                    <span><span class="material-symbols-outlined">sell</span>${c.tipo === '%' ? 'Porcentagem' : 'Valor fixo'}</span>
+                    ${c.data_inicio ? `<span><span class="material-symbols-outlined" style="color:#60a5fa">schedule</span>Início: ${new Date(c.data_inicio).toLocaleString('pt-BR').slice(0, -3)}</span>` : ''}
+                    ${c.data_expiracao ? `<span><span class="material-symbols-outlined" style="color:#fb923c">timer</span>Fim: ${new Date(c.data_expiracao).toLocaleString('pt-BR').slice(0, -3)}</span>` : ''}
+                    ${c.afiliados ? `<span style="color:#25f4f4"><span class="material-symbols-outlined">person</span>Afil.: ${esc(c.afiliados.codigo)}</span>` : ''}
+                </div>
+            </div>
+            <div class="cupom-valor">
+                <div class="cupom-valor-num" style="color:${valorColor}">${valorDisplay}</div>
+                <div class="cupom-valor-tipo">${c.tipo === '%' ? 'desconto' : 'de desconto'}</div>
+            </div>
+            <div class="cupom-actions">
+                <button class="btn-toggle ${c.ativo ? 'desativar' : 'ativar'}" onclick="toggleAtivo(${c.id}, ${c.ativo})">
+                    <span class="material-symbols-outlined" style="font-size:.8rem">${c.ativo ? 'pause_circle' : 'play_circle'}</span>
+                    ${c.ativo ? 'Desativar' : 'Ativar'}
+                </button>
+                <button class="btn-del" onclick="deletarCupom(${c.id}, '${esc(c.codigo)}')">
+                    <span class="material-symbols-outlined" style="font-size:.8rem">delete</span>
+                    Excluir
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Criar cupom ────────────────────────────────────────────────
+async function criarCupom() {
+    const codigo = (document.getElementById('inp-codigo').value || '').trim().toUpperCase();
+    const tipo   = document.getElementById('inp-tipo').value;
+    const valor  = parseFloat(document.getElementById('inp-valor').value);
+    const usos   = document.getElementById('inp-usos').value ? parseInt(document.getElementById('inp-usos').value) : null;
+    const inicioStr    = document.getElementById('inp-inicio').value;
+    const expiracaoStr = document.getElementById('inp-expiracao').value;
+    const afiliadoCod = (document.getElementById('inp-afiliado').value || '').trim().toUpperCase();
+
+    if (!codigo) { showToast('Preencha o código do cupom.', 'error'); return; }
+    if (!valor || valor <= 0) { showToast('Preencha o valor do desconto.', 'error'); return; }
+    if (tipo === '%' && valor > 100) { showToast('Porcentagem não pode ser maior que 100%.', 'error'); return; }
+
+    const btn = document.getElementById('btn-criar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem;animation:spin 1s linear infinite">sync</span>Criando…';
+
+    try {
+        let afiliado_id = null;
+        if (afiliadoCod) {
+            const { data: af, error: afErr } = await sb.from('afiliados').select('id').eq('codigo', afiliadoCod).single();
+            if (afErr || !af) throw new Error(`Afiliado com código "${afiliadoCod}" não encontrado.`);
+            afiliado_id = af.id;
+        }
+
+        const payload = { codigo, tipo, valor, ativo: true, usos_atual: 0 };
+        if (usos) payload.usos_max = usos;
+        if (inicioStr) {
+            payload.data_inicio = new Date(inicioStr).toISOString();
+        }
+        if (expiracaoStr) {
+            payload.data_expiracao = new Date(expiracaoStr).toISOString(); // Salva como ISO Timestamptz completo
+        }
+        if (afiliado_id) {
+            payload.afiliado_id = afiliado_id;
+        }
+
+        const { error } = await sb.from('cupons').insert(payload);
+        if (error) {
+            if (error.code === '23505') throw new Error(`O código "${codigo}" já existe.`);
+            throw error;
+        }
+
+        // Limpa form
+        document.getElementById('inp-codigo').value = '';
+        document.getElementById('inp-valor').value = '';
+        document.getElementById('inp-usos').value = '';
+        document.getElementById('inp-inicio').value = '';
+        document.getElementById('inp-expiracao').value = '';
+        document.getElementById('inp-afiliado').value = '';
+
+        showToast(`Cupom "${codigo}" criado com sucesso! ✓`);
+        await carregarCupons();
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem">add</span>Criar Cupom';
+    }
+}
+
+// ── Toggle ativo ──────────────────────────────────────────────
+async function toggleAtivo(id, atualAtivo) {
+    try {
+        const { error } = await sb.from('cupons').update({ ativo: !atualAtivo }).eq('id', id);
+        if (error) throw error;
+
+        const c = allCupons.find(x => x.id === id);
+        if (c) c.ativo = !atualAtivo;
+
+        updateStats();
+        filtrar();
+        showToast(atualAtivo ? 'Cupom desativado.' : 'Cupom ativado! ✓');
+    } catch (e) {
+        showToast('Erro: ' + e.message, 'error');
+    }
+}
+
+// ── Deletar ──────────────────────────────────────────────────
+async function deletarCupom(id, codigo) {
+    if (!confirm(`Excluir o cupom "${codigo}" permanentemente?`)) return;
+
+    try {
+        const { error } = await sb.from('cupons').delete().eq('id', id);
+        if (error) throw error;
+
+        allCupons = allCupons.filter(c => c.id !== id);
+        updateStats();
+        filtrar();
+        showToast(`Cupom "${codigo}" excluído.`);
+    } catch (e) {
+        showToast('Erro: ' + e.message, 'error');
+    }
+}
+
+// ── Copiar código ────────────────────────────────────────────
+function copiar(codigo) {
+    navigator.clipboard.writeText(codigo).then(() => {
+        showToast(`Código "${codigo}" copiado! 📋`);
+    }).catch(() => {
+        showToast('Erro ao copiar.', 'error');
+    });
+}
+
+// ── Utils ────────────────────────────────────────────────────
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

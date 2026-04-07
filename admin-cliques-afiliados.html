@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cliques de Afiliados - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.2);border-radius:.75rem;font-size:.78rem;color:#25f4f4; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        .click-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;transition:border-color .15s;display:flex;align-items:flex-start;gap:1rem; }
+        .click-card:hover { border-color:rgba(37,244,244,.2); }
+        .click-icon { width:2.4rem;height:2.4rem;border-radius:.55rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .click-icon .material-symbols-outlined { font-size:1.1rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .click-info { flex:1;min-width:0; }
+        .click-code { font-size:.9rem;font-weight:800;color:#25f4f4;font-family:'Courier New',monospace;letter-spacing:.04em; }
+        .click-meta { font-size:.7rem;color:#64748b;margin-top:.3rem;display:flex;flex-direction:column;gap:.2rem; }
+        .click-meta span { display:flex;align-items:center;gap:.25rem; }
+        .click-meta .material-symbols-outlined { font-size:.7rem;flex-shrink:0; }
+        .click-referrer { font-size:.68rem;color:#475569;background:#111;border:1px solid #1E1E1E;border-radius:.4rem;padding:.3rem .5rem;margin-top:.4rem;word-break:break-all;max-width:100%; }
+
+        .agg-card { background:#141414;border:1px solid #2A2A2A;border-radius:.85rem;padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem; }
+        .agg-card:hover { border-color:rgba(37,244,244,.15); }
+        .agg-rank { width:1.8rem;height:1.8rem;border-radius:.45rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#25f4f4;flex-shrink:0; }
+        .agg-code { font-size:.88rem;font-weight:800;color:#f1f5f9;font-family:'Courier New',monospace; }
+        .agg-count { font-size:1.1rem;font-weight:900;color:#25f4f4;margin-left:auto; }
+        .agg-label { font-size:.6rem;color:#475569;text-transform:uppercase;letter-spacing:.06em; }
+
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;margin-bottom:.5rem; }
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .pill.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        .tab-bar { display:flex;gap:.5rem;margin-bottom:1rem; }
+        .tab-btn { padding:.5rem 1rem;border-radius:.6rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .tab-btn.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#25f4f4;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
+        <h1 class="text-base font-semibold flex-1">Cliques de Afiliados</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">ads_click</span>
+        <span>Veja de onde cada visitante está chegando via links de afiliados. Rode <strong>cliques_afiliados_schema.sql</strong> no Supabase.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total Cliques</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-hoje" style="color:#25f4f4">—</div>
+            <div class="stat-lbl">Hoje</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-afiliados" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Afiliados Únicos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-referrers" style="color:#a78bfa">—</div>
+            <div class="stat-lbl">Origens Únicas</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('ranking', this)">
+            <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:text-bottom">leaderboard</span> Ranking
+        </button>
+        <button class="tab-btn" onclick="switchTab('historico', this)">
+            <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:text-bottom">history</span> Histórico
+        </button>
+    </div>
+
+    <!-- Busca -->
+    <div class="search-wrap">
+        <span class="material-symbols-outlined ico">search</span>
+        <input id="search-input" class="search-input" type="text" placeholder="Buscar por código do afiliado..." oninput="renderCurrent()" />
+    </div>
+
+    <!-- Conteúdo -->
+    <div id="content-area" class="space-y-2">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+    </div>
+</main>
+
+<script>
+let allCliques = [];
+let currentTab = 'ranking';
+
+(async () => {
+    await _waitForRole(4000);
+    if(window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    carregar();
+})();
+
+async function carregar() {
+    try {
+        const { data, error } = await sb
+            .from('cliques_afiliados')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(500);
+        if(error) throw error;
+        allCliques = data || [];
+        updateStats();
+        renderCurrent();
+    } catch(e) {
+        console.error(e);
+        document.getElementById('content-area').innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+    }
+}
+
+function updateStats() {
+    const hoje = new Date().toISOString().split('T')[0];
+    const cliquesHoje = allCliques.filter(c => c.created_at.startsWith(hoje));
+    const codigos = new Set(allCliques.map(c => c.afiliado_codigo));
+    const referrers = new Set(allCliques.map(c => c.referrer).filter(Boolean));
+
+    document.getElementById('stat-total').textContent = allCliques.length;
+    document.getElementById('stat-hoje').textContent = cliquesHoje.length;
+    document.getElementById('stat-afiliados').textContent = codigos.size;
+    document.getElementById('stat-referrers').textContent = referrers.size;
+}
+
+function switchTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCurrent();
+}
+
+function renderCurrent() {
+    if(currentTab === 'ranking') renderRanking();
+    else renderHistorico();
+}
+
+function renderRanking() {
+    const term = document.getElementById('search-input').value.toLowerCase();
+    const area = document.getElementById('content-area');
+
+    // Agrupar por código
+    const map = {};
+    allCliques.forEach(c => {
+        const code = c.afiliado_codigo.toUpperCase();
+        if(term && !code.toLowerCase().includes(term)) return;
+        if(!map[code]) map[code] = { count:0, lastClick:c.created_at, referrers: new Set() };
+        map[code].count++;
+        if(c.referrer) map[code].referrers.add(c.referrer);
+    });
+
+    const sorted = Object.entries(map).sort((a,b) => b[1].count - a[1].count);
+
+    if(sorted.length === 0) {
+        area.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">ads_click</span><p style="font-size:.85rem;font-weight:600">Nenhum clique registrado ainda.</p></div>`;
+        return;
+    }
+
+    area.innerHTML = sorted.map(([code, info], i) => {
+        const lastDate = new Date(info.lastClick).toLocaleString('pt-BR');
+        const refs = [...info.referrers];
+        const refText = refs.length > 0
+            ? refs.map(r => { try { return new URL(r).hostname; } catch(e) { return r.substring(0,40); } }).join(', ')
+            : 'Direto';
+        return `
+        <div class="agg-card">
+            <div class="agg-rank">${i+1}</div>
+            <div style="flex:1;min-width:0">
+                <div class="agg-code">${code}</div>
+                <div style="font-size:.65rem;color:#475569;margin-top:.2rem">
+                    Último: ${lastDate} · Origens: ${refText}
+                </div>
+            </div>
+            <div style="text-align:right">
+                <div class="agg-count">${info.count}</div>
+                <div class="agg-label">cliques</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderHistorico() {
+    const term = document.getElementById('search-input').value.toLowerCase();
+    const area = document.getElementById('content-area');
+
+    const filtered = allCliques.filter(c => {
+        if(term) return c.afiliado_codigo.toLowerCase().includes(term);
+        return true;
+    });
+
+    if(filtered.length === 0) {
+        area.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">ads_click</span><p style="font-size:.85rem;font-weight:600">Nenhum clique encontrado.</p></div>`;
+        return;
+    }
+
+    area.innerHTML = filtered.map(c => {
+        const dt = new Date(c.created_at).toLocaleString('pt-BR');
+        let refDisplay = 'Acesso direto';
+        if(c.referrer) {
+            try { refDisplay = new URL(c.referrer).hostname + new URL(c.referrer).pathname; }
+            catch(e) { refDisplay = c.referrer.substring(0, 60); }
+        }
+        // Detectar dispositivo do user agent
+        const ua = c.user_agent || '';
+        let device = 'Desktop';
+        if(/Android/i.test(ua)) device = 'Android';
+        else if(/iPhone|iPad/i.test(ua)) device = 'iPhone';
+        else if(/Mobile/i.test(ua)) device = 'Mobile';
+
+        return `
+        <div class="click-card">
+            <div class="click-icon">
+                <span class="material-symbols-outlined">ads_click</span>
+            </div>
+            <div class="click-info">
+                <div class="click-code">${c.afiliado_codigo.toUpperCase()}</div>
+                <div class="click-meta">
+                    <span><span class="material-symbols-outlined">schedule</span> ${dt}</span>
+                    <span><span class="material-symbols-outlined">devices</span> ${device}</span>
+                    <span><span class="material-symbols-outlined">language</span> Origem: ${refDisplay}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+</script>
+</body>
+</html>

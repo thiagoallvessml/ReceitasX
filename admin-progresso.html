@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Progresso do Guia - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        .user-card { display:flex;flex-direction:column;gap:1.2rem;padding:1.2rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;transition:border-color .15s; }
+        .user-card.complete { border-left:4px solid #34d399; }
+        .user-card:hover { border-color:rgba(37,244,244,.2); }
+        .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.25),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;font-weight:700;color:#25f4f4;text-transform:uppercase; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.9rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-email { font-size:.72rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        /* stats card */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.1rem; }
+        .stat-val { font-size:1.6rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.25rem; }
+
+        /* Step pills */
+        .step-pill { display:inline-flex;flex-direction:column;align-items:center;background:#111;border:1px solid #2A2A2A;padding:.5rem .75rem;border-radius:.65rem;min-width:64px; }
+        .step-pill.done { background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3); }
+        .step-pill.done span.val { color:#34d399; }
+        .step-pill span.lbl { font-size:.58rem;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:.05em;margin-bottom:.25rem; }
+        .step-pill span.val { font-size:1.1rem;font-weight:800;color:#ef4444; } /* Red if 0 */
+        .step-pill.opt span.val { color:#94a3b8; } /* Optional step empty */
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.2);border-radius:.75rem;font-size:.78rem;color:#25f4f4;margin-bottom:1.25rem; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .progress-bar-bg { height:6px;background:#2A2A2A;border-radius:3px;overflow:hidden;margin-top:.5rem; }
+        .progress-bar-fill { height:100%;background:#25f4f4;transition:width .4s ease; }
+        .progress-bar-fill.complete { background:#34d399; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-teal-400" style="font-size:1.1rem">rule</span>
+        <h1 class="text-base font-semibold flex-1">Progresso dos Guias</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">analytics</span>
+        <span>Acompanhe o preenchimento do Guia de Configurações de cada usuário. É necessário ter rodado o script SQL `rpc_admin_progresso` no Supabase para visualizar esses dados.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="stats-row">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Usuários</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-0-pct" style="color:#ef4444">—</div>
+            <div class="stat-lbl">0% Completo</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-parcial" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Em Progresso</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-completo" style="color:#34d399">—</div>
+            <div class="stat-lbl">100% Completo</div>
+        </div>
+    </div>
+
+    <div class="search-wrap flex-1 w-full mt-4">
+        <span class="material-symbols-outlined ico">search</span>
+        <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterProgresso()" />
+    </div>
+
+    <div id="progresso-list" class="space-y-3 mt-4">
+        <div style="text-align:center;padding:4rem;color:#475569">Carregando dados...</div>
+    </div>
+</main>
+
+<script>
+let allProgresso = [];
+let perfisMap = {};
+let emailsMap = {};
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    loadDados();
+})();
+
+async function loadDados() {
+    try {
+        // 1. Pega os emails e perfis
+        const { data: perfis } = await sb.from('perfis').select('id, nome, sobrenome, created_at').order('created_at', { ascending: false });
+        (perfis || []).forEach(p => perfisMap[p.id] = p);
+
+        try {
+            const resp = await fetch('https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users', { 
+                headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` } 
+            });
+            if (resp.ok) {
+                const body = await resp.json();
+                (body.users || []).forEach(u => emailsMap[u.id] = u.email);
+            }
+        } catch(e) { console.warn("Erro ao puxar emails:", e); }
+
+        // 2. Chama a RPC
+        const { data: rpcData, error } = await sb.rpc('admin_progresso_guia');
+        
+        if (error) {
+            if (error.code === 'PGRST202') {
+                throw new Error("A função 'admin_progresso_guia' não foi encontrada. Por favor, execute o arquivo rpc_admin_progresso.sql no Supabase SQL Editor.");
+            }
+            throw error;
+        }
+
+        allProgresso = (rpcData || []).map(r => {
+            const p = perfisMap[r.user_id] || {};
+            // Count completed essential steps (6 core steps)
+            let done = 0;
+            if (r.qtd_configuracoes > 0) done++;
+            if (r.qtd_equipamentos > 0) done++;
+            if (r.qtd_insumos > 0) done++;
+            if (r.qtd_embalagens > 0) done++;
+            if (r.qtd_receitas > 0) done++;
+            if (r.qtd_produtos > 0) done++;
+            
+            return {
+                ...r,
+                nome: p.nome,
+                sobrenome: p.sobrenome,
+                created_at: p.created_at,
+                email: emailsMap[r.user_id] || '--',
+                doneCount: done,
+                pct: Math.round((done / 6) * 100)
+            };
+        });
+
+        updateStats();
+        filterProgresso();
+
+    } catch (e) {
+        document.getElementById('progresso-list').innerHTML = `
+            <div style="text-align:center;padding:3rem 1rem;color:#f87171;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:3rem;margin-bottom:.5rem;">error</span>
+                <p style="font-weight:600">Erro ao carregar dados do guia</p>
+                <p style="font-size:.85rem;margin-top:.5rem;color:#94a3b8;">${e.message}</p>
+            </div>
+        `;
+    }
+}
+
+function updateStats() {
+    let zeros = 0, parciais = 0, completos = 0;
+    allProgresso.forEach(p => {
+        if (p.doneCount === 0) zeros++;
+        else if (p.doneCount === 6) completos++;
+        else parciais++;
+    });
+    document.getElementById('stat-total').textContent = allProgresso.length;
+    document.getElementById('stat-0-pct').textContent = zeros;
+    document.getElementById('stat-parcial').textContent = parciais;
+    document.getElementById('stat-completo').textContent = completos;
+}
+
+function filterProgresso() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let res = allProgresso;
+    if (q) {
+        res = res.filter(p => {
+            const n = ((p.nome||'') + ' ' + (p.sobrenome||'')).toLowerCase();
+            return n.includes(q) || (p.email||'').toLowerCase().includes(q);
+        });
+    }
+    renderList(res);
+}
+
+function renderList(list) {
+    const el = document.getElementById('progresso-list');
+    if (!list.length) {
+        el.innerHTML = `<div style="text-align:center;padding:3rem;color:#475569">Nenhuma correspondência.</div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(p => {
+        const initials = ((p.nome||'?')[0] || '') + ((p.sobrenome||'')[0] || '');
+        const nCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem Nome';
+        
+        const badgeClass = p.doneCount === 6 ? 'complete' : '';
+        const barClass = p.doneCount === 6 ? 'progress-bar-fill complete' : 'progress-bar-fill';
+
+        const renderPill = (lbl, val, req) => `
+            <div class="step-pill ${val > 0 ? 'done' : (!req ? 'opt' : '')}">
+                <span class="lbl">${lbl}</span>
+                <span class="val">${val > 0 ? val : (req ? '0' : '-')}</span>
+            </div>
+        `;
+
+        return `
+        <div class="user-card ${badgeClass}">
+            <div style="display:flex;align-items:center;gap:.85rem;">
+                <div class="avatar">${initials.toUpperCase()}</div>
+                <div class="user-info">
+                    <div class="user-name">${esc(nCompleto)}</div>
+                    <div class="user-email">${esc(p.email)}</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-weight:800;font-size:1.1rem;color:${p.doneCount===6?'#34d399':(p.doneCount===0?'#ef4444':'#fbbf24')}">${p.pct}%</div>
+                    <div style="font-size:.65rem;color:#64748b;text-transform:uppercase;font-weight:700">Preenchido</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar-bg">
+                <div class="${barClass}" style="width:${p.pct}%"></div>
+            </div>
+
+            <div style="display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.4rem;">
+                ${renderPill('Config', p.qtd_configuracoes, true)}
+                ${renderPill('Equip', p.qtd_equipamentos, true)}
+                ${renderPill('Insum.', p.qtd_insumos, true)}
+                ${renderPill('Embal.', p.qtd_embalagens, true)}
+                ${renderPill('Receit.', p.qtd_receitas, true)}
+                ${renderPill('Prod.', p.qtd_produtos, true)}
+                <div style="width:1px;background:#2A2A2A;margin:0 .25rem"></div>
+                ${renderPill('Combos', p.qtd_combos, false)}
+                ${renderPill('Despes.', p.qtd_despesas, false)}
+            </div>
+        </div>
+        `;
+    }).join('');
+}
+
+function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Email Marketing - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);border-radius:.75rem;font-size:.78rem;color:#38bdf8; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* segment tabs */
+        .seg-tabs { display:flex;gap:.5rem;flex-wrap:wrap; }
+        .seg-tab { display:flex;align-items:center;gap:.35rem;padding:.55rem 1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#64748b;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .seg-tab:hover { border-color:#475569;color:#94a3b8; }
+        .seg-tab.active { background:rgba(37,244,244,.08);border-color:rgba(37,244,244,.35);color:#25f4f4; }
+        .seg-tab .count { font-size:.68rem;font-weight:800;padding:.1rem .4rem;border-radius:9999px;background:rgba(100,116,139,.15);color:#64748b;margin-left:.15rem; }
+        .seg-tab.active .count { background:rgba(37,244,244,.15);color:#25f4f4; }
+        .seg-tab .material-symbols-outlined { font-size:.95rem; }
+
+        /* email area */
+        .email-box { background:#111;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;position:relative; }
+        .email-box-head { display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap; }
+        .email-box-title { font-size:.82rem;font-weight:700;color:#f1f5f9;display:flex;align-items:center;gap:.4rem; }
+        .email-box-title .material-symbols-outlined { font-size:1rem;color:#38bdf8; }
+
+        .email-textarea { width:100%;min-height:200px;max-height:400px;padding:.85rem;border-radius:.65rem;border:1px solid #2A2A2A;background:#0a0a0a !important;color:#94a3b8 !important;font-size:.78rem;line-height:1.8;font-family:'Courier New',monospace;resize:vertical;outline:none;transition:border-color .2s; }
+        .email-textarea:focus { border-color:rgba(37,244,244,.3) !important; }
+
+        .btn-action { display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 1rem;border-radius:.6rem;border:none;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .btn-copy { background:rgba(37,244,244,.1);color:#25f4f4;border:1px solid rgba(37,244,244,.25); }
+        .btn-copy:hover { background:rgba(37,244,244,.2); }
+        .btn-mailto { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
+        .btn-mailto:hover { background:rgba(52,211,153,.2); }
+        .btn-csv { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25); }
+        .btn-csv:hover { background:rgba(251,191,36,.2); }
+
+        /* email list */
+        .email-list { display:flex;flex-direction:column;gap:0; }
+        .email-item { display:flex;align-items:center;gap:.65rem;padding:.5rem .75rem;border-bottom:1px solid #1a1a1a;font-size:.82rem;transition:background .1s; }
+        .email-item:hover { background:rgba(37,244,244,.02); }
+        .email-item:last-child { border-bottom:none; }
+        .email-item .email-addr { flex:1;color:#94a3b8;font-family:'Courier New',monospace;font-size:.78rem; }
+        .email-item .email-name { color:#f1f5f9;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .email-item .email-badge { font-size:.6rem;font-weight:700;padding:.12rem .4rem;border-radius:.3rem; }
+
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:3rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        input,select { background-color:#1A1A1A !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder { color:#475569 !important; }
+
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;margin-bottom:.5rem; }
+
+        /* mail merge section */
+        .merge-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;margin-top:.5rem; }
+        .merge-title { font-size:.95rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;color:#f1f5f9; }
+        .merge-title .material-symbols-outlined { font-size:1.1rem;color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .merge-label { font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b;margin-bottom:.3rem; }
+        .merge-input { width:100%;padding:.65rem .85rem;border-radius:.65rem;border:1px solid #2A2A2A;background:#111 !important;color:#f1f5f9 !important;font-size:.88rem;outline:none;transition:border-color .2s;font-weight:500; }
+        .merge-input::placeholder { color:#475569 !important; }
+        .merge-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .merge-body { width:100%;min-height:150px;padding:.85rem;border-radius:.65rem;border:1px solid #2A2A2A;background:#111 !important;color:#f1f5f9 !important;font-size:.85rem;line-height:1.7;resize:vertical;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif; }
+        .merge-body::placeholder { color:#475569 !important; }
+        .merge-body:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .btn-generate { display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem 1.5rem;border-radius:.75rem;border:none;background:#fb923c;color:#050505;font-weight:800;font-size:.9rem;cursor:pointer;transition:opacity .15s,box-shadow .2s;box-shadow:0 2px 16px rgba(251,146,60,.25);width:100%;margin-top:.75rem; }
+        .btn-generate:hover { opacity:.9;box-shadow:0 4px 24px rgba(251,146,60,.4); }
+        .script-output { width:100%;min-height:200px;max-height:350px;padding:.85rem;border-radius:.65rem;border:1px solid rgba(251,146,60,.25);background:#0a0a0a !important;color:#fb923c !important;font-size:.72rem;line-height:1.6;font-family:'Courier New',monospace;resize:vertical;outline:none; }
+        .steps-box { background:#111;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;margin-top:1rem; }
+        .steps-box h4 { font-size:.82rem;font-weight:700;color:#f1f5f9;margin-bottom:.65rem;display:flex;align-items:center;gap:.35rem; }
+        .steps-box ol { padding-left:1.25rem;font-size:.78rem;color:#94a3b8;line-height:1.8; }
+        .steps-box ol li { margin-bottom:.25rem; }
+        .steps-box a { color:#25f4f4;text-decoration:none;font-weight:600; }
+        .steps-box a:hover { text-decoration:underline; }
+        .steps-box code { background:rgba(37,244,244,.08);color:#25f4f4;padding:.1rem .35rem;border-radius:.25rem;font-size:.72rem;font-weight:600; }
+        .var-hint { display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;padding:.2rem .5rem;border-radius:.35rem;background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2);cursor:pointer;margin-left:.25rem; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#38bdf8;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">mail</span>
+        <h1 class="text-base font-semibold flex-1">Email Marketing</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">mail</span>
+        <span>Copie listas de e-mails segmentadas por plano. Use para enviar campanhas de e-mail marketing.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total usuários</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-gratuitos" style="color:#94a3b8">—</div>
+            <div class="stat-lbl">Gratuitos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-vitalicios" style="color:#34d399">—</div>
+            <div class="stat-lbl">Vitalícios</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-selecionados" style="color:#38bdf8">—</div>
+            <div class="stat-lbl">Selecionados</div>
+        </div>
+    </div>
+
+    <!-- Segmentos -->
+    <div class="seg-tabs" id="seg-tabs">
+        <button class="seg-tab active" onclick="setSegmento('gratuitos', this)">
+            <span class="material-symbols-outlined">person</span>
+            Gratuitos (sem vitalício)
+            <span class="count" id="cnt-gratuitos">0</span>
+        </button>
+        <button class="seg-tab" onclick="setSegmento('vitalicios', this)">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">workspace_premium</span>
+            Vitalícios
+            <span class="count" id="cnt-vitalicios">0</span>
+        </button>
+        <button class="seg-tab" onclick="setSegmento('todos', this)">
+            <span class="material-symbols-outlined">groups</span>
+            Todos
+            <span class="count" id="cnt-todos">0</span>
+        </button>
+    </div>
+
+    <!-- Box principal -->
+    <div class="email-box">
+        <div class="email-box-head">
+            <div class="email-box-title">
+                <span class="material-symbols-outlined">alternate_email</span>
+                <span id="box-title">E-mails de usuários gratuitos</span>
+            </div>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                <button class="btn-action btn-copy" onclick="copiarEmails()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem">content_copy</span>
+                    Copiar todos
+                </button>
+                <button class="btn-action btn-mailto" onclick="abrirMailto()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem">send</span>
+                    Abrir no e-mail
+                </button>
+                <button class="btn-action btn-csv" onclick="baixarCSV()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem">download</span>
+                    CSV
+                </button>
+            </div>
+        </div>
+
+        <textarea id="email-area" class="email-textarea" readonly placeholder="Carregando e-mails…"></textarea>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.6rem;flex-wrap:wrap;gap:.5rem">
+            <span style="font-size:.72rem;color:#475569" id="email-counter">0 e-mails</span>
+            <div style="display:flex;gap:.5rem">
+                <label style="font-size:.72rem;color:#64748b;display:flex;align-items:center;gap:.3rem;cursor:pointer">
+                    <input type="radio" name="sep" value="virgula" checked onchange="reRender()" style="accent-color:#25f4f4;width:.85rem;height:.85rem" />
+                    Separado por vírgula
+                </label>
+                <label style="font-size:.72rem;color:#64748b;display:flex;align-items:center;gap:.3rem;cursor:pointer">
+                    <input type="radio" name="sep" value="linha" onchange="reRender()" style="accent-color:#25f4f4;width:.85rem;height:.85rem" />
+                    Um por linha
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ ENVIAR EMAIL EM MASSA ══ -->
+    <div class="merge-card">
+        <div class="merge-title">
+            <span class="material-symbols-outlined">rocket_launch</span>
+            Enviar Email Individual em Massa (via Gmail)
+        </div>
+
+        <p style="font-size:.78rem;color:#94a3b8;margin-bottom:1rem;line-height:1.6">
+            Escreva seu e-mail abaixo. O sistema gera um script do Google Apps Script que envia <strong style="color:#f1f5f9">individualmente</strong> para cada pessoa usando o seu Gmail.
+        </p>
+
+        <div style="margin-bottom:.75rem">
+            <div class="merge-label">Assunto do e-mail</div>
+            <input id="merge-subject" class="merge-input" type="text" placeholder="Ex: 🎉 Novidade ReceitasX - Oferta especial para você!" />
+        </div>
+
+        <div style="margin-bottom:.5rem">
+            <div class="merge-label">
+                Corpo do e-mail (HTML)
+                <span class="var-hint" onclick="insertVar('{NOME}')" title="Insere o nome do destinatário">+ {NOME}</span>
+            </div>
+            <textarea id="merge-body" class="merge-body" placeholder="Olá {NOME}!
+
+Temos uma novidade incrível para você no ReceitasX.
+
+Acesse agora: https://www.receitasx.com.br
+
+Abraço,
+Equipe ReceitasX"></textarea>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.15rem">
+            <span style="font-size:.68rem;color:#475569">Variáveis disponíveis:</span>
+            <span class="var-hint" onclick="insertVar('{NOME}')">{NOME}</span>
+            <span class="var-hint" onclick="insertVar('{EMAIL}')">{EMAIL}</span>
+        </div>
+
+        <button class="btn-generate" onclick="gerarScript()">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">code</span>
+            Gerar Script para Gmail
+        </button>
+
+        <!-- Output do script gerado -->
+        <div id="script-output-wrap" style="display:none;margin-top:1.25rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                <span style="font-size:.82rem;font-weight:700;color:#fb923c;display:flex;align-items:center;gap:.3rem">
+                    <span class="material-symbols-outlined" style="font-size:.95rem">terminal</span>
+                    Script gerado — <span id="script-email-count">0</span> e-mails
+                </span>
+                <button class="btn-action btn-copy" onclick="copiarScript()">
+                    <span class="material-symbols-outlined" style="font-size:.9rem">content_copy</span>
+                    Copiar Script
+                </button>
+            </div>
+            <textarea id="script-output" class="script-output" readonly></textarea>
+
+            <div class="steps-box">
+                <h4>
+                    <span class="material-symbols-outlined" style="font-size:.95rem;color:#25f4f4">checklist</span>
+                    Como usar:
+                </h4>
+                <ol>
+                    <li>Clique em <strong style="color:#f1f5f9">"Copiar Script"</strong> acima</li>
+                    <li>Acesse <a href="https://script.google.com" target="_blank">script.google.com</a> (logado no Gmail que vai enviar)</li>
+                    <li>Clique em <strong style="color:#f1f5f9">"Novo projeto"</strong></li>
+                    <li>Apague tudo que estiver lá e <strong style="color:#f1f5f9">cole o script</strong></li>
+                    <li>Clique em <code>▶ Executar</code> (botão de play)</li>
+                    <li>Na primeira vez, o Google vai pedir permissão — clique em <strong style="color:#f1f5f9">"Permitir"</strong></li>
+                    <li>Pronto! Os e-mails são enviados individualmente 🚀</li>
+                </ol>
+                <p style="font-size:.72rem;color:#64748b;margin-top:.65rem">⚠️ Limite do Gmail: ~500 emails/dia (conta pessoal) ou ~2.000/dia (Google Workspace).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Busca na lista -->
+    <div class="search-wrap">
+        <span class="material-symbols-outlined ico">search</span>
+        <input id="search" class="search-input" type="text" placeholder="Filtrar por nome ou e-mail…" oninput="filtrar()" />
+    </div>
+
+    <!-- Lista detalhada -->
+    <div id="email-list-detail" style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;overflow:hidden;">
+        <div class="shimmer" style="margin:.5rem"></div>
+        <div class="shimmer" style="margin:.5rem"></div>
+        <div class="shimmer" style="margin:.5rem"></div>
+    </div>
+</main>
+
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+let allUsers = []; // { id, nome, sobrenome, plano, email, _pagante }
+let currentSegmento = 'gratuitos';
+let filteredList = [];
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    loadData();
+})();
+
+async function loadData() {
+    try {
+        // 1. Perfis
+        const { data: perfis, error } = await sb
+            .from('perfis')
+            .select('id, nome, sobrenome, plano')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+
+        // 2. Emails via edge function
+        let emailsMap = {};
+        try {
+            const resp = await fetch('https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users', {
+                headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` }
+            });
+            if (resp.ok) {
+                const body = await resp.json();
+                (body.users || []).forEach(u => { emailsMap[u.id] = u.email; });
+            }
+        } catch(_) {}
+
+        // 3. Pedidos pagos (backup para detectar pagante)
+        let pagantesSet = new Set();
+        try {
+            const { data: peds } = await sb.from('pedidos').select('user_id, email, status').eq('status', 'pago');
+            (peds || []).forEach(p => {
+                if (p.user_id) pagantesSet.add(p.user_id);
+                if (p.email) pagantesSet.add(p.email.toLowerCase());
+            });
+        } catch(_) {}
+
+        // 4. Monta lista
+        allUsers = (perfis || []).map(p => {
+            const email = emailsMap[p.id] || '';
+            const isPagante = p.plano === 'vitalicio' || pagantesSet.has(p.id) || pagantesSet.has(email.toLowerCase());
+            return {
+                id: p.id,
+                nome: p.nome || '',
+                sobrenome: p.sobrenome || '',
+                plano: p.plano || 'gratuito',
+                email: email,
+                _pagante: isPagante
+            };
+        }).filter(u => u.email); // só quem tem email
+
+        updateStats();
+        setSegmento('gratuitos', document.querySelector('.seg-tab.active'));
+
+    } catch (e) {
+        document.getElementById('email-area').value = 'Erro: ' + e.message;
+    }
+}
+
+function updateStats() {
+    const gratuitos = allUsers.filter(u => !u._pagante);
+    const vitalicios = allUsers.filter(u => u._pagante);
+
+    document.getElementById('stat-total').textContent = allUsers.length;
+    document.getElementById('stat-gratuitos').textContent = gratuitos.length;
+    document.getElementById('stat-vitalicios').textContent = vitalicios.length;
+
+    document.getElementById('cnt-gratuitos').textContent = gratuitos.length;
+    document.getElementById('cnt-vitalicios').textContent = vitalicios.length;
+    document.getElementById('cnt-todos').textContent = allUsers.length;
+}
+
+function setSegmento(seg, btn) {
+    currentSegmento = seg;
+    document.querySelectorAll('.seg-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const titles = {
+        'gratuitos': 'E-mails de usuários gratuitos',
+        'vitalicios': 'E-mails de usuários vitalícios',
+        'todos': 'Todos os e-mails'
+    };
+    document.getElementById('box-title').textContent = titles[seg] || '';
+    document.getElementById('search').value = '';
+    filtrar();
+}
+
+function getSegmentedList() {
+    if (currentSegmento === 'gratuitos') return allUsers.filter(u => !u._pagante);
+    if (currentSegmento === 'vitalicios') return allUsers.filter(u => u._pagante);
+    return [...allUsers];
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let list = getSegmentedList();
+    if (q) {
+        list = list.filter(u => {
+            const nome = (u.nome + ' ' + u.sobrenome).toLowerCase();
+            return nome.includes(q) || u.email.toLowerCase().includes(q);
+        });
+    }
+    filteredList = list;
+    reRender();
+    renderDetailList(list);
+}
+
+function reRender() {
+    const sep = document.querySelector('input[name="sep"]:checked').value;
+    const emails = filteredList.map(u => u.email);
+    const text = sep === 'virgula' ? emails.join(', ') : emails.join('\n');
+    document.getElementById('email-area').value = text;
+    document.getElementById('email-counter').textContent = `${emails.length} e-mail${emails.length !== 1 ? 's' : ''}`;
+    document.getElementById('stat-selecionados').textContent = emails.length;
+}
+
+function renderDetailList(list) {
+    const el = document.getElementById('email-list-detail');
+
+    if (!list.length) {
+        el.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">mail</span><p>Nenhum e-mail encontrado.</p></div>`;
+        return;
+    }
+
+    // Mostrar max 100 na lista visual
+    const show = list.slice(0, 100);
+    const more = list.length - show.length;
+
+    el.innerHTML = `
+        <div class="email-list">
+            ${show.map((u, i) => {
+                const nome = [u.nome, u.sobrenome].filter(Boolean).join(' ') || '—';
+                const badge = u._pagante
+                    ? `<span class="email-badge" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2)">Vitalício</span>`
+                    : `<span class="email-badge" style="background:rgba(100,116,139,.1);color:#64748b;border:1px solid rgba(100,116,139,.2)">Gratuito</span>`;
+
+                return `
+                <div class="email-item">
+                    <span style="font-size:.7rem;color:#334155;font-weight:600;width:1.5rem;text-align:right;flex-shrink:0">${i+1}</span>
+                    <span class="email-name" style="max-width:140px">${esc(nome)}</span>
+                    <span class="email-addr">${esc(u.email)}</span>
+                    ${badge}
+                    <button class="btn-action btn-copy" style="padding:.25rem .5rem;font-size:.65rem" onclick="copiarUm('${esc(u.email)}')">
+                        <span class="material-symbols-outlined" style="font-size:.7rem">content_copy</span>
+                    </button>
+                </div>`;
+            }).join('')}
+        </div>
+        ${more > 0 ? `<div style="text-align:center;padding:.75rem;font-size:.75rem;color:#475569;border-top:1px solid #2A2A2A">+ ${more} e-mails não exibidos na lista (mas incluídos na cópia)</div>` : ''}
+    `;
+}
+
+// ── Ações ──────────────────────────────────────────────────────
+function copiarEmails() {
+    const text = document.getElementById('email-area').value;
+    if (!text) { showToast('Nenhum e-mail para copiar.', 'error'); return; }
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(`${filteredList.length} e-mails copiados! 📋`);
+    }).catch(() => showToast('Erro ao copiar.', 'error'));
+}
+
+function copiarUm(email) {
+    navigator.clipboard.writeText(email).then(() => {
+        showToast(`${email} copiado!`);
+    }).catch(() => showToast('Erro ao copiar.', 'error'));
+}
+
+function abrirMailto() {
+    const emails = filteredList.map(u => u.email);
+    if (!emails.length) { showToast('Nenhum e-mail selecionado.', 'error'); return; }
+
+    // Gmail/Outlook suportam BCC até ~2000 chars na URL
+    // Para listas grandes, usar BCC
+    if (emails.length <= 50) {
+        window.open(`mailto:?bcc=${emails.join(',')}&subject=${encodeURIComponent('Novidade ReceitasX 🎉')}&body=${encodeURIComponent('Olá!\n\nTemos uma novidade especial para você no ReceitasX.\n\nAcesse: https://www.receitasx.com.br\n\nEquipe ReceitasX')}`);
+    } else {
+        // Copia pro clipboard e avisa
+        navigator.clipboard.writeText(emails.join(', ')).then(() => {
+            showToast(`${emails.length} e-mails copiados! Cole no campo BCC do seu e-mail.`);
+        });
+    }
+}
+
+function baixarCSV() {
+    const list = filteredList;
+    if (!list.length) { showToast('Nenhum e-mail para exportar.', 'error'); return; }
+
+    let csv = 'Nome,Sobrenome,Email,Plano\n';
+    list.forEach(u => {
+        csv += `"${u.nome}","${u.sobrenome}","${u.email}","${u._pagante ? 'vitalicio' : 'gratuito'}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receitasx_emails_${currentSegmento}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`CSV com ${list.length} registros baixado! 📄`);
+}
+
+// ── Inserir variável no textarea ─────────────────────────────
+function insertVar(v) {
+    const ta = document.getElementById('merge-body');
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const text = ta.value;
+    ta.value = text.substring(0, start) + v + text.substring(end);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = start + v.length;
+}
+
+// ── Gerar Google Apps Script ──────────────────────────────────
+function gerarScript() {
+    const subject = (document.getElementById('merge-subject').value || '').trim();
+    const body = (document.getElementById('merge-body').value || '').trim();
+
+    if (!subject) { showToast('Preencha o assunto do e-mail.', 'error'); return; }
+    if (!body) { showToast('Preencha o corpo do e-mail.', 'error'); return; }
+
+    const list = filteredList;
+    if (!list.length) { showToast('Nenhum e-mail no segmento selecionado.', 'error'); return; }
+
+    // Escapa aspas e quebras de linha para o JS
+    const escJS = (s) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+
+    // Gera array de destinatários
+    const recipients = list.map(u => {
+        const nome = [u.nome, u.sobrenome].filter(Boolean).join(' ') || 'Cliente';
+        return `  { email: '${escJS(u.email)}', nome: '${escJS(nome)}' }`;
+    });
+
+    const script = `// ═══════════════════════════════════════════════════════════
+// ReceitasX · Email Marketing - Envio Individual via Gmail
+// Gerado em: ${new Date().toLocaleString('pt-BR')}
+// Total: ${list.length} destinatários
+// ═══════════════════════════════════════════════════════════
+
+function enviarEmails() {
+  var assunto = '${escJS(subject)}';
+  var corpoTemplate = '${escJS(body)}';
+
+  var destinatarios = [
+${recipients.join(',\n')}
+  ];
+
+  var enviados = 0;
+  var erros = 0;
+
+  for (var i = 0; i < destinatarios.length; i++) {
+    var d = destinatarios[i];
+    try {
+      // Substitui variáveis
+      var corpo = corpoTemplate
+        .replace(/{NOME}/g, d.nome)
+        .replace(/{EMAIL}/g, d.email);
+
+      // Converte quebras de linha em <br> para HTML
+      var corpoHtml = corpo.replace(/\\n/g, '<br>');
+
+      GmailApp.sendEmail(d.email, assunto, corpo, {
+        htmlBody: corpoHtml,
+        name: 'ReceitasX'
+      });
+
+      enviados++;
+      Logger.log('✓ Enviado para: ' + d.email);
+
+      // Pausa de 1s entre envios para não sobrecarregar
+      if (i < destinatarios.length - 1) {
+        Utilities.sleep(1000);
+      }
+    } catch (e) {
+      erros++;
+      Logger.log('✗ Erro ao enviar para ' + d.email + ': ' + e.message);
+    }
+  }
+
+  Logger.log('\\n════════════════════════════════');
+  Logger.log('Envio concluído!');
+  Logger.log('Enviados: ' + enviados);
+  Logger.log('Erros: ' + erros);
+  Logger.log('Total: ' + destinatarios.length);
+}
+`;
+
+    document.getElementById('script-output').value = script;
+    document.getElementById('script-email-count').textContent = list.length;
+    document.getElementById('script-output-wrap').style.display = 'block';
+
+    // Scroll suave até o script
+    document.getElementById('script-output-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast(`Script gerado para ${list.length} e-mails! Copie e cole no Google Apps Script.`);
+}
+
+function copiarScript() {
+    const script = document.getElementById('script-output').value;
+    if (!script) { showToast('Nenhum script gerado ainda.', 'error'); return; }
+    navigator.clipboard.writeText(script).then(() => {
+        showToast('Script copiado! Agora cole no script.google.com 🚀');
+    }).catch(() => showToast('Erro ao copiar.', 'error'));
+}
+
+// ── Utils ──────────────────────────────────────────────────────
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

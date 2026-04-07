@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Tracking Vitalício - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        .user-card { display:flex;flex-direction:column;gap:1rem;padding:1.2rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;transition:border-color .15s; }
+        .user-card.clicked { border-left:4px solid #f59e0b; }
+        .user-card:hover { border-color:rgba(37,244,244,.2); }
+        .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.25),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;font-weight:700;color:#25f4f4;text-transform:uppercase; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.9rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-email { font-size:.72rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.1rem; }
+        .stat-val { font-size:1.6rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.25rem; }
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.2);border-radius:.75rem;font-size:.78rem;color:#25f4f4;margin-bottom:1.25rem; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .badge-event { display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .6rem;border-radius:.5rem;font-size:.72rem;font-weight:700; }
+        .badge-event.view { background:rgba(37,244,244,.1);color:#25f4f4;border:1px solid rgba(37,244,244,.2); }
+        .badge-event.click { background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-teal-400" style="font-size:1.1rem">visibility</span>
+        <h1 class="text-base font-semibold flex-1">Gatilhos Vitalício</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">analytics</span>
+        <span>Aqui você vê os usuários que acessaram a página de <b>Acesso Vitalício</b> e os que clicaram no botão de <b>Comprar</b>. É necessário ter rodado o script de ajuste da tabela `perfis`.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 gap-3" id="stats-row">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-views" style="color:#25f4f4">—</div>
+            <div class="stat-lbl">Visitas à Página</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-clicks" style="color:#f59e0b">—</div>
+            <div class="stat-lbl">Cliques em Comprar</div>
+        </div>
+    </div>
+
+    <div class="search-wrap flex-1 w-full mt-4">
+        <span class="material-symbols-outlined ico">search</span>
+        <input id="search" class="search-input" type="text" placeholder="Buscar por nome, telefone ou e-mail…" oninput="filterUsuarios()" />
+    </div>
+
+    <div id="users-list" class="space-y-3 mt-4">
+        <div style="text-align:center;padding:4rem;color:#475569">Carregando dados...</div>
+    </div>
+</main>
+
+<script>
+let allUsers = [];
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    loadDados();
+})();
+
+async function loadDados() {
+    try {
+        let emailsMap = {};
+        try {
+            const resp = await fetch('https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users', { 
+                headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` } 
+            });
+            if (resp.ok) {
+                const body = await resp.json();
+                (body.users || []).forEach(u => emailsMap[u.id] = u.email);
+            }
+        } catch(e) { console.warn("Erro ao puxar emails:", e); }
+
+        const { data: perfis, error } = await sb
+            .from('perfis')
+            .select('id, nome, sobrenome, telefone, created_at, vitalicio_view_at, vitalicio_click_at')
+            .not('vitalicio_view_at', 'is', 'null')
+            .order('vitalicio_view_at', { ascending: false });
+        
+        if (error) {
+            if (error.code === 'PGRST200' || error.message.includes('column')) {
+                throw new Error("A coluna 'vitalicio_view_at' não foi encontrada na tabela perfis. Por favor, execute o arquivo ajuste_perfis_vitalicio.sql no Supabase SQL Editor.");
+            }
+            throw error;
+        }
+
+        allUsers = (perfis || []).map(p => ({
+            ...p,
+            email: emailsMap[p.id] || '--',
+        }));
+
+        updateStats();
+        filterUsuarios();
+
+    } catch (e) {
+        document.getElementById('users-list').innerHTML = `
+            <div style="text-align:center;padding:3rem 1rem;color:#f87171;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;">
+                <span class="material-symbols-outlined" style="font-size:3rem;margin-bottom:.5rem;">error</span>
+                <p style="font-weight:600">Erro ao carregar tracking</p>
+                <p style="font-size:.85rem;margin-top:.5rem;color:#94a3b8;">${e.message}</p>
+            </div>
+        `;
+    }
+}
+
+function updateStats() {
+    let views = 0, clicks = 0;
+    allUsers.forEach(p => {
+        if (p.vitalicio_view_at) views++;
+        if (p.vitalicio_click_at) clicks++;
+    });
+    document.getElementById('stat-views').textContent = views;
+    document.getElementById('stat-clicks').textContent = clicks;
+}
+
+function filterUsuarios() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let res = allUsers;
+    if (q) {
+        res = res.filter(p => {
+            const n = ((p.nome||'') + ' ' + (p.sobrenome||'')).toLowerCase();
+            return n.includes(q) || (p.email||'').toLowerCase().includes(q) || (p.telefone||'').includes(q);
+        });
+    }
+    renderList(res);
+}
+
+function formatData(isoString) {
+    if (!isoString) return '--';
+    const d = new Date(isoString);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderList(list) {
+    const el = document.getElementById('users-list');
+    if (!list.length) {
+        el.innerHTML = `<div style="text-align:center;padding:3rem;color:#475569">Nenhum evento registrado.</div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(p => {
+        const initials = ((p.nome||'?')[0] || '') + ((p.sobrenome||'')[0] || '');
+        const nCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem Nome';
+        
+        const isClicked = !!p.vitalicio_click_at;
+
+        return `
+        <div class="user-card ${isClicked ? 'clicked' : ''}">
+            <div style="display:flex;align-items:center;gap:.85rem;">
+                <div class="avatar">${initials.toUpperCase()}</div>
+                <div class="user-info">
+                    <div class="user-name">${esc(nCompleto)}</div>
+                    <div class="user-email">${esc(p.email)}</div>
+                    <div style="font-size:.75rem;color:#64748b;margin-top:.2rem">${esc(p.telefone || 'Sem WhatsApp')}</div>
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                <div class="badge-event view">
+                    <span class="material-symbols-outlined">visibility</span>
+                    Visto em: ${formatData(p.vitalicio_view_at)}
+                </div>
+                ${isClicked ? `
+                <div class="badge-event click">
+                    <span class="material-symbols-outlined">touch_app</span>
+                    Clicou em: ${formatData(p.vitalicio_click_at)}
+                </div>
+                ` : ''}
+            </div>
+        </div>
+        `;
+    }).join('');
+}
+
+function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

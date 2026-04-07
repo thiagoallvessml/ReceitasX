@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Pedidos - Admin ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* ── KPI cards ── */
+        .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem; }
+        @media(min-width:640px){ .kpi-grid { grid-template-columns:repeat(4,1fr); } }
+        .kpi { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem 1.1rem;position:relative;overflow:hidden; }
+        .kpi::after { content:'';position:absolute;top:-30px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.07;pointer-events:none; }
+        .kpi-green::after  { background:#34d399; }
+        .kpi-blue::after   { background:#60a5fa; }
+        .kpi-yellow::after { background:#fbbf24; }
+        .kpi-cyan::after   { background:#25f4f4; }
+        .kpi-lbl { font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b;margin-bottom:.4rem; }
+        .kpi-val { font-size:1.5rem;font-weight:800;line-height:1;color:#f1f5f9; }
+        .kpi-val.green  { color:#34d399; }
+        .kpi-val.blue   { color:#60a5fa; }
+        .kpi-val.yellow { color:#fbbf24; }
+        .kpi-val.cyan   { color:#25f4f4; }
+        .kpi-sub { font-size:.68rem;color:#475569;margin-top:.3rem; }
+
+        /* ── Filter tabs ── */
+        .filter-bar { display:flex;gap:.3rem;flex-wrap:wrap; }
+        .filter-chip { padding:.4rem .85rem;border-radius:.6rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .filter-chip.active { background:#2A2A2A;color:#f1f5f9;border-color:#3A3A3A; }
+        .filter-chip:hover:not(.active) { color:#94a3b8;border-color:#3A3A3A; }
+
+        /* ── Search ── */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A !important;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.88rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important; box-shadow:none !important; }
+
+        /* ── Table ── */
+        .tbl-wrap { overflow-x:auto;border-radius:.85rem;border:1px solid #2A2A2A; }
+        table { width:100%;border-collapse:collapse;font-size:.82rem; }
+        thead th { background:#1A1A1A;padding:.75rem 1rem;text-align:left;font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#475569;white-space:nowrap;border-bottom:1px solid #2A2A2A;cursor:pointer;user-select:none;transition:color .15s; }
+        thead th:hover { color:#94a3b8; }
+        thead th .sort-ico { font-size:.7rem;vertical-align:middle;margin-left:.2rem;opacity:.4; }
+        thead th.sorted .sort-ico { opacity:1;color:#25f4f4; }
+        tbody tr { border-bottom:1px solid #1E1E1E;transition:background .1s; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover { background:#1A1A1A; }
+        tbody td { padding:.75rem 1rem;color:#cbd5e1;vertical-align:middle; }
+        .td-bold { font-weight:700;color:#f1f5f9; }
+
+        /* ── Status badges ── */
+        .s-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:.4rem;white-space:nowrap; }
+        .s-pago     { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
+        .s-pendente { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25); }
+        .s-badge .material-symbols-outlined { font-size:.75rem; }
+
+        /* ── Cupom badge ── */
+        .cupom-badge { display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2); }
+        .cupom-badge .material-symbols-outlined { font-size:.7rem; }
+
+        /* ── Ref badge ── */
+        .ref-badge { display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(37,244,244,.08);color:#25f4f4;border:1px solid rgba(37,244,244,.2); }
+        .ref-badge .material-symbols-outlined { font-size:.7rem; }
+
+        /* ── Empty ── */
+        .empty { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* ── Shimmer ── */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.65rem;height:3.2rem; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* ── Admin banner ── */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* ── Export btn ── */
+        .btn-export { display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .btn-export:hover { border-color:#475569;color:#94a3b8; }
+        .btn-export .material-symbols-outlined { font-size:.95rem; }
+
+        /* ── Pagination ── */
+        .pag-wrap { display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem 0; }
+        .pag-btn { padding:.4rem .75rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .pag-btn.active { background:#2A2A2A;color:#f1f5f9; }
+        .pag-btn:hover:not(.active):not(:disabled) { border-color:#3A3A3A;color:#94a3b8; }
+        .pag-btn:disabled { opacity:.3;cursor:default; }
+        .pag-info { font-size:.72rem;color:#475569; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+        <h1 class="text-base font-semibold flex-1">Pedidos</h1>
+        <button class="btn-export" onclick="exportarCSV()" id="btn-export" style="display:none">
+            <span class="material-symbols-outlined">download</span>
+            Exportar CSV
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═══════════════════════════════════════════════════════ -->
+<main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
+
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">lock</span>
+        <span>Todos os pedidos do ReceitasX — vendas confirmadas e pendentes.</span>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi kpi-green shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-blue shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-yellow shimmer" style="min-height:5rem"></div>
+        <div class="kpi kpi-cyan shimmer" style="min-height:5rem"></div>
+    </div>
+
+    <!-- Filters + Search -->
+    <div class="flex flex-col sm:flex-row gap-3">
+        <div class="filter-bar" id="filter-bar">
+            <button class="filter-chip active" onclick="setFilter('todos',this)">Todos</button>
+            <button class="filter-chip" onclick="setFilter('pago',this)">
+                <span class="material-symbols-outlined" style="font-size:.75rem;color:#34d399;vertical-align:middle">check_circle</span> Pagos
+            </button>
+            <button class="filter-chip" onclick="setFilter('pendente',this)">
+                <span class="material-symbols-outlined" style="font-size:.75rem;color:#fbbf24;vertical-align:middle">schedule</span> Pendentes
+            </button>
+            <button class="filter-chip" onclick="setFilter('cupom',this)">
+                <span class="material-symbols-outlined" style="font-size:.75rem;color:#fbbf24;vertical-align:middle">confirmation_number</span> Com Cupom
+            </button>
+            <button class="filter-chip" onclick="setFilter('afiliado',this)">
+                <span class="material-symbols-outlined" style="font-size:.75rem;color:#25f4f4;vertical-align:middle">handshake</span> Via Afiliado
+            </button>
+        </div>
+        <div class="search-wrap flex-1" style="min-width:200px">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar por email, cupom, billing…" oninput="renderTable()" />
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th onclick="sortBy('id')"># <span class="sort-ico material-symbols-outlined">unfold_more</span></th>
+                    <th onclick="sortBy('created_at')">Data <span class="sort-ico material-symbols-outlined">unfold_more</span></th>
+                    <th onclick="sortBy('email')">E-mail <span class="sort-ico material-symbols-outlined">unfold_more</span></th>
+                    <th onclick="sortBy('valor_pago')">Valor <span class="sort-ico material-symbols-outlined">unfold_more</span></th>
+                    <th>Status</th>
+                    <th>Cupom</th>
+                    <th>Afiliado</th>
+                    <th>Método</th>
+                    <th>Billing ID</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                <tr><td colspan="9"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pag-wrap" id="pagination"></div>
+
+</main>
+
+<!-- ══ Script ═══════════════════════════════════════════════════ -->
+<script>
+let allPedidos = [];
+let filteredPedidos = [];
+let currentFilter = 'todos';
+let sortField = 'created_at';
+let sortAsc = false;
+let currentPage = 1;
+const PER_PAGE = 20;
+
+// ── Guard: só admin ────────────────────────────────────────────
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('btn-export').style.display = '';
+    await loadPedidos();
+})();
+
+// ── Load ──────────────────────────────────────────────────────
+async function loadPedidos() {
+    try {
+        const { data, error } = await sb
+            .from('pedidos')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        allPedidos = data || [];
+        renderKPIs();
+        renderTable();
+    } catch (e) {
+        console.error('Erro:', e);
+    }
+}
+
+// ── KPIs ──────────────────────────────────────────────────────
+function renderKPIs() {
+    const pagos = allPedidos.filter(p => p.status === 'pago');
+    const pendentes = allPedidos.filter(p => p.status === 'pendente');
+    const faturamento = pagos.reduce((s, p) => s + Number(p.valor_pago || 0), 0);
+    const ticketMedio = pagos.length ? faturamento / pagos.length : 0;
+    const comCupom = pagos.filter(p => p.cupom_usado).length;
+    const viaAfiliado = pagos.filter(p => p.ref_afiliado).length;
+
+    // Vendas hoje
+    const hoje = new Date().toISOString().slice(0, 10);
+    const vendasHoje = pagos.filter(p => p.created_at?.slice(0, 10) === hoje).length;
+    const fatHoje = pagos.filter(p => p.created_at?.slice(0, 10) === hoje).reduce((s, p) => s + Number(p.valor_pago || 0), 0);
+
+    document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi kpi-green">
+            <div class="kpi-lbl">Faturamento Total</div>
+            <div class="kpi-val green">${fmtR(faturamento)}</div>
+            <div class="kpi-sub">${pagos.length} vendas confirmadas</div>
+        </div>
+        <div class="kpi kpi-blue">
+            <div class="kpi-lbl">Vendas Hoje</div>
+            <div class="kpi-val blue">${vendasHoje}</div>
+            <div class="kpi-sub">${fmtR(fatHoje)} faturado hoje</div>
+        </div>
+        <div class="kpi kpi-yellow">
+            <div class="kpi-lbl">Ticket Médio</div>
+            <div class="kpi-val yellow">${fmtR(ticketMedio)}</div>
+            <div class="kpi-sub">${comCupom} com cupom · ${viaAfiliado} via afiliado</div>
+        </div>
+        <div class="kpi kpi-cyan">
+            <div class="kpi-lbl">Pendentes</div>
+            <div class="kpi-val cyan">${pendentes.length}</div>
+            <div class="kpi-sub">aguardando confirmação</div>
+        </div>`;
+}
+
+// ── Filters ───────────────────────────────────────────────────
+function setFilter(f, btn) {
+    currentFilter = f;
+    currentPage = 1;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable();
+}
+
+// ── Sort ──────────────────────────────────────────────────────
+function sortBy(field) {
+    if (sortField === field) sortAsc = !sortAsc;
+    else { sortField = field; sortAsc = field === 'email'; }
+    currentPage = 1;
+    renderTable();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderTable() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+
+    let list = [...allPedidos];
+
+    // Filtro
+    if (currentFilter === 'pago')     list = list.filter(p => p.status === 'pago');
+    if (currentFilter === 'pendente') list = list.filter(p => p.status === 'pendente');
+    if (currentFilter === 'cupom')    list = list.filter(p => p.cupom_usado);
+    if (currentFilter === 'afiliado') list = list.filter(p => p.ref_afiliado);
+
+    // Busca
+    if (q) {
+        list = list.filter(p =>
+            (p.email || '').toLowerCase().includes(q) ||
+            (p.cupom_usado || '').toLowerCase().includes(q) ||
+            (p.ref_afiliado || '').toLowerCase().includes(q) ||
+            (p.billing_id || '').toLowerCase().includes(q) ||
+            (p.codigo_acesso || '').toLowerCase().includes(q) ||
+            String(p.id).includes(q)
+        );
+    }
+
+    // Sort
+    list.sort((a, b) => {
+        let va = a[sortField], vb = b[sortField];
+        if (sortField === 'valor_pago' || sortField === 'id') { va = Number(va || 0); vb = Number(vb || 0); }
+        else { va = String(va || '').toLowerCase(); vb = String(vb || '').toLowerCase(); }
+        if (va < vb) return sortAsc ? -1 : 1;
+        if (va > vb) return sortAsc ? 1 : -1;
+        return 0;
+    });
+
+    filteredPedidos = list;
+
+    // Pagination
+    const totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * PER_PAGE;
+    const page = list.slice(start, start + PER_PAGE);
+
+    const tbody = document.getElementById('tbody');
+
+    if (!page.length) {
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><span class="material-symbols-outlined">inbox</span><p>Nenhum pedido encontrado.</p></div></td></tr>`;
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+
+    tbody.innerHTML = page.map(p => {
+        const statusBadge = p.status === 'pago'
+            ? `<span class="s-badge s-pago"><span class="material-symbols-outlined">check_circle</span>Pago</span>`
+            : `<span class="s-badge s-pendente"><span class="material-symbols-outlined">schedule</span>Pendente</span>`;
+
+        const cupom = p.cupom_usado
+            ? `<span class="cupom-badge"><span class="material-symbols-outlined">confirmation_number</span>${esc(p.cupom_usado)}</span>`
+            : `<span style="color:#475569">—</span>`;
+
+        const ref = p.ref_afiliado
+            ? `<span class="ref-badge"><span class="material-symbols-outlined">handshake</span>${esc(p.ref_afiliado)}</span>`
+            : `<span style="color:#475569">—</span>`;
+
+        const billing = p.billing_id
+            ? `<code style="font-size:.65rem;color:#64748b;background:#111;padding:.1rem .4rem;border-radius:.3rem;border:1px solid #2A2A2A">${esc(p.billing_id.slice(0, 16))}…</code>`
+            : `<span style="color:#475569">—</span>`;
+
+        return `
+        <tr>
+            <td class="td-bold" style="color:#64748b">${p.id}</td>
+            <td style="white-space:nowrap">
+                <div style="font-size:.82rem;color:#f1f5f9">${fmtDate(p.created_at)}</div>
+                <div style="font-size:.65rem;color:#475569">${fmtTime(p.created_at)}</div>
+            </td>
+            <td>
+                <div class="td-bold" style="font-size:.82rem">${esc(p.email || '—')}</div>
+                ${p.user_id ? `<div style="font-size:.6rem;color:#475569">${p.user_id.slice(0,8)}…</div>` : `<div style="font-size:.6rem;color:#f87171">sem user_id</div>`}
+            </td>
+            <td class="td-bold" style="color:#34d399;white-space:nowrap;font-size:.95rem">${fmtR(p.valor_pago)}</td>
+            <td>${statusBadge}</td>
+            <td>${cupom}</td>
+            <td>${ref}</td>
+            <td style="font-size:.75rem;color:#64748b">${esc((p.metodo_pag || '—').toUpperCase())}</td>
+            <td>${billing}</td>
+        </tr>`;
+    }).join('');
+
+    // Render pagination
+    renderPagination(totalPages, list.length);
+}
+
+function renderPagination(totalPages, total) {
+    if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+
+    let html = `<span class="pag-info">${total} pedidos</span>`;
+    html += `<button class="pag-btn" onclick="goPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>&laquo;</button>`;
+
+    for (let i = 1; i <= totalPages; i++) {
+        if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
+            if (i === 3 || i === totalPages - 2) html += `<span class="pag-info">…</span>`;
+            continue;
+        }
+        html += `<button class="pag-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+    }
+
+    html += `<button class="pag-btn" onclick="goPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&raquo;</button>`;
+    document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(p) {
+    currentPage = p;
+    renderTable();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Export CSV ────────────────────────────────────────────────
+function exportarCSV() {
+    const headers = ['ID','Data','Email','Valor','Status','Cupom','Afiliado','Método','Billing ID','User ID'];
+    const rows = filteredPedidos.map(p => [
+        p.id,
+        p.created_at?.slice(0, 19).replace('T', ' ') || '',
+        p.email || '',
+        Number(p.valor_pago || 0).toFixed(2),
+        p.status || '',
+        p.cupom_usado || '',
+        p.ref_afiliado || '',
+        p.metodo_pag || '',
+        p.billing_id || '',
+        p.user_id || '',
+    ]);
+
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pedidos_receitasx_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function fmtR(v) {
+    return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function fmtTime(d) {
+    if (!d) return '';
+    const dt = new Date(d);
+    return dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+}
+</script>
+
+</body>
+</html>

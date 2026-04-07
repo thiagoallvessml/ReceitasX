@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gerenciar Reembolsos - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.2);border-radius:.75rem;font-size:.78rem;color:#a78bfa; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* cupom card - reuse for reembolso */
+        .reembolso-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;transition:border-color .15s;display:flex;align-items:center;gap:1.5rem; }
+        .reembolso-card:hover { border-color:rgba(37,244,244,.2); }
+
+        .reembolso-icon { width:2.8rem;height:2.8rem;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .reembolso-icon.pendente { background:rgba(251,191,36,.12);color:#fbbf24; }
+        .reembolso-icon.concluido { background:rgba(52,211,153,.12);color:#34d399; }
+        .reembolso-icon.recusado { background:rgba(248,113,113,.12);color:#f87171; }
+        .reembolso-icon .material-symbols-outlined { font-size:1.3rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        .reembolso-info { flex:1;min-width:0; }
+        .reembolso-code { font-size:.9rem;font-weight:800;color:#f1f5f9; }
+        .reembolso-meta { font-size:.72rem;color:#64748b;margin-top:.3rem;display:flex;gap:.75rem;flex-wrap:wrap;line-height:1.4; }
+        .reembolso-meta span { display:inline-flex;align-items:center;gap:.2rem; }
+        .reembolso-meta .material-symbols-outlined { font-size:.75rem; }
+
+        .btn-acao { display:flex;align-items:center;justify-content:center;gap:.25rem;padding:.4rem .75rem;border-radius:.5rem;border:1px solid;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .btn-acao.concluir { border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:#34d399; }
+        .btn-acao.concluir:hover { background:rgba(52,211,153,.18); }
+        .btn-acao.recusar { border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08);color:#f87171; }
+        .btn-acao.recusar:hover { background:rgba(248,113,113,.18); }
+
+        .badge-status { display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;border:1px solid; }
+        .badge-status.pendente { background:rgba(251,191,36,.1);color:#fbbf24;border-color:rgba(251,191,36,.25); }
+        .badge-status.concluido { background:rgba(52,211,153,.1);color:#34d399;border-color:rgba(52,211,153,.25); }
+        .badge-status.recusado { background:rgba(248,113,113,.1);color:#f87171;border-color:rgba(248,113,113,.25); }
+
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;margin-bottom:.5rem; }
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4.5rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .pill.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+        
+        .copy-btn { border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); border-radius:4px; padding:2px 6px; cursor:pointer; color:#f1f5f9; display:inline-flex; align-items:center; gap:3px; }
+        .copy-btn:hover { background:rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#a78bfa;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">currency_exchange</span>
+        <h1 class="text-base font-semibold flex-1">Ver Reembolsos</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">payments</span>
+        <span>Acompanhe solicitações de reembolso. Lembre-se de rodar <strong>reembolsos_schema.sql</strong> no Supabase.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total Sols.</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-pendentes" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Pendentes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-concluidos" style="color:#34d399">—</div>
+            <div class="stat-lbl">Concluídos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-recusados" style="color:#f87171">—</div>
+            <div class="stat-lbl">Recusados</div>
+        </div>
+    </div>
+
+    <!-- Filtro -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center mt-6">
+        <div class="search-wrap flex-1 w-full">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search-input" class="search-input" type="text" placeholder="Buscar por email ou chave pix..." oninput="filtrar()" />
+        </div>
+        <div class="flex gap-2 flex-shrink-0 flex-wrap">
+            <button class="pill active" onclick="setFilter('todos',this)">Todos</button>
+            <button class="pill" onclick="setFilter('pendente',this)">Pendentes</button>
+            <button class="pill" onclick="setFilter('concluido',this)">Concluídos</button>
+        </div>
+    </div>
+
+    <!-- Lista -->
+    <div id="reembolsos-list" class="space-y-3">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+    </div>
+</main>
+
+<script>
+let allReembolsos = [];
+let currentFilter = 'todos';
+
+(async () => {
+    await _waitForRole(4000);
+    if(window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    carregar();
+})();
+
+async function carregar() {
+    try {
+        const { data, error } = await sb
+            .from('reembolsos')
+            .select(`*, perfis:user_id(nome)`)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        allReembolsos = data || [];
+        updateStats();
+        filtrar();
+    } catch(e) {
+        console.error(e);
+        document.getElementById('reembolsos-list').innerHTML = `<div class="empty-state">Erro ao carregar: ${e.message}</div>`;
+    }
+}
+
+function updateStats() {
+    document.getElementById('stat-total').textContent = allReembolsos.length;
+    document.getElementById('stat-pendentes').textContent = allReembolsos.filter(r => r.status === 'pendente').length;
+    document.getElementById('stat-concluidos').textContent = allReembolsos.filter(r => r.status === 'concluido').length;
+    document.getElementById('stat-recusados').textContent = allReembolsos.filter(r => r.status === 'recusado').length;
+}
+
+function setFilter(val, btn) {
+    currentFilter = val;
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function filtrar() {
+    const term = document.getElementById('search-input').value.toLowerCase();
+    const list = document.getElementById('reembolsos-list');
+    
+    const docs = allReembolsos.filter(r => {
+        if(currentFilter !== 'todos' && r.status !== currentFilter) return false;
+        if(term) {
+            const email = (r.email || r.perfis?.email || '').toLowerCase();
+            const chave = (r.pix_chave || '').toLowerCase();
+            return email.includes(term) || chave.includes(term);
+        }
+        return true;
+    });
+
+    if(docs.length === 0) {
+        list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">inbox</span><p style="font-size:.85rem;font-weight:600">Nenhum reembolso encontrado.</p></div>`;
+        return;
+    }
+
+    list.innerHTML = docs.map(r => {
+        const data = new Date(r.created_at).toLocaleString('pt-BR');
+        let ico = 'help', iconCls = 'pendente';
+        let actBtns = '';
+
+        if(r.status === 'pendente') {
+            ico = 'hourglass_empty'; iconCls = 'pendente';
+            actBtns = `
+                <div class="flex flex-col gap-1 sm:flex-row">
+                    <button class="btn-acao concluir" onclick="alterarStatus('${r.id}', 'concluido')"><span class="material-symbols-outlined">check</span> Marcar Pago</button>
+                    <button class="btn-acao recusar" onclick="alterarStatus('${r.id}', 'recusado')"><span class="material-symbols-outlined">close</span> Recusar</button>
+                </div>
+            `;
+        } else if(r.status === 'concluido') {
+            ico = 'check_circle'; iconCls = 'concluido';
+        } else {
+            ico = 'cancel'; iconCls = 'recusado';
+        }
+
+        const email = r.email || r.perfis?.email || 'Sem email';
+        const nome = r.perfis?.nome || 'Desconhecido';
+
+        return `
+        <div class="reembolso-card flex-col sm:flex-row items-start sm:items-center">
+            <div class="reembolso-icon ${iconCls}">
+                <span class="material-symbols-outlined">${ico}</span>
+            </div>
+            <div class="reembolso-info">
+                <div class="reembolso-code">
+                    ${email} <span class="badge-status ${iconCls} ml-2">${r.status.toUpperCase()}</span>
+                </div>
+                <div class="reembolso-meta">
+                    <span><span class="material-symbols-outlined">person</span> ${nome}</span>
+                    <span><span class="material-symbols-outlined">calendar_today</span> ${data}</span>
+                </div>
+                <div class="mt-2 text-sm text-slate-300 bg-black/30 p-2 rounded border border-white/5">
+                    <strong>Motivo:</strong> ${r.motivo.substring(0,100)}...
+                </div>
+                <div class="mt-2 text-xs text-slate-400">
+                    Chave Pix (${r.pix_tipo || 'Desconhecido'}): <br/>
+                    <strong class="text-white bg-black/50 p-1 px-2 rounded inline-block mt-1">${r.pix_chave}</strong>
+                    <button class="copy-btn" onclick="navigator.clipboard.writeText('${r.pix_chave}')"><span class="material-symbols-outlined" style="font-size:12px">content_copy</span></button>
+                </div>
+            </div>
+            <div class="reembolso-actions mt-3 sm:mt-0 self-end sm:self-center">
+                ${actBtns}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function alterarStatus(id, novoStatus) {
+    if(!confirm(`Tem certeza que deseja marcar como ${novoStatus}?`)) return;
+    try {
+        const { error } = await sb.from('reembolsos').update({ status: novoStatus, updated_at: new Date().toISOString() }).eq('id', id);
+        if(error) throw error;
+        const i = allReembolsos.findIndex(x => x.id === id);
+        if(i >= 0) allReembolsos[i].status = novoStatus;
+        updateStats();
+        filtrar();
+    } catch(e) {
+        alert("Erro: " + e.message);
+    }
+}
+</script>
+</body>
+</html>
