@@ -156,10 +156,23 @@ async function carregar() {
     try {
         const { data, error } = await sb
             .from('reembolsos')
-            .select(`*, perfis:user_id(nome)`)
+            .select('*')
             .order('created_at', { ascending: false });
         if (error) throw error;
         allReembolsos = data || [];
+
+        // Buscar nomes dos perfis separadamente (sem depender de FK)
+        const userIds = [...new Set(allReembolsos.map(r => r.user_id).filter(Boolean))];
+        if (userIds.length) {
+            const { data: perfis } = await sb
+                .from('perfis')
+                .select('id, nome')
+                .in('id', userIds);
+            const nomeMap = {};
+            (perfis || []).forEach(p => nomeMap[p.id] = p.nome);
+            allReembolsos.forEach(r => { r._nome = nomeMap[r.user_id] || null; });
+        }
+
         updateStats();
         filtrar();
     } catch(e) {
@@ -220,8 +233,8 @@ function filtrar() {
             ico = 'cancel'; iconCls = 'recusado';
         }
 
-        const email = r.email || r.perfis?.email || 'Sem email';
-        const nome = r.perfis?.nome || 'Desconhecido';
+        const email = r.email || 'Sem email';
+        const nome = r._nome || 'Desconhecido';
 
         return `
         <div class="reembolso-card flex-col sm:flex-row items-start sm:items-center">
