@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -27,7 +27,9 @@
 
         /* ── KPI cards ── */
         .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem; }
-        @media(min-width:640px){ .kpi-grid { grid-template-columns:repeat(4,1fr); } }
+        @media(min-width:640px){ .kpi-grid { grid-template-columns:repeat(5,1fr); } }
+        .kpi-blue::after { background:#60a5fa; }
+        .kpi-val.blue  { color:#60a5fa; }
         .kpi { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem 1.1rem;position:relative;overflow:hidden; }
         .kpi::after { content:'';position:absolute;top:-30px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.07;pointer-events:none; }
         .kpi-green::after  { background:#25f4f4; }
@@ -170,10 +172,11 @@
 
     <!-- KPIs -->
     <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi kpi-blue shimmer" style="min-height:5rem"></div>
         <div class="kpi kpi-green shimmer" style="min-height:5rem"></div>
         <div class="kpi kpi-orange shimmer" style="min-height:5rem"></div>
         <div class="kpi kpi-yellow shimmer" style="min-height:5rem"></div>
-        <div class="kpi kpi-red shimmer" style="min-height:5rem"></div>
+        <div class="kpi shimmer" style="min-height:5rem"></div>
     </div>
 
     <!-- Tabs -->
@@ -406,6 +409,7 @@ let abaAtiva    = 'afiliados';
 let allAfiliados  = [];
 let allSaques     = [];
 let allIndicacoes = [];
+let allPedidos    = [];
 let saqueAtivoId  = null; // id do saque sendo processado no modal
 
 // ── Guard: só admin ────────────────────────────────────────────
@@ -432,7 +436,7 @@ let saqueAtivoId  = null; // id do saque sendo processado no modal
 // ── Carregar todos os dados ────────────────────────────────────
 async function loadTudo() {
     try {
-        const [resAfil, resSaques, resIndic] = await Promise.all([
+        const [resAfil, resSaques, resIndic, resPedidos] = await Promise.all([
             sb.from('afiliados')
               .select('*')
               .order('total_ganhos', { ascending: false }),
@@ -444,6 +448,10 @@ async function loadTudo() {
             sb.from('indicacoes')
               .select('*')
               .order('created_at', { ascending: false }),
+
+            sb.from('pedidos')
+              .select('valor_pago, status')
+              .eq('status', 'pago'),
         ]);
 
         if (resAfil.error)   throw resAfil.error;
@@ -453,6 +461,7 @@ async function loadTudo() {
         allAfiliados  = resAfil.data  || [];
         allSaques     = resSaques.data || [];
         allIndicacoes = resIndic.data  || [];
+        allPedidos    = (resPedidos.error ? [] : resPedidos.data) || [];
 
         renderKPIs();
         renderAtivo();
@@ -465,6 +474,7 @@ async function loadTudo() {
 
 // ── KPIs ──────────────────────────────────────────────────────
 function renderKPIs() {
+    const faturamentoTotal = allPedidos.reduce((s, p) => s + Number(p.valor_pago || 0), 0);
     const totalComissoes = allAfiliados.reduce((s, a) => s + Number(a.total_ganhos || 0), 0);
     const pendente = allSaques
         .filter(s => s.status === 'pendente')
@@ -474,12 +484,18 @@ function renderKPIs() {
         .reduce((s, x) => s + Number(x.valor || 0), 0);
     const totalAfil = allAfiliados.length;
     const totalVendas = allAfiliados.reduce((s, a) => s + Number(a.total_vendas || 0), 0);
+    const lucroLiquido = faturamentoTotal - totalComissoes;
 
     document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi kpi-blue">
+            <div class="kpi-lbl">Faturamento Total</div>
+            <div class="kpi-val blue">${fmtR(faturamentoTotal)}</div>
+            <div class="kpi-sub">${allPedidos.length} vendas realizadas</div>
+        </div>
         <div class="kpi kpi-green">
             <div class="kpi-lbl">Total Comissões Geradas</div>
             <div class="kpi-val green">${fmtR(totalComissoes)}</div>
-            <div class="kpi-sub">${totalVendas} vendas no total</div>
+            <div class="kpi-sub">${totalVendas} vendas via afiliados</div>
         </div>
         <div class="kpi kpi-orange">
             <div class="kpi-lbl">Saques Pendentes</div>

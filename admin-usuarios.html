@@ -40,8 +40,8 @@
         .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.25),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;font-weight:700;color:#25f4f4;text-transform:uppercase; }
         .user-info { flex:1;min-width:0; }
         .user-name { font-size:.9rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-        .user-email { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-        .user-meta { font-size:.78rem;color:#64748b;margin-top:.2rem; }
+        .user-email { font-size:.72rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-meta { font-size:.78rem;color:#94a3b8;margin-top:.2rem; }
 
         /* role select */
         .role-sel { padding:.35rem .6rem;border-radius:.5rem;border:1px solid #2A2A2A;background:#141414;color:#f1f5f9;font-size:.78rem;font-weight:600;cursor:pointer;outline:none;transition:border-color .2s; }
@@ -92,6 +92,12 @@
         .btn-vital:hover { background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.6); }
         .btn-vital.revoke { border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08);color:#f87171; }
         .btn-vital.revoke:hover { background:rgba(248,113,113,.18);border-color:rgba(248,113,113,.6); }
+
+        /* online badge */
+        .badge-online { display:inline-flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
+        .online-dot { width:.45rem;height:.45rem;border-radius:50%;background:#34d399;flex-shrink:0;animation:pulse-dot 2s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)} }
+        .badge-offline { display:inline-flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:600;padding:.15rem .45rem;border-radius:9999px;color:#475569; }
     </style>
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
@@ -115,13 +121,33 @@
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
     <!-- Banner de acesso restrito -->
-    <div class="admin-banner">
+    <div class="admin-banner" style="margin-bottom:0.5rem">
         <span class="material-symbols-outlined">lock</span>
         <span>Área restrita aos administradores do ReceitasX. Aqui você pode gerenciar os roles de todos os usuários.</span>
     </div>
 
+    <!-- Botões pros novos painéis -->
+    <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <a href="admin-cadastros.html" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(139,92,246,.3);color:#a78bfa;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
+            <span class="material-symbols-outlined" style="font-size:1.15rem;">monitoring</span>
+            Evolução de Cadastros
+        </a>
+        <a href="admin-progresso.html" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
+            <span class="material-symbols-outlined" style="font-size:1.15rem;">rule</span>
+            Progresso do Guia
+        </a>
+        <a href="admin-vitalicio.html" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(245,158,11,.3);color:#f59e0b;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
+            <span class="material-symbols-outlined" style="font-size:1.15rem;">track_changes</span>
+            Acessos Vitalício
+        </a>
+    </div>
+
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-3" id="stats-row">
+        <div class="stat-card" style="border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.03)">
+            <div class="stat-val" id="stat-online" style="color:#34d399;display:flex;align-items:center;gap:.4rem"><span class="online-dot"></span>—</div>
+            <div class="stat-lbl">Online agora</div>
+        </div>
         <div class="stat-card">
             <div class="stat-val" id="stat-total">—</div>
             <div class="stat-lbl">Total</div>
@@ -156,6 +182,7 @@
         </div>
         <div class="flex gap-2 flex-shrink-0 flex-wrap">
             <button class="pill active" data-filter="todos"    onclick="setFilter('todos', this)">Todos</button>
+            <button class="pill" data-filter="online"         onclick="setFilter('online', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">🟢 Online</button>
             <button class="pill" data-filter="pagantes"        onclick="setFilter('pagantes', this)">Pagantes</button>
             <button class="pill" data-filter="admin"          onclick="setFilter('admin', this)">Admin</button>
             <button class="pill" data-filter="afiliado"       onclick="setFilter('afiliado', this)">Afiliado</button>
@@ -179,6 +206,9 @@ let allUsuarios = [];
 let emailsMap   = {};   // user_id → email
 let lastLoginMap = {};  // user_id → last_sign_in_at
 let pagantesSet = new Set(); // emails de quem pagou
+let cupomMap    = {};  // user_id → cupom_usado
+let valorPagoMap = {}; // user_id → valor_pago
+let onlineMap   = {};  // user_id → { last_seen, pagina }
 let currentFilter = 'todos';
 
 // ── Guard: só admin pode acessar ───────────────────────────────────
@@ -213,32 +243,44 @@ async function loadUsuarios() {
         if (error) throw error;
         allUsuarios = data || [];
 
-        // 2. Emails e Último Login: busca via Edge Function list-users (service-role)
         try {
             const resp = await fetch(
                 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users',
                 { headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` } }
             );
+            console.log("Status list-users:", resp.status);
             if (resp.ok) {
                 const body = await resp.json();
+                console.log("Body users:", body);
                 (body.users || []).forEach(u => { 
                     emailsMap[u.id] = u.email; 
                     if (u.last_sign_in_at) lastLoginMap[u.id] = u.last_sign_in_at;
                 });
+            } else {
+                const errText = await resp.text();
+                console.error("Erro list-users fetch:", errText);
             }
-        } catch(_) {}
+        } catch(errFetch) {
+            console.error("Falha ao fazer request list-users:", errFetch);
+        }
 
         // 3. Pagantes via tabela pedidos (complemento — pode ser bloqueado por RLS se policy admin não existir)
         //    SOLUÇÃO PRINCIPAL: usar plano='vitalicio' direto da tabela perfis (sempre funciona para admin)
         try {
             const { data: peds, error: pedErr } = await sb
                 .from('pedidos')
-                .select('email, user_id, status')
+                .select('email, user_id, status, cupom_usado, valor_pago')
                 .eq('status', 'pago');
             if (!pedErr && peds?.length) {
                 pagantesSet = new Set(
                     peds.flatMap(p => [p.email?.toLowerCase(), p.user_id].filter(Boolean))
                 );
+                peds.forEach(p => {
+                    if (p.user_id) {
+                        if (p.cupom_usado) cupomMap[p.user_id] = p.cupom_usado;
+                        if (p.valor_pago) valorPagoMap[p.user_id] = p.valor_pago;
+                    }
+                });
             }
         } catch(_) {}
 
@@ -254,8 +296,18 @@ async function loadUsuarios() {
             }
         });
 
+        // Carregar presença online
+        await refreshPresenca();
+
         updateStats();
         filterUsuarios();
+
+        // Auto-refresh presença a cada 30s
+        setInterval(async () => {
+            await refreshPresenca();
+            updateStats();
+            filterUsuarios();
+        }, 30000);
     } catch (e) {
         console.error('Erro ao carregar usuários', e);
         document.getElementById('user-list').innerHTML = `
@@ -266,8 +318,31 @@ async function loadUsuarios() {
     }
 }
 
+// ── Presença Online ───────────────────────────────────────────────────
+async function refreshPresenca() {
+    try {
+        const { data } = await sb.from('presenca_online').select('user_id, last_seen, pagina');
+        onlineMap = {};
+        const agora = Date.now();
+        (data || []).forEach(p => {
+            const diff = agora - new Date(p.last_seen).getTime();
+            // Considera online se heartbeat < 60s
+            if (diff < 60000) {
+                onlineMap[p.user_id] = { last_seen: p.last_seen, pagina: p.pagina };
+            }
+        });
+    } catch(_) {}
+}
+
+function isOnline(userId) {
+    return !!onlineMap[userId];
+}
+
 // ── Stats ──────────────────────────────────────────────────────────────
 function updateStats() {
+    const onlineCount = Object.keys(onlineMap).length;
+    const onlineEl = document.getElementById('stat-online');
+    onlineEl.innerHTML = `<span class="online-dot"></span>${onlineCount}`;
     document.getElementById('stat-total').textContent    = allUsuarios.length;
     document.getElementById('stat-gratuito').textContent = allUsuarios.filter(u => !u._pagante).length;
     document.getElementById('stat-vitalicio').textContent= allUsuarios.filter(u => u.plano === 'vitalicio').length;
@@ -289,11 +364,20 @@ function filterUsuarios() {
 
     let list = allUsuarios;
 
-    if (currentFilter === 'pagantes') {
+    if (currentFilter === 'online') {
+        list = list.filter(u => isOnline(u.id));
+    } else if (currentFilter === 'pagantes') {
         list = list.filter(u => u._pagante);
     } else if (currentFilter !== 'todos') {
         list = list.filter(u => u.role === currentFilter);
     }
+
+    // Ordena online primeiro
+    list.sort((a, b) => {
+        const aOn = isOnline(a.id) ? 1 : 0;
+        const bOn = isOnline(b.id) ? 1 : 0;
+        return bOn - aOn;
+    });
 
     if (q) {
         list = list.filter(u => {
@@ -339,25 +423,36 @@ function renderUsuarios(list) {
             : `<span class="badge-afiliado"><span class="material-symbols-outlined">person</span>Afiliado</span>`;
 
         const vitalBadge = u._pagante
-            ? `<span class="badge-vital"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">workspace_premium</span>Vitálicio</span>`
+            ? `<span class="badge-vital"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">workspace_premium</span>Vitálicio${valorPagoMap[u.id] ? ' · R$ ' + Number(valorPagoMap[u.id]).toFixed(2).replace('.',',') : ''}</span>`
+            : '';
+
+        const cupomBadge = cupomMap[u.id]
+            ? `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)"><span class="material-symbols-outlined" style="font-size:.7rem">confirmation_number</span>${esc(cupomMap[u.id])}</span>`
+            : '';
+
+        const userOnline = isOnline(u.id);
+        const onlineInfo = onlineMap[u.id];
+        const onlineBadge = userOnline
+            ? `<span class="badge-online"><span class="online-dot"></span>Online · ${esc(onlineInfo.pagina || '')}</span>`
             : '';
 
         return `
-        <div class="user-card" id="card-${u.id}">
+        <div class="user-card" id="card-${u.id}" ${userOnline ? 'style="border-color:rgba(52,211,153,.2);"' : ''}>
             <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:0;">
-                <div class="avatar">${initials}</div>
+                <div class="avatar" ${userOnline ? 'style="border-color:#34d399;box-shadow:0 0 8px rgba(52,211,153,.3);"' : ''}>${initials}</div>
                 <div class="user-info">
-                    <div class="user-name">${esc(nomeCompleto)}</div>
+                    <div class="user-name" style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">${esc(nomeCompleto)} ${onlineBadge}</div>
                     <div class="user-email">${emailExib}</div>
                     <div class="user-meta">${esc(u.negocio || '—')} · Desde ${criadoEm}</div>
-                    <div class="user-meta" style="font-size:0.7rem;margin-top:0.2rem;color:#475569">
-                        Último login: <span style="color:#64748b;font-weight:500">${ultimoLoginStr}</span>
+                    <div class="user-meta" style="font-size:0.7rem;margin-top:0.2rem;color:#94a3b8">
+                        Último login: <span style="color:#cbd5e1;font-weight:500">${ultimoLoginStr}</span>
                     </div>
                 </div>
             </div>
             <div style="display:flex;flex-direction:column;gap:.6rem;flex-shrink:0;" class="sm:items-end w-full sm:w-auto mt-1 sm:mt-0">
                 <div style="display:flex;gap:.3rem;flex-wrap:wrap;" class="sm:justify-end">
                     ${vitalBadge}
+                    ${cupomBadge}
                     ${roleBadge}
                 </div>
                 <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;" class="sm:justify-end w-full">
