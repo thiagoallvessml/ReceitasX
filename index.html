@@ -153,6 +153,25 @@
     </div>
 </header>
 <div class="p-6 space-y-8">
+    <!-- ── Guia de Configuração ─────────────────────────────── -->
+    <a href="guia-configuracao.html" id="banner-guia"
+        class="nav-card block p-4 rounded-xl border group"
+        style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
+        <div class="flex items-center gap-4">
+            <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">rocket_launch</span>
+            </div>
+            <div class="flex-1">
+                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                    <h4 class="text-sm font-bold">Guia de Configuração</h4>
+                    <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Novo</span>
+                </div>
+                <p class="text-xs" style="color:#64748b;margin-top:.1rem">Siga o passo a passo para configurar tudo corretamente</p>
+            </div>
+            <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
+        </div>
+    </a>
+
     <!-- ── Operacional ──────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-4 px-1">
@@ -296,6 +315,18 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
+            <!-- Pedidos -->
+            <a href="admin-pedidos.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Pedidos</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Todas as vendas, cupons e afiliados</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
             <!-- Receitas dos Usuários -->
             <a href="admin-receitas-usuarios.html"
                 class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
@@ -329,6 +360,114 @@
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Configurações do Sistema</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Comissão, saque mínimo e valores</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Avisos aos Usuários -->
+            <a href="admin-avisos.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Avisos aos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Mensagens popup ao entrar no sistema</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Produtos Vinculados -->
+            <a href="admin-produtos-vinculados.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">link</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Produtos Vinculados</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Quem vinculou receita ao produto</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Gerenciar Cupons -->
+            <a href="admin-cupons.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(167,139,250,.1);color:#a78bfa;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">confirmation_number</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Gerenciar Cupons</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Criar e gerenciar cupons de desconto</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Ver Reembolsos -->
+            <a href="admin-reembolsos.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">currency_exchange</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Ver Reembolsos</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Solicitações de reembolso dos usuários</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Cliques de Afiliados -->
+            <a href="admin-cliques-afiliados.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Cliques de Afiliados</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">De onde vêm os visitantes via link</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Email Marketing -->
+            <a href="admin-emails.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(56,189,248,.1);color:#38bdf8;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">mail</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Email Marketing</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Copiar e-mails segmentados por plano</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Visão de Progresso -->
+            <a href="admin-progresso.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">query_stats</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Visão de Progresso</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Progresso dos usuários no sistema</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Administrar Acessos -->
+            <a href="admin-vitalicio.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">key</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Administrar Acessos</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ativar ou remover planos premium</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Histórico de Pagamentos -->
+            <a href="admin-historico-pagamentos.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">history</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Histórico de Pagamentos</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Registro de pagamentos efetuados</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -456,6 +595,32 @@
                             badge.style.borderColor = 'rgba(52,211,153,.3)';
                         }
                     }
+                }
+            } catch(_) {}
+
+            // Ocultar banner do Guia se progresso = 100%
+            try {
+                const uid = session.user.id;
+                const countTable = async (table) => {
+                    const { count } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                    return count || 0;
+                };
+
+                const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                const steps = [
+                    cfgCount > 0,
+                    await countTable('equipamentos') > 0,
+                    await countTable('insumos') > 0,
+                    await countTable('embalagens') > 0,
+                    await countTable('receitas') > 0,
+                    await countTable('produtos') > 0,
+                    localStorage.getItem('receitasx_precificacao_hit') === 'true',
+                ];
+                const doneCount = steps.filter(Boolean).length;
+
+                if (doneCount >= 7) {
+                    const bannerGuia = document.getElementById('banner-guia');
+                    if (bannerGuia) bannerGuia.style.display = 'none';
                 }
             } catch(_) {}
         } catch (e) {
@@ -609,6 +774,189 @@
     </script>
 
     <script src="notificacoes-afiliado.js"></script>
+
+    <!-- ══ Modal de Avisos do Admin ══════════════════════════════════ -->
+    <style>
+        #aviso-overlay {
+            position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+            z-index:9998;display:none;align-items:center;justify-content:center;padding:1rem;
+            animation:fadeOverlay .25s ease;
+        }
+        #aviso-overlay.show { display:flex; }
+        @keyframes fadeOverlay { from{opacity:0}to{opacity:1} }
+
+        #aviso-modal {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem;
+            width:100%;max-width:420px;overflow:hidden;
+            box-shadow:0 16px 64px rgba(0,0,0,.8),0 0 0 1px rgba(37,244,244,.06);
+            animation:slideModal .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes slideModal { from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)} }
+
+        .aviso-modal-header {
+            display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;
+            border-bottom:1px solid #2A2A2A;
+        }
+        .aviso-modal-icon {
+            width:2.5rem;height:2.5rem;border-radius:.7rem;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;
+        }
+        .aviso-modal-icon .material-symbols-outlined {
+            font-size:1.25rem;
+            font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;
+        }
+        .aviso-modal-title { font-size:1rem;font-weight:800;color:#f1f5f9; }
+        .aviso-modal-tipo { font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.15rem .5rem;border-radius:9999px;margin-top:.15rem;display:inline-block; }
+
+        .aviso-modal-body {
+            padding:1.25rem;max-height:320px;overflow-y:auto;
+        }
+        .aviso-modal-body p {
+            font-size:.88rem;color:#cbd5e1;line-height:1.7;white-space:pre-wrap;
+        }
+        .aviso-modal-footer {
+            padding:.85rem 1.25rem;border-top:1px solid #2A2A2A;display:flex;justify-content:flex-end;
+        }
+        .aviso-modal-btn {
+            display:inline-flex;align-items:center;gap:.4rem;
+            padding:.6rem 1.25rem;border-radius:.7rem;border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8);
+            color:#0a0a0a;font-weight:800;font-size:.82rem;cursor:pointer;
+            transition:opacity .15s;box-shadow:0 4px 16px rgba(37,244,244,.2);
+        }
+        .aviso-modal-btn:hover { opacity:.9; }
+        .aviso-modal-btn .material-symbols-outlined { font-size:.9rem; }
+    </style>
+
+    <div id="aviso-overlay">
+        <div id="aviso-modal">
+            <div class="aviso-modal-header">
+                <div class="aviso-modal-icon" id="aviso-m-icon"></div>
+                <div>
+                    <div class="aviso-modal-title" id="aviso-m-title"></div>
+                    <span class="aviso-modal-tipo" id="aviso-m-tipo"></span>
+                </div>
+            </div>
+            <div class="aviso-modal-body">
+                <p id="aviso-m-msg"></p>
+            </div>
+            <div class="aviso-modal-footer">
+                <button class="aviso-modal-btn" onclick="fecharAvisoModal()">
+                    <span class="material-symbols-outlined">check</span>
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ══ AVISOS DO ADMIN — Popup ao entrar ════════════════════════ */
+    let avisosQueue = [];
+    let avisoAtualId = null;
+
+    (async function checkAvisosAdmin() {
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) return;
+            const uid = session.user.id;
+
+            // Buscar avisos ativos (para todos OU para este usuário)
+            const { data: avisos, error } = await sb
+                .from('avisos_admin')
+                .select('*')
+                .eq('ativo', true)
+                .or(`destino.eq.todos,and(destino.eq.usuario,destino_user_id.eq.${uid})`)
+                .order('created_at', { ascending: false });
+
+            if (error || !avisos?.length) return;
+
+            // Buscar quais já foram vistos
+            const { data: vistos } = await sb
+                .from('avisos_vistos')
+                .select('aviso_id')
+                .eq('user_id', uid);
+
+            const vistosSet = new Set((vistos || []).map(v => v.aviso_id));
+
+            // Filtrar não vistos
+            avisosQueue = avisos.filter(a => !vistosSet.has(a.id));
+
+            if (avisosQueue.length > 0) {
+                mostrarProximoAviso();
+            }
+        } catch (e) {
+            console.warn('[ReceitasX] Erro ao verificar avisos:', e);
+        }
+    })();
+
+    function mostrarProximoAviso() {
+        if (!avisosQueue.length) return;
+
+        const aviso = avisosQueue.shift();
+        avisoAtualId = aviso.id;
+
+        // Configurar estilo por tipo
+        const configs = {
+            info:     { icon:'info',         bg:'rgba(96,165,250,.1)',  border:'rgba(96,165,250,.25)', color:'#60a5fa', label:'Informação',labelBg:'rgba(96,165,250,.12)',labelBorder:'rgba(96,165,250,.25)' },
+            aviso:    { icon:'warning',      bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.25)', color:'#fbbf24', label:'Aviso',      labelBg:'rgba(251,191,36,.12)', labelBorder:'rgba(251,191,36,.25)' },
+            urgente:  { icon:'priority_high', bg:'rgba(248,113,113,.1)',border:'rgba(248,113,113,.25)',color:'#f87171', label:'Urgente',    labelBg:'rgba(248,113,113,.12)',labelBorder:'rgba(248,113,113,.25)' },
+            novidade: { icon:'auto_awesome', bg:'rgba(52,211,153,.1)', border:'rgba(52,211,153,.25)', color:'#34d399', label:'Novidade',   labelBg:'rgba(52,211,153,.12)', labelBorder:'rgba(52,211,153,.25)' },
+        };
+        const c = configs[aviso.tipo] || configs.info;
+
+        const iconEl = document.getElementById('aviso-m-icon');
+        iconEl.style.background = c.bg;
+        iconEl.style.border = `1px solid ${c.border}`;
+        iconEl.innerHTML = `<span class="material-symbols-outlined" style="color:${c.color}">${c.icon}</span>`;
+
+        document.getElementById('aviso-m-title').textContent = aviso.titulo;
+
+        const tipoEl = document.getElementById('aviso-m-tipo');
+        tipoEl.textContent = c.label;
+        tipoEl.style.background = c.labelBg;
+        tipoEl.style.border = `1px solid ${c.labelBorder}`;
+        tipoEl.style.color = c.color;
+
+        document.getElementById('aviso-m-msg').textContent = aviso.mensagem;
+
+        document.getElementById('aviso-overlay').classList.add('show');
+    }
+
+    async function fecharAvisoModal() {
+        // Marcar como visto + desativar o aviso
+        if (avisoAtualId) {
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (session) {
+                    // Marcar como visto para este usuário
+                    await sb.from('avisos_vistos').insert({
+                        aviso_id: avisoAtualId,
+                        user_id: session.user.id
+                    });
+
+                    // Desativar o aviso (não aparece mais para ninguém)
+                    await sb.from('avisos_admin')
+                        .update({ ativo: false })
+                        .eq('id', avisoAtualId);
+                }
+            } catch (_) {}
+        }
+
+        document.getElementById('aviso-overlay').classList.remove('show');
+
+        // Mostrar próximo aviso (se houver) após uma breve pausa
+        if (avisosQueue.length > 0) {
+            setTimeout(mostrarProximoAviso, 400);
+        }
+    }
+
+    // Fechar com ESC
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('aviso-overlay')?.classList.contains('show')) {
+            fecharAvisoModal();
+        }
+    });
+    </script>
 </div>
 </body>
 </html>
