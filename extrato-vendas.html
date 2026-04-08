@@ -296,7 +296,7 @@
         <div class="saque-desktop" style="background:#141414;border:1px solid #1E1E1E;border-radius:1.1rem;padding:1.25rem;flex-direction:column;gap:.75rem;">
             <p style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;">Próximo Saque</p>
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:.78rem;">
-                <span style="color:#64748b;">Mínimo R$ 50,00</span>
+                <span id="label-min-head" style="color:#64748b;">Mínimo R$ 50,00</span>
                 <span id="prog-label-d" style="font-weight:700;color:#25f4f4;">—</span>
             </div>
             <div class="prog-track">
@@ -352,7 +352,7 @@
 <div class="glass-footer" style="position:fixed;bottom:0;left:0;right:0;padding:1rem 1.15rem 1.5rem;">
     <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:.75rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem;font-size:.75rem;">
-            <span style="color:#64748b;">Progresso para próximo saque (min. R$ 50)</span>
+            <span id="label-min-footer" style="color:#64748b;">Progresso para próximo saque (min. R$ 50)</span>
             <span id="prog-label" style="font-weight:700;color:#25f4f4;">—</span>
         </div>
         <div class="prog-track">
@@ -426,7 +426,7 @@
             <ul style="list-style:none;padding:0;margin:0">
                 <li class="ms-avisos li"><span class="dot">•</span><span>O prazo de pagamento é de até <strong style="color:#f1f5f9">48h úteis</strong> após a solicitação.</span></li>
                 <li class="ms-avisos li"><span class="dot">•</span><span>Certifique-se de que a chave Pix está <strong style="color:#f1f5f9">correta e ativa</strong> para evitar estornos.</span></li>
-                <li class="ms-avisos li"><span class="dot">•</span><span>O valor mínimo para saque é de <strong style="color:#25f4f4">R$ 50,00</strong>.</span></li>
+                <li class="ms-avisos li" id="li-min-saque"><span class="dot">•</span><span>O valor mínimo para saque é de <strong style="color:#25f4f4">R$ 50,00</strong>.</span></li>
             </ul>
         </div>
 
@@ -556,6 +556,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(r, 3000); // fallback
     });
     SAQUE_MINIMO = (window.AppConfig && window.AppConfig.saqueMinimo) ? window.AppConfig.saqueMinimo : 50;
+
+    // Atualiza Labels Hardcoded
+    const lblMinHead = document.getElementById('label-min-head');
+    if (lblMinHead) lblMinHead.textContent = 'Mínimo ' + fmtR(SAQUE_MINIMO);
+    
+    const lblMinFooter = document.getElementById('label-min-footer');
+    if (lblMinFooter) lblMinFooter.textContent = 'Progresso para próximo saque (min. ' + fmtR(SAQUE_MINIMO) + ')';
+    
+    const inpValor = document.getElementById('ms-valor');
+    if (inpValor) inpValor.min = SAQUE_MINIMO;
+    
+    const lblHint = document.getElementById('ms-valor-hint');
+    if (lblHint) lblHint.innerHTML = 'Mínimo: <span style="color:rgba(37,244,244,.8)">' + fmtR(SAQUE_MINIMO) + '</span>';
+    
+    const liMinSaque = document.getElementById('li-min-saque');
+    if (liMinSaque) liMinSaque.innerHTML = '<span class="dot">•</span><span>O valor mínimo para saque é de <strong style="color:#25f4f4">' + fmtR(SAQUE_MINIMO) + '</strong>.</span>';
+
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { location.href = 'login.html'; return; }
@@ -579,6 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById(id).textContent = '—';
             });
             document.getElementById('prog-label').textContent = fmtR(0) + ' / ' + fmtR(SAQUE_MINIMO);
+            document.getElementById('prog-label-d').textContent = fmtR(0) + ' / ' + fmtR(SAQUE_MINIMO);
             return;
         }
 
