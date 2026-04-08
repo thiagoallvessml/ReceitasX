@@ -244,9 +244,14 @@ async function loadUsuarios() {
         allUsuarios = data || [];
 
         try {
+            const { data: { session: listSession } } = await sb.auth.getSession();
+            const listToken = listSession?.access_token;
             const resp = await fetch(
                 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users',
-                { headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` } }
+                { headers: { 
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${listToken}` 
+                } }
             );
             console.log("Status list-users:", resp.status);
             if (resp.ok) {

@@ -16,7 +16,11 @@ serve(async (req) => {
   try {
     // Verifica se o chamador é admin via token JWT
     const authHeader = req.headers.get('authorization') || '';
-    const userToken  = authHeader.replace('Bearer ', '');
+    const userToken  = authHeader.replace('Bearer ', '').trim();
+
+    if (!userToken || userToken === 'undefined') {
+      return new Response(JSON.stringify({ error: 'Token não fornecido' }), { status: 401, headers: CORS });
+    }
 
     const sbUser = createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false },
@@ -24,8 +28,8 @@ serve(async (req) => {
     });
 
     // Confirma que é admin
-    const { data: { user } } = await sbUser.auth.getUser();
-    if (!user) {
+    const { data: { user }, error: authError } = await sbUser.auth.getUser(userToken);
+    if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Não autenticado' }), { status: 401, headers: CORS });
     }
 
