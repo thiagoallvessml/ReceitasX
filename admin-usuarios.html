@@ -460,9 +460,13 @@ function renderUsuarios(list) {
                         <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">${u._pagante ? 'remove_circle' : 'workspace_premium'}</span>
                         ${u._pagante ? 'Revogar Vit\u00e1licio' : 'Dar Vit\u00e1licio'}
                     </button>
+                    <button onclick="forcarLogout('${u.id}', '${emailsMap[u.id] || ''}')" title="Invalidar todas as sess\u00f5es do usu\u00e1rio" style="display:flex;align-items:center;gap:.25rem;padding:.4rem .65rem;border-radius:.5rem;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.06);color:#f87171;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;" onmouseover="this.style.background='rgba(248,113,113,.15)'" onmouseout="this.style.background='rgba(248,113,113,.06)'">
+                        <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">logout</span>
+                        Forçar Logout
+                    </button>
                     <select class="role-sel flex-1 sm:flex-none" id="sel-${u.id}"
                     onchange="changeRole('${u.id}', this.value)"
-                    ${u.id === window.__userProfile?.id ? 'title="Não é possível alterar seu próprio role"' : ''}>
+                    ${u.id === window.__userProfile?.id ? 'title="N\u00e3o \u00e9 poss\u00edvel alterar seu pr\u00f3prio role"' : ''}>
                     <option value="afiliado" ${u.role === 'afiliado' ? 'selected' : ''}>Afiliado</option>
                     <option value="admin"    ${u.role === 'admin'    ? 'selected' : ''}>Admin</option>
                 </select>
@@ -470,6 +474,41 @@ function renderUsuarios(list) {
             </div>
         </div>`;
     }).join('');
+}
+
+// ── Forçar Logout ────────────────────────────────────────────────
+async function forcarLogout(userId, email) {
+    const exibEmail = email ? ` (${email})` : '';
+    if (!confirm(`Tem certeza que deseja forçar o logout de${exibEmail}?\n\nTodas as sessões ativas serão invalidadas.`)) return;
+
+    const btn = document.querySelector(`#card-${userId} button[onclick*='forcarLogout']`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Aguarde...'; }
+
+    try {
+        const session = (await sb.auth.getSession()).data.session;
+        const resp = await fetch(
+            'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/force-logout',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session?.access_token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId }),
+            }
+        );
+        const json = await resp.json();
+        if (!resp.ok) throw new Error(json.error || 'Erro desconhecido');
+        showToast(`Logout forçado com sucesso!${exibEmail}`, 'success');
+    } catch(e) {
+        console.error('[forcarLogout]', e);
+        showToast('Erro ao forçar logout: ' + e.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:\'FILL\' 1,\'wght\' 700,\'GRAD\' 0,\'opsz\' 24">logout</span> Forçar Logout';
+        }
+    }
 }
 
 // ── Dar / Revogar Vitalício ───────────────────────────────────────
