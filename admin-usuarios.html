@@ -321,17 +321,29 @@ async function loadUsuarios() {
 // ── Presença Online ───────────────────────────────────────────────────
 async function refreshPresenca() {
     try {
-        const { data } = await sb.from('presenca_online').select('user_id, last_seen, pagina');
+        const { data, error } = await sb.from('presenca_online').select('user_id, last_seen, pagina');
+        
+        if (error) {
+            console.error('[Presença] Erro ao buscar presença:', error.message, error);
+            return;
+        }
+
+        console.log('[Presença] Total registros:', (data||[]).length);
+        
         onlineMap = {};
         const agora = Date.now();
         (data || []).forEach(p => {
             const diff = agora - new Date(p.last_seen).getTime();
-            // Considera online se heartbeat < 60s
-            if (diff < 60000) {
+            // Considera online se heartbeat < 2 minutos (120s)
+            if (diff < 120000) {
                 onlineMap[p.user_id] = { last_seen: p.last_seen, pagina: p.pagina };
             }
         });
-    } catch(_) {}
+        
+        console.log('[Presença] Usuários online:', Object.keys(onlineMap).length);
+    } catch(e) {
+        console.error('[Presença] Exceção:', e);
+    }
 }
 
 function isOnline(userId) {
