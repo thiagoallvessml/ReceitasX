@@ -485,14 +485,20 @@ async function forcarLogout(userId, email) {
     if (btn) { btn.disabled = true; btn.textContent = 'Aguarde...'; }
 
     try {
-        const session = (await sb.auth.getSession()).data.session;
+        const { data: { session } } = await sb.auth.getSession();
+        const token = session?.access_token;
+        
+        if (!token) {
+            throw new Error('Sessão expirada. Por favor, faça login novamente.');
+        }
+
         const resp = await fetch(
             'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/force-logout',
             {
                 method: 'POST',
                 headers: {
                     'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${session?.access_token}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ user_id: userId }),
