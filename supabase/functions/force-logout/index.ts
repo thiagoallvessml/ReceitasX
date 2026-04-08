@@ -66,15 +66,29 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'ID do usuário alvo não fornecido' }), { status: 400, headers: CORS });
     }
 
-    // Executar SignOut Global
-    const { error: signOutError } = await sbAdmin.auth.admin.signOut(user_id, 'global');
+    // Invalidar todas as sessões via ban temporário (1 segundo) + unban
+    // Isso revoga todos os refresh tokens do usuário imediatamente
+    const { error: banError } = await sbAdmin.auth.admin.updateUserById(user_id, {
+      ban_duration: '1s',
+    });
 
-    if (signOutError) {
-      console.error('SignOut Admin Error:', signOutError);
-      return new Response(JSON.stringify({ error: `Erro no Supabase Admin: ${signOutError.message}` }), { status: 500, headers: CORS });
+    if (banError) {
+      console.error('Ban Error:', banError);
+      return new Response(JSON.stringify({ error: `Erro ao invalidar sessões: ${banError.message}` }), { status: 500, headers: CORS });
     }
 
-    return new Response(JSON.stringify({ success: true, message: 'Usuário deslogado com sucesso de todos os dispositivos.' }), {
+    // Desbanir imediatamente para que o usuário possa fazer login novamente
+    const { error: unbanError } = await sbAdmin.auth.admin.updateUserById(user_id, {
+      ban_duration: 'none',
+    });
+
+    if (unbanError) {
+      console.error('Unban Error:', unbanError);
+      // Sessões já foram invalidadas, mas avisa que o unban falhou
+      return new Response(JSON.stringify({ error: `Sessões invalidadas, mas erro ao desbanir: ${unbanError.message}` }), { status: 500, headers: CORS });
+    }
+
+    return new Response(JSON.stringify({ success: true, message: 'Todas as sessões do usuário foram invalidadas.' }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
