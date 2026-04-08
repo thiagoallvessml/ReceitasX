@@ -61,3 +61,59 @@ async function dbUpsert(table, payload, onConflict) {
     if (error) throw error;
     return data;
 }
+
+/* ─── GOOGLE ANALYTICS (GA4) ──────────────────────────────────── */
+(function() {
+    const gaId = 'G-LFKEYKBBCD';
+    
+    // Injeta o script do Google
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+    document.head.appendChild(script);
+
+    // Inicializa o DataLayer
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    window.gtag = gtag;
+    
+    gtag('js', new Date());
+    gtag('config', gaId, {
+        page_path: window.location.pathname + window.location.search
+    });
+})();
+
+/* ─── PRESENÇA ONLINE (Heartbeat) ─────────────────────────────── */
+(async function _heartbeat() {
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { console.log('[Heartbeat] Sem sessão, heartbeat desativado'); return; }
+
+        const pagina = window.location.pathname.split('/').pop() || 'index.html';
+        console.log('[Heartbeat] Iniciado para', session.user.id, '| Página:', pagina);
+
+        const ping = async () => {
+            try {
+                const { error } = await sb.from('presenca_online').upsert({
+                    user_id: session.user.id,
+                    last_seen: new Date().toISOString(),
+                    pagina: pagina
+                }, { onConflict: 'user_id' });
+                
+                if (error) {
+                    console.error('[Heartbeat] Erro no upsert:', error.message, error);
+                } else {
+                    console.log('[Heartbeat] Ping OK', new Date().toLocaleTimeString());
+                }
+            } catch(e) {
+                console.error('[Heartbeat] Exceção:', e);
+            }
+        };
+
+        // Ping imediato + a cada 30s
+        await ping();
+        setInterval(ping, 30000);
+    } catch(e) {
+        console.error('[Heartbeat] Erro init:', e);
+    }
+})();
