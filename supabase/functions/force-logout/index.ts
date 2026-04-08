@@ -18,26 +18,34 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('authorization') || '';
-    const userToken  = authHeader.replace('Bearer ', '');
+    const userToken  = authHeader.replace('Bearer ', '').trim();
 
-    if (!userToken) {
-      return new Response(JSON.stringify({ error: 'Token não fornecido' }), { status: 401, headers: CORS });
+    if (!userToken || userToken === 'undefined') {
+      return new Response(JSON.stringify({ error: 'Token inválido ou ausente no header' }), { status: 401, headers: CORS });
     }
 
-    // Valida o chamador e confirma que é admin
+    // Cliente para validar o usuário que está chamando
     const sbUser = createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false },
       global: { headers: { Authorization: `Bearer ${userToken}` } },
     });
 
-    const { data: { user }, error: authError } = await sbUser.auth.getUser();
+    // Validar usuário
+    const { data: { user }, error: authError } = await sbUser.auth.getUser(userToken);
+    
     if (authError || !user) {
-      console.error('Auth error:', authError);
-      return new Response(JSON.stringify({ error: 'Não autenticado' }), { status: 401, headers: CORS });
+      console.error('Auth verify error:', authError);
+      return new Response(JSON.stringify({ 
+        error: `Erro de autenticação (JWT): ${authError?.message || 'Incapaz de obter usuário'}` 
+      }), { status: 401, headers: CORS });
     }
 
-    const sbAdmin = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+    // Cliente Admin para operações e verificação de perfil
+    const sbAdmin = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
 
+    // Verificar se o chamador é admin na tabela perfis
     const { data: perfil, error: perfilError } = await sbAdmin
       .from('perfis')
       .select('role')
@@ -45,63 +53,35 @@ serve(async (req) => {
       .maybeSingle();
 
     if (perfilError) {
-      console.error('Perfil error:', perfilError);
-      return new Response(JSON.stringify({ error: 'Erro ao verificar permissão' }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ error: 'Erro ao verificar perfil' }), { status: 500, headers: CORS });
     }
 
     if (perfil?.role !== 'admin') {
-      return new Response(JSON.stringify({ error: 'Acesso negado — não é admin' }), { status: 403, headers: CORS });
+      return new Response(JSON.stringify({ error: 'Acesso negado: Requer nível Admin' }), { status: 403, headers: CORS });
     }
 
-    // Lê o user_id alvo do body
-    let body: { user_id?: string };
-    try {
-      body = await req.json();
-    } catch {
-      return new Response(JSON.stringify({ error: 'Body JSON inválido' }), { status: 400, headers: CORS });
+    // Ler body
+    const { user_id } = await req.json();
+    if (!user_id) {
+      return new Response(JSON.stringify({ error: 'ID do usuário alvo não fornecido' }), { status: 400, headers: CORS });
     }
 
-    const targetUserId = body?.user_id;
+    // Executar SignOut Global
+    const { error: signOutError } = await sbAdmin.auth.admin.signOut(user_id, 'global');
 
-    if (!targetUserId) {
-      return new Response(JSON.stringify({ error: 'user_id é obrigatório' }), { status: 400, headers: CORS });
+    if (signOutError) {
+      console.error('SignOut Admin Error:', signOutError);
+      return new Response(JSON.stringify({ error: `Erro no Supabase Admin: ${signOutError.message}` }), { status: 500, headers: CORS });
     }
 
-    if (targetUserId === user.id) {
-      return new Response(JSON.stringify({ error: 'Não é possível forçar o próprio logout' }), { status: 400, headers: CORS });
-    }
-
-    // Usa a Admin REST API do Supabase Auth diretamente para revogar todas as sessões
-    const signOutResp = await fetch(
-      `${SUPABASE_URL}/auth/v1/admin/users/${targetUserId}/logout`,
-      {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ scope: 'global' }),
-      }
-    );
-
-    if (!signOutResp.ok) {
-      const errText = await signOutResp.text();
-      console.error('signOut REST error:', signOutResp.status, errText);
-      return new Response(
-        JSON.stringify({ error: `Erro ao revogar sessões (HTTP ${signOutResp.status}): ${errText}` }),
-        { status: 500, headers: CORS }
-      );
-    }
-
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, message: 'Usuário deslogado com sucesso de todos os dispositivos.' }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
 
   } catch (err) {
-    console.error('force-logout error:', err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    console.error('Unexpected error in force-logout:', err);
+    return new Response(JSON.stringify({ error: `Erro inesperado: ${err.message}` }), {
       status: 500,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
