@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Guia de Configuração - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #121212;
+            color: #f1f5f9;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* ── Header ── */
+        .btn-back {
+            display: flex; align-items: center; gap: .3rem;
+            color: #94a3b8; font-size: .85rem; cursor: pointer;
+            transition: color .15s; background: none; border: none; padding: 0;
+        }
+        .btn-back:hover { color: #25f4f4; }
+
+        /* ── Hero ── */
+        .hero-section {
+            position: relative;
+            padding: 2.5rem 1.25rem 2rem;
+            text-align: center;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 50% 0%, rgba(37,244,244,.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: .4rem;
+            font-size: .65rem; font-weight: 800; letter-spacing: .08em;
+            text-transform: uppercase;
+            background: rgba(37,244,244,.08);
+            border: 1px solid rgba(37,244,244,.2);
+            color: #25f4f4;
+            padding: .3rem .8rem; border-radius: 9999px;
+            margin-bottom: 1rem;
+        }
+        .hero-title {
+            font-size: 1.6rem; font-weight: 900;
+            letter-spacing: -.02em; line-height: 1.2;
+            margin-bottom: .6rem;
+        }
+        .hero-title span { color: #25f4f4; }
+        .hero-desc {
+            font-size: .88rem; color: #64748b;
+            max-width: 520px; margin: 0 auto; line-height: 1.5;
+        }
+
+        /* ── Progress Bar ── */
+        .progress-wrap {
+            max-width: 680px; margin: 0 auto 2rem;
+            padding: 0 1.25rem;
+        }
+        .progress-bar-outer {
+            width: 100%; height: .55rem;
+            background: #1E1E1E;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 1px solid #2A2A2A;
+        }
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #25f4f4, #0dc8c8);
+            border-radius: 9999px;
+            transition: width .5s cubic-bezier(.34, 1.56, .64, 1);
+            box-shadow: 0 0 12px rgba(37,244,244,.3);
+        }
+        .progress-label {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: .55rem;
+        }
+        .progress-text {
+            font-size: .72rem; color: #64748b; font-weight: 600;
+        }
+        .progress-pct {
+            font-size: .82rem; font-weight: 800; color: #25f4f4;
+        }
+
+        /* ── Timeline ── */
+        .timeline {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 1.25rem 3rem;
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 2.6rem;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, rgba(37,244,244,.3), #2A2A2A 30%, #2A2A2A 70%, transparent);
+        }
+        @media (max-width: 640px) {
+            .timeline::before { left: 1.85rem; }
+        }
+
+        /* ── Step Card ── */
+        .step-card {
+            position: relative;
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            animation: fadeUp .4s ease both;
+        }
+        .step-card:nth-child(1)  { animation-delay: .05s; }
+        .step-card:nth-child(2)  { animation-delay: .1s; }
+        .step-card:nth-child(3)  { animation-delay: .15s; }
+        .step-card:nth-child(4)  { animation-delay: .2s; }
+        .step-card:nth-child(5)  { animation-delay: .25s; }
+        .step-card:nth-child(6)  { animation-delay: .3s; }
+        .step-card:nth-child(7)  { animation-delay: .35s; }
+        .step-card:nth-child(8)  { animation-delay: .4s; }
+        .step-card:nth-child(9)  { animation-delay: .45s; }
+        .step-card:nth-child(10) { animation-delay: .5s; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Node (circle on timeline) */
+        .step-node {
+            flex-shrink: 0;
+            width: 2.8rem; height: 2.8rem;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem; font-weight: 900;
+            z-index: 2;
+            transition: all .3s;
+            border: 2px solid #2A2A2A;
+            background: #1A1A1A;
+            color: #475569;
+        }
+        @media (max-width: 640px) {
+            .step-node { width: 2.2rem; height: 2.2rem; font-size: .72rem; }
+        }
+
+        .step-card.required .step-node {
+            border-color: rgba(37,244,244,.35);
+            color: #25f4f4;
+            background: rgba(37,244,244,.08);
+        }
+        .step-card.optional .step-node {
+            border-color: rgba(100,116,139,.4);
+            color: #64748b;
+            background: rgba(100,116,139,.06);
+        }
+        .step-card.done .step-node {
+            border-color: rgba(52,211,153,.5);
+            background: rgba(52,211,153,.12);
+            color: #34d399;
+            box-shadow: 0 0 12px rgba(52,211,153,.2);
+        }
+
+        /* Body */
+        .step-body {
+            flex: 1;
+            background: #1A1A1A;
+            border: 1px solid #2A2A2A;
+            border-radius: 1rem;
+            padding: 1.1rem 1.25rem;
+            transition: border-color .2s, box-shadow .2s;
+            cursor: default;
+        }
+        .step-body:hover {
+            border-color: rgba(37,244,244,.2);
+        }
+        .step-card.done .step-body {
+            border-color: rgba(52,211,153,.2);
+            background: rgba(52,211,153,.03);
+        }
+
+        .step-head {
+            display: flex; align-items: center; gap: .6rem;
+            margin-bottom: .5rem;
+        }
+        .step-icon-wrap {
+            width: 2.2rem; height: 2.2rem;
+            border-radius: .6rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-icon-wrap .material-symbols-outlined {
+            font-size: 1.15rem;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .step-title-group { flex: 1; }
+        .step-title {
+            font-size: .92rem; font-weight: 700; color: #f1f5f9;
+            display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+        }
+        .step-required-badge {
+            font-size: .55rem; font-weight: 800;
+            letter-spacing: .07em; text-transform: uppercase;
+            background: rgba(37,244,244,.12);
+            color: #25f4f4;
+            border: 1px solid rgba(37,244,244,.25);
+            padding: .12rem .45rem; border-radius: .3rem;
+        }
+        .step-optional-badge {
+            font-size: .55rem; font-weight: 800;
+            letter-spacing: .07em; text-transform: uppercase;
+            background: rgba(100,116,139,.1);
+            color: #64748b;
+            border: 1px solid rgba(100,116,139,.25);
+            padding: .12rem .45rem; border-radius: .3rem;
+        }
+        .step-subtitle {
+            font-size: .72rem; color: #64748b; margin-top: .1rem;
+        }
+
+        .step-desc {
+            font-size: .8rem; color: #94a3b8; line-height: 1.55;
+            margin-bottom: .75rem;
+        }
+
+        /* Checklist items inside steps */
+        .step-checklist {
+            display: flex; flex-direction: column; gap: .35rem;
+            margin-bottom: .85rem;
+        }
+        .check-item {
+            display: flex; align-items: center; gap: .5rem;
+            font-size: .78rem; color: #94a3b8;
+        }
+        .check-item .material-symbols-outlined {
+            font-size: .9rem; color: #25f4f4;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .step-card.done .check-item .material-symbols-outlined {
+            color: #34d399;
+        }
+
+        /* Actions */
+        .step-actions {
+            display: flex; gap: .5rem; flex-wrap: wrap; align-items: center;
+        }
+        .btn-go {
+            display: inline-flex; align-items: center; gap: .35rem;
+            padding: .5rem 1rem; border-radius: .6rem;
+            border: 1px solid rgba(37,244,244,.3);
+            background: rgba(37,244,244,.08);
+            color: #25f4f4;
+            font-size: .78rem; font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+        }
+        .btn-go:hover {
+            background: rgba(37,244,244,.15);
+            border-color: rgba(37,244,244,.5);
+        }
+        .btn-go .material-symbols-outlined { font-size: .9rem; }
+
+        .btn-done {
+            display: inline-flex; align-items: center; gap: .35rem;
+            padding: .5rem .85rem; border-radius: .6rem;
+            border: 1px solid #2A2A2A;
+            background: transparent;
+            color: #64748b;
+            font-size: .72rem; font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-done:hover {
+            border-color: rgba(52,211,153,.4);
+            color: #34d399;
+            background: rgba(52,211,153,.05);
+        }
+        .btn-done .material-symbols-outlined { font-size: .85rem; }
+
+        .btn-done.is-done {
+            border-color: rgba(52,211,153,.35);
+            color: #34d399;
+            background: rgba(52,211,153,.08);
+        }
+
+        /* ── Tip box ── */
+        .tip-box {
+            display: flex; align-items: flex-start; gap: .55rem;
+            background: rgba(251,191,36,.04);
+            border: 1px solid rgba(251,191,36,.15);
+            border-radius: .7rem;
+            padding: .75rem .9rem;
+            font-size: .75rem; color: #94a3b8;
+            margin-top: .6rem;
+        }
+        .tip-box .material-symbols-outlined {
+            font-size: 1rem; color: #fbbf24; flex-shrink: 0; margin-top: .05rem;
+        }
+
+        /* ── Completed banner ── */
+        .banner-complete {
+            display: none;
+            max-width: 680px;
+            margin: 0 auto 1.5rem;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, rgba(52,211,153,.08), rgba(52,211,153,.03));
+            border: 1px solid rgba(52,211,153,.25);
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .banner-complete.show { display: block; }
+        .banner-complete-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 3rem; height: 3rem; border-radius: 50%;
+            background: rgba(52,211,153,.12);
+            margin-bottom: .6rem;
+        }
+        .banner-complete-icon .material-symbols-outlined {
+            font-size: 1.5rem; color: #34d399;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .banner-complete h3 {
+            font-size: 1rem; font-weight: 800; color: #34d399; margin-bottom: .3rem;
+        }
+        .banner-complete p {
+            font-size: .82rem; color: #64748b;
+        }
+
+        /* ── Reset btn ── */
+        .btn-reset {
+            display: flex; align-items: center; gap: .35rem;
+            margin: 0 auto; padding: .45rem .9rem;
+            border-radius: .5rem; border: 1px solid #2A2A2A;
+            background: transparent; color: #475569;
+            font-size: .72rem; font-weight: 600; cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-reset:hover { color: #f87171; border-color: rgba(248,113,113,.3); }
+        .btn-reset .material-symbols-outlined { font-size: .85rem; }
+
+        /* Legend */
+        .legend {
+            display: flex; gap: 1.25rem; justify-content: center;
+            flex-wrap: wrap;
+            padding: .75rem 0;
+            margin-bottom: .5rem;
+        }
+        .legend-item {
+            display: flex; align-items: center; gap: .35rem;
+            font-size: .7rem; font-weight: 600; color: #64748b;
+        }
+        .legend-dot {
+            width: .55rem; height: .55rem; border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="location.href='index.html'">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Guia de Configuração</h1>
+    </div>
+</header>
+
+<!-- ══ Hero ════════════════════════════════════════════════════════ -->
+<div class="hero-section">
+    <div class="hero-badge">
+        <span class="material-symbols-outlined" style="font-size:.85rem">rocket_launch</span>
+        Primeiros Passos
+    </div>
+    <h2 class="hero-title">Configure o <span>ReceitasX</span> do zero</h2>
+    <p class="hero-desc">Siga os passos abaixo na ordem indicada para configurar tudo corretamente. O progresso é atualizado automaticamente.</p>
+</div>
+
+<!-- ══ Progress ════════════════════════════════════════════════════ -->
+<div class="progress-wrap">
+    <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div class="progress-label">
+        <span class="progress-text"><span id="done-count">0</span> de <span id="total-count">7</span> etapas concluídas <span style="color:#475569;font-weight:400">+ 3 opcionais</span></span>
+        <span class="progress-pct" id="progress-pct">0%</span>
+    </div>
+</div>
+
+<!-- ══ Legend ══════════════════════════════════════════════════════ -->
+<div class="legend">
+    <div class="legend-item">
+        <span class="legend-dot" style="background:#25f4f4"></span>
+        Importante Preencher
+    </div>
+    <div class="legend-item">
+        <span class="legend-dot" style="background:#64748b"></span>
+        Opcional
+    </div>
+    <div class="legend-item">
+        <span class="legend-dot" style="background:#34d399"></span>
+        Concluído
+    </div>
+</div>
+
+<!-- ══ Banner 100% ════════════════════════════════════════════════ -->
+<div class="banner-complete" id="banner-complete">
+    <div class="banner-complete-icon">
+        <span class="material-symbols-outlined">celebration</span>
+    </div>
+    <h3>Parabéns! Tudo configurado 🎉</h3>
+    <p>O ReceitasX está pronto para uso. Agora é só cadastrar suas receitas e começar a precificar!</p>
+</div>
+
+<!-- ══ Timeline Steps ═════════════════════════════════════════════ -->
+<div class="timeline" id="timeline">
+
+    <!-- ── 1. Configurações ── -->
+    <div class="step-card required" data-step="1">
+        <div class="step-node">1</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(251,146,60,.1)">
+                    <span class="material-symbols-outlined" style="color:#fb923c">settings</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Configurações
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">Base de cálculo do sistema</p>
+                </div>
+            </div>
+            <p class="step-desc">Configure os valores essenciais que servem de base para todos os cálculos de custo no ReceitasX.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Peso e preço do botijão de gás</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Custo do kWh (conta de luz)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Valor da hora trabalhada (mão de obra)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Metas de margem (baixa, razoável, excelente)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Marketplaces e taxas (iFood, Rappi, etc.)</span>
+                </div>
+            </div>
+            <div class="step-actions">
+                <a href="configuracoes.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Configurações
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 2. Equipamentos ── -->
+    <div class="step-card required" data-step="2">
+        <div class="step-node">2</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(167,139,250,.1)">
+                    <span class="material-symbols-outlined" style="color:#a78bfa">construction</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Equipamentos
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">Forno, batedeira, fogão, etc.</p>
+                </div>
+            </div>
+            <p class="step-desc">Cadastre os equipamentos que você usa na produção. O custo de energia/gás deles será calculado automaticamente nas receitas.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome do equipamento</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Tipo de energia (Gás ou Elétrico)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Potência (watts) ou consumo (kg/h)</span>
+                </div>
+            </div>
+            <div class="tip-box">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <span><strong>Dica:</strong> A potência em watts está na etiqueta atrás do equipamento ou no manual. Se usa gás, informe o consumo em kg/hora.</span>
+            </div>
+            <div class="step-actions" style="margin-top:.85rem">
+                <a href="gerenciar-equipamentos.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Equipamentos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 3. Insumos ── -->
+    <div class="step-card required" data-step="3">
+        <div class="step-node">3</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(251,191,36,.1)">
+                    <span class="material-symbols-outlined" style="color:#fbbf24">package_2</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Insumos
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">Ingredientes e matéria-prima</p>
+                </div>
+            </div>
+            <p class="step-desc">Cadastre todos os ingredientes que você compra. É a base para o cálculo do custo de cada receita.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome do insumo (ex: Farinha de Trigo)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Unidade de medida (kg, litro, unidade)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Quantidade da embalagem comprada</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Preço pago pela embalagem</span>
+                </div>
+            </div>
+            <div class="tip-box">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <span><strong>Dica:</strong> Você pode importar uma lista inteira de insumos de uma vez pelo botão de importação na página de insumos.</span>
+            </div>
+            <div class="step-actions" style="margin-top:.85rem">
+                <a href="gerenciar-insumos.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Insumos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 4. Embalagens ── -->
+    <div class="step-card required" data-step="4">
+        <div class="step-node">4</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(244,114,182,.1)">
+                    <span class="material-symbols-outlined" style="color:#f472b6">inventory</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Embalagens
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">Caixas, potes, sacolas, tags</p>
+                </div>
+            </div>
+            <p class="step-desc">Cadastre as embalagens usadas para embalar seus produtos. O custo unitário entra na composição do preço final.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome da embalagem (ex: Caixa Kraft P)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Quantidade por pacote</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Preço pago pelo pacote</span>
+                </div>
+            </div>
+            <div class="step-actions">
+                <a href="gerenciar-embalagens.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Embalagens
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 5. Receitas ── -->
+    <div class="step-card required" data-step="5">
+        <div class="step-node">5</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(52,211,153,.1)">
+                    <span class="material-symbols-outlined" style="color:#34d399">menu_book</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Receitas
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">Monte suas receitas com custos</p>
+                </div>
+            </div>
+            <p class="step-desc">Crie suas receitas selecionando os insumos e equipamentos cadastrados. O sistema calcula automaticamente o custo total.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome da receita</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Ingredientes usados e quantidades</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Equipamentos usados e tempo de uso</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Rendimento (quantas unidades a receita rende)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Tempo de mão de obra (preparo)</span>
+                </div>
+            </div>
+            <div class="tip-box">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <span><strong>Dica:</strong> Se a receita rende 30 brigadeiros, coloque rendimento = 30. Assim o custo unitário será calculado corretamente.</span>
+            </div>
+            <div class="step-actions" style="margin-top:.85rem">
+                <a href="receitas.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Receitas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 6. Produtos ── -->
+    <div class="step-card required" data-step="6">
+        <div class="step-node">6</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(96,165,250,.1)">
+                    <span class="material-symbols-outlined" style="color:#60a5fa">shopping_basket</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Produtos
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">O que você vende de fato</p>
+                </div>
+            </div>
+            <p class="step-desc">Un produto é vinculado a uma receita + embalagem. É aqui que você define o preço de venda e visualiza a margem de lucro.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome do produto (ex: Brigadeiro Gourmet)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Receita vinculada</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Embalagem(ns) utilizada(s)</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Preço de venda</span>
+                </div>
+            </div>
+            <div class="step-actions">
+                <a href="gestao-produtos.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Produtos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 7. Precificação ── -->
+    <div class="step-card required" data-step="7">
+        <div class="step-node">7</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(37,244,244,.1)">
+                    <span class="material-symbols-outlined" style="color:#25f4f4">storefront</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Precificação
+                        <span class="step-required-badge">Importante</span>
+                    </div>
+                    <p class="step-subtitle">Análise por canal de venda</p>
+                </div>
+            </div>
+            <p class="step-desc">Veja o preço ideal para cada canal (Porta de Casa, iFood, etc.) com base nas taxas configuradas. Aqui você valida se a margem está saudável.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Analise a margem de lucro por canal</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Ajuste preços se a margem estiver baixa</span>
+                </div>
+            </div>
+            <div class="step-actions">
+                <a href="precificacao-marketplace.html" class="btn-go">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Precificação
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 8. Combos ── -->
+    <div class="step-card optional" data-step="8">
+        <div class="step-node">8</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(100,116,139,.1)">
+                    <span class="material-symbols-outlined" style="color:#94a3b8">layers</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Combos
+                        <span class="step-optional-badge">Opcional</span>
+                    </div>
+                    <p class="step-subtitle">Se você vende kits ou combos</p>
+                </div>
+            </div>
+            <p class="step-desc">Monte combos agrupando produtos. Ideal para caixas com mix de doces, cestas de presente, etc. Só configure se você pretende vender combos.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome do combo</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Produtos que compõem o combo</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Preço de venda do combo</span>
+                </div>
+            </div>
+            <div class="step-actions">
+                <a href="combos.html" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Combos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 9. Despesas ── -->
+    <div class="step-card optional" data-step="9">
+        <div class="step-node">9</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(100,116,139,.1)">
+                    <span class="material-symbols-outlined" style="color:#94a3b8">receipt_long</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Despesas
+                        <span class="step-optional-badge">Opcional</span>
+                    </div>
+                    <p class="step-subtitle">Custos fixos e variáveis do mês</p>
+                </div>
+            </div>
+            <p class="step-desc">Cadastre suas despesas fixas mensais (aluguel, internet, embalagens, etc.) para ter uma visão completa da lucratividade real do seu negócio.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Nome da despesa</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Valor mensal</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Categoria (Fixa ou Variável)</span>
+                </div>
+            </div>
+            <div class="step-actions">
+                <a href="despesas.html" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Despesas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 10. Ponto de Equilíbrio ── -->
+    <div class="step-card optional" data-step="10">
+        <div class="step-node">10</div>
+        <div class="step-body">
+            <div class="step-head">
+                <div class="step-icon-wrap" style="background:rgba(100,116,139,.1)">
+                    <span class="material-symbols-outlined" style="color:#94a3b8">balance</span>
+                </div>
+                <div class="step-title-group">
+                    <div class="step-title">
+                        Ponto de Equilíbrio
+                        <span class="step-optional-badge">Opcional</span>
+                    </div>
+                    <p class="step-subtitle">Quanto precisa vender por mês</p>
+                </div>
+            </div>
+            <p class="step-desc">Descubra quantas unidades ou quanto em faturamento você precisa atingir por mês para cobrir todas as despesas e começar a ter lucro.</p>
+            <div class="step-checklist">
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Analise o faturamento mínimo necessário</span>
+                </div>
+                <div class="check-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Veja quantas unidades precisa vender</span>
+                </div>
+            </div>
+            <div class="tip-box">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <span><strong>Dica:</strong> Para usar o Ponto de Equilíbrio, é ideal ter preenchido as Despesas (passo 9) antes.</span>
+            </div>
+            <div class="step-actions" style="margin-top:.85rem">
+                <a href="ponto-equilibrio.html" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    Ir para Equilíbrio
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /timeline -->
+
+<!-- ══ Reset Button ═══════════════════════════════════════════════ -->
+
+
+<!-- ══ Script ═════════════════════════════════════════════════════ -->
+<script>
+const TOTAL_STEPS = 7; // Combos, Despesas e Ponto de Equilíbrio são opcionais e não contam para o progresso
+let userSession = null;
+
+async function checkProgress() {
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) return;
+        userSession = session;
+
+        const uid = session.user.id;
+        const progress = {};
+
+        // Helper para rodar contagem
+        const countTable = async (table) => {
+            const { count } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
+            return count || 0;
+        };
+
+        // 1. Configurações
+        const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
+        progress[1] = cfgCount > 0;
+
+        // 2. Equipamentos
+        progress[2] = await countTable('equipamentos') > 0;
+
+        // 3. Insumos
+        progress[3] = await countTable('insumos') > 0;
+
+        // 4. Embalagens
+        progress[4] = await countTable('embalagens') > 0;
+
+        // 5. Receitas
+        progress[5] = await countTable('receitas') > 0;
+
+        // 6. Produtos
+        progress[6] = await countTable('produtos') > 0;
+
+        // 7. Precificação (pelo menos 1 preço cadastrado no marketplace)
+        const precHit = localStorage.getItem('receitasx_precificacao_hit');
+        progress[7] = precHit === 'true';
+
+        // 8. Combos (Opcional — NÃO conta para o progresso)
+        progress[8] = await countTable('combos') > 0;
+
+        // 9. Despesas (Opcional — NÃO conta para o progresso)
+        progress[9] = await countTable('despesas') > 0;
+
+        // 10. Ponto de Equilíbrio (Acessou a aba pelo menos uma vez)
+        // Isso pode ser via localStorage ou deixamos sem validação estrita
+        const peqHit = localStorage.getItem('receitasx_peq_hit');
+        progress[10] = peqHit === 'true';
+
+        renderProgress(progress);
+    } catch(e) {
+        console.warn('Erro ao verificar progresso:', e);
+    }
+}
+
+function renderProgress(progress) {
+    // Conta apenas etapas que contam para o progresso (exclui 8=Combos e 9=Despesas)
+    const requiredSteps = [1,2,3,4,5,6,7];
+    const doneCount = requiredSteps.filter(k => progress[k]).length;
+    let requiredCount = 0;
+    const TOTAL_REQUIRED = 7;
+    for(let i=1; i<=7; i++) {
+        if(progress[i]) requiredCount++;
+    }
+
+    const pct = Math.round((doneCount / TOTAL_STEPS) * 100);
+
+    // Update progress bar
+    const bar = document.getElementById('progress-bar');
+    if (bar) bar.style.width = pct + '%';
+    
+    document.getElementById('done-count').textContent = doneCount;
+    document.getElementById('total-count').textContent = TOTAL_STEPS;
+    document.getElementById('progress-pct').textContent = pct + '%';
+
+    // Update step cards
+    document.querySelectorAll('.step-card').forEach(card => {
+        const step = parseInt(card.dataset.step);
+        const isDone = !!progress[step];
+
+        card.classList.toggle('done', isDone);
+
+        // Update node content
+        const node = card.querySelector('.step-node');
+        if (node) {
+            if (isDone) {
+                node.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:\'FILL\' 1,\'wght\' 500,\'GRAD\' 0,\'opsz\' 24">check</span>';
+            } else {
+                node.textContent = step;
+            }
+        }
+    });
+
+    // Banner 100% (Mostra se fez pelo menos o básico ou tudo)
+    const banner = document.getElementById('banner-complete');
+    if (banner) {
+        if (requiredCount >= TOTAL_REQUIRED) {
+            banner.classList.add('show');
+            banner.querySelector('p').textContent = 'O ReceitasX está pronto para uso. Suas configurações essenciais estão concluídas!';
+        } else {
+            banner.classList.remove('show');
+        }
+    }
+}
+
+function resetProgress() {
+    // Como agora é automático, o reset visual não serve muito.
+    // Vamos apenas recarregar para buscar do DB.
+    checkProgress();
+}
+
+// Init
+checkProgress();
+</script>
+
+</body>
+</html>
