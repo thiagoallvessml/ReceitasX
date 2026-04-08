@@ -497,8 +497,16 @@ async function forcarLogout(userId, email) {
                 body: JSON.stringify({ user_id: userId }),
             }
         );
-        const json = await resp.json();
-        if (!resp.ok) throw new Error(json.error || 'Erro desconhecido');
+        
+        let json;
+        const text = await resp.text();
+        try {
+            json = JSON.parse(text);
+        } catch(e) {
+            json = { error: text || `Erro HTTP ${resp.status}` };
+        }
+
+        if (!resp.ok) throw new Error(json.error || `Erro ${resp.status}`);
         showToast(`Logout forçado com sucesso!${exibEmail}`, 'success');
     } catch(e) {
         console.error('[forcarLogout]', e);
