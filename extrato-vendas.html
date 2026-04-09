@@ -445,6 +445,134 @@ let _todasIndicacoes = [];
 let _todosSaquesPagos = [];
 let _saldoDisponivel = 0;
 let _filtroAtivo = 'todos';
+let _pixTipo = 'cpf';
+
+/* ── Toast ── */
+let _toastTimer;
+function showToast(msg, type='success') {
+    let t = document.getElementById('toast-ev');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast-ev';
+        t.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap;';
+        document.body.appendChild(t);
+    }
+    const icoName = type === 'error' ? 'cancel' : 'check_circle';
+    const icoColor = type === 'error' ? '#f87171' : '#25f4f4';
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;color:${icoColor}">${icoName}</span><span>${msg}</span>`;
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    t.style.opacity = '1';
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => {
+        t.style.transform = 'translateX(-50%) translateY(80px)';
+        t.style.opacity = '0';
+    }, 3500);
+}
+
+/* ── Modal Saque ── */
+function abrirModalSaque() {
+    document.getElementById('ms-saldo').textContent = fmtR(_saldoDisponivel);
+    document.getElementById('ms-valor').value = '';
+    document.getElementById('ms-chave').value = '';
+    document.getElementById('btn-confirmar-saque').disabled = true;
+    document.getElementById('modal-saque').classList.add('open');
+}
+
+function fecharModalSaque() {
+    document.getElementById('modal-saque').classList.remove('open');
+}
+
+function _fecharModalSe(event) {
+    if (event.target === document.getElementById('modal-saque')) fecharModalSaque();
+}
+
+function selecionarPixTipo(tipo, btn) {
+    _pixTipo = tipo;
+    document.querySelectorAll('.pix-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const lblMap = { cpf: 'Sua Chave Pix (CPF / CNPJ)', email: 'Sua Chave Pix (E-mail)', celular: 'Sua Chave Pix (Celular)', aleatoria: 'Sua Chave Pix (Aleatória)' };
+    const phMap  = { cpf: '000.000.000-00', email: 'seu@email.com', celular: '(11) 99999-9999', aleatoria: 'Cole sua chave aleatória' };
+    document.getElementById('ms-chave-lbl').textContent = lblMap[tipo] || lblMap.cpf;
+    document.getElementById('ms-chave').placeholder = phMap[tipo] || phMap.cpf;
+    validarModalSaque();
+}
+
+function validarModalSaque() {
+    const valor = parseFloat(document.getElementById('ms-valor').value);
+    const chave = document.getElementById('ms-chave').value.trim();
+    const ok = valor >= SAQUE_MINIMO && valor <= _saldoDisponivel && chave.length >= 5;
+    document.getElementById('btn-confirmar-saque').disabled = !ok;
+}
+
+async function confirmarSaque() {
+    const btn = document.getElementById('btn-confirmar-saque');
+    const valor = parseFloat(document.getElementById('ms-valor').value);
+    const chave = document.getElementById('ms-chave').value.trim();
+
+    if (!valor || valor < SAQUE_MINIMO) { showToast('Valor mínimo é ' + fmtR(SAQUE_MINIMO), 'error'); return; }
+    if (valor > _saldoDisponivel) { showToast('Saldo insuficiente', 'error'); return; }
+    if (chave.length < 5) { showToast('Informe uma chave Pix válida', 'error'); return; }
+
+    btn.disabled = true;
+    document.getElementById('btn-confirmar-txt').textContent = 'Enviando...';
+
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) { showToast('Sessão expirada. Faça login novamente.', 'error'); return; }
+
+        const { error } = await sb.from('saques_afiliado').insert({
+            user_id: user.id,
+            valor: valor,
+            pix_tipo: _pixTipo,
+            pix_chave: chave,
+            status: 'pendente'
+        });
+
+        if (error) {
+            console.error('[Saque]', error);
+            showToast('Erro ao solicitar saque: ' + error.message, 'error');
+            return;
+        }
+
+        showToast('Solicitação de saque enviada com sucesso! 🎉');
+        fecharModalSaque();
+
+        // Atualiza saldo local
+        _saldoDisponivel = Math.max(0, _saldoDisponivel - valor);
+        document.getElementById('a-receber').textContent = fmtR(_saldoDisponivel);
+
+        const pct = Math.min(100, (_saldoDisponivel / SAQUE_MINIMO) * 100);
+        const progLabel = fmtR(_saldoDisponivel) + ' / ' + fmtR(SAQUE_MINIMO);
+        ['prog-fill','prog-fill-d'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.width = pct + '%';
+        });
+        ['prog-label','prog-label-d'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = progLabel;
+        });
+
+        // Desabilita botão se saldo ficou abaixo do mínimo
+        if (_saldoDisponivel < SAQUE_MINIMO) {
+            ['btn-saque','btn-saque-d'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.disabled = true;
+            });
+            ['btn-saque-txt','btn-saque-txt-d'].forEach(id => {
+                const t = document.getElementById(id);
+                if (t) t.textContent = 'Saldo insuficiente (mín. ' + fmtR(SAQUE_MINIMO) + ')';
+            });
+        }
+
+    } catch(e) {
+        console.error('[Saque] Exceção:', e);
+        showToast('Erro inesperado: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        document.getElementById('btn-confirmar-txt').textContent = 'Confirmar Solicitação de Saque';
+    }
+}
 
 /* ── Formata R$ ── */
 function fmtR(v) {
