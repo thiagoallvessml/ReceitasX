@@ -893,6 +893,7 @@
         if (!avisosQueue.length) return;
 
         const aviso = avisosQueue.shift();
+        window.avisoAtualInfo = aviso; // Guarda a info para o fechamento
         avisoAtualId = aviso.id;
 
         // Configurar estilo por tipo
@@ -934,10 +935,12 @@
                         user_id: session.user.id
                     });
 
-                    // Desativar o aviso (não aparece mais para ninguém)
-                    await sb.from('avisos_admin')
-                        .update({ ativo: false })
-                        .eq('id', avisoAtualId);
+                    // Desativar automaticamente SOMENTE se for um aviso direcionado a um usuário específico
+                    if (window.avisoAtualInfo && window.avisoAtualInfo.destino === 'usuario') {
+                        await sb.from('avisos_admin')
+                            .update({ ativo: false })
+                            .eq('id', avisoAtualId);
+                    }
                 }
             } catch (_) {}
         }
