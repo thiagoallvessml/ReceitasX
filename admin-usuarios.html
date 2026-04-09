@@ -165,10 +165,6 @@
             <div class="stat-lbl">Pagantes</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-admin" style="color:#fb923c">—</div>
-            <div class="stat-lbl">Admins</div>
-        </div>
-        <div class="stat-card">
             <div class="stat-val" id="stat-afiliado" style="color:#25f4f4">—</div>
             <div class="stat-lbl">Afiliados</div>
         </div>
@@ -189,7 +185,6 @@
             <button class="pill active" data-filter="todos"    onclick="setFilter('todos', this)">Todos</button>
             <button class="pill" data-filter="online"         onclick="setFilter('online', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">🟢 Online</button>
             <button class="pill" data-filter="pagantes"        onclick="setFilter('pagantes', this)">Pagantes</button>
-            <button class="pill" data-filter="admin"          onclick="setFilter('admin', this)">Admin</button>
             <button class="pill" data-filter="afiliado"       onclick="setFilter('afiliado', this)">Afiliado</button>
         </div>
     </div>
@@ -369,7 +364,6 @@ function updateStats() {
     document.getElementById('stat-gratuito').textContent = allUsuarios.filter(u => !u._pagante).length;
     document.getElementById('stat-vitalicio').textContent= allUsuarios.filter(u => u.plano === 'vitalicio').length;
     document.getElementById('stat-pagantes').textContent = allUsuarios.filter(u => u._pagante).length;
-    document.getElementById('stat-admin').textContent    = allUsuarios.filter(u => u.role === 'admin').length;
     document.getElementById('stat-afiliado').textContent = allUsuarios.filter(u => u.role === 'afiliado').length;
 }
 
