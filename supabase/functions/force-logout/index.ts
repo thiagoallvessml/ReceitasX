@@ -66,7 +66,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'ID do usuário alvo não fornecido' }), { status: 400, headers: CORS });
     }
 
-    // Invalidar todas as sessões via ban temporário (1 segundo) + unban
+    // Verificar se o usuário alvo já está banido
+    const { data: targetUser, error: getUserError } = await sbAdmin.auth.admin.getUserById(user_id);
+    
+    if (getUserError) {
+      return new Response(JSON.stringify({ error: `Usuário não encontrado: ${getUserError.message}` }), { status: 404, headers: CORS });
+    }
+
+    const wasBanned = !!targetUser?.user?.banned_until && 
+      new Date(targetUser.user.banned_until) > new Date();
+
+    // Invalidar todas as sessões via ban temporário (1 segundo)
     // Isso revoga todos os refresh tokens do usuário imediatamente
     const { error: banError } = await sbAdmin.auth.admin.updateUserById(user_id, {
       ban_duration: '1s',
@@ -77,18 +87,27 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: `Erro ao invalidar sessões: ${banError.message}` }), { status: 500, headers: CORS });
     }
 
-    // Desbanir imediatamente para que o usuário possa fazer login novamente
-    const { error: unbanError } = await sbAdmin.auth.admin.updateUserById(user_id, {
-      ban_duration: 'none',
-    });
+    // Se o usuário NÃO estava banido antes, desbanir para que possa fazer login novamente
+    // Se JÁ estava banido, manter o ban permanente
+    if (!wasBanned) {
+      const { error: unbanError } = await sbAdmin.auth.admin.updateUserById(user_id, {
+        ban_duration: 'none',
+      });
 
-    if (unbanError) {
-      console.error('Unban Error:', unbanError);
-      // Sessões já foram invalidadas, mas avisa que o unban falhou
-      return new Response(JSON.stringify({ error: `Sessões invalidadas, mas erro ao desbanir: ${unbanError.message}` }), { status: 500, headers: CORS });
+      if (unbanError) {
+        console.error('Unban Error:', unbanError);
+        return new Response(JSON.stringify({ error: `Sessões invalidadas, mas erro ao desbanir: ${unbanError.message}` }), { status: 500, headers: CORS });
+      }
     }
 
-    return new Response(JSON.stringify({ success: true, message: 'Todas as sessões do usuário foram invalidadas.' }), {
+    // Remover a presença online imediatamente (para sumir do painel admin)
+    await sbAdmin.from('presenca_online').delete().eq('user_id', user_id);
+
+    const msg = wasBanned 
+      ? 'Sessões invalidadas. Usuário continua banido.' 
+      : 'Todas as sessões do usuário foram invalidadas.';
+
+    return new Response(JSON.stringify({ success: true, message: msg }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
