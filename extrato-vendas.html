@@ -523,6 +523,7 @@ async function confirmarSaque() {
 
         const { error } = await sb.from('saques_afiliado').insert({
             user_id: user.id,
+            email: user.email,
             valor: valor,
             pix_tipo: _pixTipo,
             pix_chave: chave,
