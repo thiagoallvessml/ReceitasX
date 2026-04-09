@@ -132,6 +132,24 @@
     </div>
 </main>
 
+<!-- Modal Usos / Conversões -->
+<div id="modal-usos" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl w-full max-w-lg overflow-hidden flex flex-col m-4 max-h-[85vh] shadow-[0_8px_32px_rgba(0,0,0,0.6)] transform scale-95 transition-transform duration-200" id="modal-usos-content">
+        <div class="flex items-center justify-between p-4 border-b border-[#2A2A2A] bg-[#1E1E1E]">
+            <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#a78bfa]">history</span>
+                Vendas vinculadas a <span id="modal-usos-codigo" class="text-[#a78bfa] font-mono tracking-wide px-1">---</span>
+            </h3>
+            <button onclick="fecharModalUsos()" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-4 overflow-y-auto flex-1 space-y-3" id="modal-usos-list">
+            <!-- carregando ou lista -->
+        </div>
+    </div>
+</div>
+
 <script>
 let allCliques = [];
 let currentTab = 'ranking';
@@ -227,6 +245,10 @@ function renderRanking() {
                 <div class="agg-count">${info.count}</div>
                 <div class="agg-label">cliques</div>
             </div>
+            <button style="display:flex;align-items:center;justify-content:center;gap:.25rem;padding:.35rem .65rem;border-radius:.5rem;border:1px solid rgba(167,139,250,.4);color:#a78bfa;background:rgba(167,139,250,.08);font-size:.68rem;font-weight:700;cursor:pointer;margin-left:.25rem;transition:all .15s;" onclick="verUsos('${code}')" onmouseover="this.style.background='rgba(167,139,250,.18)'" onmouseout="this.style.background='rgba(167,139,250,.08)'">
+                <span class="material-symbols-outlined" style="font-size:.8rem">history</span>
+                Ver Vendas
+            </button>
         </div>`;
     }).join('');
 }
@@ -275,6 +297,75 @@ function renderHistorico() {
         </div>`;
     }).join('');
 }
+
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function verUsos(codigo) {
+    const modal = document.getElementById('modal-usos');
+    const content = document.getElementById('modal-usos-content');
+    const list = document.getElementById('modal-usos-list');
+    document.getElementById('modal-usos-codigo').textContent = codigo;
+    
+    list.innerHTML = '<div class="shimmer" style="height:3rem"></div><div class="shimmer" style="height:3rem"></div>';
+    
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    setTimeout(() => content.classList.remove('scale-95'), 10);
+
+    try {
+        const { data, error } = await sb
+            .from('pedidos')
+            .select('email, created_at, status, valor_pago')
+            .ilike('cupom_usado', codigo)
+            .order('created_at', {ascending: false});
+            
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-8 text-slate-400">
+                    <span class="material-symbols-outlined block text-4xl mb-2 text-[#2A2A2A]">history_toggle_off</span>
+                    Nenhum pedido atrelado a este código ainda.
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = data.map(p => {
+            const dt = new Date(p.created_at).toLocaleString('pt-BR');
+            const stsColor = p.status === 'pago' ? 'text-emerald-400' : 'text-slate-400';
+            const valLabel = p.valor_pago ? `R$ ${Number(p.valor_pago).toFixed(2).replace('.',',')}` : '---';
+            return `
+                <div class="bg-[#141414] border border-[#2A2A2A] rounded-lg p-3 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-semibold text-slate-200">${esc(p.email || 'Sem email')}</span>
+                        <span class="text-xs font-bold ${stsColor} uppercase tracking-wide bg-[#1A1A1A] border border-[#2A2A2A] px-2 py-0.5 rounded">${p.status}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-500 mt-1">
+                        <span>${dt}</span>
+                        <span class="font-bold text-slate-300">${valLabel}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch(e) {
+        list.innerHTML = `<div class="text-red-400 text-sm text-center py-4">Erro ao buscar no servidor: ${esc(e.message)}</div>`;
+    }
+}
+
+function fecharModalUsos() {
+    const modal = document.getElementById('modal-usos');
+    const content = document.getElementById('modal-usos-content');
+    content.classList.add('scale-95');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('modal-usos') && !document.getElementById('modal-usos').classList.contains('opacity-0')) {
+        fecharModalUsos();
+    }
+});
 </script>
 </body>
 </html>
