@@ -176,11 +176,16 @@
 
     <!-- Search + filtro -->
     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div class="search-wrap flex-1 w-full">
+        <div class="search-wrap flex-1 w-full flex-shrink-0" style="min-width: 250px;">
             <span class="material-symbols-outlined ico">search</span>
             <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterUsuarios()" />
         </div>
-        <div class="flex gap-2 flex-shrink-0 flex-wrap">
+        <select id="sort-usuarios" class="role-sel flex-shrink-0" onchange="filterUsuarios()" style="padding:.7rem;border-radius:.75rem;font-size:.85rem;font-weight:600;min-height:2.6rem;appearance:auto;">
+            <option value="cadastro_desc">Recentes (Novo Cadastro)</option>
+            <option value="login_desc">Último Login (Mais Recente)</option>
+            <option value="nome_asc">Ordem Alfabética (A-Z)</option>
+        </select>
+        <div class="flex gap-2 flex-shrink-0 flex-wrap w-full">
             <button class="pill active" data-filter="todos"    onclick="setFilter('todos', this)">Todos</button>
             <button class="pill" data-filter="online"         onclick="setFilter('online', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">🟢 Online</button>
             <button class="pill" data-filter="pagantes"        onclick="setFilter('pagantes', this)">Pagantes</button>
@@ -389,11 +394,28 @@ function filterUsuarios() {
         list = list.filter(u => u.role === currentFilter);
     }
 
-    // Ordena online primeiro
+    const sortVal = document.getElementById('sort-usuarios')?.value || 'cadastro_desc';
+
+    // Ordena 
     list.sort((a, b) => {
+        // Online sempre fica no topo de qualquer lista
         const aOn = isOnline(a.id) ? 1 : 0;
         const bOn = isOnline(b.id) ? 1 : 0;
-        return bOn - aOn;
+        if (bOn !== aOn) return bOn - aOn;
+
+        // Se ambos online ou ambos offline, usa o filtro selecionado
+        if (sortVal === 'login_desc') {
+            const dA = lastLoginMap[a.id] ? new Date(lastLoginMap[a.id]).getTime() : 0;
+            const dB = lastLoginMap[b.id] ? new Date(lastLoginMap[b.id]).getTime() : 0;
+            return dB - dA;
+        } else if (sortVal === 'nome_asc') {
+            const nA = (a.nome || '').toLowerCase();
+            const nB = (b.nome || '').toLowerCase();
+            return nA.localeCompare(nB);
+        } else {
+            // cadastro_desc (padrão)
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
     });
 
     if (q) {
