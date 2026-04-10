@@ -128,11 +128,15 @@ serve(async (req) => {
       pedido = ins;
     }
 
-    // Atualiza perfil para vitalício
+    // Atualiza perfil para vitalício (via RPC SECURITY DEFINER)
     if (userId) {
-      await sb.from('perfis')
-        .update({ plano: 'vitalicio', plano_ativo_em: new Date().toISOString() })
-        .eq('id', userId);
+      const { error: rpcErr } = await sb.rpc('ativar_plano_vitalicio', { p_user_id: userId });
+      if (rpcErr) {
+        console.warn('RPC falhou, tentando update direto:', rpcErr.message);
+        await sb.from('perfis')
+          .update({ plano: 'vitalicio', plano_ativo_em: new Date().toISOString() })
+          .eq('id', userId);
+      }
       console.log(`Perfil ${userId} atualizado para vitalicio`);
     }
 

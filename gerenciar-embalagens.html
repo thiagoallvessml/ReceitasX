@@ -350,7 +350,7 @@ function fmtR(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFr
 /* â”€â”€â”€ SUPABASE: CARREGAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 async function loadEmbalagens() {
     try {
-        const { data, error } = await sb.from('embalagens').select('*').order('nome', { ascending: true });
+        const { data, error } = await sb.from('embalagens').select('*').eq('user_id', userId).order('nome', { ascending: true });
         if (error) throw error;
         embalagens = data || [];
         renderList();
@@ -586,5 +586,6 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCadas
     injetarAviso('embalagens');
 })();
 </script>
+<script src="guia-banner.js"></script>
 </body>
 </html>

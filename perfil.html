@@ -327,6 +327,12 @@
             <span class="material-symbols-outlined">lock_reset</span>
             Alterar senha
         </button>
+        <button id="btn-reembolso" class="danger-btn" onclick="location.href='solicitar-reembolso.html'" style="margin-bottom:.5rem;color:#fbbf24;border-color:rgba(251,191,36,.3);"
+            onmouseover="if(!this.disabled){this.style.background='rgba(251,191,36,.08)';this.style.borderColor='rgba(251,191,36,.5)'}"
+            onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='rgba(251,191,36,.3)'}">
+            <span class="material-symbols-outlined">currency_exchange</span>
+            <span id="btn-reembolso-text">Solicitar Reembolso</span>
+        </button>
         <button class="danger-btn" onclick="sairDaConta()" id="btn-sair">
             <span class="material-symbols-outlined">logout</span>
             Sair da conta
@@ -420,7 +426,7 @@ async function sairDaConta() {
     emailEl.style.cursor  = 'not-allowed';
     emailEl.title = 'O e-mail é gerenciado pela autenticação e não pode ser alterado aqui.';
 
-    await Promise.all([loadPerfil(), loadStats(), loadPlano()]);
+    await Promise.all([loadPerfil(), loadStats(), loadPlano(), checkReembolsoPrazo()]);
 })();
 
 /* ─── Carregar perfil do Supabase ────────────────────────────────── */
@@ -728,6 +734,44 @@ function showToast(msg, type = 'success') {
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+/* ── VERIFICAR PRAZO REEMBOLSO (7 dias) ─────────────────────── */
+async function checkReembolsoPrazo() {
+    const btn = document.getElementById('btn-reembolso');
+    const txt = document.getElementById('btn-reembolso-text');
+    if (!btn) return;
+    try {
+        const session = await getSession();
+        if (!session) return;
+        // Busca o pedido pago mais recente
+        const { data: peds } = await sb
+            .from('pedidos')
+            .select('created_at')
+            .eq('status', 'pago')
+            .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
+            .order('created_at', { ascending: false })
+            .limit(1);
+        if (!peds || peds.length === 0) {
+            // Sem compra — esconde o botão
+            btn.style.display = 'none';
+            return;
+        }
+        const compraDate = new Date(peds[0].created_at);
+        const agora = new Date();
+        const diffMs = agora - compraDate;
+        const diffDias = diffMs / (1000 * 60 * 60 * 24);
+        if (diffDias > 7) {
+            btn.disabled = true;
+            btn.onclick = null;
+            btn.style.opacity = '.4';
+            btn.style.cursor = 'not-allowed';
+            btn.style.color = '#64748b';
+            btn.style.borderColor = '#2A2A2A';
+            txt.textContent = 'Prazo de reembolso expirado (7 dias)';
+        }
+    } catch (e) {
+        console.warn('Erro ao verificar prazo reembolso:', e);
+    }
 }
 /* ── MODAL ALTERAR SENHA ────────────────────────────────────── */
 function openModalSenha() {

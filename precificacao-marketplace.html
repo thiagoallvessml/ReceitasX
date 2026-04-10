@@ -51,7 +51,7 @@
         @media(min-width:1024px) { .prod-grid { grid-template-columns:1fr 1fr 1fr; } }
 
         /* product pricing card */
-        .pp-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.75rem;transition:border-color .2s,box-shadow .2s; }
+        .pp-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.75rem;transition:border-color .2s,box-shadow .2s; min-width:0; }
         .pp-card:hover { border-color:rgba(37,244,244,.18);box-shadow:0 4px 24px rgba(0,0,0,.4); }
 
         /* card top */
@@ -67,7 +67,7 @@
         .pp-custo-val { font-size:.82rem;font-weight:700;color:#94a3b8; }
         .badge-receita { display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:.35rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);color:#25f4f4;cursor:help; }
         .badge-receita .material-symbols-outlined { font-size:.7rem; }
-        .pp-lz-row { display:flex;align-items:center;gap:.4rem; }
+        .pp-lz-row { display:flex;align-items:center;gap:.4rem;flex-wrap:wrap; }
         .pp-lz-lbl { font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#f87171; }
         .pp-lz-val { font-size:.78rem;font-weight:700;color:#f87171; }
         .pp-lz-hint { font-size:.6rem;color:#475569; }
@@ -78,10 +78,10 @@
         /* price section */
         .pp-price-lbl { font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.45rem; }
         .pp-price-row { display:flex;align-items:center;gap:.65rem; }
-        .pp-input-wrap { display:flex;align-items:center;gap:.4rem;background:#111;border:1px solid #2A2A2A;border-radius:.65rem;padding:.55rem .8rem;flex:1;transition:border-color .2s; }
+        .pp-input-wrap { display:flex;align-items:center;gap:.4rem;background:#111;border:1px solid #2A2A2A;border-radius:.65rem;padding:.55rem .8rem;flex:1;transition:border-color .2s;min-width:0; }
         .pp-input-wrap:focus-within { border-color:rgba(37,244,244,.5); }
         .pp-pfx { font-size:.82rem;font-weight:700;color:#64748b;flex-shrink:0; }
-        .pp-input { flex:1;background:transparent!important;border:none!important;outline:none;font-size:1.15rem;font-weight:800;color:#f1f5f9!important;box-shadow:none!important;padding:0!important;min-width:0; }
+        .pp-input { flex:1;background:transparent!important;border:none!important;outline:none;font-size:1.15rem;font-weight:800;color:#f1f5f9!important;box-shadow:none!important;padding:0!important;min-width:0;width:100%; }
         .pp-metrics { display:flex;flex-direction:column;gap:.2rem;flex-shrink:0;text-align:right; }
         .pp-lucro-lbl { font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b; }
         .pp-lucro-val { font-size:.95rem;font-weight:800;color:#25f4f4; }
@@ -167,7 +167,7 @@
             <span class="text-xs text-slate-500" id="prod-count"></span>
         </div>
         <div class="prod-grid" id="prod-grid"></div>
-        <div id="empty-state" class="hidden" style="display:flex;flex-direction:column;align-items:center;padding:4rem 1rem;color:#475569;gap:.5rem">
+        <div id="empty-state" style="display:none;flex-direction:column;align-items:center;padding:4rem 1rem;color:#475569;gap:.5rem">
             <span class="material-symbols-outlined" style="font-size:3rem;color:#2A2A2A">inventory_2</span>
             <p class="font-semibold text-slate-400">Nenhum produto cadastrado</p>
             <p class="text-sm">Cadastre produtos em Gestão de Produtos</p>
@@ -313,9 +313,9 @@ function renderGrid() {
     document.getElementById('prod-count').textContent = `${produtos.length} ite${produtos.length!==1?'ns':'m'}`;
 
     if (!produtos.length) {
-        grid.innerHTML = ''; empty.classList.remove('hidden'); return;
+        grid.innerHTML = ''; empty.style.display = 'flex'; return;
     }
-    empty.classList.add('hidden');
+    empty.style.display = 'none';
 
     grid.innerHTML = produtos.map(p => {
         const custo      = p.custo || 0;
@@ -516,6 +516,10 @@ renderTabs();
 renderBanner();
 renderGrid();
 injetarAviso('precificacoes');
+
+// Marca que o usuário já acessou a ferramenta (para o guia de configuração)
+localStorage.setItem('receitasx_precificacao_hit', 'true');
 </script>
+<script src="guia-banner.js"></script>
 </body>
 </html>

@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { nome, email, telefone, taxId, valor, ref } = await req.json();
+    const { nome, email, telefone, taxId, valor, ref, cupom } = await req.json();
 
     if (!email || !valor || !taxId) {
       return new Response(JSON.stringify({ error: 'email, cpf e valor são obrigatórios' }), {
@@ -59,6 +59,7 @@ serve(async (req) => {
         email,
         ref:   ref || '',
         valor: String(valor),
+        cupom: cupom || '',
       },
     };
 
@@ -151,7 +152,29 @@ serve(async (req) => {
         const { data: usersData } = await sbAdmin.auth.admin.listUsers({ perPage: 1000 });
         const found = (usersData as { users: {email:string;id:string}[] })?.users?.find(u => u.email === email);
         userId = found?.id ?? null;
-      } catch(_) {}
+
+        // Se o usuário não existe e foi enviada uma senha na requisição (e nome), cria a conta
+        const reqData = await req.clone().json().catch(() => ({}));
+        if (!userId && reqData.senha) {
+            console.log(`Criando nova conta para ${email} no checkout...`);
+            const { data: newUser, error: createErr } = await sbAdmin.auth.admin.createUser({
+                email: email,
+                password: reqData.senha,
+                email_confirm: true,
+                user_metadata: {
+                    nome: nome || email.split('@')[0],
+                }
+            });
+            if (createErr) {
+                console.error('Erro ao criar usuário:', createErr);
+            } else if (newUser?.user) {
+                userId = newUser.user.id;
+                console.log(`Usuário criado via checkout: ${userId}`);
+            }
+        }
+      } catch(e) {
+         console.warn('Erro na busca/criação de usuário:', e);
+      }
 
       await sbAdmin.from('pedidos').insert({
         email,
@@ -160,6 +183,8 @@ serve(async (req) => {
         status:        'pendente',
         billing_id:    billingId,
         codigo_acesso: 'RX-PENDENTE',
+        cupom_usado:   cupom || null,
+        ref_afiliado:  ref || null,
         ...(userId ? { user_id: userId } : {}),
       });
       console.log(`Pedido pendente registrado: ${email} | billing: ${billingId}`);

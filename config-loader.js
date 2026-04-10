@@ -18,7 +18,7 @@ window.AppConfig = {
             .from('config_afiliados')
             .select('valor_plano, comissao_pct, saque_minimo')
             .eq('id', 1)
-            .single();
+            .maybeSingle();
 
         if (data) {
             window.AppConfig.valorPlano  = parseFloat(data.valor_plano)  || 46.90;

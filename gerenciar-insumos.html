@@ -470,12 +470,11 @@
                     <p id="f-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome do insumo.</p>
                 </div>
 
-                <!-- Peso da Embalagem -->
                 <div>
                     <label class="field-label">Peso da Embalagem <span style="color:#475569;text-transform:none;font-weight:400">(Compra)</span></label>
                     <div style="display:flex;gap:.5rem">
                         <input id="f-peso" type="number" step="0.001" min="0" class="fc" placeholder="Ex: 1000" style="flex:1" />
-                        <select id="f-unidade" class="fc select-placeholder" onchange="updateSelectColor(this)"
+                        <select id="f-unidade" class="fc select-placeholder" onchange="updateSelectColor(this); onUnidadeChange(this.value)"
                             style="width:120px;flex-shrink:0;padding-right:2rem;-webkit-appearance:none;appearance:none;cursor:pointer">
                             <option value="" disabled selected>Unidade</option>
                             <option value="g">g (grama)</option>
@@ -484,6 +483,10 @@
                             <option value="l">l (litro)</option>
                             <option value="un">un</option>
                         </select>
+                    </div>
+                    <div id="aviso-un" style="display:none;margin-top:.5rem;padding:.5rem .75rem;border-radius:.55rem;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);font-size:.72rem;color:#fbbf24;display:none;align-items:flex-start;gap:.4rem">
+                        <span class="material-symbols-outlined" style="font-size:.85rem;flex-shrink:0;margin-top:.05rem">info</span>
+                        <span>Ao usar <strong>un</strong>, o peso fica <strong>1</strong> (o insumo inteiro será usado na receita). Na receita, informe a quantidade de unidades que usa.</span>
                     </div>
                 </div>
 
@@ -574,6 +577,7 @@ async function loadInsumos() {
     try {
         const { data, error } = await sb.from('insumos')
             .select('*')
+            .eq('user_id', userId)
             .order('nome', { ascending: true });
         if (error) throw error;
         insumos = data || [];
@@ -675,6 +679,24 @@ function updateSelectColor(sel) {
     sel.classList.toggle('filled', sel.value !== '');
 }
 
+function onUnidadeChange(val) {
+    const pesoInput = document.getElementById('f-peso');
+    const aviso     = document.getElementById('aviso-un');
+    if (val === 'un') {
+        pesoInput.value    = 1;
+        pesoInput.readOnly = true;
+        pesoInput.style.opacity = '.5';
+        pesoInput.style.cursor  = 'not-allowed';
+        aviso.style.display = 'flex';
+    } else {
+        pesoInput.readOnly = false;
+        pesoInput.style.opacity = '';
+        pesoInput.style.cursor  = '';
+        aviso.style.display = 'none';
+        if (pesoInput.value === '1') pesoInput.value = '';
+    }
+}
+
 /* ─── AÇÕES ──────────────────────────────────────────────────────── */
 function setFilter(val, btn) {
     currentFilter = val;
@@ -716,6 +738,7 @@ async function openCadastrar(id = null) {
             document.getElementById('f-custo').value     = item.preco ?? '';
             document.getElementById('f-fornecedor').value= '';
             updateSelectColor(document.getElementById('f-unidade'));
+            onUnidadeChange(item.unidade || '');
         }
         title.textContent = 'Editar Insumo';
         btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">edit</span> Salvar Alterações';
@@ -737,6 +760,12 @@ function resetCadastrar() {
     document.getElementById('form-cadastrar').reset();
     document.getElementById('f-nome').classList.remove('error');
     document.getElementById('f-nome-err').style.display = 'none';
+    // Reset UN state
+    const pesoInput = document.getElementById('f-peso');
+    pesoInput.readOnly = false;
+    pesoInput.style.opacity = '';
+    pesoInput.style.cursor  = '';
+    document.getElementById('aviso-un').style.display = 'none';
 }
 
 async function salvarInsumo(e) {
@@ -928,5 +957,6 @@ document.addEventListener('keydown', e => {
     injetarAviso('insumos');
 })();
 </script>
+<script src="guia-banner.js"></script>
 </body>
 </html>

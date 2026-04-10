@@ -55,12 +55,13 @@ serve(async (req) => {
       '';
 
     const ref        = metadata?.ref    || customerMeta?.ref || (billing?.ref as string) || '';
+    const cupom      = metadata?.cupom  || '';
     const billingId  = (billing?.id ?? payload?.id) as string || '';
     const valorCents = (billing?.amount ?? billing?.value ?? payload?.amount) as number || 0;
     const valorReal  = valorCents / 100;
 
 
-    console.log(`Extraído — email: ${email} | billingId: ${billingId} | valor: ${valorReal} | ref: ${ref}`);
+    console.log(`Extraído — email: ${email} | billingId: ${billingId} | valor: ${valorReal} | ref: ${ref} | cupom: ${cupom}`);
 
     if (!email) {
       console.error('Email não encontrado no webhook. Payload completo:', JSON.stringify(payload));
@@ -127,6 +128,7 @@ serve(async (req) => {
         status:        'pago',
         codigo_acesso: cod,
         billing_id:    billingId,
+        cupom_usado:   cupom || null,
         ...(userId ? { user_id: userId } : {}),
       }).select().single();
       pedido = ins;
@@ -137,15 +139,23 @@ serve(async (req) => {
       console.error('Erro ao salvar pedido:', pedErr.message);
     }
 
-    // ── Atualiza perfis com plano vitalicio ──────────────────────────
+    // ── Atualiza perfis com plano vitalicio (via RPC SECURITY DEFINER) ──
     if (userId) {
       try {
-        const { error: pErr } = await sb
-          .from('perfis')
-          .update({ plano: 'vitalicio', plano_ativo_em: new Date().toISOString() })
-          .eq('id', userId);
-        if (pErr) console.error('Erro ao atualizar perfis:', pErr.message);
-        else console.log(`Perfil ${userId} atualizado para plano vitalicio`);
+        // Tenta via RPC (mais confiável, ignora RLS)
+        const { error: rpcErr } = await sb.rpc('ativar_plano_vitalicio', { p_user_id: userId });
+        if (rpcErr) {
+          console.warn('RPC ativar_plano falhou, tentando update direto:', rpcErr.message);
+          // Fallback: update direto (funciona se service_role key estiver OK)
+          const { error: pErr } = await sb
+            .from('perfis')
+            .update({ plano: 'vitalicio', plano_ativo_em: new Date().toISOString() })
+            .eq('id', userId);
+          if (pErr) console.error('Erro ao atualizar perfis (fallback):', pErr.message);
+          else console.log(`Perfil ${userId} atualizado via fallback`);
+        } else {
+          console.log(`Perfil ${userId} atualizado para plano vitalicio via RPC`);
+        }
       } catch(e) {
         console.error('Erro ao atualizar perfis:', e);
       }
@@ -154,12 +164,16 @@ serve(async (req) => {
     }
 
     // ── Comissão do afiliado ─────────────────────────────────────────
-    if (ref && pedido) {
+    // Usa ref do metadata, mas se veio vazio, tenta pegar do pedido pendente
+    const refFinal = ref || (pedido as Record<string, unknown>)?.ref_afiliado as string || '';
+    console.log(`Ref para comissão: metadata="${ref}" | pedido="${(pedido as Record<string, unknown>)?.ref_afiliado || ''}" | final="${refFinal}"`);
+
+    if (refFinal && pedido) {
       try {
         const { data: af } = await sb
           .from('afiliados')
           .select('id')
-          .eq('codigo', ref.toUpperCase())
+          .eq('codigo', refFinal.toUpperCase())
           .single();
 
         if (af) {
@@ -195,7 +209,7 @@ serve(async (req) => {
             p_valor:       valorReal,
           }).catch((e: Error) => console.error('rpc erro:', e.message));
 
-          console.log(`Comissão R$ ${comissao} registrada para afiliado ${ref}`);
+          console.log(`Comissão R$ ${comissao} registrada para afiliado ${refFinal}`);
         }
       } catch (e) {
         console.error('Erro ao registrar comissão:', e);

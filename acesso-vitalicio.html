@@ -519,6 +519,28 @@
 <div style="height:5rem"></div>
 
 <script>
+// ── Salvar afiliado da URL imediatamente ──────────────────────────
+const _params = new URLSearchParams(window.location.search);
+const _ref = _params.get('ref');
+if (_ref) {
+    sessionStorage.setItem('ref_afiliado', _ref);
+    // Registrar clique no banco (com logs visíveis caso algo falhe)
+    (async () => {
+        console.log(`[Cliques] Registrando afiliado: ${_ref}`);
+        const { error } = await sb.from('cliques_afiliados').insert({
+            afiliado_codigo: _ref,
+            pagina_destino: window.location.pathname,
+            referrer: document.referrer || null,
+            user_agent: navigator.userAgent || null
+        });
+        if (error) {
+            console.error('[Cliques] Erro ao registrar clique:', error);
+        } else {
+            console.log('[Cliques] Clique registrado com sucesso no banco!');
+        }
+    })();
+}
+
 // ── Guard: redireciona vitalício de volta ao app ──────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -535,7 +557,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Usuário já é vitalício — redireciona para o app
             sessionStorage.setItem('rx_toast', 'Você já tem Acesso Vitalício ativo! 🎉');
             location.href = 'index.html';
+            return;
         }
+
+        // Registrar visualização
+        sb.from('perfis').update({ vitalicio_view_at: new Date().toISOString() }).eq('id', user.id).then(()=>{});
     } catch(e) {
         // Silencia erro — deixa a página carregar normalmente
         console.warn('[AcessoVitalicio] Guard check error:', e);
@@ -547,7 +573,19 @@ function toggleFaq(el) {
 }
 
 function handleCompra() {
-    location.href = 'checkout.html';
+    const btn = document.querySelector('.sticky-cta');
+    if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite">refresh</span> Redirecionando...';
+
+    sb.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+            sb.from('perfis').update({ vitalicio_click_at: new Date().toISOString() }).eq('id', user.id).then(() => {
+                location.href = 'checkout.html';
+            });
+        } else {
+            // Não logado — manda direto para o checkout (agora o checkout aceita)
+            location.href = 'checkout.html';
+        }
+    });
 }
 
 // Atualiza preços dinamicamente quando config carregar

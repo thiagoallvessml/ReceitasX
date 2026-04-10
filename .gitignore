@@ -17,3 +17,5 @@ package-lock.json
 # Env
 .env
 .env.local
+
+.vercel
