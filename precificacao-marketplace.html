@@ -431,6 +431,20 @@ function salvar() {
     }
 
     showToast('Precificação salva!');
+
+    // Sincroniza no banco para o Admin Progresso puxar a métrica
+    try {
+        const uid = (await sb.auth.getSession()).data?.session?.user?.id;
+        if (uid) {
+            await sb.from('marketplaces').delete().eq('user_id', uid);
+            const insertData = marketplaces.map(mk => ({ user_id: uid, nome: mk.nome, taxa: mk.taxa || 0 }));
+            if (insertData.length > 0) {
+                await sb.from('marketplaces').insert(insertData);
+            }
+        }
+    } catch(e) {
+        console.warn('Erro sync progresso precificacao:', e);
+    }
 }
 
 /* ─── MODAL CRIAR CATEGORIA ──────────────────────────────────────── */

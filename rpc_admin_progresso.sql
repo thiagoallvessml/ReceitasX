@@ -26,7 +26,7 @@ AS $$
     (SELECT count(*) FROM produtos pr WHERE pr.user_id = p.id) as qtd_produtos,
     (SELECT count(*) FROM combos cb WHERE cb.user_id = p.id) as qtd_combos,
     (SELECT count(*) FROM despesas d WHERE d.user_id = p.id) as qtd_despesas,
-    (SELECT count(*) FROM precificacao prec WHERE prec.user_id = p.id) as qtd_precificacao
+    (SELECT count(*) FROM marketplaces m WHERE m.user_id = p.id) as qtd_precificacao
   FROM perfis p
   ORDER BY p.created_at DESC;
 $$;
