@@ -1,28 +1,28 @@
 User-agent: *
 
 # Páginas públicas — liberar para indexação
-Allow: /landing.html
-Allow: /acesso-vitalicio.html
-Allow: /login.html
-Allow: /checkout.html
+Allow: /landing
+Allow: /acesso-vitalicio
+Allow: /login
+Allow: /checkout
+Allow: /blog
 
-# Páginas do app — bloquear para não indexar páginas de login
-Disallow: /index.html
-Disallow: /receitas.html
-Disallow: /configuracoes.html
-Disallow: /gerenciar-insumos.html
-Disallow: /gerenciar-equipamentos.html
-Disallow: /gerenciar-embalagens.html
-Disallow: /gestao-produtos.html
-Disallow: /combos.html
-Disallow: /despesas.html
-Disallow: /extrato-vendas.html
-Disallow: /indique-ganhe.html
-Disallow: /meus-ganhos.html
-Disallow: /perfil.html
-Disallow: /ponto-equilibrio.html
-Disallow: /precificacao-marketplace.html
+# Páginas do app — bloquear para não indexar área restrita
+Disallow: /index
+Disallow: /receitas
+Disallow: /configuracoes
+Disallow: /gerenciar-
+Disallow: /gestao-produtos
+Disallow: /combos
+Disallow: /despesas
+Disallow: /extrato-vendas
+Disallow: /indique-ganhe
+Disallow: /meus-ganhos
+Disallow: /perfil
+Disallow: /ponto-equilibrio
+Disallow: /precificacao-marketplace
 Disallow: /admin-
-Disallow: /receita-detalhe.html
+Disallow: /receita-detalhe
+Disallow: /*.html$
 
 Sitemap: https://receitasx.com.br/sitemap.xml

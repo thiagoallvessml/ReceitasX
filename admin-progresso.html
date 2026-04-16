@@ -165,6 +165,7 @@ async function loadDados() {
             if (r.qtd_embalagens > 0) done++;
             if (r.qtd_receitas > 0) done++;
             if (r.qtd_produtos > 0) done++;
+            if (r.qtd_precificacao > 0) done++;
             
             return {
                 ...r,
@@ -173,7 +174,7 @@ async function loadDados() {
                 created_at: p.created_at,
                 email: emailsMap[r.user_id] || '--',
                 doneCount: done,
-                pct: Math.round((done / 6) * 100)
+                pct: Math.round((done / 7) * 100)
             };
         });
 
@@ -195,7 +196,7 @@ function updateStats() {
     let zeros = 0, parciais = 0, completos = 0;
     allProgresso.forEach(p => {
         if (p.doneCount === 0) zeros++;
-        else if (p.doneCount === 6) completos++;
+        else if (p.doneCount === 7) completos++;
         else parciais++;
     });
     document.getElementById('stat-total').textContent = allProgresso.length;
@@ -227,8 +228,8 @@ function renderList(list) {
         const initials = ((p.nome||'?')[0] || '') + ((p.sobrenome||'')[0] || '');
         const nCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem Nome';
         
-        const badgeClass = p.doneCount === 6 ? 'complete' : '';
-        const barClass = p.doneCount === 6 ? 'progress-bar-fill complete' : 'progress-bar-fill';
+        const badgeClass = p.doneCount === 7 ? 'complete' : '';
+        const barClass = p.doneCount === 7 ? 'progress-bar-fill complete' : 'progress-bar-fill';
 
         const renderPill = (lbl, val, req) => `
             <div class="step-pill ${val > 0 ? 'done' : (!req ? 'opt' : '')}">
@@ -246,7 +247,7 @@ function renderList(list) {
                     <div class="user-email">${esc(p.email)}</div>
                 </div>
                 <div style="text-align:right">
-                    <div style="font-weight:800;font-size:1.1rem;color:${p.doneCount===6?'#34d399':(p.doneCount===0?'#ef4444':'#fbbf24')}">${p.pct}%</div>
+                    <div style="font-weight:800;font-size:1.1rem;color:${p.doneCount===7?'#34d399':(p.doneCount===0?'#ef4444':'#fbbf24')}">${p.pct}%</div>
                     <div style="font-size:.65rem;color:#64748b;text-transform:uppercase;font-weight:700">Preenchido</div>
                 </div>
             </div>
@@ -262,6 +263,7 @@ function renderList(list) {
                 ${renderPill('Embal.', p.qtd_embalagens, true)}
                 ${renderPill('Receit.', p.qtd_receitas, true)}
                 ${renderPill('Prod.', p.qtd_produtos, true)}
+                ${renderPill('Precif.', p.qtd_precificacao, true)}
                 <div style="width:1px;background:#2A2A2A;margin:0 .25rem"></div>
                 ${renderPill('Combos', p.qtd_combos, false)}
                 ${renderPill('Despes.', p.qtd_despesas, false)}

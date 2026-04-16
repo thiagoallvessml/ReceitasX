@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS admin_progresso_guia();
+
 CREATE OR REPLACE FUNCTION admin_progresso_guia()
 RETURNS TABLE (
   user_id UUID,
@@ -8,7 +10,8 @@ RETURNS TABLE (
   qtd_receitas BIGINT,
   qtd_produtos BIGINT,
   qtd_combos BIGINT,
-  qtd_despesas BIGINT
+  qtd_despesas BIGINT,
+  qtd_precificacao BIGINT
 )
 LANGUAGE sql
 SECURITY DEFINER
@@ -22,7 +25,8 @@ AS $$
     (SELECT count(*) FROM receitas r WHERE r.user_id = p.id) as qtd_receitas,
     (SELECT count(*) FROM produtos pr WHERE pr.user_id = p.id) as qtd_produtos,
     (SELECT count(*) FROM combos cb WHERE cb.user_id = p.id) as qtd_combos,
-    (SELECT count(*) FROM despesas d WHERE d.user_id = p.id) as qtd_despesas
+    (SELECT count(*) FROM despesas d WHERE d.user_id = p.id) as qtd_despesas,
+    (SELECT count(*) FROM precificacao prec WHERE prec.user_id = p.id) as qtd_precificacao
   FROM perfis p
   ORDER BY p.created_at DESC;
 $$;

@@ -4,6 +4,11 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Acesso Vitalício - ReceitasX</title>
+    <link rel="canonical" href="https://receitasx.com.br/acesso-vitalicio" />
+    <meta property="og:title" content="Acesso Vitalício - ReceitasX" />
+    <meta property="og:url" content="https://receitasx.com.br/acesso-vitalicio" />
+    <meta property="og:type" content="website" />
+    <meta name="description" content="Obtenha acesso vitalício ao ReceitasX. Pague uma vez e use para sempre todas as ferramentas de precificação e gestão." />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="config-loader.js"></script>
@@ -579,11 +584,11 @@ function handleCompra() {
     sb.auth.getUser().then(({ data: { user } }) => {
         if (user) {
             sb.from('perfis').update({ vitalicio_click_at: new Date().toISOString() }).eq('id', user.id).then(() => {
-                location.href = 'checkout.html';
+                location.href = 'checkout';
             });
         } else {
             // Não logado — manda direto para o checkout (agora o checkout aceita)
-            location.href = 'checkout.html';
+            location.href = 'checkout';
         }
     });
 }

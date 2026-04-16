@@ -639,6 +639,9 @@ let currentFilter = 'todas';
 // localStorage (compatibilidade p/ dados antigos)
 function save() { localStorage.setItem('receitasx_receitas', JSON.stringify(receitas)); }
 
+// Escape especial de HTML
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 /* Mapeia linha do Supabase para o formato usado pelos cards */
 function sbRowToLocal(r) {
     return {
@@ -778,7 +781,7 @@ function renderCards() {
             </div>
             <div class="card-body">
                 <div>
-                    <h2 class="font-bold text-base leading-snug">${r.nome}</h2>
+                    <h2 class="font-bold text-base leading-snug">${esc(r.nome)}</h2>
                     <p class="text-xs text-slate-400 mt-0.5">${catLabel(r.categoria)}</p>
                 </div>
                 <div class="card-meta">
@@ -1147,7 +1150,7 @@ function addEmbalagem() {
     const opts = embCatalogo.length
         ? embCatalogo.map(e => {
             const custoUn = e.qtd > 0 ? (e.custo / e.qtd) : 0;
-            return `<option value="${e.id}" data-custo-un="${custoUn.toFixed(4)}" data-nome="${e.nome}">${e.nome} (R$ ${custoUn.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}/un)</option>`;
+            return `<option value="${e.id}" data-custo-un="${custoUn.toFixed(4)}" data-nome="${esc(e.nome)}">${esc(e.nome)} (R$ ${custoUn.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}/un)</option>`;
           }).join('')
         : '<option value="" disabled>Nenhuma embalagem cadastrada</option>';
 
@@ -1207,7 +1210,7 @@ function addEquipamento() {
         ? eqpCatalogo.map(e => {
             const ch = e.custoH ?? calcEqpCustoH(e);
             const tipo = e.tipo === 'eletrico' ? '⚡' : '🔥';
-            return `<option value="${e.id}" data-custo-h="${ch.toFixed(4)}">${tipo} ${e.nome} (${fmtR(ch)}/h)</option>`;
+            return `<option value="${e.id}" data-custo-h="${ch.toFixed(4)}">${tipo} ${esc(e.nome)} (${fmtR(ch)}/h)</option>`;
           }).join('')
         : '<option value="" disabled>Nenhum equipamento cadastrado</option>';
 
