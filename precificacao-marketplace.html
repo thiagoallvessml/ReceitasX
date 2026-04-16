@@ -411,7 +411,7 @@ function onPrecoChange(mktId, prodId, val) {
 }
 
 /* ─── SALVAR ─────────────────────────────────────────────────────── */
-function salvar() {
+async function salvar() {
     // Coleta todos os inputs visíveis
     const m = getMkt();
     produtos.forEach(p => {
