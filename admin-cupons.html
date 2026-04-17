@@ -348,6 +348,7 @@ function renderList(list) {
                 </div>
                 <div class="cupom-meta">
                     <span><span class="material-symbols-outlined">calendar_today</span>Criado ${dt}</span>
+                    <span><span class="material-symbols-outlined">ads_click</span>${c.cliques || 0} cliques</span>
                     <span><span class="material-symbols-outlined">group</span>${usosLabel}</span>
                     <span><span class="material-symbols-outlined">sell</span>${c.tipo === '%' ? 'Porcentagem' : 'Valor fixo'}</span>
                     ${c.data_inicio ? `<span><span class="material-symbols-outlined" style="color:#60a5fa">schedule</span>Início: ${new Date(c.data_inicio).toLocaleString('pt-BR').slice(0, -3)}</span>` : ''}
@@ -403,7 +404,7 @@ async function criarCupom() {
             afiliado_id = af.id;
         }
 
-        const payload = { codigo, tipo, valor, ativo: true, usos_atual: 0 };
+        const payload = { codigo, tipo, valor, ativo: true, usos_atual: 0, cliques: 0 };
         if (usos) payload.usos_max = usos;
         if (inicioStr) {
             payload.data_inicio = new Date(inicioStr).toISOString();
@@ -513,7 +514,7 @@ async function verUsosCupom(codigo) {
     try {
         const { data, error } = await sb
             .from('pedidos')
-            .select('email, created_at, status, valor_pago')
+            .select('email, user_id, created_at, status, valor_pago')
             .ilike('cupom_usado', codigo)
             .order('created_at', {ascending: false});
             
@@ -529,14 +530,32 @@ async function verUsosCupom(codigo) {
             return;
         }
 
+        // Buscar nomes dos usuários (perfis) baseados nos user_ids
+        const userIds = [...new Set(data.filter(p => p.user_id).map(p => p.user_id))];
+        let nomesMap = {};
+        if (userIds.length > 0) {
+            const { data: perfis } = await sb
+                .from('perfis')
+                .select('id, nome')
+                .in('id', userIds);
+            if (perfis) {
+                perfis.forEach(pf => {
+                    nomesMap[pf.id] = pf.nome;
+                });
+            }
+        }
+
         list.innerHTML = data.map(p => {
             const dt = new Date(p.created_at).toLocaleString('pt-BR');
             const stsColor = p.status === 'pago' ? 'text-emerald-400' : 'text-slate-400';
             const valLabel = p.valor_pago ? `R$ ${Number(p.valor_pago).toFixed(2).replace('.',',')}` : '---';
+            const nomeUsuario = p.user_id && nomesMap[p.user_id] ? nomesMap[p.user_id] : p.email.split('@')[0];
+            const identificacao = `<span class="text-slate-300 font-bold">${esc(nomeUsuario)}</span> <span class="text-slate-500 font-normal">(${esc(p.email)})</span>`;
+            
             return `
                 <div class="bg-[#141414] border border-[#2A2A2A] rounded-lg p-3 flex flex-col gap-1">
                     <div class="flex justify-between items-start">
-                        <span class="text-sm font-semibold text-slate-200">${esc(p.email || 'Sem email')}</span>
+                        <span class="text-sm text-slate-200">${identificacao}</span>
                         <span class="text-xs font-bold ${stsColor} uppercase tracking-wide bg-[#1A1A1A] border border-[#2A2A2A] px-2 py-0.5 rounded">${p.status}</span>
                     </div>
                     <div class="flex justify-between items-center text-xs text-slate-500 mt-1">
