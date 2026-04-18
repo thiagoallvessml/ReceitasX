@@ -514,9 +514,17 @@ function toggleAllStatus() {
 /* ─── CARREGAR DADOS DO SUPABASE ─────────────────────────────── */
 async function carregarDados() {
     try {
-        const user = await getUser();
-        if (!user) {
+        // Aguarda a sessão ser restaurada primeiro (evita race condition)
+        const session = await getSession();
+        if (!session) {
             // fallback localStorage
+            produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+            receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
+            render();
+            return;
+        }
+        const user = session.user;
+        if (!user) {
             produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
             receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
             render();
@@ -526,6 +534,9 @@ async function carregarDados() {
             sb.from('produtos').select('*').eq('user_id', user.id).order('nome'),
             sb.from('receitas').select('id, nome, unidades, custo_total').eq('user_id', user.id).order('nome'),
         ]);
+        if (resProd.error) {
+            console.warn('Erro ao carregar produtos do Supabase:', resProd.error);
+        }
         if (!resProd.error) {
             produtos = (resProd.data || []).map(p => ({
                 id:        p.id,
@@ -540,6 +551,9 @@ async function carregarDados() {
                 _supabase: true,
             }));
             save();
+        } else {
+            // Fallback localStorage se Supabase falhar
+            produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
         }
         if (!resRec.error) {
             receitas = (resRec.data || []).map(r => ({
@@ -548,6 +562,8 @@ async function carregarDados() {
                 unidades:  r.unidades || 1,
                 custoTotal:parseFloat(r.custo_total || 0),
             }));
+        } else {
+            receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
         }
     } catch(e) {
         console.warn('Supabase indisponível:', e);

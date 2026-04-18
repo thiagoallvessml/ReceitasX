@@ -252,10 +252,53 @@ let marketplaces  = loadMkts();
 let currentMktIdx = 0;
 
 // Produtos
-let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+let produtos = [];
 
 // Precificação salva: { mktId: { prodId: preco } }
 let precificacao = JSON.parse(localStorage.getItem(PREC_KEY) || '{}');
+
+/* ─── CARREGAR DADOS DO SUPABASE ─────────────────────────────── */
+async function carregarDados() {
+    try {
+        // Aguarda a sessão ser restaurada primeiro (evita race condition)
+        const session = await getSession();
+        if (!session || !session.user) {
+            // fallback localStorage
+            produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+            renderTabs(); renderBanner(); renderGrid();
+            return;
+        }
+        const user = session.user;
+        const { data, error } = await sb
+            .from('produtos')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('nome');
+        if (!error && data) {
+            produtos = data.map(p => ({
+                id:        p.id,
+                nome:      p.nome,
+                preco:     parseFloat(p.preco || 0),
+                custo:     parseFloat(p.custo || 0),
+                obs:       p.obs || '',
+                img:       p.imagem_url || '',
+                disp:      p.ativo !== false,
+                receitaId: p.receita_id || null,
+                cat:       p.categoria || 'Gourmet',
+                _supabase: true,
+            }));
+            // Sincroniza localStorage para manter compatibilidade
+            localStorage.setItem('receitasx_produtos', JSON.stringify(produtos));
+        } else {
+            // Se erro no Supabase, fallback localStorage
+            produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+        }
+    } catch(e) {
+        console.warn('Supabase indisponível, usando localStorage:', e);
+        produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+    }
+    renderTabs(); renderBanner(); renderGrid();
+}
 
 /* ─── HELPERS ────────────────────────────────────────────────────── */
 function fmtR(v) {
@@ -526,9 +569,11 @@ document.addEventListener('keydown', e => {
 });
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
+// Renderiza tabs e banner imediatamente (não dependem dos produtos)
 renderTabs();
 renderBanner();
-renderGrid();
+// Carrega produtos do Supabase/localStorage e depois renderiza o grid
+carregarDados();
 injetarAviso('precificacoes');
 
 // Marca que o usuário já acessou a ferramenta (para o guia de configuração)

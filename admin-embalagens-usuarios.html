@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin — Embalagens dos Usuários · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* admin banner */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* badge admin */
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .badge-admin .material-symbols-outlined { font-size:.75rem; }
+
+        /* stats */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.85rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        input,select { background-color:#1A1A1A !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder { color:#475569 !important; }
+
+        /* user row */
+        .user-row { display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;cursor:pointer;transition:border-color .18s,background .18s; }
+        .user-row:hover, .user-row.active { border-color:rgba(37,244,244,.35);background:#1E1E1E; }
+        .user-row.active { background:rgba(37,244,244,.04); }
+
+        .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(37,244,244,.25),rgba(37,244,244,.05));border:1px solid rgba(37,244,244,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.88rem;font-weight:700;color:#25f4f4;text-transform:uppercase; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.88rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-sub  { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem; }
+
+        .emb-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;flex-shrink:0; }
+        .emb-badge.has   { background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);color:#a855f7; }
+        .emb-badge.empty { background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#64748b; }
+        .emb-badge .material-symbols-outlined { font-size:.75rem; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* drawer */
+        .drawer-bg { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s; }
+        .drawer-bg.open { opacity:1;pointer-events:auto; }
+        .drawer { position:fixed;top:0;right:0;height:100%;width:100%;max-width:520px;background:#141414;border-left:1px solid #2A2A2A;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1);overflow:hidden; }
+        .drawer-bg.open .drawer { transform:translateX(0); }
+        @media(max-width:540px) { .drawer { max-width:100%;border-left:none;border-top:1px solid #2A2A2A;border-radius:1.1rem 1.1rem 0 0;height:92%;top:auto;bottom:0; } .drawer-bg { align-items:flex-end; } }
+
+        .drawer-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0; }
+        .drawer-body { flex:1;overflow-y:auto;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.5rem;min-height:0;-webkit-overflow-scrolling:touch; }
+
+        /* embalagem card in drawer */
+        .emb-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;overflow:hidden;transition:border-color .18s; }
+        .emb-card:hover { border-color:rgba(168,85,247,.25); }
+
+        /* summary grid */
+        .sum-grid { display:grid;grid-template-columns:1fr 1fr;gap:.35rem;padding:.5rem 0; }
+        .sum-cell { background:#111;border-radius:.5rem;padding:.45rem .6rem; }
+        .sum-lbl  { font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748b;margin-bottom:.1rem; }
+        .sum-val  { font-size:.82rem;font-weight:700;color:#f1f5f9; }
+        .sum-val.cyan   { color:#25f4f4; }
+        .sum-val.green  { color:#34d399; }
+        .sum-val.amber  { color:#fbbf24; }
+        .sum-val.purple { color:#a855f7; }
+
+        /* drawer rec-tag */
+        .rec-tag { display:inline-flex;align-items:center;gap:.2rem;font-size:.65rem;font-weight:600;padding:.18rem .5rem;border-radius:.35rem;background:#1E1E1E;border:1px solid #2A2A2A;color:#64748b; }
+        .rec-tag .material-symbols-outlined { font-size:.72rem; }
+        .rec-tag.cyan   { background:rgba(37,244,244,.07);border-color:rgba(37,244,244,.2);color:#25f4f4; }
+        .rec-tag.green  { background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.2);color:#34d399; }
+        .rec-tag.purple { background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.2);color:#a855f7; }
+
+        /* empty */
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* pill filter */
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .pill.active { background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.4);color:#a855f7; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        /* sort toggle */
+        .sort-btn { display:flex;align-items:center;gap:.3rem;padding:.35rem .7rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .sort-btn:hover { border-color:rgba(168,85,247,.3);color:#a855f7; }
+        .sort-btn.active { border-color:rgba(168,85,247,.4);color:#a855f7;background:rgba(168,85,247,.06); }
+        .sort-btn .material-symbols-outlined { font-size:.9rem; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+        <h1 class="text-base font-semibold flex-1">Embalagens dos Usuários</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span> Admin
+        </span>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+
+    <!-- Banner -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">package_2</span>
+        <span>Visualize todas as embalagens cadastradas por cada usuário. Clique em um usuário para ver os detalhes.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-usuarios">—</div>
+            <div class="stat-lbl">Usuários</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total-emb" style="color:#a855f7">—</div>
+            <div class="stat-lbl">Total Embalagens</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-media" style="color:#34d399">—</div>
+            <div class="stat-lbl">Média / Usuário</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-custo-medio" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Custo Médio</div>
+        </div>
+    </div>
+
+    <!-- Search + filtro -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div class="search-wrap flex-1 w-full">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou negócio…" oninput="filtrar()" />
+        </div>
+        <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
+            <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
+            <button class="pill" data-filter="com" onclick="setFilter('com',this)">Com embalagens</button>
+            <button class="pill" data-filter="sem" onclick="setFilter('sem',this)">Sem embalagens</button>
+        </div>
+    </div>
+
+    <!-- Contagem + sort -->
+    <div class="flex items-center justify-between">
+        <p id="count-label" class="text-xs text-slate-500"></p>
+        <button id="sort-btn" class="sort-btn" onclick="toggleSort()">
+            <span class="material-symbols-outlined">sort</span>
+            <span id="sort-label">Mais embalagens</span>
+        </button>
+    </div>
+
+    <!-- Lista -->
+    <div id="user-list" class="space-y-2"></div>
+
+</main>
+
+<!-- ══ Drawer Embalagens ══════════════════════════════════════════ -->
+<div id="drawer-bg" class="drawer-bg" onclick="closeDrawer()">
+    <div class="drawer" onclick="event.stopPropagation()">
+        <div class="drawer-head">
+            <div class="avatar" id="drawer-avatar">??</div>
+            <div style="flex:1;min-width:0">
+                <p id="drawer-nome" class="font-bold text-sm leading-tight">—</p>
+                <p id="drawer-negocio" class="text-xs text-slate-400 mt-0.5">—</p>
+            </div>
+            <button onclick="closeDrawer()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+            </button>
+        </div>
+
+        <!-- sub-info do usuário -->
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-wrap:wrap;flex-shrink:0" id="drawer-tags"></div>
+
+        <!-- resumo de embalagens -->
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0;overflow-y:auto;max-height:180px" id="drawer-summary"></div>
+
+        <!-- busca embalagens -->
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0">
+            <div class="search-wrap">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="emb-search" class="search-input" type="text" placeholder="Filtrar embalagens…" oninput="filtrarEmbalagens()" />
+            </div>
+        </div>
+
+        <div class="drawer-body" id="drawer-body">
+            <!-- preenchido por JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+let todosUsuarios = [];  // [{ perfil, embalagens:[] }]
+let currentFilter = 'todos';
+let currentUserEmbalagens = [];
+let sortByCount = true;  // true = mais embalagens primeiro
+
+// ── Guard admin ───────────────────────────────────────────────────
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarDados();
+})();
+
+// ── Carregar perfis + embalagens ──────────────────────────────────
+async function carregarDados() {
+    showLoading();
+    try {
+        // 1. Busca todos os perfis
+        const { data: perfis, error: ep } = await sb
+            .from('perfis')
+            .select('id, nome, sobrenome, negocio, segmento, cidade, estado, plano, role, created_at')
+            .order('created_at', { ascending: false });
+        if (ep) throw ep;
+
+        // 2. Busca todas as embalagens
+        const { data: embalagens, error: ee } = await sb
+            .from('embalagens')
+            .select('*')
+            .order('nome', { ascending: true });
+        if (ee) throw ee;
+
+        // 3. Agrupa embalagens por user_id
+        const embMap = {};
+        (embalagens || []).forEach(emb => {
+            if (!embMap[emb.user_id]) embMap[emb.user_id] = [];
+            embMap[emb.user_id].push(emb);
+        });
+
+        // 4. Monta a estrutura
+        todosUsuarios = (perfis || []).map(p => ({
+            perfil: p,
+            embalagens: embMap[p.id] || [],
+        }));
+
+        atualizarStats();
+        filtrar();
+    } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        document.getElementById('user-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">error</span>
+                <p>Erro ao carregar dados.<br><small style="font-size:.72rem">${esc(e.message)}</small></p>
+            </div>`;
+    }
+}
+
+// ── Stats ──────────────────────────────────────────────────────────
+function atualizarStats() {
+    const total = todosUsuarios.length;
+    const totalEmb = todosUsuarios.reduce((s, u) => s + u.embalagens.length, 0);
+    const media = total > 0 ? (totalEmb / total).toFixed(1) : '0';
+
+    // Custo médio global
+    const todasEmb = todosUsuarios.flatMap(u => u.embalagens);
+    const embComPreco = todasEmb.filter(e => e.preco != null && Number(e.preco) > 0);
+    const custoMedio = embComPreco.length > 0
+        ? embComPreco.reduce((s, e) => s + Number(e.preco), 0) / embComPreco.length
+        : 0;
+
+    document.getElementById('stat-usuarios').textContent    = total;
+    document.getElementById('stat-total-emb').textContent   = totalEmb;
+    document.getElementById('stat-media').textContent        = media;
+    document.getElementById('stat-custo-medio').textContent  = fmtR(custoMedio);
+}
+
+// ── Filtro + busca ─────────────────────────────────────────────────
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function toggleSort() {
+    sortByCount = !sortByCount;
+    const btn = document.getElementById('sort-btn');
+    const lbl = document.getElementById('sort-label');
+    if (sortByCount) {
+        lbl.textContent = 'Mais embalagens';
+    } else {
+        lbl.textContent = 'A → Z';
+    }
+    btn.classList.toggle('active', sortByCount);
+    filtrar();
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let list = todosUsuarios;
+
+    if (currentFilter === 'com')  list = list.filter(u => u.embalagens.length > 0);
+    if (currentFilter === 'sem')  list = list.filter(u => u.embalagens.length === 0);
+
+    if (q) {
+        list = list.filter(u => {
+            const nome = ((u.perfil.nome || '') + ' ' + (u.perfil.sobrenome || '')).toLowerCase();
+            const neg  = (u.perfil.negocio || '').toLowerCase();
+            return nome.includes(q) || neg.includes(q);
+        });
+    }
+
+    // Sort
+    if (sortByCount) {
+        list = [...list].sort((a, b) => b.embalagens.length - a.embalagens.length);
+    } else {
+        list = [...list].sort((a, b) => {
+            const nA = ((a.perfil.nome || '') + ' ' + (a.perfil.sobrenome || '')).trim().toLowerCase();
+            const nB = ((b.perfil.nome || '') + ' ' + (b.perfil.sobrenome || '')).trim().toLowerCase();
+            return nA.localeCompare(nB, 'pt-BR');
+        });
+    }
+
+    document.getElementById('count-label').textContent =
+        `${list.length} usuário${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
+
+    renderLista(list);
+}
+
+// ── Render lista de usuários ───────────────────────────────────────
+function renderLista(list) {
+    const el = document.getElementById('user-list');
+
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">person_search</span>
+                <p>Nenhum usuário encontrado.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(u => {
+        const p = u.perfil;
+        const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+        const initials = getInitials(p.nome, p.sobrenome);
+        const qtd = u.embalagens.length;
+        const badgeClass = qtd > 0 ? 'has' : 'empty';
+        const badgeIco   = qtd > 0 ? 'package_2' : 'package';
+        const badgeTxt   = qtd > 0 ? `${qtd} embalage${qtd > 1 ? 'ns' : 'm'}` : 'Nenhuma';
+        const criadoEm   = new Date(p.created_at).toLocaleDateString('pt-BR');
+
+        // Mini stats: custo total das embalagens do user
+        const custoTotal = u.embalagens.reduce((s, e) => s + Number(e.preco || 0), 0);
+        const custoInfo = qtd > 0 && custoTotal > 0
+            ? `<span style="font-size:.6rem;color:#a855f7">${fmtR(custoTotal)}</span>`
+            : `<span style="font-size:.65rem;color:#475569">${esc(p.plano || 'gratuito')}</span>`;
+
+        return `
+        <div class="user-row" id="row-${p.id}" onclick="abrirDrawer('${p.id}')">
+            <div class="avatar">${initials}</div>
+            <div class="user-info">
+                <div class="user-name">${esc(nomeCompleto)}</div>
+                <div class="user-sub">${esc(p.negocio || '—')} · Desde ${criadoEm}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0">
+                <span class="emb-badge ${badgeClass}">
+                    <span class="material-symbols-outlined">${badgeIco}</span>
+                    ${badgeTxt}
+                </span>
+                ${custoInfo}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Drawer ─────────────────────────────────────────────────────────
+function abrirDrawer(userId) {
+    const found = todosUsuarios.find(u => u.perfil.id === userId);
+    if (!found) return;
+
+    const p = found.perfil;
+    currentUserEmbalagens = found.embalagens;
+
+    // Header do drawer
+    const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+    document.getElementById('drawer-avatar').textContent = getInitials(p.nome, p.sobrenome);
+    document.getElementById('drawer-nome').textContent    = nomeCompleto;
+    document.getElementById('drawer-negocio').textContent = p.negocio || 'Negócio não informado';
+
+    // Tags de info
+    const tags = [];
+    if (p.segmento) tags.push({ ico:'storefront', txt: p.segmento });
+    if (p.cidade || p.estado) tags.push({ ico:'location_on', txt: [p.cidade, p.estado].filter(Boolean).join(' – ') });
+    tags.push({ ico:'workspace_premium', txt: p.plano || 'gratuito', cls: p.plano && p.plano !== 'gratuito' ? 'cyan' : '' });
+    tags.push({ ico:'package_2', txt: `${currentUserEmbalagens.length} embalage${currentUserEmbalagens.length !== 1 ? 'ns' : 'm'}`, cls: currentUserEmbalagens.length > 0 ? 'purple' : '' });
+
+    document.getElementById('drawer-tags').innerHTML = tags.map(t =>
+        `<span class="rec-tag ${t.cls || ''}">
+            <span class="material-symbols-outlined">${t.ico}</span>
+            ${esc(t.txt)}
+        </span>`
+    ).join('');
+
+    // Summary stats
+    renderDrawerSummary();
+
+    // Limpa busca
+    document.getElementById('emb-search').value = '';
+    filtrarEmbalagens();
+
+    // Destaca linha
+    document.querySelectorAll('.user-row').forEach(r => r.classList.remove('active'));
+    document.getElementById(`row-${userId}`)?.classList.add('active');
+
+    // Abre
+    document.getElementById('drawer-bg').classList.add('open');
+}
+
+function renderDrawerSummary() {
+    const el = document.getElementById('drawer-summary');
+    const embs = currentUserEmbalagens;
+
+    if (!embs.length) {
+        el.innerHTML = '';
+        return;
+    }
+
+    let totalCusto = 0;
+    let comPreco = 0;
+    let totalQtd = 0;
+    let comFornecedor = 0;
+
+    embs.forEach(e => {
+        const preco = Number(e.preco || 0);
+        if (preco > 0) {
+            totalCusto += preco;
+            comPreco++;
+        }
+        totalQtd += Number(e.quantidade || 1);
+        if (e.fornecedor) comFornecedor++;
+    });
+
+    const custoMedio = comPreco > 0 ? totalCusto / comPreco : 0;
+
+    // Fornecedores únicos
+    const fornecedores = [...new Set(embs.filter(e => e.fornecedor).map(e => e.fornecedor))];
+
+    el.innerHTML = `
+        <div class="sum-grid">
+            <div class="sum-cell">
+                <div class="sum-lbl">Total Embalagens</div>
+                <div class="sum-val purple">${embs.length}</div>
+            </div>
+            <div class="sum-cell">
+                <div class="sum-lbl">Custo Médio</div>
+                <div class="sum-val amber">${fmtR(custoMedio)}</div>
+            </div>
+            <div class="sum-cell">
+                <div class="sum-lbl">Custo Total</div>
+                <div class="sum-val green">${fmtR(totalCusto)}</div>
+            </div>
+            <div class="sum-cell">
+                <div class="sum-lbl">Total Unidades</div>
+                <div class="sum-val">${totalQtd.toLocaleString('pt-BR')}</div>
+            </div>
+        </div>
+        ${fornecedores.length > 0 ? `
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem">
+            ${fornecedores.map(f => `<span class="rec-tag purple"><span class="material-symbols-outlined">local_shipping</span>${esc(f)}</span>`).join('')}
+        </div>` : ''}
+    `;
+}
+
+function closeDrawer() {
+    document.getElementById('drawer-bg').classList.remove('open');
+    document.querySelectorAll('.user-row').forEach(r => r.classList.remove('active'));
+}
+
+function filtrarEmbalagens() {
+    const q = (document.getElementById('emb-search').value || '').toLowerCase().trim();
+    const lista = q
+        ? currentUserEmbalagens.filter(e => (e.nome || '').toLowerCase().includes(q) || (e.fornecedor || '').toLowerCase().includes(q))
+        : currentUserEmbalagens;
+
+    renderEmbalagens(lista);
+}
+
+function fmtR(v) { return 'R$\u00a0' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function renderEmbalagens(lista) {
+    const body = document.getElementById('drawer-body');
+
+    if (!lista.length) {
+        body.innerHTML = `
+            <div style="text-align:center;padding:3rem 1rem;color:#475569">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem">package_2</span>
+                <p>${currentUserEmbalagens.length === 0 ? 'Este usuário ainda não cadastrou embalagens.' : 'Nenhuma embalagem encontrada.'}</p>
+            </div>`;
+        return;
+    }
+
+    // Header
+    const headerHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding:0 .4rem .4rem;flex-shrink:0">
+        <span style="font-size:.7rem;font-weight:700;color:#64748b">${lista.length} embalage${lista.length !== 1 ? 'ns' : 'm'}</span>
+        <span style="font-size:.65rem;color:#475569">Custo pacote</span>
+    </div>`;
+
+    const rows = lista.map(emb => {
+        const preco      = Number(emb.preco || 0);
+        const qtd        = Number(emb.quantidade || 1);
+        const custoUnit  = qtd > 0 ? preco / qtd : 0;
+        const data       = new Date(emb.created_at).toLocaleDateString('pt-BR');
+        const fornecedor = emb.fornecedor || '';
+        const obs        = emb.obs || '';
+
+        return `<div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.65rem;padding:.55rem .75rem;display:flex;align-items:center;gap:.6rem;min-height:3rem;animation:fadeUp .2s ease both">
+            <div style="width:2rem;height:2rem;border-radius:.45rem;background:rgba(168,85,247,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1rem;color:#a855f7;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span>
+            </div>
+            <div style="flex:1;min-width:0;overflow:hidden">
+                <div style="font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(emb.nome || 'Sem nome')}</div>
+                <div style="font-size:.62rem;color:#64748b;margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    ${qtd} un/pacote · ${custoUnit > 0 ? fmtR(custoUnit) + '/un' : ''}${fornecedor ? ' · ' + esc(fornecedor) : ''} · ${data}
+                </div>
+                ${obs ? `<div style="font-size:.58rem;color:#475569;margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(obs)}">📝 ${esc(obs)}</div>` : ''}
+            </div>
+            <div style="flex-shrink:0;text-align:right">
+                <div style="font-size:.85rem;font-weight:800;color:${preco > 0 ? '#a855f7' : '#334155'}">${preco > 0 ? fmtR(preco) : '—'}</div>
+                ${custoUnit > 0 ? `<div style="font-size:.58rem;color:#64748b;margin-top:.1rem">${fmtR(custoUnit)}/un</div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+
+    body.innerHTML = headerHtml + rows;
+}
+
+// ── Shimmer loading ────────────────────────────────────────────────
+function showLoading() {
+    document.getElementById('user-list').innerHTML =
+        Array(6).fill('<div class="shimmer"></div>').join('');
+}
+
+// ── Utilitários ───────────────────────────────────────────────────
+function getInitials(nome, sobrenome) {
+    return (((nome || '?')[0] || '') + ((sobrenome || '')[0] || '')).toUpperCase() || '?';
+}
+function esc(str) {
+    return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    document.getElementById('toast-msg').textContent  = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>
