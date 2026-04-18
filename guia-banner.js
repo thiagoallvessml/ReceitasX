@@ -226,7 +226,7 @@
     try {
       if (typeof sb === 'undefined') return;
 
-      const { data: { session } } = await sb.auth.getSession();
+      const session = await getSession();
       if (!session) return;
 
       const uid = session.user.id;

@@ -10,24 +10,56 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        // Bypass navigator.locks para evitar lock contention quando múltiplos
+        // scripts chamam getSession() simultaneamente na inicialização.
+        lock: (name, acquireTimeout, fn) => fn(),
     }
 });
 
-/* ─── Helpers de Auth ─────────────────────────────────────────── */
-async function getUser() {
-    const { data: { user } } = await sb.auth.getUser();
-    return user;
+/* ─── Cache de sessão (evita lock contention) ─────────────────── */
+let _sessionPromise = null;    // Promise compartilhada
+let _sessionCache   = null;    // resultado cacheado
+
+/**
+ * Retorna a sessão do Supabase cacheada.
+ * A primeira chamada busca do Supabase; as seguintes retornam o cache.
+ * Use forceRefresh=true para forçar nova busca (ex: após login).
+ */
+async function getSession(forceRefresh) {
+    if (!forceRefresh && _sessionCache !== null) return _sessionCache;
+    if (!forceRefresh && _sessionPromise) return _sessionPromise;
+
+    _sessionPromise = sb.auth.getSession()
+        .then(({ data: { session } }) => {
+            _sessionCache = session;
+            _sessionPromise = null;
+            return session;
+        })
+        .catch(e => {
+            console.warn('[getSession] erro:', e.message);
+            _sessionPromise = null;
+            return _sessionCache; // retorna cache anterior se houver
+        });
+
+    return _sessionPromise;
 }
 
-async function getSession() {
-    const { data: { session } } = await sb.auth.getSession();
-    return session;
+async function getUser() {
+    const session = await getSession();
+    return session?.user || null;
 }
 
 async function signOut() {
+    _sessionCache = null;
+    _sessionPromise = null;
     await sb.auth.signOut();
     window.location.href = 'login.html';
 }
+
+// Atualiza cache quando sessão muda (refresh, login, logout)
+sb.auth.onAuthStateChange((_event, session) => {
+    _sessionCache = session;
+});
 
 /* ─── Helpers de dados ────────────────────────────────────────── */
 async function dbSelect(table, query = '*', filters = {}) {
@@ -86,7 +118,10 @@ async function dbUpsert(table, payload, onConflict) {
 /* ─── PRESENÇA ONLINE (Heartbeat) ─────────────────────────────── */
 (async function _heartbeat() {
     try {
-        const { data: { session } } = await sb.auth.getSession();
+        // Aguarda o auth-guard resolver a sessão primeiro (evita lock contention)
+        await new Promise(r => setTimeout(r, 800));
+
+        const session = await getSession();
         if (!session) { console.log('[Heartbeat] Sem sessão, heartbeat desativado'); return; }
 
         const pagina = window.location.pathname.split('/').pop() || 'index.html';
@@ -101,9 +136,7 @@ async function dbUpsert(table, payload, onConflict) {
                 }, { onConflict: 'user_id' });
                 
                 if (error) {
-                    console.error('[Heartbeat] Erro no upsert:', error.message, error);
-                } else {
-                    console.log('[Heartbeat] Ping OK', new Date().toLocaleTimeString());
+                    console.error('[Heartbeat] Erro no upsert:', error.message);
                 }
             } catch(e) {
                 console.error('[Heartbeat] Exceção:', e);
@@ -117,3 +150,4 @@ async function dbUpsert(table, payload, onConflict) {
         console.error('[Heartbeat] Erro init:', e);
     }
 })();
+

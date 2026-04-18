@@ -543,7 +543,7 @@
     // Controle de visibilidade por role — executa direto ao carregar
     (async () => {
         try {
-            const { data: { session } } = await sb.auth.getSession();
+            const session = await getSession();
             if (!session) return;
 
             const { data: perfil } = await sb
@@ -868,7 +868,7 @@
 
     (async function checkAvisosAdmin() {
         try {
-            const { data: { session } } = await sb.auth.getSession();
+            const session = await getSession();
             if (!session) return;
             const uid = session.user.id;
 
