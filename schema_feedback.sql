@@ -69,7 +69,7 @@ BEGIN
         p.nome AS user_nome,
         p.sobrenome AS user_sobrenome,
         p.negocio AS user_negocio,
-        u.email AS user_email
+        u.email::TEXT AS user_email
     FROM feedbacks f
     LEFT JOIN perfis p ON p.id = f.user_id
     LEFT JOIN auth.users u ON u.id = f.user_id
