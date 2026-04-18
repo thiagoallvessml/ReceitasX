@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Configurações dos Usuários (Admin) · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1A1A1A","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* header banner */
+        .hero-banner {
+            background:linear-gradient(135deg,rgba(37,244,244,.08),rgba(37,244,244,.02));
+            border:1px solid rgba(37,244,244,.15);border-radius:1rem;
+            padding:1.5rem;display:flex;align-items:center;gap:1.25rem;
+        }
+        .hero-ico {
+            width:3.5rem;height:3.5rem;border-radius:1rem;flex-shrink:0;
+            background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.2);
+            display:flex;align-items:center;justify-content:center;
+        }
+        .hero-ico .material-symbols-outlined { font-size:1.8rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+
+        .filter-box {
+            display:flex;gap:.5rem;margin-top:1.5rem;
+        }
+        .search-wrap { position:relative;flex:1; }
+        .search-wrap .material-symbols-outlined { position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:1.1rem; }
+        .search-input { width:100%;background:#1A1A1A!important;border:1px solid #2A2A2A!important;color:#f1f5f9!important;padding:.65rem 1rem .65rem 2.8rem;border-radius:.65rem;font-size:.85rem;outline:none;transition:all .2s; }
+        .search-input:focus { border-color:rgba(37,244,244,.5)!important;box-shadow:0 0 0 3px rgba(37,244,244,.08)!important; }
+
+        /* config card */
+        .cfg-card {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;
+            padding:1.25rem;display:flex;flex-direction:column;gap:1rem;
+            transition:border-color .2s;
+        }
+        .cfg-card:hover { border-color:rgba(37,244,244,.3); }
+
+        .user-top { display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2A2A2A;padding-bottom:.75rem;margin-bottom:.5rem; }
+        .user-info { display:flex;gap:.75rem;align-items:center; }
+        .user-avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:#2A2A2A;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem; }
+        .user-name { font-size:.9rem;font-weight:700;color:#f1f5f9; }
+        .user-email { font-size:.7rem;color:#64748b;margin-top:.1rem; }
+        .cfg-date { font-size:.7rem;color:#475569;text-align:right;}
+        .biz-badge { display:inline-flex;align-items:center;gap:.25rem;background:rgba(52,211,153,.1);color:#34d399;font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;border:1px solid rgba(52,211,153,.2);margin-top:.25rem; }
+        .biz-badge .material-symbols-outlined { font-size:.7rem; }
+
+        .cfg-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem; }
+        .cfg-metric { background:#141414;border:1px solid #2A2A2A;border-radius:.65rem;padding:.75rem;display:flex;flex-direction:column;gap:.2rem; }
+        .cfg-metric-label { font-size:.65rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;font-weight:600;display:flex;align-items:center;gap:.3rem; }
+        .cfg-metric-label .material-symbols-outlined { font-size:.85rem;color:#25f4f4; }
+        .cfg-metric-val { font-size:1.1rem;font-weight:800;color:#f1f5f9; }
+
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:1rem;height:12rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        
+        .empty-state { text-align:center;padding:4rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:4rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Configurações dos Usuários</h1>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-5xl mx-auto px-4 py-6">
+    <div class="hero-banner flex-col sm:flex-row text-center sm:text-left">
+        <div class="hero-ico">
+            <span class="material-symbols-outlined">settings_account_box</span>
+        </div>
+        <div class="flex-1">
+            <h2 style="font-size:1.1rem;font-weight:800;color:#f1f5f9;margin-bottom:.25rem">Monitoramento de Configurações</h2>
+            <p style="font-size:.82rem;color:#64748b;max-width:480px">Visão administrativa de todos os ajustes salvos pelos usuários (Gás, Energia, Custos e Metas de Margem).</p>
+        </div>
+        <div class="mt-2 sm:mt-0 px-4 py-2 bg-card-dark border border-border-dark rounded-xl text-center">
+            <div id="cfg-count" style="font-size:1.4rem;font-weight:800;color:#25f4f4">...</div>
+            <div style="font-size:.65rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Ajustes Registrados</div>
+        </div>
+    </div>
+
+    <div class="filter-box">
+        <div class="search-wrap">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" id="cfg-search" class="search-input" placeholder="Buscar por nome, negócio ou e-mail..." oninput="handleSearch()">
+        </div>
+    </div>
+
+    <div id="cfg-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6"></div>
+</main>
+
+<script>
+let stateConfiguracoes = [];
+
+(async () => {
+    try {
+        const session = await getSession();
+        if (!session) { location.replace('login.html'); return; }
+
+        showLoading();
+        
+        // Chamando RPC de Admin
+        const { data, error } = await sb.rpc('admin_listar_configuracoes');
+        if (error) throw error;
+        
+        stateConfiguracoes = data || [];
+        document.getElementById('cfg-count').textContent = stateConfiguracoes.length;
+        renderList(stateConfiguracoes);
+    } catch (e) {
+        console.error('Erro ao carregar configuracoes:', e);
+        document.getElementById('cfg-list').innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1">
+                <span class="material-symbols-outlined">error</span>
+                <p>Nao foi possível carregar as configurações. Verifique se o SQL foi executado.</p>
+            </div>`;
+    }
+})();
+
+function handleSearch() {
+    const q = document.getElementById('cfg-search').value.toLowerCase().trim();
+    if (!q) return renderList(stateConfiguracoes);
+    
+    const filt = stateConfiguracoes.filter(c => {
+        const str = [c.user_nome, c.user_sobrenome, c.user_negocio, c.user_email].join(' ').toLowerCase();
+        return str.includes(q);
+    });
+    renderList(filt);
+}
+
+function showLoading() {
+    document.getElementById('cfg-list').innerHTML =
+        Array(4).fill('<div class="shimmer"></div>').join('');
+}
+
+function renderList(list) {
+    const el = document.getElementById('cfg-list');
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1">
+                <span class="material-symbols-outlined">search_off</span>
+                <p style="font-size:.95rem;font-weight:600">Nenhum resultado</p>
+                <p style="font-size:.78rem;margin-top:.25rem">Não encontramos nada correspondente a esta busca.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map((c, i) => {
+        const char = (c.user_nome || c.user_email || 'U').charAt(0).toUpperCase();
+        const nomeCompleto = esc([c.user_nome, c.user_sobrenome].filter(Boolean).join(' ')) || 'Sem Nome';
+        const updated = c.updated_at ? new Date(c.updated_at).toLocaleDateString('pt-BR', { day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Nunca atualizado';
+        
+        const negocioNode = c.user_negocio ? `<div class="biz-badge"><span class="material-symbols-outlined">storefront</span>${esc(c.user_negocio)}</div>` : '';
+
+        return `
+        <div class="cfg-card" style="animation:fadeUp .3s ease both;animation-delay:${i * 0.05}s">
+            <div class="user-top">
+                <div class="user-info">
+                    <div class="user-avatar">${char}</div>
+                    <div>
+                        <div class="user-name">${nomeCompleto}</div>
+                        <div class="user-email">${esc(c.user_email || 'Não informado')}</div>
+                        ${negocioNode}
+                    </div>
+                </div>
+                <div class="cfg-date">Salvo em:<br><strong>${updated}</strong></div>
+            </div>
+            
+            <div class="cfg-grid">
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">local_fire_department</span> Gás / Kg</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.gas_custo)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">bolt</span> Energia kWh</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.energia_kwh)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">engineering</span> Mão de Obra/h</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.mao_obra_hora)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">trending_up</span> Margem Padrão</div>
+                    <div class="cfg-metric-val">${fmtPct(c.meta_margem)}</div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function fmtR(val) {
+    if (val === null || val === undefined) return '0,00';
+    return Number(val).toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtPct(val) {
+    if (val === null || val === undefined) return '0%';
+    return Number(val).toLocaleString('pt-BR', {maximumFractionDigits:1}) + '%';
+}
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
