@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin — Gerenciar Tutoriais · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-radius:.75rem;font-size:.78rem;color:#f87171; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .badge-admin .material-symbols-outlined { font-size:.75rem; }
+
+        /* Stat */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* Buttons */
+        .btn-primary {
+            display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;
+            border-radius:.65rem;border:none;
+            background:linear-gradient(135deg,#f87171,#ef4444);color:#fff;
+            font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .15s;
+            font-family:'Inter',sans-serif;box-shadow:0 4px 16px rgba(248,113,113,.3);
+        }
+        .btn-primary:hover { opacity:.88; }
+        .btn-primary .material-symbols-outlined { font-size:.95rem; }
+
+        .action-btn { display:flex;align-items:center;gap:.3rem;padding:.4rem .7rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif; }
+        .action-btn:hover { border-color:#475569;color:#f1f5f9; }
+        .action-btn.danger:hover { border-color:rgba(248,113,113,.4);color:#f87171; }
+        .action-btn .material-symbols-outlined { font-size:.8rem; }
+
+        /* video row card */
+        .video-row {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;
+            padding:.85rem 1rem;display:flex;align-items:center;gap:.9rem;
+            transition:border-color .18s;
+        }
+        .video-row:hover { border-color:rgba(248,113,113,.2); }
+        .video-row.inactive { opacity:.5; }
+
+        .video-thumb-sm {
+            width:6rem;height:3.4rem;border-radius:.5rem;overflow:hidden;flex-shrink:0;
+            background:#111;position:relative;
+        }
+        .video-thumb-sm img { width:100%;height:100%;object-fit:cover; }
+        .video-thumb-sm .play-sm {
+            position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+            background:rgba(0,0,0,.3);
+        }
+        .video-thumb-sm .play-sm .material-symbols-outlined { font-size:1.3rem;color:#fff;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+
+        .order-badge {
+            width:1.8rem;height:1.8rem;border-radius:.5rem;
+            background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;
+            font-size:.7rem;font-weight:800;color:#f87171;
+        }
+
+        .status-pill { display:inline-flex;align-items:center;gap:.2rem;font-size:.55rem;font-weight:700;padding:.12rem .4rem;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase; }
+        .status-pill.ativo { background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:#34d399; }
+        .status-pill.inativo { background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2);color:#64748b; }
+
+        /* modal form */
+        #form-overlay {
+            position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+            z-index:9998;display:none;align-items:center;justify-content:center;padding:1rem;
+        }
+        #form-overlay.show { display:flex; }
+
+        #form-modal {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem;
+            width:100%;max-width:480px;overflow:hidden;
+            box-shadow:0 16px 64px rgba(0,0,0,.8),0 0 0 1px rgba(248,113,113,.08);
+            animation:_fmSlide .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes _fmSlide { from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)} }
+
+        .fm-header { display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;border-bottom:1px solid #2A2A2A; }
+        .fm-header-icon { width:2.5rem;height:2.5rem;border-radius:.65rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .fm-header-icon .material-symbols-outlined { font-size:1.2rem;color:#f87171;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        .fm-body { padding:1.25rem;display:flex;flex-direction:column;gap:1rem; }
+
+        .fm-field label { display:block;font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em; }
+        .fm-field input, .fm-field textarea {
+            width:100%;padding:.65rem .85rem;border-radius:.65rem;
+            border:1px solid #2A2A2A !important;background:#141414 !important;
+            color:#f1f5f9 !important;font-size:.85rem;font-family:'Inter',sans-serif;
+            outline:none;transition:border-color .2s;
+        }
+        .fm-field input::placeholder, .fm-field textarea::placeholder { color:#475569 !important; }
+        .fm-field input:focus, .fm-field textarea:focus { border-color:rgba(248,113,113,.4) !important;box-shadow:0 0 0 3px rgba(248,113,113,.07) !important; }
+        .fm-field textarea { min-height:70px;max-height:120px;resize:vertical;line-height:1.5; }
+
+        .fm-preview { display:flex;align-items:center;gap:.75rem;padding:.6rem;background:#111;border:1px solid #2A2A2A;border-radius:.65rem;min-height:3.2rem; }
+        .fm-preview img { width:5rem;height:2.8rem;border-radius:.4rem;object-fit:cover; }
+        .fm-preview-empty { font-size:.72rem;color:#475569;font-style:italic; }
+
+        .fm-row { display:flex;gap:.75rem; }
+        .fm-row .fm-field { flex:1; }
+
+        .fm-footer { display:flex;gap:.5rem;padding:0 1.25rem 1.25rem;justify-content:flex-end; }
+
+        .fm-btn-cancel { padding:.6rem 1.2rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif; }
+        .fm-btn-cancel:hover { color:#f1f5f9;border-color:#475569; }
+        .fm-btn-save { padding:.6rem 1.6rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#f87171,#ef4444);color:#fff;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:.35rem;box-shadow:0 4px 16px rgba(248,113,113,.3); }
+        .fm-btn-save:hover { opacity:.88; }
+        .fm-btn-save:disabled { opacity:.5;cursor:not-allowed; }
+        .fm-btn-save .material-symbols-outlined { font-size:.95rem; }
+
+        /* confirm delete */
+        .confirm-del { background:rgba(248,113,113,.04);border:1px solid rgba(248,113,113,.2);border-radius:.65rem;padding:.75rem;display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem; }
+        .confirm-del p { font-size:.78rem;color:#f87171;font-weight:600; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:3.8rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(248,113,113,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+        <h1 class="text-base font-semibold flex-1">Gerenciar Tutoriais</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span> Admin
+        </span>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+
+    <!-- Banner -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">video_library</span>
+        <span>Adicione links do YouTube para os tutoriais do sistema. Os vídeos ativos aparecem na página "Como Usar" dos usuários.</span>
+    </div>
+
+    <!-- Stats + botão -->
+    <div class="flex items-center gap-3 flex-wrap">
+        <div class="stat-card flex-1 min-w-[100px]">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card flex-1 min-w-[100px]">
+            <div class="stat-val" id="stat-ativos" style="color:#34d399">—</div>
+            <div class="stat-lbl">Ativos</div>
+        </div>
+        <div class="stat-card flex-1 min-w-[100px]">
+            <div class="stat-val" id="stat-inativos" style="color:#64748b">—</div>
+            <div class="stat-lbl">Inativos</div>
+        </div>
+        <button class="btn-primary" onclick="abrirForm()">
+            <span class="material-symbols-outlined">add</span>
+            Novo Tutorial
+        </button>
+    </div>
+
+    <!-- Lista -->
+    <div id="videos-list" class="space-y-2"></div>
+
+</main>
+
+<!-- ══ Modal de Formulário ═════════════════════════════════════════ -->
+<div id="form-overlay" onclick="fecharForm(event)">
+    <div id="form-modal" onclick="event.stopPropagation()">
+        <div class="fm-header">
+            <div class="fm-header-icon">
+                <span class="material-symbols-outlined">video_library</span>
+            </div>
+            <div>
+                <p id="fm-title" style="font-size:.95rem;font-weight:700;color:#f1f5f9">Novo Tutorial</p>
+                <p style="font-size:.72rem;color:#64748b">Adicione um vídeo do YouTube</p>
+            </div>
+            <button onclick="fecharForm()" style="margin-left:auto;background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center">
+                <span class="material-symbols-outlined" style="font-size:1.2rem">close</span>
+            </button>
+        </div>
+        <div class="fm-body">
+            <div class="fm-field">
+                <label>Link do YouTube *</label>
+                <input id="fm-url" type="text" placeholder="https://youtube.com/watch?v=..." oninput="previewThumb()" />
+            </div>
+            <div class="fm-preview" id="fm-preview">
+                <span class="fm-preview-empty">Cole o link acima para ver o preview</span>
+            </div>
+            <div class="fm-field">
+                <label>Título *</label>
+                <input id="fm-titulo" type="text" placeholder="Ex: Como cadastrar uma receita" maxlength="120" />
+            </div>
+            <div class="fm-field">
+                <label>Descrição (opcional)</label>
+                <textarea id="fm-descricao" placeholder="Breve descrição do tutorial…" maxlength="300"></textarea>
+            </div>
+            <div class="fm-row">
+                <div class="fm-field">
+                    <label>Ordem</label>
+                    <input id="fm-ordem" type="number" min="0" value="0" />
+                </div>
+                <div class="fm-field">
+                    <label>Status</label>
+                    <select id="fm-ativo" style="padding:.65rem .85rem;border-radius:.65rem;font-size:.85rem;width:100%">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="fm-footer">
+            <button class="fm-btn-cancel" onclick="fecharForm()">Cancelar</button>
+            <button class="fm-btn-save" id="fm-btn-salvar" onclick="salvarTutorial()">
+                <span class="material-symbols-outlined">save</span>
+                Salvar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#f87171">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+let todosTutoriais = [];
+let editandoId = null;
+
+// ── Guard admin ───────────────────────────────────────────────────
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarTutoriais();
+})();
+
+// ── Carregar ──────────────────────────────────────────────────────
+async function carregarTutoriais() {
+    showLoading();
+    try {
+        const { data, error } = await sb.rpc('admin_listar_todos_tutoriais');
+        if (error) throw error;
+        todosTutoriais = data || [];
+        atualizarStats();
+        renderLista();
+    } catch (e) {
+        console.error('Erro ao carregar:', e);
+        document.getElementById('videos-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">error</span>
+                <p>Erro ao carregar. <small>${esc(e.message)}</small></p>
+            </div>`;
+    }
+}
+
+function atualizarStats() {
+    const total = todosTutoriais.length;
+    const ativos = todosTutoriais.filter(t => t.ativo).length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-ativos').textContent = ativos;
+    document.getElementById('stat-inativos').textContent = total - ativos;
+}
+
+// ── Render lista ──────────────────────────────────────────────────
+function renderLista() {
+    const el = document.getElementById('videos-list');
+
+    if (!todosTutoriais.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">video_library</span>
+                <p>Nenhum tutorial cadastrado.</p>
+                <p style="font-size:.75rem;margin-top:.25rem">Clique em "Novo Tutorial" para começar.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = todosTutoriais.map((t, i) => {
+        const videoId = extractYouTubeId(t.youtube_url);
+        const thumb = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : '';
+
+        return `
+        <div class="video-row ${t.ativo ? '' : 'inactive'}" style="animation:fadeUp .25s ease both;animation-delay:${i * 0.05}s">
+            <div class="order-badge">${t.ordem}</div>
+            <div class="video-thumb-sm">
+                ${thumb ? `<img src="${thumb}" alt="" />` : ''}
+                <div class="play-sm">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                </div>
+            </div>
+            <div style="flex:1;min-width:0">
+                <p style="font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.titulo)}</p>
+                <div style="display:flex;align-items:center;gap:.4rem;margin-top:.2rem">
+                    <span class="status-pill ${t.ativo ? 'ativo' : 'inativo'}">${t.ativo ? 'Ativo' : 'Inativo'}</span>
+                    ${t.descricao ? `<span style="font-size:.62rem;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px">${esc(t.descricao)}</span>` : ''}
+                </div>
+            </div>
+            <div style="display:flex;gap:.35rem;flex-shrink:0">
+                <button class="action-btn" onclick="editarTutorial('${t.id}')" title="Editar">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="action-btn danger" onclick="confirmarExclusao('${t.id}')" title="Excluir">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Formulário ────────────────────────────────────────────────────
+function abrirForm(id) {
+    editandoId = id || null;
+    const tut = editandoId ? todosTutoriais.find(t => t.id === editandoId) : null;
+
+    document.getElementById('fm-title').textContent = tut ? 'Editar Tutorial' : 'Novo Tutorial';
+    document.getElementById('fm-url').value = tut?.youtube_url || '';
+    document.getElementById('fm-titulo').value = tut?.titulo || '';
+    document.getElementById('fm-descricao').value = tut?.descricao || '';
+    document.getElementById('fm-ordem').value = tut?.ordem ?? (todosTutoriais.length + 1);
+    document.getElementById('fm-ativo').value = tut?.ativo === false ? 'false' : 'true';
+
+    previewThumb();
+    document.getElementById('form-overlay').classList.add('show');
+}
+
+function fecharForm(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('form-overlay').classList.remove('show');
+    editandoId = null;
+}
+
+function previewThumb() {
+    const url = document.getElementById('fm-url').value;
+    const videoId = extractYouTubeId(url);
+    const preview = document.getElementById('fm-preview');
+
+    if (videoId) {
+        preview.innerHTML = `
+            <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="preview" />
+            <div>
+                <p style="font-size:.72rem;font-weight:700;color:#34d399">✓ Vídeo detectado</p>
+                <p style="font-size:.6rem;color:#475569">ID: ${videoId}</p>
+            </div>`;
+    } else if (url.length > 5) {
+        preview.innerHTML = `<span class="fm-preview-empty" style="color:#f87171">Link inválido — use um link do YouTube</span>`;
+    } else {
+        preview.innerHTML = `<span class="fm-preview-empty">Cole o link acima para ver o preview</span>`;
+    }
+}
+
+async function salvarTutorial() {
+    const btn = document.getElementById('fm-btn-salvar');
+    const url = document.getElementById('fm-url').value.trim();
+    const titulo = document.getElementById('fm-titulo').value.trim();
+    const descricao = document.getElementById('fm-descricao').value.trim();
+    const ordem = parseInt(document.getElementById('fm-ordem').value) || 0;
+    const ativo = document.getElementById('fm-ativo').value === 'true';
+
+    if (!url || !titulo) {
+        showToast('Preencha o link e o título.', 'error');
+        return;
+    }
+    if (!extractYouTubeId(url)) {
+        showToast('Link do YouTube inválido.', 'error');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite">progress_activity</span> Salvando…';
+
+    try {
+        const { error } = await sb.rpc('admin_upsert_tutorial', {
+            p_id: editandoId || null,
+            p_titulo: titulo,
+            p_descricao: descricao || null,
+            p_youtube_url: url,
+            p_ordem: ordem,
+            p_ativo: ativo,
+        });
+        if (error) throw error;
+
+        fecharForm();
+        showToast(editandoId ? 'Tutorial atualizado!' : 'Tutorial adicionado!');
+        await carregarTutoriais();
+    } catch (e) {
+        console.error('Erro ao salvar:', e);
+        showToast('Erro: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">save</span> Salvar';
+    }
+}
+
+function editarTutorial(id) {
+    abrirForm(id);
+}
+
+async function confirmarExclusao(id) {
+    const tut = todosTutoriais.find(t => t.id === id);
+    if (!tut) return;
+    if (!confirm(`Tem certeza que deseja excluir "${tut.titulo}"?`)) return;
+
+    try {
+        const { error } = await sb.rpc('admin_deletar_tutorial', { p_id: id });
+        if (error) throw error;
+        showToast('Tutorial excluído.');
+        await carregarTutoriais();
+    } catch (e) {
+        console.error('Erro ao excluir:', e);
+        showToast('Erro: ' + e.message, 'error');
+    }
+}
+
+// ── Utilitários ───────────────────────────────────────────────────
+function extractYouTubeId(url) {
+    if (!url) return null;
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+        /^([a-zA-Z0-9_-]{11})$/,
+    ];
+    for (const p of patterns) {
+        const m = url.match(p);
+        if (m) return m[1];
+    }
+    return null;
+}
+
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showLoading() {
+    document.getElementById('videos-list').innerHTML =
+        Array(4).fill('<div class="shimmer"></div>').join('');
+}
+
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#34d399';
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fecharForm();
+});
+</script>
+</body>
+</html>
