@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Meus Feedbacks · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* header banner */
+        .hero-banner {
+            background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(139,92,246,.02));
+            border:1px solid rgba(139,92,246,.15);border-radius:1rem;
+            padding:1.5rem;display:flex;align-items:center;gap:1.25rem;
+        }
+        .hero-ico {
+            width:3.5rem;height:3.5rem;border-radius:1rem;flex-shrink:0;
+            background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);
+            display:flex;align-items:center;justify-content:center;
+        }
+        .hero-ico .material-symbols-outlined { font-size:1.8rem;color:#a78bfa;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+
+        /* card historico */
+        .fb-card {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;
+            padding:1.25rem;transition:border-color .2s;
+            display:flex;flex-direction:column;gap:1rem;
+        }
+        .fb-card:hover { border-color:rgba(139,92,246,.3); }
+
+        .tipo-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem; }
+        .tipo-badge.duvida   { background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8; }
+        .tipo-badge.sugestao { background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24; }
+        .tipo-badge.elogio   { background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399; }
+        .tipo-badge.bug      { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:#f87171; }
+        .tipo-badge .material-symbols-outlined { font-size:.75rem; }
+
+        .fb-date { font-size:.7rem;color:#475569;font-weight:500; }
+
+        .fb-msg { font-size:.85rem;color:#f1f5f9;line-height:1.6;white-space:pre-wrap; }
+
+        .fb-resp-box {
+            background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15);border-radius:.75rem;
+            padding:1rem;position:relative;
+        }
+        .fb-resp-box::before {
+            content:'';position:absolute;left:-1px;top:1rem;bottom:1rem;width:3px;
+            background:#34d399;border-radius:0 4px 4px 0;
+        }
+        .fb-resp-title { font-size:.7rem;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem; }
+        .fb-resp-title .material-symbols-outlined { font-size:.8rem; }
+        .fb-resp-text { font-size:.82rem;color:#e2e8f0;line-height:1.6;white-space:pre-wrap; }
+
+        /* modal (copiado com prefixo novo para n dar conflito global caso fosse no index) */
+        #fm-overlay {
+            position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+            z-index:9998;display:none;align-items:center;justify-content:center;padding:1rem;
+        }
+        #fm-overlay.show { display:flex; }
+        #fm-modal {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem;
+            width:100%;max-width:440px;overflow:hidden;
+            box-shadow:0 16px 64px rgba(0,0,0,.8),0 0 0 1px rgba(139,92,246,.08);
+            animation:_fmSlide .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes _fmSlide { from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)} }
+
+        .fm-header { display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;border-bottom:1px solid #2A2A2A; }
+        .fm-header-icon { width:2.5rem;height:2.5rem;border-radius:.65rem;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .fm-header-icon .material-symbols-outlined { font-size:1.2rem;color:#a78bfa;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+        .fm-body { padding:1.25rem; }
+        .fm-tipo-grid { display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem; }
+        .fm-tipo-btn { display:flex;align-items:center;gap:.5rem;padding:.65rem .85rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#141414;color:#94a3b8;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif; }
+        .fm-tipo-btn:hover { border-color:#475569;color:#f1f5f9; }
+        .fm-tipo-btn.active { border-color:var(--fb-color);color:var(--fb-color);background:var(--fb-bg); }
+        .fm-tipo-btn .material-symbols-outlined { font-size:1.1rem; }
+        .fm-tipo-btn[data-tipo="duvida"]   { --fb-color:#38bdf8;--fb-bg:rgba(56,189,248,.06); }
+        .fm-tipo-btn[data-tipo="sugestao"] { --fb-color:#fbbf24;--fb-bg:rgba(251,191,36,.06); }
+        .fm-tipo-btn[data-tipo="elogio"]   { --fb-color:#34d399;--fb-bg:rgba(52,211,153,.06); }
+        .fm-tipo-btn[data-tipo="bug"]      { --fb-color:#f87171;--fb-bg:rgba(248,113,113,.06); }
+        .fm-textarea { width:100%;min-height:110px;max-height:200px;resize:vertical;background:#141414 !important;border:1px solid #2A2A2A !important;border-radius:.75rem;padding:.75rem 1rem;color:#f1f5f9 !important;font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;line-height:1.5; }
+        .fm-textarea::placeholder { color:#475569 !important; }
+        .fm-textarea:focus { border-color:rgba(139,92,246,.4) !important;box-shadow:0 0 0 3px rgba(139,92,246,.07) !important; }
+        .fm-footer { display:flex;gap:.5rem;padding:0 1.25rem 1.25rem;justify-content:flex-end; }
+        .fm-btn-cancel { padding:.6rem 1.2rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif; }
+        .fm-btn-cancel:hover { color:#f1f5f9;border-color:#475569; }
+        .fm-btn-send { padding:.6rem 1.6rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:.35rem;box-shadow:0 4px 16px rgba(139,92,246,.3); }
+        .fm-btn-send:hover { opacity:.88; }
+        .fm-btn-send:disabled { opacity:.5;cursor:not-allowed; }
+        .fm-btn-send .material-symbols-outlined { font-size:.95rem; }
+        .fm-char-count { text-align:right;font-size:.62rem;color:#475569;margin-top:.3rem; }
+        .fm-success { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 1.5rem;gap:.75rem;text-align:center;animation:_fmFadeUp .4s ease both; }
+        @keyframes _fmFadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        .fm-success-icon { width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(52,211,153,.1);border:2px solid rgba(52,211,153,.3);display:flex;align-items:center;justify-content:center; }
+        .fm-success-icon .material-symbols-outlined { font-size:1.8rem;color:#34d399;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+
+        /* btn primario no lugar de hero */
+        .btn-new { display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.4rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;font-weight:700;font-size:.85rem;cursor:pointer;transition:opacity .15s;font-family:'Inter',sans-serif;box-shadow:0 4px 16px rgba(139,92,246,.3); }
+        .btn-new:hover { opacity:.88; }
+        .btn-new .material-symbols-outlined { font-size:1.1rem; }
+
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:1rem;height:8rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        .empty-state { text-align:center;padding:4rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:4rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Fale Conosco</h1>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Hero -->
+    <div class="hero-banner flex-col sm:flex-row text-center sm:text-left">
+        <div class="hero-ico">
+            <span class="material-symbols-outlined">forum</span>
+        </div>
+        <div class="flex-1">
+            <h2 style="font-size:1.1rem;font-weight:800;color:#f1f5f9;margin-bottom:.25rem">Seus Feedbacks</h2>
+            <p style="font-size:.82rem;color:#64748b;max-width:400px">Acompanhe suas dúvidas, sugestões e bugs reportados, e veja as respostas da nossa equipe.</p>
+        </div>
+        <div class="mt-2 sm:mt-0">
+            <button class="btn-new" onclick="abrirNovoFeedback()">
+                <span class="material-symbols-outlined">chat_bubble</span>
+                Nova Mensagem
+            </button>
+        </div>
+    </div>
+
+    <!-- Lista -->
+    <div id="fb-list" class="space-y-4"></div>
+
+</main>
+
+<!-- ══ Modal de Novo Feedback ══════════════════════════════════════ -->
+<div id="fm-overlay" onclick="fecharForm(event)">
+    <div id="fm-modal" onclick="event.stopPropagation()">
+        <!-- form -->
+        <div id="fm-state-form">
+            <div class="fm-header">
+                <div class="fm-header-icon">
+                    <span class="material-symbols-outlined">edit_square</span>
+                </div>
+                <div>
+                    <p style="font-size:.95rem;font-weight:700;color:#f1f5f9">Nova Mensagem</p>
+                    <p style="font-size:.72rem;color:#64748b">O que você deseja nos enviar?</p>
+                </div>
+                <button onclick="fecharForm()" style="margin-left:auto;background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center">
+                    <span class="material-symbols-outlined" style="font-size:1.2rem">close</span>
+                </button>
+            </div>
+            <div class="fm-body">
+                <div class="fm-tipo-grid">
+                    <button class="fm-tipo-btn" data-tipo="duvida" onclick="selecionarTipo(this)"><span class="material-symbols-outlined">help</span>Dúvida</button>
+                    <button class="fm-tipo-btn" data-tipo="sugestao" onclick="selecionarTipo(this)"><span class="material-symbols-outlined">lightbulb</span>Sugestão</button>
+                    <button class="fm-tipo-btn" data-tipo="elogio" onclick="selecionarTipo(this)"><span class="material-symbols-outlined">thumb_up</span>Elogio</button>
+                    <button class="fm-tipo-btn" data-tipo="bug" onclick="selecionarTipo(this)"><span class="material-symbols-outlined">bug_report</span>Bug</button>
+                </div>
+                <textarea id="fm-mensagem" class="fm-textarea" placeholder="Descreva todos os detalhes aqui…" maxlength="1000" oninput="atualizarCharCount()"></textarea>
+                <div class="fm-char-count"><span id="fm-chars">0</span> / 1000</div>
+            </div>
+            <div class="fm-footer">
+                <button class="fm-btn-cancel" onclick="fecharForm()">Cancelar</button>
+                <button class="fm-btn-send" id="fm-btn-enviar" onclick="enviarFeedback()" disabled>
+                    <span class="material-symbols-outlined">send</span>
+                    Enviar
+                </button>
+            </div>
+        </div>
+        <!-- success -->
+        <div id="fm-state-success" style="display:none">
+            <div class="fm-success">
+                <div class="fm-success-icon">
+                    <span class="material-symbols-outlined">check</span>
+                </div>
+                <p style="font-size:1rem;font-weight:700;color:#f1f5f9">Enviado com Sucesso!</p>
+                <p style="font-size:.82rem;color:#64748b;max-width:280px">Logo nossa equipe responderá sua mensagem por aqui.</p>
+                <button class="fm-btn-send" onclick="fecharFormReload()" style="margin-top:.5rem;background:rgba(52,211,153,.15);color:#34d399;box-shadow:none;border:1px solid rgba(52,211,153,.3)">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const TIPO_CONFIG = {
+    duvida:   { ico:'help',        label:'Dúvida',   color:'#38bdf8' },
+    sugestao: { ico:'lightbulb',   label:'Sugestão', color:'#fbbf24' },
+    elogio:   { ico:'thumb_up',    label:'Elogio',   color:'#34d399' },
+    bug:      { ico:'bug_report',  label:'Bug',      color:'#f87171' },
+};
+
+(async () => {
+    showLoading();
+    try {
+        const session = await getSession();
+        if (!session) throw new Error('Sessão inválida');
+
+        const { data, error } = await sb
+            .from('feedbacks')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        renderFeedbacks(data || []);
+    } catch (e) {
+        console.error('Erro ao carregar feedbacks:', e);
+        document.getElementById('fb-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">error</span>
+                <p>Nao foi possível carregar os feedbacks.</p>
+            </div>`;
+    }
+})();
+
+function renderFeedbacks(list) {
+    const el = document.getElementById('fb-list');
+
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">forum</span>
+                <p style="font-size:.95rem;font-weight:600">Nenhum feedback enviado</p>
+                <p style="font-size:.78rem;margin-top:.25rem">Sua caixa de mensagens está vazia.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map((f, i) => {
+        const tc = TIPO_CONFIG[f.tipo] || TIPO_CONFIG.duvida;
+        const data = new Date(f.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+        return `
+        <div class="fb-card" style="animation:fadeUp .3s ease both;animation-delay:${i * 0.08}s">
+            <!-- topo -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+                <span class="tipo-badge ${f.tipo}">
+                    <span class="material-symbols-outlined">${tc.ico}</span>
+                    ${tc.label}
+                </span>
+                <span class="fb-date">${data}</span>
+            </div>
+            
+            <!-- msg original -->
+            <div class="fb-msg">${esc(f.mensagem)}</div>
+
+            <!-- resposta -->
+            ${f.resposta ? `
+            <div class="fb-resp-box mt-1">
+                <div class="fb-resp-title">
+                    <span class="material-symbols-outlined">quick_reference_all</span>
+                    Resposta da Equipe ReceitasX
+                </div>
+                <div class="fb-resp-text">${esc(f.resposta)}</div>
+            </div>` : `
+            <div style="display:flex;align-items:center;gap:.4rem;padding:.6rem .8rem;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:.5rem">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#fbbf24">hourglass_empty</span>
+                <span style="font-size:.72rem;font-weight:600;color:#fbbf24">Aguardando análise da equipe</span>
+            </div>
+            `}
+        </div>`;
+    }).join('');
+}
+
+// ── Modal Novo Feedback ───────────────────────────────────────────
+let formTipo = null;
+
+function abrirNovoFeedback() {
+    formTipo = null;
+    document.getElementById('fm-mensagem').value = '';
+    document.getElementById('fm-chars').textContent = '0';
+    document.getElementById('fm-btn-enviar').disabled = true;
+    document.querySelectorAll('.fm-tipo-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById('fm-state-form').style.display = '';
+    document.getElementById('fm-state-success').style.display = 'none';
+    document.getElementById('fm-overlay').classList.add('show');
+}
+
+function fecharForm(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('fm-overlay').classList.remove('show');
+}
+function fecharFormReload() {
+    window.location.reload();
+}
+
+function selecionarTipo(btn) {
+    document.querySelectorAll('.fm-tipo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    formTipo = btn.dataset.tipo;
+    validarForm();
+}
+
+function atualizarCharCount() {
+    const len = document.getElementById('fm-mensagem').value.length;
+    document.getElementById('fm-chars').textContent = len;
+    validarForm();
+}
+
+function validarForm() {
+    const msg = document.getElementById('fm-mensagem').value.trim();
+    document.getElementById('fm-btn-enviar').disabled = !formTipo || msg.length < 5;
+}
+
+async function enviarFeedback() {
+    const btn = document.getElementById('fm-btn-enviar');
+    const msg = document.getElementById('fm-mensagem').value.trim();
+    if (!formTipo || msg.length < 5) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite">progress_activity</span> Enviando…';
+
+    try {
+        const session = await getSession();
+        if (!session) throw new Error('Sessão expirada');
+
+        const { error } = await sb.from('feedbacks').insert({
+            user_id: session.user.id,
+            tipo: formTipo,
+            mensagem: msg,
+        });
+        if (error) throw error;
+
+        document.getElementById('fm-state-form').style.display = 'none';
+        document.getElementById('fm-state-success').style.display = '';
+    } catch (e) {
+        console.error('Erro ao enviar:', e);
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">send</span> Enviar';
+        alert('Erro ao enviar: ' + (e.message || e));
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('fm-overlay').classList.contains('show')) fecharForm();
+});
+
+// ── Utilitários ───────────────────────────────────────────────────
+function showLoading() {
+    document.getElementById('fb-list').innerHTML =
+        Array(3).fill('<div class="shimmer"></div>').join('');
+}
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
