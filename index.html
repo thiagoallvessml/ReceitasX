@@ -298,8 +298,11 @@
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">manage_accounts</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Gestão de Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Roles, permissões e contas</p>
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Gestão de Usuários</h4>
+                        <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-vitalicios">0</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" style="margin-top:.1rem">Roles, permissões e contas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -626,6 +629,23 @@
                 const allowed = el.dataset.role.split(',').map(r => r.trim());
                 el.style.display = allowed.includes(role) ? '' : 'none';
             });
+
+            if (role === 'admin') {
+                try {
+                    const { count: vitaliciosCount } = await sb
+                        .from('perfis')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('plano', 'vitalicio');
+
+                    const badgeVit = document.getElementById('badge-vitalicios');
+                    if (badgeVit && vitaliciosCount !== null) {
+                        badgeVit.innerHTML = `<span class="material-symbols-outlined" style="font-size:.7rem;margin-right:-1px">diamond</span> ${vitaliciosCount}`;
+                        badgeVit.style.display = 'inline-flex';
+                        badgeVit.style.alignItems = 'center';
+                        badgeVit.style.gap = '.15rem';
+                    }
+                } catch(_) {}
+            }
 
             // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
             try {
