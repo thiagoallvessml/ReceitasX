@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin — Feedbacks dos Usuários · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.2);border-radius:.75rem;font-size:.78rem;color:#a78bfa; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .badge-admin .material-symbols-outlined { font-size:.75rem; }
+
+        /* stats */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
+
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.85rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(139,92,246,.4) !important;box-shadow:0 0 0 3px rgba(139,92,246,.07) !important; }
+
+        input,select,textarea { background-color:#1A1A1A !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder,textarea::placeholder { color:#475569 !important; }
+
+        /* pill filter */
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .pill.active { background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.4);color:#a78bfa; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        /* tipo badges */
+        .tipo-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem; }
+        .tipo-badge.duvida   { background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8; }
+        .tipo-badge.sugestao { background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24; }
+        .tipo-badge.elogio   { background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399; }
+        .tipo-badge.bug      { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:#f87171; }
+        .tipo-badge .material-symbols-outlined { font-size:.75rem; }
+
+        /* status badges */
+        .status-badge { display:inline-flex;align-items:center;gap:.2rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase; }
+        .status-badge.pendente   { background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24; }
+        .status-badge.lido       { background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8; }
+        .status-badge.respondido { background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399; }
+        .status-badge.arquivado  { background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#64748b; }
+
+        /* feedback card */
+        .fb-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;cursor:pointer;transition:border-color .18s,background .18s; }
+        .fb-card:hover { border-color:rgba(139,92,246,.3);background:#1E1E1E; }
+        .fb-card.active { border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.04); }
+
+        .avatar { width:2.2rem;height:2.2rem;border-radius:50%;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.05));border:1px solid rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:#a78bfa;text-transform:uppercase; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:5.5rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* drawer */
+        .drawer-bg { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s; }
+        .drawer-bg.open { opacity:1;pointer-events:auto; }
+        .drawer { position:fixed;top:0;right:0;height:100%;width:100%;max-width:520px;background:#141414;border-left:1px solid #2A2A2A;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1);overflow:hidden; }
+        .drawer-bg.open .drawer { transform:translateX(0); }
+        @media(max-width:540px) { .drawer { max-width:100%;border-left:none;border-top:1px solid #2A2A2A;border-radius:1.1rem 1.1rem 0 0;height:92%;top:auto;bottom:0; } }
+
+        .drawer-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0; }
+        .drawer-body { flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;min-height:0;-webkit-overflow-scrolling:touch; }
+
+        .resp-textarea { width:100%;min-height:80px;max-height:160px;resize:vertical;border:1px solid #2A2A2A;border-radius:.65rem;padding:.65rem .85rem;background:#111 !important;color:#f1f5f9 !important;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;line-height:1.5; }
+        .resp-textarea:focus { border-color:rgba(139,92,246,.4);box-shadow:0 0 0 3px rgba(139,92,246,.07); }
+
+        .action-btn { display:flex;align-items:center;gap:.3rem;padding:.5rem .9rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif; }
+        .action-btn:hover { border-color:#475569;color:#f1f5f9; }
+        .action-btn.primary { background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:#a78bfa; }
+        .action-btn.primary:hover { background:rgba(139,92,246,.2); }
+        .action-btn.green { background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399; }
+        .action-btn.green:hover { background:rgba(52,211,153,.2); }
+        .action-btn .material-symbols-outlined { font-size:.85rem; }
+
+        /* empty */
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* toast */
+        #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(139,92,246,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
+        #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
+        <h1 class="text-base font-semibold flex-1">Feedbacks dos Usuários</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span> Admin
+        </span>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+
+    <!-- Banner -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">forum</span>
+        <span>Gerencie dúvidas, sugestões, elogios e bugs reportados pelos usuários. Clique para ver detalhes e responder.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-pendentes" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Pendentes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-duvidas" style="color:#38bdf8">—</div>
+            <div class="stat-lbl">Dúvidas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-bugs" style="color:#f87171">—</div>
+            <div class="stat-lbl">Bugs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-elogios" style="color:#34d399">—</div>
+            <div class="stat-lbl">Elogios</div>
+        </div>
+    </div>
+
+    <!-- Search + filtro -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div class="search-wrap flex-1 w-full">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome, negócio ou mensagem…" oninput="filtrar()" />
+        </div>
+        <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
+            <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
+            <button class="pill" data-filter="pendente" onclick="setFilter('pendente',this)">Pendentes</button>
+            <button class="pill" data-filter="duvida" onclick="setFilter('duvida',this)">Dúvidas</button>
+            <button class="pill" data-filter="sugestao" onclick="setFilter('sugestao',this)">Sugestões</button>
+            <button class="pill" data-filter="elogio" onclick="setFilter('elogio',this)">Elogios</button>
+            <button class="pill" data-filter="bug" onclick="setFilter('bug',this)">Bugs</button>
+        </div>
+    </div>
+
+    <!-- Contagem -->
+    <p id="count-label" class="text-xs text-slate-500"></p>
+
+    <!-- Lista -->
+    <div id="fb-list" class="space-y-2"></div>
+
+</main>
+
+<!-- ══ Drawer Detalhes ════════════════════════════════════════════ -->
+<div id="drawer-bg" class="drawer-bg" onclick="closeDrawer()">
+    <div class="drawer" onclick="event.stopPropagation()">
+        <div class="drawer-head">
+            <div class="avatar" id="drawer-avatar">??</div>
+            <div style="flex:1;min-width:0">
+                <p id="drawer-nome" class="font-bold text-sm leading-tight">—</p>
+                <p id="drawer-email" class="text-xs text-slate-400 mt-0.5">—</p>
+            </div>
+            <button onclick="closeDrawer()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+            </button>
+        </div>
+
+        <div class="drawer-body" id="drawer-body">
+            <!-- preenchido por JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<div id="toast">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#a78bfa">check_circle</span>
+    <span id="toast-msg">OK</span>
+</div>
+
+<script>
+const TIPO_CONFIG = {
+    duvida:   { ico:'help',        label:'Dúvida',   color:'#38bdf8' },
+    sugestao: { ico:'lightbulb',   label:'Sugestão', color:'#fbbf24' },
+    elogio:   { ico:'thumb_up',    label:'Elogio',   color:'#34d399' },
+    bug:      { ico:'bug_report',  label:'Bug',      color:'#f87171' },
+};
+
+let todosFeedbacks = [];
+let currentFilter = 'todos';
+let currentFbId = null;
+
+// ── Guard admin ───────────────────────────────────────────────────
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarDados();
+})();
+
+// ── Carregar feedbacks via RPC ────────────────────────────────────
+async function carregarDados() {
+    showLoading();
+    try {
+        const { data, error } = await sb.rpc('admin_listar_feedbacks');
+        if (error) throw error;
+
+        todosFeedbacks = data || [];
+        atualizarStats();
+        filtrar();
+    } catch (e) {
+        console.error('Erro ao carregar feedbacks:', e);
+        document.getElementById('fb-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">error</span>
+                <p>Erro ao carregar feedbacks.<br><small style="font-size:.72rem">${esc(e.message)}</small></p>
+            </div>`;
+    }
+}
+
+// ── Stats ──────────────────────────────────────────────────────────
+function atualizarStats() {
+    const total = todosFeedbacks.length;
+    const pendentes = todosFeedbacks.filter(f => f.status === 'pendente').length;
+    const duvidas = todosFeedbacks.filter(f => f.tipo === 'duvida').length;
+    const bugs = todosFeedbacks.filter(f => f.tipo === 'bug').length;
+    const elogios = todosFeedbacks.filter(f => f.tipo === 'elogio').length;
+
+    document.getElementById('stat-total').textContent     = total;
+    document.getElementById('stat-pendentes').textContent = pendentes;
+    document.getElementById('stat-duvidas').textContent   = duvidas;
+    document.getElementById('stat-bugs').textContent      = bugs;
+    document.getElementById('stat-elogios').textContent   = elogios;
+}
+
+// ── Filtro + busca ─────────────────────────────────────────────────
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    let list = todosFeedbacks;
+
+    if (currentFilter === 'pendente') list = list.filter(f => f.status === 'pendente');
+    else if (currentFilter !== 'todos') list = list.filter(f => f.tipo === currentFilter);
+
+    if (q) {
+        list = list.filter(f => {
+            const nome = ((f.user_nome || '') + ' ' + (f.user_sobrenome || '')).toLowerCase();
+            const neg = (f.user_negocio || '').toLowerCase();
+            const msg = (f.mensagem || '').toLowerCase();
+            return nome.includes(q) || neg.includes(q) || msg.includes(q);
+        });
+    }
+
+    document.getElementById('count-label').textContent =
+        `${list.length} feedback${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
+
+    renderLista(list);
+}
+
+// ── Render lista ───────────────────────────────────────────────────
+function renderLista(list) {
+    const el = document.getElementById('fb-list');
+
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">forum</span>
+                <p>Nenhum feedback encontrado.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(f => {
+        const tc = TIPO_CONFIG[f.tipo] || TIPO_CONFIG.duvida;
+        const nomeCompleto = [f.user_nome, f.user_sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+        const initials = getInitials(f.user_nome, f.user_sobrenome);
+        const data = new Date(f.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        const msgPreview = (f.mensagem || '').substring(0, 100) + (f.mensagem?.length > 100 ? '…' : '');
+        const isNew = f.status === 'pendente';
+
+        return `
+        <div class="fb-card ${currentFbId === f.id ? 'active' : ''}" onclick="abrirDrawer('${f.id}')" style="animation:fadeUp .25s ease both">
+            <div style="display:flex;align-items:flex-start;gap:.75rem">
+                <div class="avatar">${initials}</div>
+                <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem">
+                        <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">${esc(nomeCompleto)}</span>
+                        <span class="tipo-badge ${f.tipo}">
+                            <span class="material-symbols-outlined">${tc.ico}</span>
+                            ${tc.label}
+                        </span>
+                        <span class="status-badge ${f.status}">${f.status}</span>
+                        ${isNew ? '<span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;flex-shrink:0;box-shadow:0 0 8px rgba(139,92,246,.5)"></span>' : ''}
+                    </div>
+                    <p style="font-size:.78rem;color:#94a3b8;line-height:1.4;margin-bottom:.3rem">${esc(msgPreview)}</p>
+                    <div style="display:flex;align-items:center;gap:.5rem">
+                        <span style="font-size:.62rem;color:#475569">${esc(f.user_negocio || '—')}</span>
+                        <span style="width:2px;height:2px;border-radius:50%;background:#334155;flex-shrink:0"></span>
+                        <span style="font-size:.62rem;color:#475569">${data}</span>
+                        ${f.resposta ? '<span style="font-size:.55rem;color:#34d399;font-weight:600">✓ Respondido</span>' : ''}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Drawer ─────────────────────────────────────────────────────────
+function abrirDrawer(fbId) {
+    const fb = todosFeedbacks.find(f => f.id === fbId);
+    if (!fb) return;
+    currentFbId = fbId;
+
+    const tc = TIPO_CONFIG[fb.tipo] || TIPO_CONFIG.duvida;
+    const nomeCompleto = [fb.user_nome, fb.user_sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+    const data = new Date(fb.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+    document.getElementById('drawer-avatar').textContent = getInitials(fb.user_nome, fb.user_sobrenome);
+    document.getElementById('drawer-nome').textContent = nomeCompleto;
+    document.getElementById('drawer-email').textContent = fb.user_email || fb.user_negocio || '—';
+
+    const body = document.getElementById('drawer-body');
+    body.innerHTML = `
+        <!-- Info -->
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+            <span class="tipo-badge ${fb.tipo}" style="font-size:.72rem;padding:.25rem .65rem">
+                <span class="material-symbols-outlined" style="font-size:.85rem">${tc.ico}</span>
+                ${tc.label}
+            </span>
+            <span class="status-badge ${fb.status}" style="font-size:.65rem;padding:.2rem .55rem">${fb.status}</span>
+            <span style="font-size:.65rem;color:#475569;display:flex;align-items:center;gap:.2rem">
+                <span class="material-symbols-outlined" style="font-size:.8rem">schedule</span>
+                ${data}
+            </span>
+        </div>
+        ${fb.user_negocio ? `<p style="font-size:.72rem;color:#64748b"><strong>Negócio:</strong> ${esc(fb.user_negocio)}</p>` : ''}
+
+        <!-- Mensagem -->
+        <div style="background:#111;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem">
+            <p style="font-size:.7rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Mensagem</p>
+            <p style="font-size:.85rem;color:#e2e8f0;line-height:1.65;white-space:pre-wrap">${esc(fb.mensagem)}</p>
+        </div>
+
+        <!-- Resposta existente -->
+        ${fb.resposta ? `
+        <div style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15);border-radius:.75rem;padding:1rem">
+            <p style="font-size:.7rem;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem">
+                <span class="material-symbols-outlined" style="font-size:.8rem">reply</span>
+                Sua Resposta
+            </p>
+            <p style="font-size:.82rem;color:#e2e8f0;line-height:1.5;white-space:pre-wrap">${esc(fb.resposta)}</p>
+        </div>` : ''}
+
+        <!-- Área de responder -->
+        <div style="background:#141414;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem">
+            <p style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.5rem">${fb.resposta ? 'Atualizar Resposta' : 'Responder'}</p>
+            <textarea id="drawer-resposta" class="resp-textarea" placeholder="Escreva sua resposta…">${fb.resposta || ''}</textarea>
+            <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem">
+                <button class="action-btn green" onclick="responderFeedback('${fb.id}','respondido')">
+                    <span class="material-symbols-outlined">reply</span>
+                    ${fb.resposta ? 'Atualizar' : 'Responder'}
+                </button>
+                ${fb.status !== 'lido' ? `
+                <button class="action-btn primary" onclick="mudarStatus('${fb.id}','lido')">
+                    <span class="material-symbols-outlined">visibility</span>
+                    Marcar como Lido
+                </button>` : ''}
+                ${fb.status !== 'arquivado' ? `
+                <button class="action-btn" onclick="mudarStatus('${fb.id}','arquivado')">
+                    <span class="material-symbols-outlined">archive</span>
+                    Arquivar
+                </button>` : ''}
+                ${fb.status === 'arquivado' ? `
+                <button class="action-btn primary" onclick="mudarStatus('${fb.id}','pendente')">
+                    <span class="material-symbols-outlined">unarchive</span>
+                    Desarquivar
+                </button>` : ''}
+            </div>
+        </div>
+    `;
+
+    // Highlight na lista
+    document.querySelectorAll('.fb-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('drawer-bg').classList.add('open');
+}
+
+async function responderFeedback(fbId, novoStatus) {
+    const resp = document.getElementById('drawer-resposta')?.value?.trim();
+    if (!resp) { showToast('Escreva uma resposta antes de enviar.', 'error'); return; }
+
+    try {
+        const { error } = await sb.rpc('admin_responder_feedback', {
+            feedback_id: fbId,
+            novo_status: novoStatus,
+            nova_resposta: resp,
+        });
+        if (error) throw error;
+
+        // Atualiza local
+        const fb = todosFeedbacks.find(f => f.id === fbId);
+        if (fb) { fb.status = novoStatus; fb.resposta = resp; }
+
+        atualizarStats();
+        filtrar();
+        abrirDrawer(fbId);
+        showToast('Resposta enviada com sucesso!');
+    } catch (e) {
+        console.error('Erro ao responder:', e);
+        showToast('Erro ao responder: ' + e.message, 'error');
+    }
+}
+
+async function mudarStatus(fbId, novoStatus) {
+    try {
+        const { error } = await sb.rpc('admin_responder_feedback', {
+            feedback_id: fbId,
+            novo_status: novoStatus,
+            nova_resposta: null,
+        });
+        if (error) throw error;
+
+        const fb = todosFeedbacks.find(f => f.id === fbId);
+        if (fb) fb.status = novoStatus;
+
+        atualizarStats();
+        filtrar();
+        abrirDrawer(fbId);
+        showToast(`Status alterado para "${novoStatus}"`);
+    } catch (e) {
+        console.error('Erro ao mudar status:', e);
+        showToast('Erro: ' + e.message, 'error');
+    }
+}
+
+function closeDrawer() {
+    document.getElementById('drawer-bg').classList.remove('open');
+    currentFbId = null;
+    document.querySelectorAll('.fb-card').forEach(c => c.classList.remove('active'));
+}
+
+// ── Shimmer ────────────────────────────────────────────────────────
+function showLoading() {
+    document.getElementById('fb-list').innerHTML =
+        Array(5).fill('<div class="shimmer"></div>').join('');
+}
+
+// ── Utilitários ───────────────────────────────────────────────────
+function getInitials(nome, sobrenome) {
+    return (((nome || '?')[0] || '') + ((sobrenome || '')[0] || '')).toUpperCase() || '?';
+}
+function esc(str) {
+    return String(str||'')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = type === 'error' ? 'error' : 'check_circle';
+    document.getElementById('toast-icon').style.color = type === 'error' ? '#f87171' : '#a78bfa';
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>

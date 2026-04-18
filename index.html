@@ -483,6 +483,18 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
+            <!-- Feedbacks dos Usuários -->
+            <a href="admin-feedbacks.html"
+                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(139,92,246,.1);color:#a78bfa;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">forum</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Feedbacks dos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Dúvidas, sugestões, elogios e bugs</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
         </div>
     </section>
     <!-- ── Sistema ──────────────────────────────────────────── -->
@@ -536,9 +548,258 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
+            <!-- Feedback / Fale Conosco -->
+            <button onclick="abrirFeedbackModal()"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl border group text-left w-full"
+                style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(139,92,246,.02));border-color:rgba(139,92,246,.2);cursor:pointer">
+                <div class="p-2 rounded-lg" style="background:rgba(139,92,246,.1);color:#a78bfa;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">chat_bubble</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Fale Conosco</h4>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Feedback</span>
+                    </div>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Dúvida, sugestão, elogio ou bug</p>
+                </div>
+                <span class="material-symbols-outlined" style="color:#a78bfa;opacity:.5">chevron_right</span>
+            </button>
         </div>
     </section>
 
+    <!-- ══ Modal de Feedback ══════════════════════════════════════════ -->
+    <style>
+        #feedback-overlay {
+            position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+            z-index:9998;display:none;align-items:center;justify-content:center;padding:1rem;
+        }
+        #feedback-overlay.show { display:flex; }
+
+        #feedback-modal {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem;
+            width:100%;max-width:440px;overflow:hidden;
+            box-shadow:0 16px 64px rgba(0,0,0,.8),0 0 0 1px rgba(139,92,246,.08);
+            animation:_fbSlide .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes _fbSlide { from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)} }
+
+        .fb-header {
+            display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;
+            border-bottom:1px solid #2A2A2A;
+        }
+        .fb-header-icon {
+            width:2.5rem;height:2.5rem;border-radius:.65rem;
+            background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;
+        }
+        .fb-header-icon .material-symbols-outlined { font-size:1.2rem;color:#a78bfa;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        .fb-body { padding:1.25rem; }
+
+        .fb-tipo-grid {
+            display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;
+        }
+        .fb-tipo-btn {
+            display:flex;align-items:center;gap:.5rem;padding:.65rem .85rem;
+            border-radius:.75rem;border:1px solid #2A2A2A;background:#141414;
+            color:#94a3b8;font-size:.78rem;font-weight:600;cursor:pointer;
+            transition:all .18s;font-family:'Inter',sans-serif;
+        }
+        .fb-tipo-btn:hover { border-color:#475569;color:#f1f5f9; }
+        .fb-tipo-btn.active { border-color:var(--fb-color);color:var(--fb-color);background:var(--fb-bg); }
+        .fb-tipo-btn .material-symbols-outlined { font-size:1.1rem; }
+
+        .fb-tipo-btn[data-tipo="duvida"]   { --fb-color:#38bdf8;--fb-bg:rgba(56,189,248,.06); }
+        .fb-tipo-btn[data-tipo="sugestao"] { --fb-color:#fbbf24;--fb-bg:rgba(251,191,36,.06); }
+        .fb-tipo-btn[data-tipo="elogio"]   { --fb-color:#34d399;--fb-bg:rgba(52,211,153,.06); }
+        .fb-tipo-btn[data-tipo="bug"]      { --fb-color:#f87171;--fb-bg:rgba(248,113,113,.06); }
+
+        .fb-textarea {
+            width:100%;min-height:110px;max-height:200px;resize:vertical;
+            background:#141414 !important;border:1px solid #2A2A2A !important;border-radius:.75rem;
+            padding:.75rem 1rem;color:#f1f5f9 !important;font-size:.85rem;font-family:'Inter',sans-serif;
+            outline:none;transition:border-color .2s;line-height:1.5;
+        }
+        .fb-textarea::placeholder { color:#475569 !important; }
+        .fb-textarea:focus { border-color:rgba(139,92,246,.4) !important;box-shadow:0 0 0 3px rgba(139,92,246,.07) !important; }
+
+        .fb-footer {
+            display:flex;gap:.5rem;padding:0 1.25rem 1.25rem;justify-content:flex-end;
+        }
+        .fb-btn-cancel {
+            padding:.6rem 1.2rem;border-radius:.65rem;border:1px solid #2A2A2A;
+            background:transparent;color:#94a3b8;font-weight:600;font-size:.8rem;
+            cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;
+        }
+        .fb-btn-cancel:hover { color:#f1f5f9;border-color:#475569; }
+
+        .fb-btn-send {
+            padding:.6rem 1.6rem;border-radius:.65rem;border:none;
+            background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;
+            font-weight:700;font-size:.8rem;cursor:pointer;transition:all .15s;
+            font-family:'Inter',sans-serif;display:flex;align-items:center;gap:.35rem;
+            box-shadow:0 4px 16px rgba(139,92,246,.3);
+        }
+        .fb-btn-send:hover { opacity:.88; }
+        .fb-btn-send:disabled { opacity:.5;cursor:not-allowed; }
+        .fb-btn-send .material-symbols-outlined { font-size:.95rem; }
+
+        .fb-char-count {
+            text-align:right;font-size:.62rem;color:#475569;margin-top:.3rem;
+        }
+
+        /* success state */
+        .fb-success {
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            padding:2.5rem 1.5rem;gap:.75rem;text-align:center;
+            animation:_fbFadeUp .4s ease both;
+        }
+        @keyframes _fbFadeUp { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
+        .fb-success-icon {
+            width:3.5rem;height:3.5rem;border-radius:50%;
+            background:rgba(52,211,153,.1);border:2px solid rgba(52,211,153,.3);
+            display:flex;align-items:center;justify-content:center;
+        }
+        .fb-success-icon .material-symbols-outlined { font-size:1.8rem;color:#34d399;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+    </style>
+
+    <div id="feedback-overlay" onclick="fecharFeedbackModal(event)">
+        <div id="feedback-modal" onclick="event.stopPropagation()">
+            <!-- Form state -->
+            <div id="fb-form-state">
+                <div class="fb-header">
+                    <div class="fb-header-icon">
+                        <span class="material-symbols-outlined">chat_bubble</span>
+                    </div>
+                    <div>
+                        <p style="font-size:.95rem;font-weight:700;color:#f1f5f9">Fale Conosco</p>
+                        <p style="font-size:.72rem;color:#64748b">Selecione o tipo e escreva sua mensagem</p>
+                    </div>
+                    <button onclick="fecharFeedbackModal()" style="margin-left:auto;background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center">
+                        <span class="material-symbols-outlined" style="font-size:1.2rem">close</span>
+                    </button>
+                </div>
+                <div class="fb-body">
+                    <div class="fb-tipo-grid">
+                        <button class="fb-tipo-btn" data-tipo="duvida" onclick="selecionarTipo(this)">
+                            <span class="material-symbols-outlined">help</span>
+                            Dúvida
+                        </button>
+                        <button class="fb-tipo-btn" data-tipo="sugestao" onclick="selecionarTipo(this)">
+                            <span class="material-symbols-outlined">lightbulb</span>
+                            Sugestão
+                        </button>
+                        <button class="fb-tipo-btn" data-tipo="elogio" onclick="selecionarTipo(this)">
+                            <span class="material-symbols-outlined">thumb_up</span>
+                            Elogio
+                        </button>
+                        <button class="fb-tipo-btn" data-tipo="bug" onclick="selecionarTipo(this)">
+                            <span class="material-symbols-outlined">bug_report</span>
+                            Bug
+                        </button>
+                    </div>
+                    <textarea id="fb-mensagem" class="fb-textarea" placeholder="Escreva sua mensagem aqui…" maxlength="1000" oninput="atualizarCharCount()"></textarea>
+                    <div class="fb-char-count"><span id="fb-chars">0</span> / 1000</div>
+                </div>
+                <div class="fb-footer">
+                    <button class="fb-btn-cancel" onclick="fecharFeedbackModal()">Cancelar</button>
+                    <button class="fb-btn-send" id="fb-btn-enviar" onclick="enviarFeedback()" disabled>
+                        <span class="material-symbols-outlined">send</span>
+                        Enviar
+                    </button>
+                </div>
+            </div>
+            <!-- Success state -->
+            <div id="fb-success-state" style="display:none">
+                <div class="fb-success">
+                    <div class="fb-success-icon">
+                        <span class="material-symbols-outlined">check</span>
+                    </div>
+                    <p style="font-size:1rem;font-weight:700;color:#f1f5f9">Mensagem Enviada!</p>
+                    <p style="font-size:.82rem;color:#64748b;max-width:280px">Obrigado pelo seu feedback. Nossa equipe irá analisar em breve.</p>
+                    <button class="fb-btn-send" onclick="fecharFeedbackModal()" style="margin-top:.5rem;background:rgba(52,211,153,.15);color:#34d399;box-shadow:none;border:1px solid rgba(52,211,153,.3)">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ══ FEEDBACK MODAL ════════════════════════════════════════════ */
+    let feedbackTipo = null;
+
+    function abrirFeedbackModal() {
+        feedbackTipo = null;
+        document.getElementById('fb-mensagem').value = '';
+        document.getElementById('fb-chars').textContent = '0';
+        document.getElementById('fb-btn-enviar').disabled = true;
+        document.querySelectorAll('.fb-tipo-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('fb-form-state').style.display = '';
+        document.getElementById('fb-success-state').style.display = 'none';
+        document.getElementById('feedback-overlay').classList.add('show');
+    }
+
+    function fecharFeedbackModal(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('feedback-overlay').classList.remove('show');
+    }
+
+    function selecionarTipo(btn) {
+        document.querySelectorAll('.fb-tipo-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        feedbackTipo = btn.dataset.tipo;
+        validarFeedback();
+    }
+
+    function atualizarCharCount() {
+        const len = document.getElementById('fb-mensagem').value.length;
+        document.getElementById('fb-chars').textContent = len;
+        validarFeedback();
+    }
+
+    function validarFeedback() {
+        const msg = document.getElementById('fb-mensagem').value.trim();
+        document.getElementById('fb-btn-enviar').disabled = !feedbackTipo || msg.length < 5;
+    }
+
+    async function enviarFeedback() {
+        const btn = document.getElementById('fb-btn-enviar');
+        const msg = document.getElementById('fb-mensagem').value.trim();
+        if (!feedbackTipo || msg.length < 5) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite">progress_activity</span> Enviando…';
+
+        try {
+            const session = await getSession();
+            if (!session) throw new Error('Sessão expirada');
+
+            const { error } = await sb.from('feedbacks').insert({
+                user_id: session.user.id,
+                tipo: feedbackTipo,
+                mensagem: msg,
+            });
+            if (error) throw error;
+
+            // Sucesso
+            document.getElementById('fb-form-state').style.display = 'none';
+            document.getElementById('fb-success-state').style.display = '';
+        } catch (e) {
+            console.error('Erro ao enviar feedback:', e);
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">send</span> Enviar';
+            alert('Erro ao enviar: ' + (e.message || 'Tente novamente'));
+        }
+    }
+
+    // Fechar com Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('feedback-overlay').classList.contains('show')) {
+            fecharFeedbackModal();
+        }
+    });
+    </script>
     <script>
     // Controle de visibilidade por role — executa direto ao carregar
     (async () => {
