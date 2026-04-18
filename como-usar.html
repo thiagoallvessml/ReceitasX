@@ -104,10 +104,13 @@
             animation:_playerSlide .35s cubic-bezier(.34,1.56,.64,1);
             position:relative;
         }
+        #player-wrap.is-short { max-width:400px; }
         @keyframes _playerSlide { from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)} }
         #player-wrap iframe {
             width:100%;aspect-ratio:16/9;border:none;display:block;
+            transition:aspect-ratio .3s;
         }
+        #player-wrap.is-short iframe { aspect-ratio:9/16; }
         .player-close {
             position:absolute;top:.75rem;right:.75rem;z-index:10;
             width:2.2rem;height:2.2rem;border-radius:50%;
@@ -215,11 +218,12 @@ function renderVideos(list) {
     el.innerHTML = list.map((t, i) => {
         const videoId = extractYouTubeId(t.youtube_url);
         const thumb = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
+        const isShort = t.youtube_url && t.youtube_url.toLowerCase().includes('/shorts/') ? 'true' : 'false';
         const idx = i + 1;
 
         return `
         <div class="video-card" style="animation:fadeUp .3s ease both;animation-delay:${i * 0.08}s">
-            <div class="video-thumb" onclick="abrirPlayer('${videoId}')">
+            <div class="video-thumb" onclick="abrirPlayer('${videoId}', ${isShort})">
                 ${thumb ? `<img src="${thumb}" alt="${esc(t.titulo)}" loading="lazy" />` : ''}
                 <div class="play-overlay">
                     <div class="play-btn">
@@ -233,7 +237,7 @@ function renderVideos(list) {
                 <div class="video-meta">
                     <span class="meta-pill">
                         <span class="material-symbols-outlined">play_circle</span>
-                        Vídeo ${idx}
+                        ${isShort === 'true' ? 'Shorts' : 'Vídeo'} ${idx}
                     </span>
                 </div>
             </div>
@@ -242,8 +246,13 @@ function renderVideos(list) {
 }
 
 // ── Player ────────────────────────────────────────────────────────
-function abrirPlayer(videoId) {
+function abrirPlayer(videoId, isShort = false) {
     if (!videoId) return;
+    
+    const wrap = document.getElementById('player-wrap');
+    if (isShort) wrap.classList.add('is-short');
+    else wrap.classList.remove('is-short');
+
     document.getElementById('player-iframe').src =
         `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
     document.getElementById('player-overlay').classList.add('show');
