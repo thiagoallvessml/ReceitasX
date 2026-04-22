@@ -209,63 +209,88 @@ async function carregarReceita() {
     if (!receitaId) { mostrarNotFound(); return; }
 
     try {
-        // Busca receita, produto vinculado e configurações em paralelo
+        // Aguarda sessão estar pronta
+        await new Promise(r => setTimeout(r, 300));
         const user = await getUser();
-        const [resRec, resProd] = await Promise.all([
-            sb.from('receitas').select('*').eq('id', receitaId).single(),
-            user
-                ? sb.from('produtos').select('id, nome, preco').eq('receita_id', receitaId).eq('user_id', user.id).maybeSingle()
-                : Promise.resolve({ data: null }),
-        ]);
-        // Mão de obra: lida do localStorage (configuracoes.html salva lá, campo horaFinal)
+
+        // Busca receita do Supabase
+        const resRec = await sb.from('receitas').select('*').eq('id', receitaId).maybeSingle();
+
+        if (resRec.error) {
+            console.warn('[Detalhe] Erro ao buscar receita:', resRec.error);
+            throw resRec.error;
+        }
+        if (!resRec.data) {
+            console.warn('[Detalhe] Receita não encontrada no Supabase para id:', receitaId);
+            throw new Error('not found');
+        }
+
+        const data = resRec.data;
+
+        // Busca produto vinculado (separado para não quebrar se falhar)
+        let prodVinculado = 0;
+        let prodNome = null;
+        try {
+            if (user) {
+                const resProd = await sb.from('produtos')
+                    .select('id, nome, preco')
+                    .eq('receita_id', receitaId)
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (resProd.data) {
+                    prodVinculado = parseFloat(resProd.data.preco || 0);
+                    prodNome = resProd.data.nome;
+                }
+            }
+        } catch(pe) {
+            console.warn('[Detalhe] Erro ao buscar produto vinculado:', pe);
+        }
+
+        // Mão de obra: lida do localStorage
         const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
         const maoObraHoraLocal = parseFloat(_cfg.horaFinal || 0);
 
-        if (!resRec.error && resRec.data) {
-            const data = resRec.data;
-            const prodPrecoUnit = parseFloat(resRec.data.preco_total || 0);
-            const prodVinculado = resProd.data ? parseFloat(resProd.data.preco || 0) : 0;
-            const precoUnit = prodVinculado > 0 ? prodVinculado : prodPrecoUnit;
-            const unidades  = data.unidades || 1;
-            const tempo     = data.tempo || 0;
+        const prodPrecoUnit = parseFloat(data.preco_total || 0);
+        const precoUnit = prodVinculado > 0 ? prodVinculado : prodPrecoUnit;
+        const unidades  = data.unidades || 1;
+        const tempo     = data.tempo || 0;
 
-            // Mão de obra: maoObraHora (R$/h) × tempo em horas
-            const maoObraHora = maoObraHoraLocal;
-            const custoMobCalc = maoObraHora > 0 ? (tempo / 60) * maoObraHora : parseFloat(data.custo_mob || 0);
-            const maoDeObraItens = maoObraHora > 0 && tempo > 0
-                ? [{ nome: 'Mão de obra', qty: `${tempo} min`, valor: custoMobCalc }]
-                : (data.mao_de_obra || []);
+        // Mão de obra: maoObraHora (R$/h) × tempo em horas
+        const maoObraHora = maoObraHoraLocal;
+        const custoMobCalc = maoObraHora > 0 ? (tempo / 60) * maoObraHora : parseFloat(data.custo_mob || 0);
+        const maoDeObraItens = maoObraHora > 0 && tempo > 0
+            ? [{ nome: 'Mão de obra', qty: `${tempo} min`, valor: custoMobCalc }]
+            : (data.mao_de_obra || []);
 
-            // Custo total recalculado incluindo mão de obra
-            const custoIngVal = parseFloat(data.custo_ing || 0);
-            const custoEmbVal = parseFloat(data.custo_emb || 0);
-            const custoEqpVal = parseFloat(data.custo_eqp || 0);
-            const custoTotalCalc = custoIngVal + custoEmbVal + custoEqpVal + custoMobCalc;
+        // Custo total recalculado incluindo mão de obra
+        const custoIngVal = parseFloat(data.custo_ing || 0);
+        const custoEmbVal = parseFloat(data.custo_emb || 0);
+        const custoEqpVal = parseFloat(data.custo_eqp || 0);
+        const custoTotalCalc = custoIngVal + custoEmbVal + custoEqpVal + custoMobCalc;
 
-            receitaAtual = {
-                id:          data.id,
-                nome:        data.nome,
-                categoria:   data.categoria  || 'gourmet',
-                unidades,
-                tempo,
-                precoUnit,
-                precoTotal:  precoUnit * unidades,
-                custoTotal:  custoTotalCalc,
-                custoIng:    custoIngVal,
-                custoEmb:    custoEmbVal,
-                custoEqp:    custoEqpVal,
-                custoMob:    custoMobCalc,
-                maoObraHora,
-                ingredientes: data.ingredientes  || [],
-                embalagens:   data.embalagens    || [],
-                equipamentos: data.equipamentos  || [],
-                maoDeObra:    maoDeObraItens,
-                grad:         data.grad || GRADIENTS[0],
-                produtoVinculado: resProd.data?.nome || null,
-            };
-            render();
-            return;
-        }
+        receitaAtual = {
+            id:          data.id,
+            nome:        data.nome,
+            categoria:   data.categoria  || 'gourmet',
+            unidades,
+            tempo,
+            precoUnit,
+            precoTotal:  precoUnit * unidades,
+            custoTotal:  custoTotalCalc,
+            custoIng:    custoIngVal,
+            custoEmb:    custoEmbVal,
+            custoEqp:    custoEqpVal,
+            custoMob:    custoMobCalc,
+            maoObraHora,
+            ingredientes: data.ingredientes  || [],
+            embalagens:   data.embalagens    || [],
+            equipamentos: data.equipamentos  || [],
+            maoDeObra:    maoDeObraItens,
+            grad:         data.grad || GRADIENTS[0],
+            produtoVinculado: prodNome || null,
+        };
+        render();
+        return;
     } catch(e) {
         console.warn('Supabase indisponível, tentando localStorage:', e);
     }

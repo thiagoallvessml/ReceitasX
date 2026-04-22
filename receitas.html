@@ -362,6 +362,22 @@
         .btn-cancel:hover { border-color:rgba(37,244,244,.35); color:#25f4f4; }
         .iconbox { width:2.25rem; height:2.25rem; border-radius:.55rem; background:rgba(37,244,244,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .iconbox .material-symbols-outlined { font-size:1.1rem; color:#25f4f4; }
+
+        /* ── Toggle produto ── */
+        .prod-toggle { position:relative;width:2.4rem;height:1.35rem;flex-shrink:0;display:inline-block; }
+        .prod-toggle input { opacity:0;width:0;height:0;position:absolute; }
+        .prod-toggle .pt-track { position:absolute;inset:0;border-radius:9999px;background:#2A2A2A;transition:background .2s;cursor:pointer; }
+        .prod-toggle input:checked + .pt-track { background:#25f4f4; }
+        .prod-toggle .pt-thumb { position:absolute;top:.175rem;left:.175rem;width:.95rem;height:.95rem;border-radius:9999px;background:#fff;transition:transform .2s;pointer-events:none; }
+        .prod-toggle input:checked ~ .pt-thumb { transform:translateX(1.1rem); }
+
+        /* ── Img upload produto ── */
+        .prod-img-upload { border:2px dashed #2A2A2A;border-radius:.75rem;padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;cursor:pointer;transition:border-color .2s;background:#1A1A1A;position:relative;overflow:hidden; }
+        .prod-img-upload:hover { border-color:rgba(37,244,244,.4); }
+        .prod-img-upload img { width:100%;max-height:120px;object-fit:cover;border-radius:.55rem; }
+
+        /* ── Seção produto destaque ── */
+        .prod-section-box { background:rgba(37,244,244,.03);border:1px solid rgba(37,244,244,.15);border-radius:1rem;padding:1.1rem;display:flex;flex-direction:column;gap:.85rem; }
     </style>
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-28">
@@ -510,10 +526,7 @@
                 <input id="r-tempo" type="number" min="1" class="fi" placeholder="Ex: 45" oninput="calcPrevia()" />
               </div>
             </div>
-            <div class="warn-row" style="gap:.5rem">
-              <span class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">info</span>
-              <span style="color:#94a3b8;font-size:.78rem">O preço de venda é definido em <strong style="color:#25f4f4">Gestão de Produtos</strong>. Vincule um produto à receita lá para ver o preço aqui.</span>
-            </div>
+
             <div>
               <label class="fl" for="r-desc">Descrição <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
               <textarea id="r-desc" class="fi" placeholder="Descreva a receita..."></textarea>
@@ -599,6 +612,69 @@
               <div style="text-align:right">
                 <p class="text-xs text-slate-500">Rendimento</p>
                 <p class="font-bold" id="cv-rend">1 un</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Produto para Venda ─ -->
+        <section>
+          <div class="section-hd" style="margin-bottom:.5rem">
+            <div class="ico" style="background:rgba(52,211,153,.1)"><span class="material-symbols-outlined" style="color:#34d399">sell</span></div>
+            <h3>Produto para Venda</h3>
+          </div>
+          <p style="font-size:.72rem;color:#64748b;margin-bottom:.85rem;line-height:1.5">
+            Ao salvar, um produto será criado automaticamente em <strong style="color:#25f4f4">Gestão de Produtos</strong>.
+          </p>
+
+          <div class="prod-section-box">
+            <input type="hidden" id="prod-edit-id" />
+
+            <!-- Foto -->
+            <div>
+              <label class="fl">Foto do Produto <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+              <div class="prod-img-upload" onclick="document.getElementById('prod-img-file').click()">
+                <img id="prod-img-preview" style="display:none" alt="preview" />
+                <span class="material-symbols-outlined" id="prod-img-ico" style="font-size:2rem;color:#475569;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24">add_photo_alternate</span>
+                <p id="prod-img-txt" style="font-size:.72rem;color:#64748b">Clique para adicionar foto</p>
+              </div>
+              <input type="file" id="prod-img-file" accept="image/*" style="display:none" onchange="handleProdImgUpload(event)" />
+              <input type="hidden" id="prod-img-val" />
+            </div>
+
+            <!-- Nome do Produto -->
+            <div>
+              <label class="fl" for="prod-nome">Nome do Produto</label>
+              <input id="prod-nome" type="text" class="fi" placeholder="Ex: Ninho com Nutella" autocomplete="off" />
+            </div>
+
+            <!-- Preço de Venda -->
+            <div>
+              <label class="fl" for="prod-preco">Preço de Venda (R$)</label>
+              <div style="position:relative">
+                <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
+                <input id="prod-preco" type="number" min="0" step="0.01" class="fi" placeholder="0,00" style="padding-left:2.2rem" />
+              </div>
+            </div>
+
+            <!-- Observações -->
+            <div>
+              <label class="fl" for="prod-obs">Observações <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+              <textarea id="prod-obs" class="fi" placeholder="Ingredientes, alérgenos, informações extras..."></textarea>
+            </div>
+
+            <!-- Disponível para venda -->
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem .9rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A">
+              <label class="prod-toggle" for="prod-disp">
+                <input type="checkbox" id="prod-disp" checked />
+                <span class="pt-track"></span>
+                <span class="pt-thumb"></span>
+              </label>
+              <div>
+                <p style="font-size:.82rem;font-weight:600;color:#f1f5f9">Disponível para venda</p>
+                <p style="font-size:.7rem;color:#64748b">Aparece no cardápio e relatórios</p>
               </div>
             </div>
           </div>
@@ -872,6 +948,7 @@ let embalIdSeq = 0;
 let equipIdSeq = 0;
 let maoObraHora = 0; // carregado das configurações ao abrir modal
 let _editandoId = null; // UUID da receita sendo editada (null = nova)
+let _editandoProdId = null; // ID do produto vinculado (para update)
 
 /* Carrega insumos, embalagens e equipamentos do Supabase */
 async function carregarCatalogos() {
@@ -937,6 +1014,7 @@ async function openCadastrar() {
     const ok = await podecriar('receitas');
     if (!ok) return;
     _editandoId = null;
+    _editandoProdId = null;
     document.getElementById('msheet-title').textContent = 'Cadastrar Receita';
     document.querySelector('.btn-save').textContent = 'Salvar Receita';
     await carregarCatalogos();
@@ -949,6 +1027,8 @@ async function openCadastrar() {
     document.getElementById('ing-warn').style.display    = 'flex';
     document.getElementById('embal-empty').style.display = 'block';
     document.getElementById('equip-empty').style.display = 'block';
+    // Reset campos de produto
+    resetProdFields();
     calcPrevia();
     document.getElementById('msheet-bg').classList.add('open');
     setTimeout(() => document.getElementById('r-nome').focus(), 80);
@@ -1031,6 +1111,43 @@ async function editarReceita(id) {
         if (minsInput) minsInput.value = minsParts[0] || 0;
         updateEqpCusto(rowId);
     });
+
+    // Carrega produto vinculado (se existir)
+    _editandoProdId = null;
+    try {
+        const user = await getUser();
+        if (user) {
+            const { data: prod } = await sb.from('produtos')
+                .select('*')
+                .eq('receita_id', id)
+                .eq('user_id', user.id)
+                .maybeSingle();
+            if (prod) {
+                _editandoProdId = prod.id;
+                document.getElementById('prod-edit-id').value = prod.id;
+                document.getElementById('prod-nome').value = prod.nome || '';
+                document.getElementById('prod-preco').value = prod.preco || '';
+                document.getElementById('prod-obs').value = prod.obs || '';
+                document.getElementById('prod-disp').checked = prod.ativo !== false;
+                if (prod.imagem_url) {
+                    document.getElementById('prod-img-val').value = prod.imagem_url;
+                    document.getElementById('prod-img-preview').src = prod.imagem_url;
+                    document.getElementById('prod-img-preview').style.display = 'block';
+                    document.getElementById('prod-img-ico').style.display = 'none';
+                    document.getElementById('prod-img-txt').style.display = 'none';
+                } else {
+                    resetProdImgUI();
+                }
+                document.getElementById('prod-nome')._userEdited = true;
+            } else {
+                resetProdFields();
+                document.getElementById('prod-nome').value = r.nome || '';
+            }
+        }
+    } catch(e) {
+        console.warn('Erro ao carregar produto vinculado:', e);
+        resetProdFields();
+    }
 
     calcPrevia();
     document.getElementById('msheet-bg').classList.add('open');
@@ -1337,6 +1454,49 @@ function calcPrevia() {
 }
 
 
+/* ─── PRODUTO: helpers ────────────────────────────────────────────── */
+function resetProdImgUI() {
+    document.getElementById('prod-img-val').value = '';
+    document.getElementById('prod-img-preview').style.display = 'none';
+    document.getElementById('prod-img-preview').src = '';
+    document.getElementById('prod-img-ico').style.display = '';
+    document.getElementById('prod-img-txt').style.display = '';
+}
+function resetProdFields() {
+    document.getElementById('prod-edit-id').value = '';
+    document.getElementById('prod-nome').value = '';
+    document.getElementById('prod-preco').value = '';
+    document.getElementById('prod-obs').value = '';
+    document.getElementById('prod-disp').checked = true;
+    document.getElementById('prod-nome')._userEdited = false;
+    document.getElementById('prod-img-file').value = '';
+    resetProdImgUI();
+}
+function handleProdImgUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        document.getElementById('prod-img-val').value = ev.target.result;
+        document.getElementById('prod-img-preview').src = ev.target.result;
+        document.getElementById('prod-img-preview').style.display = 'block';
+        document.getElementById('prod-img-ico').style.display = 'none';
+        document.getElementById('prod-img-txt').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+// Auto-preenche nome do produto ao digitar nome da receita
+document.addEventListener('DOMContentLoaded', () => {
+    const rNome = document.getElementById('r-nome');
+    const pNome = document.getElementById('prod-nome');
+    if (rNome && pNome) {
+        rNome.addEventListener('input', () => {
+            if (!pNome._userEdited) pNome.value = rNome.value;
+        });
+        pNome.addEventListener('input', () => { pNome._userEdited = true; });
+    }
+});
+
 /* ─── SALVAR ──────────────────────────────────────────────────────── */
 async function salvarReceita(e) {
     e.preventDefault();
@@ -1431,6 +1591,7 @@ async function salvarReceita(e) {
                 equipamentos: eqpList,
                 mao_de_obra:  mobItem,
             };
+            let savedReceitaId = null;
             if (_editandoId) {
                 // EDITAR: UPDATE
                 const { data: atualizada, error } = await sb
@@ -1440,14 +1601,51 @@ async function salvarReceita(e) {
                     .select()
                     .single();
                 if (error) throw error;
+                savedReceitaId = _editandoId;
                 const idx = receitas.findIndex(x => x.id === _editandoId);
                 if (idx >= 0) receitas[idx] = sbRowToLocal(atualizada);
             } else {
                 // CADASTRAR: INSERT
                 const { data: nova, error } = await sb.from('receitas').insert(payload).select().single();
                 if (error) throw error;
+                savedReceitaId = nova.id;
                 receitas.unshift(sbRowToLocal(nova));
                 registrarCriacao('receitas');
+            }
+
+            // ─ Salva produto vinculado automaticamente ─
+            if (savedReceitaId) {
+                const custoTotalFinal = custoTotal + custoMobVal;
+                const custoUnit = rend > 0 ? custoTotalFinal / rend : 0;
+                const prodPreco = parseFloat(document.getElementById('prod-preco').value) || 0;
+                const prodPayload = {
+                    user_id:    user.id,
+                    nome:       document.getElementById('prod-nome').value.trim() || nome,
+                    preco:      prodPreco,
+                    custo:      custoUnit,
+                    obs:        document.getElementById('prod-obs').value.trim() || null,
+                    imagem_url: document.getElementById('prod-img-val').value || null,
+                    ativo:      document.getElementById('prod-disp').checked,
+                    receita_id: savedReceitaId,
+                    categoria:  'Gourmet',
+                };
+                try {
+                    if (_editandoProdId) {
+                        await sb.from('produtos').update(prodPayload)
+                            .eq('id', _editandoProdId).eq('user_id', user.id);
+                    } else {
+                        const { data: novoProd } = await sb.from('produtos')
+                            .insert(prodPayload).select().single();
+                        if (novoProd) _editandoProdId = novoProd.id;
+                    }
+                    // Atualiza preco_total da receita com o preço do produto
+                    if (prodPreco > 0) {
+                        await sb.from('receitas').update({ preco_total: prodPreco })
+                            .eq('id', savedReceitaId);
+                    }
+                } catch(pe) {
+                    console.warn('Erro ao salvar produto:', pe);
+                }
             }
         } else {
             throw new Error('não logado');
