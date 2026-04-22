@@ -895,10 +895,18 @@ async function checkProgress() {
         const uid = session.user.id;
         const progress = {};
 
-        // Helper para rodar contagem
-        const countTable = async (table) => {
-            const { count } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
-            return count || 0;
+        // Helper para rodar contagem no Supabase e Fallback no LocalStorage
+        const checkItem = async (table, localKey) => {
+            try {
+                const { count, error } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                if (!error && count > 0) return true;
+            } catch(e) {}
+            // Fallback LocalStorage
+            try {
+                const localData = JSON.parse(localStorage.getItem(localKey) || '[]');
+                if (localData.length > 0) return true;
+            } catch(e) {}
+            return false;
         };
 
         // 1. Configurações
@@ -906,32 +914,36 @@ async function checkProgress() {
         progress[1] = cfgCount > 0;
 
         // 2. Equipamentos
-        progress[2] = await countTable('equipamentos') > 0;
+        progress[2] = await checkItem('equipamentos', 'receitasx_equipamentos');
 
         // 3. Insumos
-        progress[3] = await countTable('insumos') > 0;
+        progress[3] = await checkItem('insumos', 'receitasx_insumos');
 
         // 4. Embalagens
-        progress[4] = await countTable('embalagens') > 0;
+        progress[4] = await checkItem('embalagens', 'receitasx_embalagens');
 
         // 5. Receitas
-        progress[5] = await countTable('receitas') > 0;
+        progress[5] = await checkItem('receitas', 'receitasx_receitas');
 
         // 6. Produtos
-        progress[6] = await countTable('produtos') > 0;
+        progress[6] = await checkItem('produtos', 'receitasx_produtos');
 
-        // 7. Precificação (pelo menos 1 preço cadastrado no marketplace)
+        // 7. Precificação (Pelo menos 1 preço cadastrado ou hit na página)
         const precHit = localStorage.getItem('receitasx_precificacao_hit');
-        progress[7] = precHit === 'true';
+        let temPrecos = false;
+        try {
+            const prec = JSON.parse(localStorage.getItem('receitasx_precificacao') || '{}');
+            temPrecos = Object.keys(prec).length > 0;
+        } catch(e) {}
+        progress[7] = (precHit === 'true' || temPrecos);
 
-        // 8. Combos (Opcional — NÃO conta para o progresso)
-        progress[8] = await countTable('combos') > 0;
+        // 8. Combos (Opcional)
+        progress[8] = await checkItem('combos', 'receitasx_combos');
 
-        // 9. Despesas (Opcional — NÃO conta para o progresso)
-        progress[9] = await countTable('despesas') > 0;
+        // 9. Despesas (Opcional)
+        progress[9] = await checkItem('despesas', 'receitasx_despesas');
 
-        // 10. Ponto de Equilíbrio (Acessou a aba pelo menos uma vez)
-        // Isso pode ser via localStorage ou deixamos sem validação estrita
+        // 10. Ponto de Equilíbrio (Acessou a aba)
         const peqHit = localStorage.getItem('receitasx_peq_hit');
         progress[10] = peqHit === 'true';
 
