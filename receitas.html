@@ -1452,7 +1452,6 @@ function calcPrevia() {
     console.log('[ReceitasX] calcPrevia | tempo:', tempo, 'maoObraHora:', maoObraHora, 'costMob:', costMob);
 
     const total = costIng + costEmb + costEqp + costMob;
-    const rend  = parseInt(document.getElementById('r-rend')?.value) || 1;
     const unit  = total / rend;
 
     document.getElementById('cv-ing').textContent  = fmtR(costIng);
