@@ -10,12 +10,12 @@
 /* ── Limites do plano gratuito ────────────────────────────────── */
 const LIMITES_GRATUITO = {
   receitas:      2,
-  produtos:      2,
-  insumos:       7,
-  embalagens:    2,
-  equipamentos:  1,
-  combos:        0,
-  precificacoes: 2,
+  produtos:      Infinity,
+  insumos:       Infinity,
+  embalagens:    Infinity,
+  equipamentos:  Infinity,
+  combos:        Infinity,
+  precificacoes: Infinity,
 };
 
 const NOMES_RECURSO = {
@@ -260,6 +260,10 @@ async function injetarAviso(recurso) {
   if (pago) return; // plano pago → sem aviso
 
   const limite  = LIMITES_GRATUITO[recurso] ?? Infinity;
+  
+  // Se o recurso for liberado (Infinity), não mostra o banner
+  if (limite === Infinity) return;
+
   const usado   = getTotalCriado(recurso);
   const nome    = NOMES_RECURSO[recurso]  || recurso;
   const icone   = ICONES_RECURSO[recurso] || 'info';

@@ -1638,10 +1638,17 @@ async function salvarReceita(e) {
                             .insert(prodPayload).select().single();
                         if (novoProd) _editandoProdId = novoProd.id;
                     }
-                    // Atualiza preco_total da receita com o preço do produto
+                    // Atualiza preco_total da receita com o preço total da fornada
                     if (prodPreco > 0) {
-                        await sb.from('receitas').update({ preco_total: prodPreco })
+                        const precoFornada = prodPreco * rend;
+                        await sb.from('receitas').update({ preco_total: precoFornada })
                             .eq('id', savedReceitaId);
+                        
+                        // Atualiza estado local para refletir na UI imediatamente
+                        const idxLocal = receitas.findIndex(x => x.id === savedReceitaId);
+                        if (idxLocal >= 0) {
+                            receitas[idxLocal].precoTotal = precoFornada;
+                        }
                     }
                 } catch(pe) {
                     console.warn('Erro ao salvar produto:', pe);
