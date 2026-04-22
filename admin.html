@@ -13,6 +13,7 @@
     </script>
     <!-- Role badge estilo -->
     <style>
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)} }
         .role-badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:800;padding:.15rem .45rem;border-radius:.35rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25);letter-spacing:.04em;text-transform:uppercase; }
         .nav-card-admin { border-color:rgba(251,146,60,.2) !important;background:linear-gradient(135deg,rgba(251,146,60,.06),rgba(251,146,60,.02)) !important; }
         .nav-card-admin:hover { border-color:rgba(251,146,60,.45) !important; }
@@ -173,8 +174,9 @@
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
                         <h4 class="text-sm font-bold">Gestão de Usuários</h4>
+                        <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-online-usuarios">0</span>
                         <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-total-usuarios">0</span>
-                        <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-vitalicios">0</span>
+                        <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-vitalicios">0</span>
                     </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400" style="margin-top:.1rem">Roles, permissões e contas</p>
                 </div>
@@ -423,6 +425,23 @@
             });
 
             if (role === 'admin') {
+                // Contar online
+                try {
+                    const limiteOnline = new Date(Date.now() - 120000).toISOString();
+                    const { count: onlineCount } = await sb
+                        .from('presenca_online')
+                        .select('*', { count: 'exact', head: true })
+                        .gt('last_seen', limiteOnline);
+
+                    const badgeOnline = document.getElementById('badge-online-usuarios');
+                    if (badgeOnline && onlineCount !== null) {
+                        badgeOnline.innerHTML = `<span style="width:.4rem;height:.4rem;border-radius:50%;background:#34d399;display:inline-block;animation:pulse-dot 2s ease-in-out infinite"></span> ${onlineCount} Online`;
+                        badgeOnline.style.display = 'inline-flex';
+                        badgeOnline.style.alignItems = 'center';
+                        badgeOnline.style.gap = '.25rem';
+                    }
+                } catch(_) {}
+
                 // Contar total de usuários
                 try {
                     const { count: totalUsuarios } = await sb
