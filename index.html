@@ -139,6 +139,13 @@
             <span class="material-symbols-outlined" id="sino-icon" style="font-size:1.15rem">notifications</span>
             <span id="sino-badge">0</span>
         </button>
+        <!-- Botão Sair -->
+        <button onclick="sb.auth.signOut().then(() => window.location.replace('login.html'))" title="Sair"
+            style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
+            onmouseover="this.style.color='#f87171';this.style.borderColor='rgba(248,113,113,.4)'"
+            onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+            <span class="material-symbols-outlined" style="font-size:1.15rem">logout</span>
+        </button>
         <!-- Painel -->
         <div id="notif-panel">
             <div class="notif-panel-head">
