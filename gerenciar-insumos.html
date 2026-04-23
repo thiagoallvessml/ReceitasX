@@ -704,13 +704,21 @@ function onUnidadeChange(val) {
     const labelPeso = document.getElementById('label-peso');
 
     const labelMap = {
-        'g':  'Peso da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Gramas (g)</span>',
-        'kg': 'Peso da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Quilos (kg)</span>',
-        'ml': 'Volume da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Mililitros (ml)</span>',
-        'l':  'Volume da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Litros (l)</span>',
-        'un': 'Quantidade de <span style="color:#475569;text-transform:none;font-weight:400">Unidades</span>',
+        'g':  'Peso da Embalagem em Gramas (g)',
+        'kg': 'Peso da Embalagem em Quilos (kg)',
+        'ml': 'Volume da Embalagem em Mililitros (ml)',
+        'l':  'Volume da Embalagem em Litros (l)',
+        'un': 'Quantidade de Unidades',
     };
-    if (labelPeso && labelMap[val]) labelPeso.innerHTML = labelMap[val];
+    const placeholderMap = {
+        'g':  'Ex: 1000',
+        'kg': 'Ex: 5',
+        'ml': 'Ex: 500',
+        'l':  'Ex: 1',
+        'un': '1',
+    };
+    if (labelPeso && labelMap[val]) labelPeso.textContent = labelMap[val];
+    if (placeholderMap[val]) pesoInput.placeholder = placeholderMap[val];
 
     if (val === 'un') {
         pesoInput.value    = 1;
