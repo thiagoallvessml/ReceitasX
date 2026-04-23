@@ -471,7 +471,7 @@
                 </div>
 
                 <div>
-                    <label class="field-label">Peso da Embalagem <span style="color:#475569;text-transform:none;font-weight:400">(Compra)</span></label>
+                    <label class="field-label" id="label-peso">Peso da Embalagem <span style="color:#475569;text-transform:none;font-weight:400">(Compra)</span></label>
                     <div style="display:flex;gap:.5rem">
                         <input id="f-peso" type="number" step="0.001" min="0" class="fc" placeholder="Ex: 1000" style="flex:1" oninput="atualizarPreview()" />
                         <select id="f-unidade" class="fc select-placeholder" onchange="updateSelectColor(this); onUnidadeChange(this.value)"
@@ -701,6 +701,17 @@ function updateSelectColor(sel) {
 function onUnidadeChange(val) {
     const pesoInput = document.getElementById('f-peso');
     const aviso     = document.getElementById('aviso-un');
+    const labelPeso = document.getElementById('label-peso');
+
+    const labelMap = {
+        'g':  'Peso da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Gramas (g)</span>',
+        'kg': 'Peso da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Quilos (kg)</span>',
+        'ml': 'Volume da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Mililitros (ml)</span>',
+        'l':  'Volume da Embalagem em <span style="color:#475569;text-transform:none;font-weight:400">Litros (l)</span>',
+        'un': 'Quantidade de <span style="color:#475569;text-transform:none;font-weight:400">Unidades</span>',
+    };
+    if (labelPeso && labelMap[val]) labelPeso.innerHTML = labelMap[val];
+
     if (val === 'un') {
         pesoInput.value    = 1;
         pesoInput.readOnly = true;
