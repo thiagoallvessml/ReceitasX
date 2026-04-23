@@ -129,6 +129,7 @@ serve(async (req) => {
         codigo_acesso: cod,
         billing_id:    billingId,
         cupom_usado:   cupom || null,
+        ref_afiliado:  ref || null,
         ...(userId ? { user_id: userId } : {}),
       }).select().single();
       pedido = ins;
