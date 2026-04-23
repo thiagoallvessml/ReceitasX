@@ -781,11 +781,23 @@ async function salvarInsumo(e) {
     document.getElementById('f-nome').classList.remove('error');
     nomeErr.style.display = 'none';
 
+    const peso_emb = parseFloat(document.getElementById('f-peso').value) || 0;
+    const unidade  = document.getElementById('f-unidade').value || 'g';
+    const preco    = parseFloat(document.getElementById('f-custo').value) || 0;
+
+    if ((unidade === 'kg' || unidade === 'l') && peso_emb >= 100) {
+        const msg = `Atenção: Você preencheu que a embalagem tem ${peso_emb} ${unidade.toUpperCase()}.\n\nIsso significa que você pagou R$ ${preco.toFixed(2)} por ${peso_emb} QUILOS/LITROS inteiros.\n\nSe você quis dizer ${peso_emb} gramas/ml, clique em CANCELAR e troque a unidade para "g" ou "ml".`;
+        if (!confirm(msg)) {
+            document.getElementById('f-unidade').focus();
+            return;
+        }
+    }
+
     const payload = {
         nome,
-        peso_emb:  parseFloat(document.getElementById('f-peso').value)  || 0,
-        unidade:   document.getElementById('f-unidade').value || 'g',
-        preco:     parseFloat(document.getElementById('f-custo').value) || 0,
+        peso_emb,
+        unidade,
+        preco,
         user_id:   userId,
     };
 
