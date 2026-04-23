@@ -730,26 +730,34 @@ function atualizarPreview() {
     }
 
     preview.style.display = 'block';
-    const custoPorUnidade = preco / peso;
+
     const fmtVal = (v) => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
     const fmtBR  = (v) => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // Exemplos relativos à unidade
-    let ex1qty, ex2qty;
-    if (unidade === 'g' || unidade === 'ml') {
-        ex1qty = 100; ex2qty = 500;
-    } else if (unidade === 'kg' || unidade === 'l') {
-        ex1qty = 0.1; ex2qty = 0.5; // 100g / 500g equivalentes
+    // Normaliza tudo para a unidade base (g ou ml)
+    let pesoEmBase, unidadeBase, unidadeLabel;
+    if (unidade === 'kg') {
+        pesoEmBase  = peso * 1000; // converte kg → g
+        unidadeBase = 'g';
+        unidadeLabel = 'g (equivalente)';
+    } else if (unidade === 'l') {
+        pesoEmBase  = peso * 1000; // converte l → ml
+        unidadeBase = 'ml';
+        unidadeLabel = 'ml (equivalente)';
     } else {
-        ex1qty = 1; ex2qty = 5;
+        pesoEmBase  = peso;
+        unidadeBase = unidade;
+        unidadeLabel = unidade;
     }
 
-    document.getElementById('prev-unidade-label').textContent = unidade;
-    document.getElementById('prev-por-unidade').textContent = fmtVal(custoPorUnidade);
-    document.getElementById('prev-ex1-label').textContent = `${ex1qty} ${unidade} =`;
-    document.getElementById('prev-ex1-val').textContent   = fmtBR(custoPorUnidade * ex1qty);
-    document.getElementById('prev-ex2-label').textContent = `${ex2qty} ${unidade} =`;
-    document.getElementById('prev-ex2-val').textContent   = fmtBR(custoPorUnidade * ex2qty);
+    const custoPorBase = preco / pesoEmBase; // custo por g ou ml
+
+    document.getElementById('prev-unidade-label').textContent = unidadeLabel;
+    document.getElementById('prev-por-unidade').textContent   = fmtVal(custoPorBase);
+    document.getElementById('prev-ex1-label').textContent     = `100 ${unidadeBase} =`;
+    document.getElementById('prev-ex1-val').textContent       = fmtBR(custoPorBase * 100);
+    document.getElementById('prev-ex2-label').textContent     = `500 ${unidadeBase} =`;
+    document.getElementById('prev-ex2-val').textContent       = fmtBR(custoPorBase * 500);
 }
 
 /* ─── AÇÕES ──────────────────────────────────────────────────────── */
