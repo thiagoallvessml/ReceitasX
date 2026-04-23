@@ -1525,7 +1525,9 @@ async function salvarReceita(e) {
 
     // ─ custo de ingredientes ─
     let custoIng = 0, ingList = [];
-    document.querySelectorAll('[data-ingid]').forEach(sel => {
+    const ingElements = document.querySelectorAll('[data-ingid]');
+    
+    for (const sel of ingElements) {
         const id      = sel.dataset.ingid;
         const qty     = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
         const opt     = sel.selectedOptions[0];
@@ -1535,6 +1537,7 @@ async function salvarReceita(e) {
         const unSel    = document.getElementById(`ing-un-${id}`);
         const unUsada  = unSel?.value || '';
         let custo = 0;
+        
         if (custoPkg > 0 && pesoPkg > 0 && unUsada) {
             const baseIns  = toBase(pesoPkg, unIns);
             const baseUsed = toBase(qty, unUsada);
@@ -1542,9 +1545,19 @@ async function salvarReceita(e) {
         } else if (custoPkg > 0 && unUsada === 'un') {
             custo = custoPkg * qty;
         }
+
+        // BLOQUEIO: Não aceita custo menor que 0.01 (que aparece como 0,00)
+        if (custo < 0.01) {
+            const nomeIng = opt?.text.split('(')[0].trim() || 'Ingrediente';
+            alert(`Erro no ingrediente "${nomeIng}":\n\nO custo calculado é R$ 0,00. Isso geralmente acontece quando o peso do ingrediente foi cadastrado errado no estoque (ex: 1000kg em vez de 1kg).\n\nCorrija o estoque para que o ingrediente tenha um custo real antes de salvar a receita.`);
+            const btnSave = document.querySelector('.btn-save');
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+
         custoIng += custo;
         if (opt?.text) ingList.push({ nome: opt.text.split('(')[0].trim(), qty: `${qty} ${unUsada}`, valor: custo });
-    });
+    }
 
     // ─ custo de embalagens ─
     let custoEmb = 0, embList = [];
