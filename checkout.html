@@ -867,6 +867,15 @@ function mostrarSucesso(cod) {
             Começar a usar o ReceitasX
         </button>
     `;
+    // ── Google Ads: Disparar evento de conversão ──
+    if (typeof gtag === 'function') {
+        gtag('event', 'conversion_event_purchase_2', {
+            value: precoFinal || 18.96,
+            currency: 'BRL',
+            new_customer: true
+        });
+        console.log('[GA] Conversão de compra registrada.');
+    }
     // Contagem regressiva e redirect automático em 3s
     let secs = 3;
     const countEl = document.getElementById('countdown');
