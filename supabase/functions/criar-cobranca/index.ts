@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { nome, email, telefone, taxId, valor, ref, cupom } = await req.json();
+    const { nome, email, telefone, taxId, valor, ref, cupom, senha } = await req.json();
 
     if (!email || !valor || !taxId) {
       return new Response(JSON.stringify({ error: 'email, cpf e valor são obrigatórios' }), {
@@ -153,13 +153,12 @@ serve(async (req) => {
         const found = (usersData as { users: {email:string;id:string}[] })?.users?.find(u => u.email === email);
         userId = found?.id ?? null;
 
-        // Se o usuário não existe e foi enviada uma senha na requisição (e nome), cria a conta
-        const reqData = await req.clone().json().catch(() => ({}));
-        if (!userId && reqData.senha) {
+        // Se o usuário não existe e foi enviada uma senha, cria a conta
+        if (!userId && senha) {
             console.log(`Criando nova conta para ${email} no checkout...`);
             const { data: newUser, error: createErr } = await sbAdmin.auth.admin.createUser({
                 email: email,
-                password: reqData.senha,
+                password: senha,
                 email_confirm: true,
                 user_metadata: {
                     nome: nome || email.split('@')[0],
