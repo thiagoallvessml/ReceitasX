@@ -10,7 +10,7 @@
     { "source": "/configuracoes","destination": "/configuracoes.html" },
     { "source": "/login",       "destination": "/login.html" },
     { "source": "/perfil",      "destination": "/perfil.html" },
-    { "source": "/promo/:ref",  "destination": "/promo.html" }
+    { "source": "/promo/(.*)",  "destination": "/promo.html" }
   ],
   "headers": [
     {
