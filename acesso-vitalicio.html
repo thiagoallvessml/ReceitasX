@@ -577,7 +577,12 @@ function handleCompra() {
     if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite">refresh</span> Redirecionando...';
 
     // Garante que o cupom seja passado pro checkout
-    const checkoutUrl = 'checkout.html' + (window.location.search.includes('RECEITASX60') ? window.location.search : '?ref=RECEITASX60');
+    // Pega o ref da URL atual (se existir)
+    const p = new URLSearchParams(window.location.search);
+    const hasAdsRef = p.get('ref') === 'RECEITASX60';
+    
+    // Se for ads, garante o RECEITASX60. Se não, passa o query string que estiver (ex: ?ref=AFILIADO1)
+    const checkoutUrl = 'checkout.html' + (window.location.search || (hasAdsRef ? '?ref=RECEITASX60' : ''));
 
     sb.auth.getUser().then(({ data: { user } }) => {
         if (user) {
@@ -585,34 +590,44 @@ function handleCompra() {
                 location.href = checkoutUrl;
             });
         } else {
-            // Não logado — manda direto para o checkout com o desconto garantido
             location.href = checkoutUrl;
         }
     });
 }
 
-// Atualiza preços dinamicamente quando config carregar
+// Atualiza preços dinamicamente
 document.addEventListener('appconfig:loaded', () => {
-    const ORIG = 97.00;
-    const v    = window.AppConfig.valorPlano;
-    const fmt  = 'R$ ' + v.toFixed(2).replace('.', ',');
-    const desc = ORIG - v;
-    const pct  = Math.round((desc / ORIG) * 100);
+    let orig = 97.00;
+    let v = 46.90; // Preço padrão / afiliados
+    let badgeText = "-52% OFF";
+    
+    // Se veio pelo link do ADS com o ref RECEITASX60
+    if (_ref === 'RECEITASX60') {
+        orig = 46.90;
+        v = 18.96; // Promoção agressiva Ads
+        badgeText = "-60% OFF";
+    }
+
+    const fmt = 'R$ ' + v.toFixed(2).replace('.', ',');
+    const fmtOrig = 'R$ ' + orig.toFixed(2).replace('.', ',');
 
     // Todos os botões/textos com classe preco-display
     document.querySelectorAll('.preco-display').forEach(el => el.textContent = fmt);
 
-    // Preço principal grande
-    const pm = document.getElementById('price-main');
-    if (pm) pm.textContent = fmt;
+    // Ajusta card de preço
+    const origEl = document.getElementById('price-orig');
+    const badgeEl = document.getElementById('price-badge-off');
+    const mainEl = document.getElementById('price-main');
 
-    // Preço original riscado
-    const po = document.getElementById('price-orig');
-    if (po) po.textContent = 'R$ ' + ORIG.toFixed(2).replace('.', ',');
-
-    // Badge de desconto (recalcular %)
-    const pb = document.getElementById('price-badge-off');
-    if (pb) pb.textContent = '-' + pct + '% OFF';
+    if (origEl && mainEl) {
+        origEl.textContent = fmtOrig;
+        origEl.style.display = 'inline-block';
+        if (badgeEl) {
+            badgeEl.textContent = badgeText;
+            badgeEl.style.display = 'inline-block';
+        }
+        mainEl.textContent = fmt;
+    }
 });
 
 // Scroll suave para âncoras
