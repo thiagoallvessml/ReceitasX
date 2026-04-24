@@ -151,3 +151,23 @@ async function dbUpsert(table, payload, onConflict) {
     }
 })();
 
+/* ─── PAGE VIEW TRACKING ──────────────────────────────────────── */
+(async function _trackPageView() {
+    try {
+        await new Promise(r => setTimeout(r, 1200));
+        const session = await getSession();
+        if (!session) return;
+
+        const pagina = window.location.pathname.split('/').pop() || 'index.html';
+        // Não rastreia páginas admin
+        if (pagina.startsWith('admin')) return;
+
+        await sb.from('page_views').insert({
+            user_id: session.user.id,
+            pagina: pagina,
+            referrer: document.referrer || null
+        });
+    } catch(e) {
+        // Silencia — não deve quebrar a UX
+    }
+})();

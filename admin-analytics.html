@@ -180,6 +180,12 @@
         </div>
     </div>
 
+    <!-- ═══ PÁGINAS MAIS ACESSADAS ═══ -->
+    <div class="section-head"><span class="material-symbols-outlined">web</span><h3>Páginas Mais Acessadas</h3></div>
+    <div class="chart-box" id="pages-box">
+        <div style="text-align:center;color:#475569;font-size:.8rem;padding:2rem 0">Carregando page views...</div>
+    </div>
+
     <!-- ═══ PEDIDOS RECENTES ═══ -->
     <div class="section-head"><span class="material-symbols-outlined">receipt_long</span><h3>Últimos Pedidos</h3></div>
     <div class="chart-box" style="padding:.5rem 0">
@@ -262,6 +268,40 @@ async function loadAll() {
 
     // ── Pedidos Recentes ──
     renderPedidos(pedidos.slice(0, 10));
+
+    // ── Page Views ──
+    loadPageViews();
+}
+
+async function loadPageViews() {
+    try {
+        const { data, error } = await sb.from('page_views').select('pagina, created_at').order('created_at', { ascending: false }).limit(5000);
+        if (error || !data || data.length === 0) {
+            document.getElementById('pages-box').innerHTML = '<div style="text-align:center;color:#475569;font-size:.8rem;padding:2rem 0">Nenhuma visualização registrada ainda.<br><span style="font-size:.7rem">Os dados aparecerão conforme os usuários navegam.</span></div>';
+            return;
+        }
+        const map = {};
+        data.forEach(r => {
+            const p = r.pagina.replace('.html', '');
+            if (!map[p]) map[p] = 0;
+            map[p]++;
+        });
+        const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 15);
+        const maxVal = sorted[0][1];
+        const html = sorted.map(([page, count]) => {
+            const pct = Math.max((count / maxVal) * 100, 3);
+            const icon = page === 'index' ? 'home' : page === 'receitas' ? 'menu_book' : page === 'configuracoes' ? 'settings' : page === 'gerenciar-insumos' ? 'inventory_2' : page === 'gestao-produtos' ? 'shopping_basket' : page === 'combos' ? 'layers' : page === 'checkout' ? 'shopping_cart' : page === 'perfil' ? 'person' : page === 'despesas' ? 'receipt_long' : 'web';
+            return `<div class="funnel-row">
+                <div style="min-width:1.5rem;display:flex;align-items:center"><span class="material-symbols-outlined" style="font-size:.95rem;color:#64748b">${icon}</span></div>
+                <div style="min-width:10rem;font-size:.78rem;font-weight:600;color:#cbd5e1">${page}</div>
+                <div style="flex:1"><div class="funnel-bar" style="width:${pct}%;background:linear-gradient(90deg,rgba(37,244,244,.2),#25f4f4)"></div></div>
+                <div style="font-size:.82rem;font-weight:800;color:#25f4f4;min-width:3rem;text-align:right">${count}</div>
+            </div>`;
+        }).join('');
+        document.getElementById('pages-box').innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><span style="font-size:.82rem;font-weight:700;color:#f1f5f9">Top 15 Páginas</span><span style="font-size:.7rem;color:#475569">${data.length} views total</span></div>` + html;
+    } catch(e) {
+        document.getElementById('pages-box').innerHTML = '<div style="text-align:center;color:#475569;font-size:.8rem;padding:2rem 0">Tabela page_views não encontrada. Execute o SQL.</div>';
+    }
 }
 
 function renderFunnel(users, clicks, vitalicios, pedidos) {
