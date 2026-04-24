@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Oferta Especial - ReceitasX</title>
+    <meta name="description" content="Acesso Vitalício ao ReceitasX com desconto exclusivo. Precifique seus doces, bolos e salgados como profissional." />
+    <meta property="og:title" content="Oferta Especial - ReceitasX" />
+    <meta property="og:description" content="Acesso Vitalício com desconto exclusivo! Precifique seus produtos como profissional." />
+    <meta property="og:url" content="https://receitasx.com.br/oferta" />
+    <meta property="og:type" content="website" />
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: #0a0a0a;
+            color: #f1f5f9;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        .logo { font-size: 1.8rem; font-weight: 900; color: #25f4f4; margin-bottom: .5rem; }
+        .subtitle { font-size: .95rem; color: #94a3b8; margin-bottom: 2rem; }
+        .loader-wrap {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            background: rgba(37, 244, 244, 0.05);
+            border: 1px solid rgba(37, 244, 244, 0.15);
+            border-radius: 1rem;
+            padding: 1rem 2rem;
+        }
+        .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid rgba(37,244,244,0.2);
+            border-top-color: #25f4f4;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { font-size: .9rem; font-weight: 600; color: #25f4f4; }
+        .fallback {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1rem 2.5rem;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #25f4f4, #0dc8c8);
+            color: #0a0a0a;
+            font-weight: 800;
+            font-size: .95rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logo">ReceitasX</div>
+<p class="subtitle">Preparando sua oferta exclusiva...</p>
+
+<div class="loader-wrap">
+    <div class="spinner"></div>
+    <span class="loader-text">Carregando desconto...</span>
+</div>
+
+<a id="fallback-btn" class="fallback" href="/acesso-vitalicio">Ir para a oferta</a>
+
+<script>
+(function() {
+    // Lê o código do afiliado do hash (#DOCECONE10) ou do path (/oferta/DOCECONE10)
+    var ref = '';
+    
+    // Tenta hash primeiro: /oferta#DOCECONE10
+    if (window.location.hash && window.location.hash.length > 1) {
+        ref = window.location.hash.substring(1); // Remove o #
+    }
+    
+    // Limpa caracteres inválidos
+    ref = ref.replace(/[^a-zA-Z0-9_\-]/g, '');
+    
+    // Monta URL de destino
+    var destino = '/acesso-vitalicio';
+    if (ref) {
+        destino += '?ref=' + ref;
+    }
+    
+    // Atualiza o botão fallback
+    var btn = document.getElementById('fallback-btn');
+    if (btn) btn.href = destino;
+    
+    // Redireciona após 800ms (tempo suficiente para a página renderizar)
+    setTimeout(function() {
+        window.location.replace(destino);
+    }, 800);
+    
+    // Se o redirect não funcionar em 3s, mostra o botão manual
+    setTimeout(function() {
+        if (btn) btn.style.display = 'inline-block';
+    }, 3000);
+})();
+</script>
+
+</body>
+</html>

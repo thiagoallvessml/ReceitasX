@@ -11,9 +11,6 @@
     { "source": "/login",       "destination": "/login.html" },
     { "source": "/perfil",      "destination": "/perfil.html" }
   ],
-  "redirects": [
-    { "source": "/promo/:ref", "destination": "/acesso-vitalicio?ref=:ref", "statusCode": 307 }
-  ],
   "headers": [
     {
       "source": "/(.*)",
