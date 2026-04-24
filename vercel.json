@@ -9,8 +9,10 @@
     { "source": "/produtos",    "destination": "/gestao-produtos.html" },
     { "source": "/configuracoes","destination": "/configuracoes.html" },
     { "source": "/login",       "destination": "/login.html" },
-    { "source": "/perfil",      "destination": "/perfil.html" },
-    { "source": "/promo/(.*)",  "destination": "/promo.html" }
+    { "source": "/perfil",      "destination": "/perfil.html" }
+  ],
+  "redirects": [
+    { "source": "/promo/:ref", "destination": "/acesso-vitalicio?ref=:ref", "statusCode": 307 }
   ],
   "headers": [
     {
