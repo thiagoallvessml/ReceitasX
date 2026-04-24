@@ -208,6 +208,7 @@ let lastLoginMap = {};  // user_id → last_sign_in_at
 let pagantesSet = new Set(); // emails de quem pagou
 let cupomMap    = {};  // user_id → cupom_usado
 let valorPagoMap = {}; // user_id → valor_pago
+let refAfiliadoMap = {}; // user_id → ref_afiliado
 let onlineMap   = {};  // user_id → { last_seen, pagina }
 let currentFilter = 'todos';
 
@@ -274,7 +275,7 @@ async function loadUsuarios() {
         try {
             const { data: peds, error: pedErr } = await sb
                 .from('pedidos')
-                .select('email, user_id, status, cupom_usado, valor_pago')
+                .select('email, user_id, status, cupom_usado, valor_pago, ref_afiliado')
                 .eq('status', 'pago');
             if (!pedErr && peds?.length) {
                 pagantesSet = new Set(
@@ -284,6 +285,7 @@ async function loadUsuarios() {
                     if (p.user_id) {
                         if (p.cupom_usado) cupomMap[p.user_id] = p.cupom_usado;
                         if (p.valor_pago) valorPagoMap[p.user_id] = p.valor_pago;
+                        if (p.ref_afiliado) refAfiliadoMap[p.user_id] = p.ref_afiliado;
                     }
                 });
             }
@@ -459,7 +461,14 @@ function renderUsuarios(list) {
             ? `<span class="badge-vital"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">workspace_premium</span>Vitálicio${valorPagoMap[u.id] ? ' · R$ ' + Number(valorPagoMap[u.id]).toFixed(2).replace('.',',') : ''}</span>`
             : '';
 
-        const cupomBadge = cupomMap[u.id]
+        let origemBadge = '';
+        if (refAfiliadoMap[u.id] === 'RECEITASX60' || cupomMap[u.id] === 'RECEITASX60') {
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(250, 204, 21, 0.1);color:#facc15;border:1px solid rgba(250, 204, 21, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">ads_click</span>Google Ads</span>`;
+        } else if (refAfiliadoMap[u.id]) {
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(168, 85, 247, 0.1);color:#a855f7;border:1px solid rgba(168, 85, 247, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">handshake</span>Afiliado: ${esc(refAfiliadoMap[u.id])}</span>`;
+        }
+
+        const cupomBadge = cupomMap[u.id] && cupomMap[u.id] !== 'RECEITASX60'
             ? `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)"><span class="material-symbols-outlined" style="font-size:.7rem">confirmation_number</span>${esc(cupomMap[u.id])}</span>`
             : '';
 
