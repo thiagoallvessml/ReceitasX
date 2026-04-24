@@ -9,14 +9,8 @@
     { "source": "/produtos",    "destination": "/gestao-produtos.html" },
     { "source": "/configuracoes","destination": "/configuracoes.html" },
     { "source": "/login",       "destination": "/login.html" },
-    { "source": "/perfil",      "destination": "/perfil.html" }
-  ],
-  "redirects": [
-    {
-      "source": "/promo/:ref",
-      "destination": "/acesso-vitalicio?ref=:ref",
-      "permanent": false
-    }
+    { "source": "/perfil",      "destination": "/perfil.html" },
+    { "source": "/promo/:ref",  "destination": "/promo.html" }
   ],
   "headers": [
     {

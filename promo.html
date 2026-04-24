@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando ReceitasX...</title>
+    <!-- Fallback caso o JS falhe, redireciona em 2 segundos para a home -->
+    <noscript><meta http-equiv="refresh" content="2;url=/acesso-vitalicio"></noscript>
+    <style>
+        body { background:#121212; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; margin:0; }
+        .loader { border: 3px solid rgba(37,244,244,0.2); border-top: 3px solid #25f4f4; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script>
+        // Redirecionamento 100% Client-side (inquebrável pelos navegadores de TikTok/Instagram)
+        document.addEventListener("DOMContentLoaded", () => {
+            const path = window.location.pathname; // ex: /promo/DOCECONE10
+            const parts = path.split('/promo/');
+            
+            let urlDestino = '/acesso-vitalicio';
+            
+            if (parts.length > 1 && parts[1]) {
+                const ref = parts[1].replace(/[^a-zA-Z0-9_-]/g, ''); // Limpa caracteres estranhos
+                urlDestino = `/acesso-vitalicio?ref=${ref}`;
+            }
+
+            // Replace previne que o usuário volte para esta página "em branco" ao clicar em voltar
+            window.location.replace(urlDestino);
+        });
+    </script>
+</head>
+<body>
+    <div class="loader"></div>
+    <p>Preparando oferta...</p>
+</body>
+</html>
