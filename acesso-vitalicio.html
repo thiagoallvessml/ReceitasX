@@ -576,14 +576,17 @@ function handleCompra() {
     const btn = document.querySelector('.sticky-cta');
     if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite">refresh</span> Redirecionando...';
 
+    // Garante que o cupom seja passado pro checkout
+    const checkoutUrl = 'checkout.html' + (window.location.search.includes('RECEITASX60') ? window.location.search : '?ref=RECEITASX60');
+
     sb.auth.getUser().then(({ data: { user } }) => {
         if (user) {
             sb.from('perfis').update({ vitalicio_click_at: new Date().toISOString() }).eq('id', user.id).then(() => {
-                location.href = 'checkout';
+                location.href = checkoutUrl;
             });
         } else {
-            // Não logado — manda direto para o checkout (agora o checkout aceita)
-            location.href = 'checkout';
+            // Não logado — manda direto para o checkout com o desconto garantido
+            location.href = checkoutUrl;
         }
     });
 }
