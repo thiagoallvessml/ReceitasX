@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ReceitasX - Vitrine TikTok</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script>requireAdmin();</script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* ── Form ── */
+        .fl { font-size:.64rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#25f4f4; margin-bottom:.35rem; display:block; }
+        .fi { width:100%; padding:.65rem .9rem; border-radius:.65rem; border:1px solid #2A2A2A !important; background:#1E1E1E !important; color:#f1f5f9 !important; font-size:.875rem; outline:none; transition:border-color .2s,box-shadow .2s; }
+        .fi::placeholder { color:#475569 !important; }
+        .fi:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        /* ── Product card preview ── */
+        .prod-card-preview {
+            background:#1A1A1A; border:1px solid #2A2A2A; border-radius:.85rem;
+            padding:1rem; display:flex; gap:1rem; align-items:center;
+            transition: all .2s;
+        }
+        .prod-card-preview:hover { border-color:rgba(37,244,244,.3); }
+        .prod-card-img {
+            width:4.5rem; height:4.5rem; border-radius:.65rem; flex-shrink:0;
+            background:#2A2A2A; display:flex; align-items:center; justify-content:center;
+            overflow:hidden;
+        }
+        .prod-card-img img { width:100%; height:100%; object-fit:cover; }
+
+        /* ── Upload area ── */
+        .img-upload-area {
+            border:2px dashed #2A2A2A; border-radius:.75rem; padding:1.5rem;
+            display:flex; flex-direction:column; align-items:center; gap:.4rem;
+            cursor:pointer; transition:border-color .2s; background:#1A1A1A;
+            position:relative; overflow:hidden;
+        }
+        .img-upload-area:hover { border-color:rgba(37,244,244,.4); }
+        .img-upload-area img { width:100%; max-height:140px; object-fit:contain; border-radius:.5rem; }
+
+        /* ── Modal ── */
+        .modal-bg {
+            position:fixed; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(6px);
+            z-index:300; display:none; align-items:center; justify-content:center; padding:1rem;
+        }
+        .modal-bg.open { display:flex; }
+        .modal-box {
+            background:#141414; border:1px solid #2A2A2A; border-radius:1.1rem;
+            width:100%; max-width:480px; max-height:90vh; overflow-y:auto;
+            box-shadow:0 16px 64px rgba(0,0,0,.8);
+            animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)} }
+
+        /* ── Toast ── */
+        #toast {
+            position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px);
+            background:#1E1E1E; border:1px solid rgba(37,244,244,.35); color:#f1f5f9;
+            padding:.65rem 1.2rem; border-radius:.75rem; font-size:.85rem; font-weight:500;
+            display:flex; align-items:center; gap:.5rem; z-index:400; opacity:0;
+            transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+            box-shadow:0 8px 32px rgba(0,0,0,.5); white-space:nowrap;
+        }
+        #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+        /* ── Drag ── */
+        .drag-handle { cursor:grab; color:#475569; }
+        .drag-handle:active { cursor:grabbing; }
+        .dragging { opacity:.5; }
+
+        /* ── Empty ── */
+        .empty-state { display:flex; flex-direction:column; align-items:center; padding:3rem 1rem; color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem; margin-bottom:.75rem; color:#2A2A2A; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-12">
+
+<!-- ══ Header ═══════════════════════════════════════════════════ -->
+<header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
+    <div style="max-width:800px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.75rem">
+        <button onclick="history.back()" style="width:2rem;height:2rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
+            onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
+            onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+            <span class="material-symbols-outlined" style="font-size:1.15rem">arrow_back</span>
+        </button>
+        <div style="flex:1">
+            <p style="font-size:.95rem;font-weight:800;letter-spacing:-.01em">Vitrine TikTok</p>
+            <p style="font-size:.65rem;color:#64748b;font-weight:500">Gerenciar produtos das receitas</p>
+        </div>
+        <span class="role-badge-admin" style="display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:800;padding:.15rem .45rem;border-radius:.35rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25);letter-spacing:.04em;text-transform:uppercase">Admin</span>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════ -->
+<main style="max-width:800px;margin:0 auto;padding:1.25rem">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:1.5rem">
+        <div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;padding:.75rem .9rem">
+            <p style="font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:.2rem">Total Produtos</p>
+            <p style="font-size:1.1rem;font-weight:800;color:#25f4f4" id="stat-total">0</p>
+        </div>
+        <div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;padding:.75rem .9rem">
+            <p style="font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:.2rem">Com Link</p>
+            <p style="font-size:1.1rem;font-weight:800;color:#34d399" id="stat-com-link">0</p>
+        </div>
+        <div style="background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;padding:.75rem .9rem">
+            <p style="font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:.2rem">Com Imagem</p>
+            <p style="font-size:1.1rem;font-weight:800;color:#fbbf24" id="stat-com-img">0</p>
+        </div>
+    </div>
+    <!-- Botões de Ação -->
+    <div style="display:flex;gap:.65rem;margin-bottom:1.25rem">
+        <button onclick="openModal()" style="flex:2;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;border-radius:.75rem;border:1px dashed rgba(37,244,244,.35);background:rgba(37,244,244,.04);color:#25f4f4;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s"
+            onmouseover="this.style.background='rgba(37,244,244,.08)';this.style.borderColor='rgba(37,244,244,.6)'"
+            onmouseout="this.style.background='rgba(37,244,244,.04)';this.style.borderColor='rgba(37,244,244,.35)'">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">add_circle</span>
+            Adicionar Produto
+        </button>
+        
+        <button onclick="exportarJSON()" title="Exportar para Publicação" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s"
+            onmouseover="this.style.borderColor='rgba(37,244,244,.4)';this.style.color='#25f4f4'"
+            onmouseout="this.style.borderColor='#2A2A2A';this.style.color='#f1f5f9'">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">cloud_download</span>
+            Publicar
+        </button>
+    </div>
+
+    <!-- Alerta de Publicação -->
+    <div id="publish-alert" style="display:none;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-radius:.75rem;padding:.75rem 1rem;margin-bottom:1.25rem;gap:.75rem;align-items:center">
+        <span class="material-symbols-outlined" style="color:#fbbf24;font-size:1.2rem">info</span>
+        <div style="flex:1">
+            <p style="font-size:.72rem;font-weight:700;color:#fcd34d">Alterações não publicadas!</p>
+            <p style="font-size:.65rem;color:#94a3b8">Clique em "Publicar" para baixar o arquivo e atualizar o site.</p>
+        </div>
+    </div>
+
+    <!-- Lista de Produtos -->
+    <div id="prod-list"></div>
+
+    <!-- Empty -->
+    <div id="empty-state" class="empty-state" style="display:none">
+        <span class="material-symbols-outlined">storefront</span>
+        <p style="font-size:1rem;font-weight:700;color:#64748b">Nenhum produto cadastrado</p>
+        <p style="font-size:.82rem;margin-top:.25rem;color:#475569">Adicione os produtos da sua lojinha do TikTok</p>
+    </div>
+</main>
+
+<!-- ══ Modal ════════════════════════════════════════════════════ -->
+<div id="modal-bg" class="modal-bg">
+    <div class="modal-box">
+        <div style="display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A">
+            <div style="width:2.25rem;height:2.25rem;border-radius:.55rem;background:rgba(37,244,244,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#25f4f4">shopping_bag</span>
+            </div>
+            <div style="flex:1">
+                <p id="modal-title" style="font-size:.9rem;font-weight:800">Novo Produto</p>
+                <p style="font-size:.68rem;color:#64748b">Preencha as informações do produto</p>
+            </div>
+            <button onclick="closeModal()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+            </button>
+        </div>
+
+        <form id="form-prod" onsubmit="salvarProduto(event)" style="padding:1.25rem;display:flex;flex-direction:column;gap:1.1rem">
+            <input type="hidden" id="edit-id" />
+
+            <!-- Nome -->
+            <div>
+                <label class="fl" for="p-nome">Nome do Produto</label>
+                <input id="p-nome" type="text" class="fi" placeholder="Ex: Liquidificador Turbo 1200W" autocomplete="off" required />
+            </div>
+
+            <!-- Link TikTok -->
+            <div>
+                <label class="fl" for="p-link">Link da Loja TikTok</label>
+                <input id="p-link" type="url" class="fi" placeholder="https://www.tiktok.com/view/product/..." autocomplete="off" />
+                <p style="font-size:.65rem;color:#475569;margin-top:.3rem">Cole o link completo do produto na sua lojinha do TikTok</p>
+            </div>
+
+            <!-- Imagem -->
+            <div>
+                <label class="fl">Imagem do Produto</label>
+                <div class="img-upload-area" id="upload-area" onclick="document.getElementById('p-img-file').click()">
+                    <img id="img-preview" style="display:none" alt="preview" />
+                    <span class="material-symbols-outlined" id="upload-ico" style="font-size:2rem;color:#475569;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24">add_photo_alternate</span>
+                    <p id="upload-txt" style="font-size:.72rem;color:#64748b">Clique para adicionar foto</p>
+                </div>
+                <input type="file" id="p-img-file" accept="image/*" style="display:none" onchange="handleImg(event)" />
+                <div id="img-actions" style="display:none;margin-top:.5rem;text-align:right">
+                    <button type="button" onclick="removeImg()" style="font-size:.72rem;color:#f87171;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem">
+                        <span class="material-symbols-outlined" style="font-size:.8rem;vertical-align:text-bottom">delete</span> Remover imagem
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div style="display:flex;gap:.65rem;padding-top:.5rem">
+                <button type="button" onclick="closeModal()" style="padding:.7rem 1.1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s">Cancelar</button>
+                <button type="submit" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem;border-radius:.65rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:700;font-size:.85rem;cursor:pointer;box-shadow:0 3px 16px rgba(37,244,244,.22);transition:opacity .2s">
+                    <span class="material-symbols-outlined" style="font-size:1rem">save</span>
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══ Confirm Delete ══════════════════════════════════════════ -->
+<div id="confirm-bg" class="modal-bg">
+    <div class="modal-box" style="max-width:380px">
+        <div style="padding:1.5rem;text-align:center">
+            <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(248,113,113,.1);display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem">
+                <span class="material-symbols-outlined" style="font-size:1.5rem;color:#f87171;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">delete_forever</span>
+            </div>
+            <p style="font-size:1rem;font-weight:800;margin-bottom:.35rem">Remover produto?</p>
+            <p style="font-size:.82rem;color:#64748b">Essa ação não pode ser desfeita.</p>
+        </div>
+        <div style="display:flex;gap:.5rem;padding:0 1.25rem 1.25rem;justify-content:center">
+            <button onclick="cancelDelete()" style="padding:.6rem 1.25rem;border-radius:.6rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;font-weight:600;font-size:.82rem;cursor:pointer">Cancelar</button>
+            <button id="btn-confirm-del" onclick="confirmDelete()" style="padding:.6rem 1.25rem;border-radius:.6rem;border:none;background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:.3rem">
+                <span class="material-symbols-outlined" style="font-size:.9rem">delete</span> Remover
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ Toast ══════════════════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Ação realizada!</span>
+</div>
+
+<!-- ══ Script ═════════════════════════════════════════════════ -->
+<script>
+const STORAGE_KEY = 'receitasx_vitrine_tiktok';
+
+function getProdutos() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+}
+function saveProdutos(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    document.getElementById('publish-alert').style.display = 'flex';
+}
+
+/* ── RENDER ── */
+async function init() {
+    // Se o localStorage estiver vazio, tenta carregar do servidor
+    if (!localStorage.getItem(STORAGE_KEY)) {
+        await importarDoServidor();
+    }
+    render();
+}
+
+async function importarDoServidor() {
+    try {
+        const res = await fetch('vitrine-produtos-data.json?v=' + Date.now());
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.length) {
+                saveProdutos(data);
+                document.getElementById('publish-alert').style.display = 'none';
+            }
+        }
+    } catch(e) { console.warn('Erro ao carregar do servidor:', e); }
+}
+
+function exportarJSON() {
+    const data = getProdutos();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vitrine-produtos-data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    document.getElementById('publish-alert').style.display = 'none';
+    toast('Arquivo baixado! Salve-o na pasta do projeto.');
+}
+
+function render() {
+    const prods = getProdutos();
+    const list = document.getElementById('prod-list');
+    const empty = document.getElementById('empty-state');
+
+    // Stats
+    document.getElementById('stat-total').textContent = prods.length;
+    document.getElementById('stat-com-link').textContent = prods.filter(p => p.link && p.link !== '#').length;
+    document.getElementById('stat-com-img').textContent = prods.filter(p => p.imagem).length;
+
+    if (!prods.length) {
+        list.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+    }
+    empty.style.display = 'none';
+
+    list.innerHTML = prods.map((p, i) => {
+        const hasImg = p.imagem;
+        const hasLink = p.link && p.link !== '#';
+        return `
+        <div class="prod-card-preview" style="margin-bottom:.65rem" data-idx="${i}">
+            <div class="prod-card-img">
+                ${hasImg
+                    ? `<img src="${esc(p.imagem)}" alt="${esc(p.nome)}" />`
+                    : `<span class="material-symbols-outlined text-slate-600" style="font-size:1.5rem">image</span>`
+                }
+            </div>
+            <div style="flex:1;min-width:0">
+                <p style="font-size:.85rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.nome)}</p>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem">
+                    <span style="font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:9999px;
+                        ${hasLink ? 'background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25)' : 'background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.25)'}">
+                        ${hasLink ? '✓ Link ativo' : '✕ Sem link'}
+                    </span>
+                    <span style="font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:9999px;
+                        ${hasImg ? 'background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25)' : 'background:rgba(100,116,139,.1);color:#64748b;border:1px solid rgba(100,116,139,.2)'}">
+                        ${hasImg ? '✓ Imagem' : 'Sem imagem'}
+                    </span>
+                </div>
+            </div>
+            <div style="display:flex;gap:.35rem;flex-shrink:0">
+                <button onclick="editProduto(${i})" title="Editar" style="width:2rem;height:2rem;border-radius:.45rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s"
+                    onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
+                    onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+                    <span class="material-symbols-outlined" style="font-size:.9rem">edit</span>
+                </button>
+                <button onclick="askDelete(${i})" title="Remover" style="width:2rem;height:2rem;border-radius:.45rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s"
+                    onmouseover="this.style.color='#f87171';this.style.borderColor='rgba(248,113,113,.4)'"
+                    onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+                    <span class="material-symbols-outlined" style="font-size:.9rem">delete</span>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── MODAL ── */
+let _imgBase64 = '';
+
+function openModal(editIdx) {
+    document.getElementById('modal-bg').classList.add('open');
+    document.getElementById('form-prod').reset();
+    document.getElementById('edit-id').value = editIdx !== undefined ? editIdx : '';
+    document.getElementById('modal-title').textContent = editIdx !== undefined ? 'Editar Produto' : 'Novo Produto';
+    _imgBase64 = '';
+    resetImgPreview();
+
+    if (editIdx !== undefined) {
+        const p = getProdutos()[editIdx];
+        if (!p) return;
+        document.getElementById('p-nome').value = p.nome || '';
+        document.getElementById('p-link').value = p.link || '';
+        if (p.imagem) {
+            _imgBase64 = p.imagem;
+            showImgPreview(p.imagem);
+        }
+    }
+}
+
+function closeModal() {
+    document.getElementById('modal-bg').classList.remove('open');
+}
+
+function editProduto(idx) {
+    openModal(idx);
+}
+
+/* ── IMAGE ── */
+function handleImg(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Max 500KB
+    if (file.size > 512000) {
+        toast('Imagem muito grande! Máx: 500KB', 'warning');
+        e.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        // Resize to max 200x200 for localStorage efficiency
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX = 200;
+            let w = img.width, h = img.height;
+            if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+            else       { w = Math.round(w * MAX / h); h = MAX; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            _imgBase64 = canvas.toDataURL('image/webp', 0.8);
+            showImgPreview(_imgBase64);
+        };
+        img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function showImgPreview(src) {
+    const prev = document.getElementById('img-preview');
+    prev.src = src;
+    prev.style.display = 'block';
+    document.getElementById('upload-ico').style.display = 'none';
+    document.getElementById('upload-txt').style.display = 'none';
+    document.getElementById('img-actions').style.display = 'block';
+}
+
+function resetImgPreview() {
+    document.getElementById('img-preview').style.display = 'none';
+    document.getElementById('img-preview').src = '';
+    document.getElementById('upload-ico').style.display = '';
+    document.getElementById('upload-txt').style.display = '';
+    document.getElementById('img-actions').style.display = 'none';
+    document.getElementById('p-img-file').value = '';
+}
+
+function removeImg() {
+    _imgBase64 = '';
+    resetImgPreview();
+}
+
+/* ── SAVE ── */
+function salvarProduto(e) {
+    e.preventDefault();
+    const nome = document.getElementById('p-nome').value.trim();
+    const link = document.getElementById('p-link').value.trim() || '#';
+    const editIdx = document.getElementById('edit-id').value;
+
+    if (!nome) { toast('Informe o nome do produto', 'warning'); return; }
+
+    const prods = getProdutos();
+    const produto = { nome, link, imagem: _imgBase64 || '' };
+
+    if (editIdx !== '') {
+        prods[parseInt(editIdx)] = produto;
+        toast('Produto atualizado!');
+    } else {
+        prods.push(produto);
+        toast('Produto adicionado!');
+    }
+
+    saveProdutos(prods);
+    closeModal();
+    render();
+}
+
+/* ── DELETE ── */
+let _deleteIdx = null;
+function askDelete(idx) {
+    _deleteIdx = idx;
+    document.getElementById('confirm-bg').classList.add('open');
+}
+function cancelDelete() {
+    _deleteIdx = null;
+    document.getElementById('confirm-bg').classList.remove('open');
+}
+function confirmDelete() {
+    if (_deleteIdx === null) return;
+    const prods = getProdutos();
+    prods.splice(_deleteIdx, 1);
+    saveProdutos(prods);
+    cancelDelete();
+    render();
+    toast('Produto removido!');
+}
+
+/* ── TOAST ── */
+function toast(msg, type) {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const m = document.getElementById('toast-msg');
+    m.textContent = msg;
+    icon.textContent = type === 'warning' ? 'warning' : 'check_circle';
+    icon.style.color = type === 'warning' ? '#fbbf24' : '#25f4f4';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── INIT ── */
+init();
+</script>
+
+</body>
+</html>

@@ -1,28 +1,20 @@
 User-agent: *
 
-# Páginas públicas — liberar para indexação
+# ── Páginas públicas — liberar para indexação ──
+Allow: /$
 Allow: /landing
 Allow: /acesso-vitalicio
 Allow: /login
 Allow: /checkout
-Allow: /blog
+Allow: /blog/
+Allow: /blog$
+Allow: /comecegratis
+Allow: /politica-de-privacidade
+Allow: /termos-de-uso
+Allow: /receitas-geladinho
+Allow: /geladinho-maracuja
 
-# Páginas do app — bloquear para não indexar área restrita
-Disallow: /index
-Disallow: /receitas
-Disallow: /configuracoes
-Disallow: /gerenciar-
-Disallow: /gestao-produtos
-Disallow: /combos
-Disallow: /despesas
-Disallow: /extrato-vendas
-Disallow: /indique-ganhe
-Disallow: /meus-ganhos
-Disallow: /perfil
-Disallow: /ponto-equilibrio
-Disallow: /precificacao-marketplace
-Disallow: /admin-
-Disallow: /receita-detalhe
-Disallow: /*.html$
+# ── Páginas do app — bloquear TUDO que não foi liberado acima ──
+Disallow: /
 
 Sitemap: https://receitasx.com.br/sitemap.xml

@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/calculadora", "destination": "/calculadora.html" },
     { "source": "/insumos",     "destination": "/gerenciar-insumos.html" },
     { "source": "/embalagens",  "destination": "/gerenciar-embalagens.html" },
     { "source": "/equipamentos","destination": "/gerenciar-equipamentos.html" },
@@ -10,6 +11,10 @@
     { "source": "/configuracoes","destination": "/configuracoes.html" },
     { "source": "/login",       "destination": "/login.html" },
     { "source": "/perfil",      "destination": "/perfil.html" }
+  ],
+  "redirects": [
+    { "source": "/OFERTA", "destination": "/oferta", "permanent": true },
+    { "source": "/Oferta", "destination": "/oferta", "permanent": true }
   ],
   "headers": [
     {

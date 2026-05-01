@@ -1,6 +1,9 @@
 // analytics.js
 // Script dedicado para carregar Google Analytics nas páginas que não usam supabase-client.js
 (function() {
+    const pagina = window.location.pathname.split('/').pop() || 'index.html';
+    if (pagina.startsWith('admin')) return;
+
     const gaId = 'G-LFKEYKBBCD';
     
     const script = document.createElement('script');

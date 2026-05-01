@@ -255,10 +255,11 @@
         .comp-name { font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
         .comp-cost { font-size:.7rem;color:#64748b;margin-top:.05rem; }
         .qty-ctrl { display:flex;align-items:center;gap:.3rem; }
-        .qty-btn { width:1.6rem;height:1.6rem;border-radius:50%;border:1px solid #2A2A2A;background:#111;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
+        .qty-btn { width:1.6rem;height:1.6rem;border-radius:50%;border:1px solid #2A2A2A;background:#111;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;position:relative;z-index:10; }
         .qty-btn:hover { border-color:rgba(37,244,244,.5);color:#25f4f4; }
         .qty-btn .material-symbols-outlined { font-size:.85rem; }
-        .qty-val { width:1.8rem;text-align:center;font-size:.82rem;font-weight:700;color:#f1f5f9;background:transparent;border:none;outline:none; }
+        .qty-val::-webkit-outer-spin-button, .qty-val::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+        .qty-val { -moz-appearance:textfield; width:2.2rem;text-align:center;font-size:.85rem;font-weight:700;color:#f1f5f9 !important;background:transparent !important;border:none !important;outline:none !important;box-shadow:none !important; padding:0; }
         .btn-del-item { width:1.6rem;height:1.6rem;border-radius:.4rem;border:none;background:transparent;color:#64748b;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
         .btn-del-item:hover { color:#f87171;background:rgba(248,113,113,.1); }
         .btn-del-item .material-symbols-outlined { font-size:.9rem; }
@@ -810,16 +811,12 @@ function getMarketplaces() {
 /* ─── COMPOSIÇÃO INTERATIVA ──────────────────────────────────────── */
 function renderComp() {
     const list = document.getElementById('comp-list');
-    const empty = document.getElementById('comp-empty');
     const keys = Object.keys(selectedItems);
     if (!keys.length) {
-        list.innerHTML = '';
-        list.appendChild(empty);
-        empty.style.display = '';
+        list.innerHTML = '<p id="comp-empty" class="text-xs text-slate-500" style="padding:.5rem 0">Adicione ao menos um produto.</p>';
         calcMetrics();
         return;
     }
-    empty.style.display = 'none';
     list.innerHTML = keys.map(id => {
         const p = produtos.find(x => x.id === parseInt(id));
         if (!p) return '';
@@ -834,11 +831,11 @@ function renderComp() {
             <p class="comp-cost">Custo unit: ${fmtR(p.custo||0)}</p>
           </div>
           <div class="qty-ctrl">
-            <button class="qty-btn" onclick="changeQty(${p.id},-1)"><span class="material-symbols-outlined">remove</span></button>
+            <button type="button" class="qty-btn" onclick="changeQty(${p.id},-1)"><span class="material-symbols-outlined">remove</span></button>
             <input class="qty-val" type="number" min="1" max="99" value="${qty}" onchange="changeQtyDirect(${p.id},this.value)" />
-            <button class="qty-btn" onclick="changeQty(${p.id},1)"><span class="material-symbols-outlined">add</span></button>
+            <button type="button" class="qty-btn" onclick="changeQty(${p.id},1)"><span class="material-symbols-outlined">add</span></button>
           </div>
-          <button class="btn-del-item" onclick="removeItem(${p.id})"><span class="material-symbols-outlined">delete</span></button>
+          <button type="button" class="btn-del-item" onclick="removeItem(${p.id})"><span class="material-symbols-outlined">delete</span></button>
         </div>`;
     }).join('');
     calcMetrics();

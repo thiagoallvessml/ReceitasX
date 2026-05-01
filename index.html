@@ -2,6 +2,15 @@
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFKEYKBBCD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LFKEYKBBCD');
+      gtag('config', 'AW-18068821024');
+    </script>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>ReceitasX - Dashboard</title>
     <meta name="google-site-verification" content="u0POsj17QqD4iukUlLzIayovjOOk-s_nhfizVgi6ak0" />
@@ -179,60 +188,129 @@
         </div>
     </a>
 
+    <!-- ── Oferta Especial Calculadora (condicional) ─────────────────────────────── -->
+    <a href="checkout.html?ref=DESCONTO60" id="banner-oferta-calculadora"
+        class="nav-card block p-4 rounded-xl border group"
+        style="display:none;background:linear-gradient(135deg,rgba(52,211,153,.1),rgba(52,211,153,.02));border-color:rgba(52,211,153,.3);">
+        <div class="flex items-center gap-4">
+            <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.15);color:var(--green);">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">loyalty</span>
+            </div>
+            <div class="flex-1">
+                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                    <h4 class="text-sm font-bold">Cupom DESCONTO60 Aplicado!</h4>
+                    <span style="font-size:.6rem;font-weight:700;background:rgba(52,211,153,.2);color:var(--green);border:1px solid rgba(52,211,153,.4);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">-60% OFF</span>
+                </div>
+                <p class="text-xs" style="color:#64748b;margin-top:.1rem">Desbloqueie o sistema completo com 60% de desconto. Oferta válida apenas agora.</p>
+            </div>
+            <span class="material-symbols-outlined" style="color:var(--green);opacity:.7">shopping_cart_checkout</span>
+        </div>
+    </a>
+
+    <!-- ── Oferta Especial Afiliado (condicional) ─────────────────────────────── -->
+    <a href="#" id="banner-oferta-afiliado"
+        class="nav-card block p-4 rounded-xl border group"
+        style="display:none;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.02));border-color:rgba(251,191,36,.3);">
+        <div class="flex items-center gap-4">
+            <div class="p-2 rounded-lg" style="background:rgba(251,191,36,.15);color:#fbbf24;">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">redeem</span>
+            </div>
+            <div class="flex-1">
+                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                    <h4 class="text-sm font-bold" id="banner-afiliado-title">Desconto Exclusivo Desbloqueado!</h4>
+                    <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.4);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Indicação</span>
+                </div>
+                <p class="text-xs" id="banner-afiliado-desc" style="color:#64748b;margin-top:.1rem">Você foi indicado! Aproveite um desconto especial no plano Vitalício.</p>
+            </div>
+            <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.7">shopping_cart_checkout</span>
+        </div>
+    </a>
+
+    <!-- ── Receitas Bônus ─────────────────────────────── -->
+    <section style="display:none">
+        <div class="flex items-center gap-2 mb-4 px-1 mt-6">
+            <span class="material-symbols-outlined text-primary text-sm">icecream</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Receitas Bônus</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <a href="receitas-geladinho.html"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
+                style="background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(251,191,36,.02));border-color:rgba(251,191,36,.2);">
+                <div class="p-2 rounded-lg" style="background:rgba(251,191,36,.1);color:#fbbf24;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">icecream</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Receitas de Geladinho</h4>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Coleção</span>
+                    </div>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Veja todas as receitas e vídeos passo a passo</p>
+                </div>
+                <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
+            </a>
+        </div>
+    </section>
+
     <!-- ── Operacional ──────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">precision_manufacturing</span>
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Operacional</h2>
         </div>
-        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             <!-- Gestão Insumos -->
             <a href="gerenciar-insumos.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">package_2</span>
-                <span class="text-xs font-medium text-center">Gestão Insumos</span>
+                <span class="text-xs font-medium text-center">Meus Insumos</span>
+                <span id="alert-insumos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Equipamentos -->
             <a href="gerenciar-equipamentos.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">construction</span>
-                <span class="text-xs font-medium text-center">Equipamentos</span>
+                <span class="text-xs font-medium text-center">Meus Equipamentos</span>
+                <span id="alert-equipamentos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Gestão Embalagens -->
             <a href="gerenciar-embalagens.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">inventory</span>
-                <span class="text-xs font-medium text-center">Embalagens</span>
+                <span class="text-xs font-medium text-center">Minhas Embalagens</span>
+                <span id="alert-embalagens" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Receitas -->
             <a href="receitas.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">menu_book</span>
-                <span class="text-xs font-medium text-center">Receitas</span>
+                <span class="text-xs font-medium text-center">Minhas Receitas</span>
+                <span id="alert-receitas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Produtos -->
             <a href="gestao-produtos.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">shopping_basket</span>
-                <span class="text-xs font-medium text-center">Produtos</span>
+                <span class="text-xs font-medium text-center">Meus Produtos</span>
+                <span id="alert-produtos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Combos -->
             <a href="combos.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">layers</span>
-                <span class="text-xs font-medium text-center">Combos</span>
+                <span class="text-xs font-medium text-center">Meus Combos</span>
             </a>
             <!-- Precificação -->
             <a href="precificacao-marketplace.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">storefront</span>
                 <span class="text-xs font-medium text-center">Precificação</span>
             </a>
             <!-- Despesas -->
             <a href="despesas.html"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">receipt_long</span>
-                <span class="text-xs font-medium text-center">Despesas</span>
+                <span class="text-xs font-medium text-center">Minhas Despesas</span>
+                <span id="alert-despesas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Ponto de Equilíbrio -->
             <a href="ponto-equilibrio.html"
@@ -462,6 +540,38 @@
                     // Não é vitalício — exibe o card de compra
                     const card = document.getElementById('card-acesso-vitalicio');
                     if (card) card.style.display = '';
+
+                    // Oferta da Calculadora (Lead Magnet)
+                    if (localStorage.getItem('has_calculadora_offer') === 'true') {
+                        const bannerCalc = document.getElementById('banner-oferta-calculadora');
+                        if (bannerCalc) bannerCalc.style.display = 'block';
+                        
+                        if (!sessionStorage.getItem('calculadora_offer_shown')) {
+                            const modalCalc = document.getElementById('oferta-calculadora-modal');
+                            if (modalCalc) modalCalc.style.display = 'flex';
+                        }
+                    }
+
+                    // Oferta do Afiliado (Lead via indicação)
+                    if (localStorage.getItem('has_afiliado_offer') === 'true') {
+                        const refCode = localStorage.getItem('afiliado_ref_code') || '';
+                        const checkoutUrl = 'checkout.html?ref=' + encodeURIComponent(refCode);
+
+                        // Banner
+                        const bannerAfil = document.getElementById('banner-oferta-afiliado');
+                        if (bannerAfil) {
+                            bannerAfil.href = checkoutUrl;
+                            bannerAfil.style.display = 'block';
+                        }
+
+                        // Modal
+                        if (!sessionStorage.getItem('afiliado_offer_shown')) {
+                            const modalAfil = document.getElementById('oferta-afiliado-modal');
+                            const modalBtn = document.getElementById('modal-afiliado-btn');
+                            if (modalBtn) modalBtn.href = checkoutUrl;
+                            if (modalAfil) modalAfil.style.display = 'flex';
+                        }
+                    }
                 }
             } catch(_) {}
 
@@ -497,7 +607,7 @@
                 }
             } catch(_) {}
 
-            // Ocultar banner do Guia se progresso = 100%
+            // Progresso e Alertas de Cards Vazios
             try {
                 const uid = session.user.id;
                 const countTable = async (table) => {
@@ -506,13 +616,30 @@
                 };
 
                 const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                
+                const countEquip = await countTable('equipamentos');
+                const countInsum = await countTable('insumos');
+                const countEmbal = await countTable('embalagens');
+                const countRecei = await countTable('receitas');
+                const countProdu = await countTable('produtos');
+                const countCombo = await countTable('combos');
+                const countDespe = await countTable('despesas');
+
+                // Mostrar alertas se = 0
+                if (countEquip === 0 && document.getElementById('alert-equipamentos')) document.getElementById('alert-equipamentos').style.display = 'block';
+                if (countInsum === 0 && document.getElementById('alert-insumos')) document.getElementById('alert-insumos').style.display = 'block';
+                if (countEmbal === 0 && document.getElementById('alert-embalagens')) document.getElementById('alert-embalagens').style.display = 'block';
+                if (countRecei === 0 && document.getElementById('alert-receitas')) document.getElementById('alert-receitas').style.display = 'block';
+                if (countProdu === 0 && document.getElementById('alert-produtos')) document.getElementById('alert-produtos').style.display = 'block';
+                if (countDespe === 0 && document.getElementById('alert-despesas')) document.getElementById('alert-despesas').style.display = 'block';
+
                 const steps = [
                     cfgCount > 0,
-                    await countTable('equipamentos') > 0,
-                    await countTable('insumos') > 0,
-                    await countTable('embalagens') > 0,
-                    await countTable('receitas') > 0,
-                    await countTable('produtos') > 0,
+                    countEquip > 0,
+                    countInsum > 0,
+                    countEmbal > 0,
+                    countRecei > 0,
+                    countProdu > 0,
                     localStorage.getItem('receitasx_precificacao_hit') === 'true',
                 ];
                 const doneCount = steps.filter(Boolean).length;
@@ -737,6 +864,7 @@
                 </div>
             </div>
             <div class="aviso-modal-body">
+                <img id="aviso-m-img" src="" alt="Aviso" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:.6rem;margin-bottom:.85rem;border:1px solid #2A2A2A;" />
                 <p id="aviso-m-msg"></p>
             </div>
             <div class="aviso-modal-footer">
@@ -817,6 +945,15 @@
         tipoEl.style.border = `1px solid ${c.labelBorder}`;
         tipoEl.style.color = c.color;
 
+        const imgEl = document.getElementById('aviso-m-img');
+        if (aviso.imagem_url) {
+            imgEl.src = aviso.imagem_url;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.src = '';
+            imgEl.style.display = 'none';
+        }
+
         document.getElementById('aviso-m-msg').textContent = aviso.mensagem;
 
         document.getElementById('aviso-overlay').classList.add('show');
@@ -860,5 +997,60 @@
     });
     </script>
 </div>
+
+<!-- ── Modal de Oferta Calculadora ─────────────────────────────── -->
+<div id="oferta-calculadora-modal" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,.8);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:1.5rem">
+    <div style="background:#111;border:1px solid rgba(52,211,153,.3);border-radius:1.25rem;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.8);position:relative">
+        <button onclick="fecharOfertaCalculadora()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#64748b;cursor:pointer">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div style="width:64px;height:64px;background:rgba(52,211,153,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:var(--green)">
+            <span class="material-symbols-outlined" style="font-size:2rem">loyalty</span>
+        </div>
+        <h3 style="font-size:1.5rem;font-weight:800;color:#f1f5f9;margin-bottom:.5rem">Presente Desbloqueado!</h3>
+        <p style="font-size:.9rem;color:#94a3b8;margin-bottom:1.5rem;line-height:1.5">
+            Como você usou nossa calculadora, liberamos o cupom <strong style="color:var(--green)">DESCONTO60</strong> para você.
+            <br><br>
+            Aproveite <strong>60% de Desconto</strong> no plano Vitalício e tenha suas receitas e precificação 100% automatizadas!
+        </p>
+        <a href="checkout.html?ref=DESCONTO60" style="display:block;width:100%;padding:.85rem;background:var(--green);color:#0a0a0a;font-weight:800;border-radius:.75rem;text-decoration:none;transition:opacity .15s">
+            Resgatar Desconto
+        </a>
+    </div>
+</div>
+
+<!-- ── Modal de Oferta Afiliado ─────────────────────────────── -->
+<div id="oferta-afiliado-modal" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,.8);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:1.5rem">
+    <div style="background:#111;border:1px solid rgba(251,191,36,.3);border-radius:1.25rem;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.8);position:relative">
+        <button onclick="fecharOfertaAfiliado()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#64748b;cursor:pointer">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div style="width:64px;height:64px;background:rgba(251,191,36,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#fbbf24">
+            <span class="material-symbols-outlined" style="font-size:2rem">redeem</span>
+        </div>
+        <h3 style="font-size:1.5rem;font-weight:800;color:#f1f5f9;margin-bottom:.5rem">Bem-vindo ao ReceitasX!</h3>
+        <p id="modal-afiliado-msg" style="font-size:.9rem;color:#94a3b8;margin-bottom:1.5rem;line-height:1.5">
+            Você foi indicado e tem um <strong style="color:#fbbf24">desconto exclusivo</strong> esperando por você!
+            <br><br>
+            Aproveite para desbloquear o plano <strong>Vitalício</strong> com um preço especial e tenha suas receitas e precificação 100% automatizadas!
+        </p>
+        <a href="#" id="modal-afiliado-btn" style="display:block;width:100%;padding:.85rem;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0a0a0a;font-weight:800;border-radius:.75rem;text-decoration:none;transition:opacity .15s">
+            Aproveitar Desconto
+        </a>
+    </div>
+</div>
+
+<script>
+    function fecharOfertaCalculadora() {
+        document.getElementById('oferta-calculadora-modal').style.display = 'none';
+        sessionStorage.setItem('calculadora_offer_shown', 'true');
+    }
+
+    function fecharOfertaAfiliado() {
+        document.getElementById('oferta-afiliado-modal').style.display = 'none';
+        sessionStorage.setItem('afiliado_offer_shown', 'true');
+    }
+</script>
+
 </body>
 </html>

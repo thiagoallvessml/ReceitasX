@@ -96,6 +96,9 @@ async function dbUpsert(table, payload, onConflict) {
 
 /* ─── GOOGLE ANALYTICS (GA4) ──────────────────────────────────── */
 (function() {
+    const pagina = window.location.pathname.split('/').pop() || 'index.html';
+    if (pagina.startsWith('admin')) return;
+
     const gaId = 'G-LFKEYKBBCD';
     
     // Injeta o script do Google
@@ -143,9 +146,9 @@ async function dbUpsert(table, payload, onConflict) {
             }
         };
 
-        // Ping imediato + a cada 30s
+        // Ping imediato + a cada 3 minutos (180000 ms) para economizar I/O de disco
         await ping();
-        setInterval(ping, 30000);
+        setInterval(ping, 180000);
     } catch(e) {
         console.error('[Heartbeat] Erro init:', e);
     }

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS avisos_admin (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     titulo TEXT NOT NULL,
     mensagem TEXT NOT NULL,
+    imagem_url TEXT,
     tipo TEXT DEFAULT 'info' CHECK (tipo IN ('info', 'aviso', 'urgente', 'novidade')),
     destino TEXT DEFAULT 'todos' CHECK (destino IN ('todos', 'usuario')),
     destino_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,

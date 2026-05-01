@@ -151,6 +151,21 @@
                     <textarea class="cfg-textarea" id="inp-mensagem" placeholder="Escreva a mensagem que o usuário verá..." maxlength="2000"></textarea>
                 </div>
 
+                <!-- Imagem (Opcional) -->
+                <div class="field">
+                    <label>Imagem (Opcional)</label>
+                    <div style="display:flex;gap:.5rem;align-items:center;">
+                        <div class="input-wrap" style="flex:1">
+                            <input class="cfg-input" id="inp-imagem" type="text" placeholder="Cole a URL ou faça upload..." />
+                        </div>
+                        <label style="cursor:pointer;padding:.7rem;border-radius:.75rem;background:#1A1A1A;border:1px solid #2A2A2A;color:#25f4f4;display:flex;align-items:center;transition:border-color .2s">
+                            <input type="file" id="inp-file" accept="image/*" style="display:none" onchange="uploadImagemAviso(this)" />
+                            <span class="material-symbols-outlined" style="font-size:1.1rem">upload</span>
+                        </label>
+                    </div>
+                    <div id="upload-status" style="font-size:.7rem;color:#94a3b8;margin-top:.2rem;display:none;"></div>
+                </div>
+
                 <!-- Tipo -->
                 <div class="field">
                     <label>Tipo</label>
@@ -321,11 +336,42 @@ function clearSelectedUser() {
 }
 
 /* ── Enviar aviso ─────────────────────────────────────────────────── */
+async function uploadImagemAviso(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const statusEl = document.getElementById('upload-status');
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#94a3b8';
+    statusEl.textContent = 'Fazendo upload...';
+    
+    try {
+        const ext = file.name.split('.').pop();
+        const fileName = `aviso_${Date.now()}.${ext}`;
+        const filePath = `avisos/${fileName}`;
+        
+        const { error } = await sb.storage.from('avatars').upload(filePath, file);
+        if (error) throw error;
+        
+        const { data } = sb.storage.from('avatars').getPublicUrl(filePath);
+        document.getElementById('inp-imagem').value = data.publicUrl;
+        
+        statusEl.style.color = '#34d399';
+        statusEl.textContent = 'Upload concluído!';
+        setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+    } catch (e) {
+        console.error('Erro upload:', e);
+        statusEl.style.color = '#f87171';
+        statusEl.textContent = 'Erro ao enviar: ' + e.message;
+    }
+}
+
 async function enviarAviso() {
     const titulo = document.getElementById('inp-titulo').value.trim();
     const mensagem = document.getElementById('inp-mensagem').value.trim();
     const tipo = document.getElementById('inp-tipo').value;
     const destino = document.getElementById('inp-destino').value;
+    const imagem_url = document.getElementById('inp-imagem').value.trim();
 
     if (!titulo) { showToast('Preencha o título', 'error'); return; }
     if (!mensagem) { showToast('Preencha a mensagem', 'error'); return; }
@@ -342,6 +388,7 @@ async function enviarAviso() {
             tipo,
             destino,
             destino_user_id: destino === 'usuario' ? selectedUserId : null,
+            imagem_url: imagem_url || null,
             ativo: true,
             created_by: currentUserId
         };
@@ -354,6 +401,7 @@ async function enviarAviso() {
         // Limpar campos
         document.getElementById('inp-titulo').value = '';
         document.getElementById('inp-mensagem').value = '';
+        document.getElementById('inp-imagem').value = '';
         document.getElementById('inp-tipo').value = 'info';
         document.getElementById('inp-destino').value = 'todos';
         toggleDestinoUser();
@@ -426,6 +474,7 @@ async function loadHistorico() {
                 <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap">
                     <span class="tipo-chip ${tipoClass}">${tipoLabel}</span>
                     <span style="font-size:.68rem;color:#475569">${destinoLabel}</span>
+                    ${a.imagem_url ? `<span class="material-symbols-outlined" style="font-size:.85rem;color:#34d399;" title="Com Imagem">image</span>` : ''}
                     <span style="font-size:.65rem;color:#334155;margin-left:auto">${dt}</span>
                 </div>
                 <div style="font-weight:700;font-size:.88rem;margin-bottom:.25rem">${esc(a.titulo)}</div>

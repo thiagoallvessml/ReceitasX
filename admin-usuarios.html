@@ -186,6 +186,9 @@
             <button class="pill" data-filter="online"         onclick="setFilter('online', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">🟢 Online</button>
             <button class="pill" data-filter="pagantes"        onclick="setFilter('pagantes', this)">Pagantes</button>
             <button class="pill" data-filter="afiliado"       onclick="setFilter('afiliado', this)">Afiliado</button>
+            <button class="pill flex items-center justify-center gap-1" onclick="exportarParaCSV()" style="border-color:rgba(37,244,244,.3);color:#25f4f4" title="Exportar dados exibidos para CSV">
+                <span class="material-symbols-outlined" style="font-size:1rem;margin-top:-1px;">download</span> CSV
+            </button>
         </div>
     </div>
 
@@ -211,6 +214,7 @@ let valorPagoMap = {}; // user_id → valor_pago
 let refAfiliadoMap = {}; // user_id → ref_afiliado
 let onlineMap   = {};  // user_id → { last_seen, pagina }
 let currentFilter = 'todos';
+let currentDisplayedUsuarios = []; // Lista atualmente exibida (para CSV)
 
 // ── Guard: só admin pode acessar ───────────────────────────────────
 (async () => {
@@ -239,7 +243,7 @@ async function loadUsuarios() {
         // 1. Perfis do Supabase (inclui plano_ativo_em para detectar vitalício)
         const { data, error } = await sb
             .from('perfis')
-            .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at')
+            .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at, origem_cadastro')
             .order('created_at', { ascending: false });
         if (error) throw error;
         allUsuarios = data || [];
@@ -341,8 +345,8 @@ async function refreshPresenca() {
         const agora = Date.now();
         (data || []).forEach(p => {
             const diff = agora - new Date(p.last_seen).getTime();
-            // Considera online se heartbeat < 2 minutos (120s)
-            if (diff < 120000) {
+            // Considera online se heartbeat < 4 minutos (240000ms)
+            if (diff < 240000) {
                 onlineMap[p.user_id] = { last_seen: p.last_seen, pagina: p.pagina };
             }
         });
@@ -423,6 +427,7 @@ function filterUsuarios() {
         });
     }
 
+    currentDisplayedUsuarios = list;
     renderUsuarios(list);
 }
 
@@ -462,10 +467,20 @@ function renderUsuarios(list) {
             : '';
 
         let origemBadge = '';
-        if (refAfiliadoMap[u.id] === 'RECEITASX60' || cupomMap[u.id] === 'RECEITASX60') {
+        const oc = u.origem_cadastro || '';
+        const isAds = refAfiliadoMap[u.id] === 'RECEITASX60' || cupomMap[u.id] === 'RECEITASX60' || oc === 'Google Ads' || oc === 'RECEITASX60';
+        
+        if (isAds) {
             origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(250, 204, 21, 0.1);color:#facc15;border:1px solid rgba(250, 204, 21, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">ads_click</span>Google Ads</span>`;
-        } else if (refAfiliadoMap[u.id]) {
-            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(168, 85, 247, 0.1);color:#a855f7;border:1px solid rgba(168, 85, 247, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">handshake</span>Afiliado: ${esc(refAfiliadoMap[u.id])}</span>`;
+        } else if (oc.includes('Google (Orgânico)')) {
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(59, 130, 246, 0.1);color:#3b82f6;border:1px solid rgba(59, 130, 246, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">travel_explore</span>Google (Orgânico)</span>`;
+        } else if (oc === 'Calculadora Lead' || refAfiliadoMap[u.id] === 'DESCONTO60') {
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(236, 72, 153, 0.1);color:#ec4899;border:1px solid rgba(236, 72, 153, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">calculate</span>Calculadora</span>`;
+        } else if ((refAfiliadoMap[u.id] && refAfiliadoMap[u.id] !== 'DESCONTO60') || oc.startsWith('Afiliado:')) {
+            const afName = refAfiliadoMap[u.id] || oc.replace('Afiliado: ', '');
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(168, 85, 247, 0.1);color:#a855f7;border:1px solid rgba(168, 85, 247, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">handshake</span>Afiliado: ${esc(afName)}</span>`;
+        } else if (oc === 'Direto') {
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(100, 116, 139, 0.1);color:#94a3b8;border:1px solid rgba(100, 116, 139, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">link</span>Acesso Direto</span>`;
         }
 
         const cupomBadge = cupomMap[u.id] && cupomMap[u.id] !== 'RECEITASX60'
@@ -493,6 +508,7 @@ function renderUsuarios(list) {
             </div>
             <div style="display:flex;flex-direction:column;gap:.6rem;flex-shrink:0;" class="sm:items-end w-full sm:w-auto mt-1 sm:mt-0">
                 <div style="display:flex;gap:.3rem;flex-wrap:wrap;" class="sm:justify-end">
+                    ${origemBadge}
                     ${vitalBadge}
                     ${cupomBadge}
                     ${roleBadge}
@@ -604,6 +620,60 @@ async function toggleVitalicio(userId, jaEVitalicio) {
         console.error('Erro ao alterar vit\u00e1licio', e);
         showToast('Erro: ' + e.message, 'error');
     }
+}
+
+// ── Exportar CSV ──────────────────────────────────────────────────
+function exportarParaCSV() {
+    if (!currentDisplayedUsuarios || currentDisplayedUsuarios.length === 0) {
+        showToast('Nenhum usuário para exportar.', 'error');
+        return;
+    }
+
+    // Cabecalho
+    const headers = ['ID', 'Nome', 'Sobrenome', 'Email', 'Telefone', 'Negocio', 'Plano', 'Vitalicio', 'Valor Pago', 'Cupom', 'Role', 'Origem Cadastro', 'Data de Criacao', 'Ultimo Login', 'Online'];
+    
+    // Linhas
+    const rows = currentDisplayedUsuarios.map(u => {
+        const email = emailsMap[u.id] || '';
+        const ultimoLoginDate = lastLoginMap[u.id] ? new Date(lastLoginMap[u.id]) : null;
+        let ultimoLoginStr = '';
+        if (ultimoLoginDate) {
+            ultimoLoginStr = `${ultimoLoginDate.toLocaleDateString('pt-BR')} ${ultimoLoginDate.toLocaleTimeString('pt-BR')}`;
+        }
+        
+        return [
+            u.id,
+            `"${u.nome || ''}"`,
+            `"${u.sobrenome || ''}"`,
+            email,
+            `"${u.telefone || ''}"`,
+            `"${u.negocio || ''}"`,
+            u.plano || 'gratuito',
+            u._pagante ? 'Sim' : 'Não',
+            u._pagante && valorPagoMap[u.id] ? Number(valorPagoMap[u.id]).toFixed(2).replace('.',',') : '',
+            cupomMap[u.id] || '',
+            u.role || 'user',
+            `"${u.origem_cadastro || ''}"`,
+            new Date(u.created_at).toLocaleDateString('pt-BR'),
+            `"${ultimoLoginStr}"`,
+            isOnline(u.id) ? 'Sim' : 'Não'
+        ].join(',');
+    });
+
+    const csvContent = "\\uFEFF" + headers.join(',') + '\n' + rows.join('\n'); // Add BOM for Excel UTF-8 support
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `usuarios_receitasx_${new Date().toISOString().split('T')[0]}.csv`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Exportação concluída!');
 }
 
 // ── Alterar role ──────────────────────────────────────────────────

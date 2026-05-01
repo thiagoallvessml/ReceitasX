@@ -2,6 +2,15 @@
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFKEYKBBCD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LFKEYKBBCD');
+      gtag('config', 'AW-18068821024');
+    </script>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Checkout · Acesso Vitalício - ReceitasX</title>
     <link rel="canonical" href="https://receitasx.com.br/checkout" />
@@ -870,10 +879,10 @@ function mostrarSucesso(cod) {
     `;
     // ── Google Ads: Disparar evento de conversão ──
     if (typeof gtag === 'function') {
-        gtag('event', 'conversion_event_purchase_2', {
-            value: precoFinal || 18.96,
+        gtag('event', 'conversion_event_purchase_1', {
+            value: precoFinal || 46.90,
             currency: 'BRL',
-            new_customer: true
+            transaction_id: Date.now().toString()
         });
         console.log('[GA] Conversão de compra registrada.');
     }

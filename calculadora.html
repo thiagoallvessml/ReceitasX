@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFKEYKBBCD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LFKEYKBBCD');
+      gtag('config', 'AW-18068821024');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora de Precificação Grátis – ReceitasX</title>
+    <meta name="description" content="Calcule o custo e o preço ideal da sua receita de confeitaria gratuitamente. Descubra sua margem de lucro real em segundos." />
+    <meta name="keywords" content="calculadora precificação confeitaria, calcular custo receita, preço brigadeiro, margem lucro doce" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://receitasx.com.br/calculadora" />
+    <meta property="og:title" content="Calculadora Grátis de Precificação – ReceitasX" />
+    <meta property="og:description" content="Descubra o custo real da sua receita e quanto cobrar. 100% grátis, sem instalar nada." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://receitasx.com.br/calculadora" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--cyan:#25f4f4;--bg:#080808;--bg2:#0f0f0f;--card:#141414;--border:#1E1E1E;--text:#f1f5f9;--muted:#64748b;--green:#34d399;--yellow:#fbbf24;--red:#f87171}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+        .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle}
+
+        /* NAV */
+        nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 2rem;height:3.75rem;background:rgba(8,8,8,.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05)}
+        .nav-logo{font-size:1.1rem;font-weight:900;flex:1;letter-spacing:-.02em}
+        .nav-logo span:first-child{color:var(--cyan)}
+        .nav-cta{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.15rem;border-radius:.6rem;background:var(--cyan);color:#050505;font-size:.85rem;font-weight:700;text-decoration:none;transition:opacity .15s;box-shadow:0 0 20px rgba(37,244,244,.25)}
+        .nav-cta:hover{opacity:.9}
+
+        /* HERO */
+        .hero{padding:6.5rem 1.5rem 2.5rem;text-align:center;position:relative;overflow:hidden}
+        .hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(37,244,244,.06) 0%,transparent 65%);pointer-events:none}
+        .hero-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:9999px;padding:.35rem 1rem;font-size:.72rem;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.25rem}
+        .hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;line-height:1.15;letter-spacing:-.03em;max-width:700px;margin:0 auto .75rem}
+        .hero h1 em{font-style:normal;color:var(--cyan)}
+        .hero-sub{font-size:clamp(.88rem,2vw,1.05rem);color:#94a3b8;max-width:520px;margin:0 auto;line-height:1.7}
+
+        /* CALCULATOR */
+        .calc-wrap{max-width:680px;margin:2rem auto 0;padding:0 1rem}
+        .calc-card{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;overflow:hidden}
+        .calc-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem}
+        .calc-header-icon{width:2.5rem;height:2.5rem;border-radius:.7rem;display:flex;align-items:center;justify-content:center;background:rgba(37,244,244,.1);flex-shrink:0}
+        .calc-header-icon .material-symbols-outlined{font-size:1.2rem;color:var(--cyan);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+        .calc-title{font-size:1rem;font-weight:800}
+        .calc-subtitle{font-size:.72rem;color:var(--muted)}
+        .calc-body{padding:1.5rem}
+        .calc-section{margin-bottom:1.5rem}
+        .calc-section-title{font-size:.65rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem}
+        .calc-section-title .material-symbols-outlined{font-size:.85rem}
+
+        /* Ingredient row */
+        .ing-list{display:flex;flex-direction:column;gap:.5rem}
+        .ing-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 32px;gap:.4rem;align-items:center}
+        @media(max-width:500px){
+            .ing-row{grid-template-columns:1fr 1fr 1fr 36px;gap:.45rem;padding-bottom:.85rem;border-bottom:1px dashed #2A2A2A;margin-bottom:.4rem}
+            .ing-row:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+            .ing-row input:first-child{grid-column:1 / -1}
+        }
+        .ing-row input,.ing-row select{background:#1a1a1a;border:1px solid #2A2A2A;border-radius:.55rem;padding:.55rem .45rem;color:#f1f5f9;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;width:100%}
+        .ing-row input:focus{border-color:rgba(37,244,244,.4)}
+        .ing-row input::placeholder{color:#475569}
+        .btn-remove{width:32px;height:32px;border-radius:.45rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+        .btn-remove:hover{border-color:rgba(248,113,113,.4);color:#f87171;background:rgba(248,113,113,.05)}
+        .btn-remove .material-symbols-outlined{font-size:.9rem}
+        .btn-add{display:flex;align-items:center;gap:.4rem;padding:.55rem 1rem;border-radius:.55rem;border:1px dashed rgba(37,244,244,.3);background:rgba(37,244,244,.04);color:var(--cyan);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;margin-top:.65rem;font-family:'Inter',sans-serif}
+        .btn-add:hover{background:rgba(37,244,244,.08);border-color:rgba(37,244,244,.5)}
+        .btn-add .material-symbols-outlined{font-size:.9rem}
+
+        /* Config fields */
+        .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+        @media(max-width:500px){.config-grid{grid-template-columns:1fr}}
+        .field{display:flex;flex-direction:column;gap:.3rem}
+        .field label{font-size:.68rem;font-weight:700;color:#94a3b8;letter-spacing:.04em}
+        .field input,.field select{background:#1a1a1a;border:1px solid #2A2A2A;border-radius:.55rem;padding:.6rem .75rem;color:#f1f5f9;font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+        .field input:focus{border-color:rgba(37,244,244,.4)}
+
+        /* BUTTON */
+        .btn-calc{width:100%;padding:.9rem;border-radius:.75rem;border:none;background:linear-gradient(135deg,var(--cyan),#0dc8c8);color:#050505;font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .15s,box-shadow .2s,transform .15s;box-shadow:0 4px 24px rgba(37,244,244,.25);font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.5rem}
+        .btn-calc:hover{opacity:.92;box-shadow:0 8px 40px rgba(37,244,244,.4);transform:translateY(-2px)}
+        .btn-calc .material-symbols-outlined{font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24}
+
+        /* RESULT */
+        .result-area{margin-top:1.5rem;display:none}
+        .result-area.show{display:block}
+        .result-preview{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem}
+        .result-card{background:#1a1a1a;border:1px solid var(--border);border-radius:.75rem;padding:.85rem}
+        .result-card.hl-border{border-color:rgba(37,244,244,.2)}
+        .result-label{font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:.2rem}
+        .result-value{font-size:1.25rem;font-weight:900}
+
+        /* LOCKED */
+        .locked-overlay{position:relative;margin-top:.75rem}
+        .locked-content{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;filter:blur(12px);pointer-events:none;user-select:none}
+        .locked-gate{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;z-index:2;background:rgba(8,8,8,.6);border-radius:1rem;backdrop-filter:blur(2px)}
+        .locked-gate .material-symbols-outlined{font-size:2.5rem;color:var(--cyan);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+        .locked-gate p{font-size:.9rem;font-weight:700;text-align:center;line-height:1.5;max-width:280px}
+        .locked-gate .sub{font-size:.75rem;color:var(--muted);font-weight:500}
+        .btn-unlock{display:inline-flex;align-items:center;gap:.45rem;padding:.75rem 1.75rem;border-radius:.7rem;background:linear-gradient(135deg,var(--cyan),#0dc8c8);color:#050505;font-size:.9rem;font-weight:800;text-decoration:none;transition:opacity .15s,box-shadow .2s;box-shadow:0 4px 24px rgba(37,244,244,.3)}
+        .btn-unlock:hover{opacity:.92;box-shadow:0 8px 40px rgba(37,244,244,.45)}
+        .btn-unlock .material-symbols-outlined{font-size:1rem;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24}
+
+        /* BENEFITS */
+        .benefits{max-width:680px;margin:3rem auto;padding:0 1rem}
+        .benefits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem}
+        .benefit-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.25rem;text-align:center;transition:border-color .2s,transform .2s}
+        .benefit-card:hover{border-color:rgba(37,244,244,.2);transform:translateY(-3px)}
+        .benefit-card .material-symbols-outlined{font-size:1.6rem;margin-bottom:.65rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+        .benefit-title{font-size:.82rem;font-weight:700;margin-bottom:.25rem}
+        .benefit-desc{font-size:.72rem;color:var(--muted);line-height:1.5}
+
+        /* FOOTER */
+        footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted)}
+        footer a{color:var(--cyan);text-decoration:none}
+
+        @media(max-width:640px){
+            nav{padding:0 1rem}
+            .hero h1{font-size:1.8rem}
+            .calc-body{padding:1rem}
+            .result-preview{grid-template-columns:1fr}
+            .locked-content{grid-template-columns:1fr}
+        }
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+        .shake{animation:shake .4s ease}
+    </style>
+    <script src="analytics.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo"><span>Receitas</span><span style="color:#f1f5f9">X</span></div>
+    <div style="display:flex;align-items:center;gap:1rem">
+        <a href="login" style="font-size:.85rem;color:#94a3b8;text-decoration:none;font-weight:500;transition:color .15s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">Entrar</a>
+        <a href="login?tab=signup&origin=calculadora" class="nav-cta">Criar conta grátis</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-badge">
+        <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">calculate</span>
+        100% gratuita · sem instalar nada
+    </div>
+    <h1>Descubra o <em>preço ideal</em> da sua receita</h1>
+    <p class="hero-sub">Adicione seus ingredientes, informe o rendimento e veja instantaneamente quanto custa e quanto você deveria cobrar.</p>
+</section>
+
+<!-- CALCULATOR -->
+<div class="calc-wrap">
+    <div class="calc-card">
+        <div class="calc-header">
+            <div class="calc-header-icon"><span class="material-symbols-outlined">calculate</span></div>
+            <div>
+                <div class="calc-title">Calculadora de Precificação</div>
+                <div class="calc-subtitle">Adicione os ingredientes da sua receita</div>
+            </div>
+        </div>
+        <div class="calc-body">
+            <!-- Ingredientes -->
+            <div class="calc-section">
+                <div class="calc-section-title">
+                    <span class="material-symbols-outlined">package_2</span>
+                    Ingredientes
+                </div>
+                <div class="ing-list" id="ing-list">
+                    <div class="ing-row">
+                        <input type="text" placeholder="Ex: Leite condensado" />
+                        <input type="number" placeholder="R$ Pago" min="0" step="0.01" title="Preço pago na embalagem" />
+                        <input type="number" placeholder="Tam. Emb." min="0" step="any" title="Tamanho total da embalagem (g ou ml)" />
+                        <input type="number" placeholder="Usou (g)" min="0" step="any" title="Quantidade usada na receita" />
+                        <button class="btn-remove" onclick="removeIng(this)" title="Remover"><span class="material-symbols-outlined">close</span></button>
+                    </div>
+                    <div class="ing-row">
+                        <input type="text" placeholder="Ex: Chocolate em pó" />
+                        <input type="number" placeholder="R$ Pago" min="0" step="0.01" title="Preço pago na embalagem" />
+                        <input type="number" placeholder="Tam. Emb." min="0" step="any" title="Tamanho total da embalagem (g ou ml)" />
+                        <input type="number" placeholder="Usou (g)" min="0" step="any" title="Quantidade usada na receita" />
+                        <button class="btn-remove" onclick="removeIng(this)" title="Remover"><span class="material-symbols-outlined">close</span></button>
+                    </div>
+                    <div class="ing-row">
+                        <input type="text" placeholder="Ex: Creme de leite" />
+                        <input type="number" placeholder="R$ Pago" min="0" step="0.01" title="Preço pago na embalagem" />
+                        <input type="number" placeholder="Tam. Emb." min="0" step="any" title="Tamanho total da embalagem (g ou ml)" />
+                        <input type="number" placeholder="Usou (g)" min="0" step="any" title="Quantidade usada na receita" />
+                        <button class="btn-remove" onclick="removeIng(this)" title="Remover"><span class="material-symbols-outlined">close</span></button>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addIng()">
+                    <span class="material-symbols-outlined">add</span>
+                    Adicionar ingrediente
+                </button>
+                <div style="display:flex;align-items:flex-start;gap:.6rem;margin-top:.85rem;padding:.75rem .9rem;border-radius:.65rem;background:rgba(37,244,244,.04);border:1px solid rgba(37,244,244,.12)">
+                    <span class="material-symbols-outlined" style="font-size:.95rem;color:var(--cyan);flex-shrink:0;margin-top:.05rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">auto_awesome</span>
+                    <p style="font-size:.72rem;color:#94a3b8;line-height:1.55;margin:0">
+                        <strong style="color:var(--cyan)">No ReceitasX isso é automático!</strong> Após o cadastro, seus insumos ficam salvos e o custo da receita é calculado em tempo real — sem precisar digitar preços toda vez.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div class="calc-section">
+                <div class="calc-section-title">
+                    <span class="material-symbols-outlined">tune</span>
+                    Configurações da Receita
+                </div>
+                <div class="config-grid">
+                    <div class="field">
+                        <label>Rendimento (unidades)</label>
+                        <input type="number" id="rendimento" placeholder="Ex: 12" min="1" value="" />
+                    </div>
+                    <div class="field">
+                        <label>Embalagem por unid. (R$)</label>
+                        <input type="number" id="embalagem" placeholder="Ex: 0.50" min="0" step="0.01" value="" />
+                    </div>
+                    <div class="field">
+                        <label>Tempo de preparo (min)</label>
+                        <input type="number" id="tempo" placeholder="Ex: 60" min="0" value="" />
+                    </div>
+                    <div class="field">
+                        <label>Margem desejada (%)</label>
+                        <input type="number" id="margem" placeholder="Ex: 50" min="0" max="95" value="" />
+                    </div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:.6rem;margin-top:.85rem;padding:.75rem .9rem;border-radius:.65rem;background:rgba(37,244,244,.04);border:1px solid rgba(37,244,244,.12)">
+                    <span class="material-symbols-outlined" style="font-size:.95rem;color:var(--cyan);flex-shrink:0;margin-top:.05rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">auto_awesome</span>
+                    <p style="font-size:.72rem;color:#94a3b8;line-height:1.55;margin:0">
+                        <strong style="color:var(--cyan)">Tudo salvo na sua conta!</strong> Após o cadastro, suas configurações de gás, energia e mão de obra ficam salvas e são aplicadas automaticamente em todas as receitas.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botão -->
+            <button class="btn-calc" onclick="calcular()">
+                <span class="material-symbols-outlined">calculate</span>
+                Calcular preço ideal
+            </button>
+
+            <!-- Resultado -->
+            <div class="result-area" id="result-area">
+                <!-- Prévia liberada -->
+                <div class="result-preview">
+                    <div class="result-card hl-border">
+                        <div class="result-label" style="color:var(--cyan)">Custo total da receita</div>
+                        <div class="result-value" id="r-custo-total" style="color:var(--text)">–</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Custo por unidade</div>
+                        <div class="result-value" id="r-custo-unid" style="color:var(--text)">–</div>
+                    </div>
+                </div>
+
+                <!-- Resultado travado -->
+                <div class="locked-overlay">
+                    <div class="locked-content">
+                        <div class="result-card" style="border-color:rgba(52,211,153,.2)">
+                            <div class="result-label" style="color:var(--green)">Preço sugerido</div>
+                            <div class="result-value" style="color:var(--green)">R$ 8,50</div>
+                        </div>
+                        <div class="result-card" style="border-color:rgba(251,191,36,.2)">
+                            <div class="result-label" style="color:var(--yellow)">Lucro por unidade</div>
+                            <div class="result-value" style="color:var(--yellow)">R$ 4,25</div>
+                        </div>
+                        <div class="result-card" style="border-color:rgba(52,211,153,.2)">
+                            <div class="result-label" style="color:var(--green)">Lucro total</div>
+                            <div class="result-value" style="color:var(--green)">R$ 51,00</div>
+                        </div>
+                        <div class="result-card" style="border-color:rgba(37,244,244,.2)">
+                            <div class="result-label" style="color:var(--cyan)">Margem real</div>
+                            <div class="result-value" style="color:var(--cyan)">50%</div>
+                        </div>
+                    </div>
+                    <div class="locked-gate" id="locked-gate">
+                        <span class="material-symbols-outlined">lock_open</span>
+                        <p>Crie sua conta <span style="color:var(--cyan)">grátis</span> para ver o resultado completo</p>
+                        <p class="sub">Preço sugerido, lucro, margem real e muito mais</p>
+                        <a href="login?tab=signup&origin=calculadora" class="btn-unlock" id="btn-unlock">
+                            <span class="material-symbols-outlined">rocket_launch</span>
+                            Criar conta grátis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BENEFÍCIOS -->
+<div class="benefits">
+    <div style="text-align:center;margin-bottom:1.5rem">
+        <p style="font-size:.65rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:.4rem">Por que criar uma conta?</p>
+        <p style="font-size:1.1rem;font-weight:800">Tudo que você ganha ao se cadastrar</p>
+    </div>
+    <div class="benefits-grid">
+        <div class="benefit-card">
+            <span class="material-symbols-outlined" style="color:var(--cyan)">menu_book</span>
+            <p class="benefit-title">Receitas ilimitadas</p>
+            <p class="benefit-desc">Salve e organize todas as suas receitas com cálculo automático</p>
+        </div>
+        <div class="benefit-card">
+            <span class="material-symbols-outlined" style="color:var(--green)">trending_up</span>
+            <p class="benefit-title">Margem em tempo real</p>
+            <p class="benefit-desc">Veja a margem colorida para cada produto e receita</p>
+        </div>
+        <div class="benefit-card">
+            <span class="material-symbols-outlined" style="color:var(--yellow)">balance</span>
+            <p class="benefit-title">Ponto de equilíbrio</p>
+            <p class="benefit-desc">Saiba quantas unidades vender para cobrir suas despesas</p>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p style="margin-bottom:.5rem"><span style="font-weight:800;color:#f1f5f9"><span style="color:#25f4f4">Receitas</span>X</span></p>
+    <p>O sistema de precificação para confeiteiras profissionais.</p>
+    <p style="margin-top:.75rem">
+        <a href="landing">Saiba mais</a> &nbsp;·&nbsp;
+        <a href="login">Entrar</a> &nbsp;·&nbsp;
+        <a href="blog">Blog</a>
+    </p>
+    <p style="margin-top:1rem;font-size:.68rem;color:#334155">© 2025 ReceitasX · Todos os direitos reservados</p>
+</footer>
+
+<script>
+function addIng() {
+    const list = document.getElementById('ing-list');
+    const row = document.createElement('div');
+    row.className = 'ing-row';
+    row.style.animation = 'fadeUp .3s ease';
+    row.innerHTML = `
+        <input type="text" placeholder="Nome do ingrediente" />
+        <input type="number" placeholder="R$ Pago" min="0" step="0.01" title="Preço pago na embalagem" />
+        <input type="number" placeholder="Tam. Emb." min="0" step="any" title="Tamanho total da embalagem (g ou ml)" />
+        <input type="number" placeholder="Usou (g)" min="0" step="any" title="Quantidade usada na receita" />
+        <button class="btn-remove" onclick="removeIng(this)" title="Remover"><span class="material-symbols-outlined">close</span></button>
+    `;
+    list.appendChild(row);
+    row.querySelector('input').focus();
+}
+
+function removeIng(btn) {
+    const row = btn.closest('.ing-row');
+    const list = document.getElementById('ing-list');
+    if (list.children.length <= 1) return;
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(20px)';
+    row.style.transition = 'all .2s ease';
+    setTimeout(() => row.remove(), 200);
+}
+
+function calcular() {
+    const rows = document.querySelectorAll('#ing-list .ing-row');
+    let custoIngredientes = 0;
+    let temIngrediente = false;
+
+    rows.forEach(r => {
+        const inputs = r.querySelectorAll('input');
+        const nome = inputs[0].value.trim();
+        const preco = parseFloat(inputs[1].value) || 0;
+        const emb = parseFloat(inputs[2].value) || 0;
+        const uso = parseFloat(inputs[3].value) || 0;
+        if (nome && preco > 0 && emb > 0 && uso > 0) {
+            custoIngredientes += (preco / emb) * uso;
+            temIngrediente = true;
+        }
+    });
+
+    if (!temIngrediente) {
+        const btn = document.querySelector('.btn-calc');
+        btn.classList.add('shake');
+        setTimeout(() => btn.classList.remove('shake'), 500);
+        return;
+    }
+
+    const rendimento = parseInt(document.getElementById('rendimento').value) || 1;
+    const embalagem = parseFloat(document.getElementById('embalagem').value) || 0;
+    const tempo = parseInt(document.getElementById('tempo').value) || 0;
+
+    // Custo da mão de obra (R$10/hora estimado)
+    const custoMaoObra = (tempo / 60) * 10;
+    const custoTotal = custoIngredientes + custoMaoObra + (embalagem * rendimento);
+    const custoUnid = custoTotal / rendimento;
+
+    // Mostra resultado
+    const area = document.getElementById('result-area');
+    area.classList.add('show');
+    area.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Dispara evento para o Google Ads/GA4
+    if (typeof gtag === 'function') {
+        gtag('event', 'calculator_used', {
+            'event_category': 'engagement',
+            'value': custoTotal,
+            'currency': 'BRL'
+        });
+    }
+
+    document.getElementById('r-custo-total').textContent = 'R$ ' + custoTotal.toFixed(2).replace('.', ',');
+    document.getElementById('r-custo-unid').textContent = 'R$ ' + custoUnid.toFixed(2).replace('.', ',');
+
+    // Animação do locked gate
+    const gate = document.getElementById('locked-gate');
+    gate.style.animation = 'fadeUp .5s .3s ease both';
+}
+</script>
+</body>
+</html>

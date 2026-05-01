@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Receita: Geladinho de Maracujá - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .recipe-header {
+            background: linear-gradient(135deg, rgba(251, 191, 36, .1), rgba(251, 191, 36, .02));
+            border-bottom: 1px solid rgba(251, 191, 36, .2);
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item .material-symbols-outlined {
+            color: #fbbf24;
+            font-size: 1.1rem;
+            margin-top: .1rem;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .step-num {
+            width: 1.75rem;
+            height: 1.75rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(37, 244, 244, .1);
+            color: #25f4f4;
+            border: 1px solid rgba(37, 244, 244, .3);
+            border-radius: 50%;
+            font-size: .85rem;
+            font-weight: 800;
+        }
+
+        .step-text {
+            font-size: .9rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            padding-top: .15rem;
+        }
+
+        .product-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: .75rem;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            transition: border-color .2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .product-card:hover {
+            border-color: rgba(37, 244, 244, .4);
+        }
+
+        .product-img {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: .5rem;
+            object-fit: cover;
+            background: #2A2A2A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: .85rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: .25rem;
+        }
+
+        .product-price {
+            font-size: .9rem;
+            font-weight: 800;
+            color: #34d399;
+        }
+
+        .btn-buy {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .4rem .85rem;
+            border-radius: .5rem;
+            background: rgba(37, 244, 244, .15);
+            color: #25f4f4;
+            border: 1px solid rgba(37, 244, 244, .3);
+            font-size: .75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .product-card:hover .btn-buy {
+            background: rgba(37, 244, 244, .25);
+        }
+
+        .tiktok-container {
+            position: relative;
+            padding-bottom: 177.77%;
+            /* 16:9 vertical */
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+            border: 1px solid var(--border-dark);
+            background: #000;
+        }
+
+        .tiktok-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-12">
+
+    <!-- Header -->
+    <header
+        style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
+        <div
+            style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem">
+            <button onclick="window.location.href='receitas-geladinho.html'"
+                class="flex items-center justify-center w-8 h-8 rounded-md bg-slate-100 dark:bg-card-dark border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
+            </button>
+            <span style="font-size:.95rem;font-weight:800;letter-spacing:-.01em">
+                Receita Bônus
+            </span>
+        </div>
+    </header>
+
+    <!-- Recipe Hero -->
+    <div class="recipe-header px-6 py-8 text-center">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4"
+            style="background:rgba(251,191,36,.15);color:#fbbf24">
+            <span class="material-symbols-outlined text-3xl">icecream</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-black mb-2 text-slate-900 dark:text-white">Geladinho de Maracujá com
+            Chocolate</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
+            Uma receita refrescante, muito cremosa e altamente lucrativa. Perfeita para vender muito no verão!
+        </p>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-5 py-8 space-y-10">
+
+        <!-- Vídeo TikTok -->
+        <section>
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">play_circle</span>
+                <h2 class="text-lg font-bold">Assista ao Passo a Passo</h2>
+            </div>
+
+            <div class="bg-card-dark border border-border-dark p-4 rounded-2xl">
+                <!-- TikTok Embed (Placeholder, substitua o video-id depois) -->
+                <!-- Usei blockquote oficial do tiktok mas encapsulado. Caso não funcione 100%, o lojista pode editar o ID -->
+                <blockquote class="tiktok-embed"
+                    cite="https://www.tiktok.com/@docecone_delicias/video/7590547635681889556" data-video-id="7590547635681889556" data-theme="dark"
+                    style="max-width: 605px;width: 100%;margin: 0 auto;">
+                    <section>
+                        <p class="text-center text-sm text-slate-500 py-20">
+                            [ Espaço reservado para o seu vídeo do TikTok ]<br>
+                            <span class="text-xs">Para adicionar seu vídeo, edite este bloco com o código Embed do seu
+                                TikTok.</span>
+                        </p>
+                    </section>
+                </blockquote>
+                <script async src="https://www.tiktok.com/embed.js"></script>
+            </div>
+        </section>
+
+        <!-- Ingredientes -->
+        <section>
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">receipt_long</span>
+                <h2 class="text-lg font-bold">Ingredientes - Base</h2>
+            </div>
+
+            <div class="bg-card-dark border border-border-dark p-5 rounded-2xl">
+                <div class="list-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white">1 Litro de Leite</p>
+                        <p class="text-xs text-slate-500">Integral para dar mais cremosidade</p>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white">1 Caixa de Leite Condensado</p>
+                        <p class="text-xs text-slate-500">(395g)</p>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white">100g de Creme de Leite</p>
+                        <p class="text-xs text-slate-500">(Meia caixinha)</p>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white">2 Sachês de Suco em Pó</p>
+                        <p class="text-xs text-slate-500">Sabor Maracujá (Tang ou similar)</p>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white">15g de Liga Neutra</p>
+                        <p class="text-xs text-slate-500">Aproximadamente 1 colher de sopa (evita cristais de gelo)</p>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <p class="font-semibold text-sm text-white">300g de Chocolate</p>
+                        <p class="text-xs text-slate-500">Chocolate nobre ou cobertura fracionada de boa qualidade</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modo de Preparo -->
+        <section>
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">skillet</span>
+                <h2 class="text-lg font-bold">Modo de Preparo</h2>
+            </div>
+
+            <div class="bg-card-dark border border-border-dark p-6 rounded-2xl">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-text">Coloque no liquidificador o leite, o leite condensado e o creme de leite.
+                        Bata por aproximadamente 3 minutos para misturar bem.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-text">Adicione os dois sachês de suco em pó sabor maracujá e bata novamente até a
+                        mistura ficar homogênea e engrossar um pouco.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-text">Adicione as 15g de Liga Neutra e bata por apenas 10 segundos (só para
+                        misturar, não bata muito para não gerar muita espuma).</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <div class="step-text">Prove e ajuste! Se quiser mais doce, pode adicionar um pouco mais de leite
+                        condensado. Se quiser mais sabor, adicione mais meio sachê de suco.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">5</div>
+                    <div class="step-text">Deixe a base descansando por cerca de 15 minutos para a espuma baixar.
+                        Enquanto isso, derreta os 300g de chocolate no micro-ondas (de 30 em 30 segundos, mexendo
+                        sempre).</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">6</div>
+                    <div class="step-text">Coloque um pouco do chocolate derretido dentro dos saquinhos de geladinho e
+                        espalhe bem com os dedos para sujar as paredes do saquinho.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">7</div>
+                    <div class="step-text">Em seguida, preencha o saquinho com a base de maracujá (use um funil), amarre
+                        bem apertado e leve ao congelador por algumas horas até endurecer. Boas vendas!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Produtos Recomendados (TikTok Shop / Afiliado) - Injetados via JS -->
+        <div id="vitrine-tiktok"></div>
+        <script src="vitrine-produtos-tiktok.js"></script>
+
+    </div>
+
+</body>
+
+</html>

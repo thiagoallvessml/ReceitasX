@@ -621,7 +621,7 @@ function renderPagamento(q = '') {
                     : `<span style="font-size:.72rem;color:#475569">—</span>`}
             </td>
             <td>
-                <button class="btn-pagar" onclick="pagarAfiliado('${a.user_id}','${esc(a.email)}',${saldo})">
+                <button class="btn-pagar" onclick="pagarAfiliado('${a.user_id}','${esc(a.email)}',${saldo}, '${esc(chave || '')}', '${esc(tipo || '')}')">
                     <span class="material-symbols-outlined">paid</span>${fmtR(saldo)}
                 </button>
             </td>
@@ -629,13 +629,15 @@ function renderPagamento(q = '') {
     }).join('');
 }
 
-async function pagarAfiliado(userId, email, valor) {
+async function pagarAfiliado(userId, email, valor, chave, tipo) {
     if (!confirm(`Confirmar pagamento de ${fmtR(valor)} para ${email}?`)) return;
     try {
         const { error } = await sb.from('saques_afiliado').insert({
             user_id: userId,
             email,
             valor,
+            pix_chave: chave || 'A COMBINAR',
+            pix_tipo: tipo || 'PIX',
             status: 'pago',
             obs:    'Pagamento admin — rodada semanal',
         });
@@ -660,22 +662,50 @@ async function pagarTodos() {
     btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Processando...';
 
     let ok = 0, err = 0;
+    let ultimoErro = '';
+    
+    // Obter as chaves PIX para não violar o constraint
+    const ultimaChave = {};
+    const ultimoTipo  = {};
+    [...allSaques].reverse().forEach(s => {
+        if (s.pix_chave) { ultimaChave[s.user_id] = s.pix_chave; ultimoTipo[s.user_id] = s.pix_tipo || 'PIX'; }
+    });
+
     for (const a of lista) {
         try {
             const { error } = await sb.from('saques_afiliado').insert({
                 user_id: a.user_id,
-                email:   a.email,
+                email:   a.email || 'sem-email@receitasx.com.br',
                 valor:   saldos[a.user_id],
+                pix_chave: ultimaChave[a.user_id] || 'A COMBINAR',
+                pix_tipo: ultimoTipo[a.user_id] || 'PIX',
                 status:  'pago',
                 obs:     'Pagamento admin — rodada semanal',
             });
-            if (error) throw error;
+            if (error) {
+                ultimoErro = error.message || error.details || JSON.stringify(error);
+                console.error("Supabase Error on insert saques_afiliado:", error);
+                throw error;
+            }
             ok++;
-        } catch { err++; }
+        } catch(e) { 
+            console.error('Erro pagando', a.user_id, e);
+            if (!ultimoErro) ultimoErro = e.message;
+            err++; 
+        }
     }
-    showToast(`\u2713 ${ok} pagamento(s) registrado(s)${err ? ' | ' + err + ' erro(s)' : ''}`);
+    
+    if (err > 0) {
+        showToast(`Erro: ${ultimoErro} | ${ok} pagos | ${err} falhas`, 'error');
+    } else {
+        showToast(`\u2713 ${ok} pagamento(s) registrado(s) com sucesso!`);
+    }
+
     await loadTudo();
     btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Pagar Todos';
+    if (err > 0) {
+        btn.disabled = false;
+    }
 }
 
 // ── Render Afiliados ──────────────────────────────────────────

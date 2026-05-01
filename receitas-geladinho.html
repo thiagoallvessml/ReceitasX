@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Receitas de Geladinho - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#121212",
+                        "card-dark": "#1E1E1E",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        .hero-blog {
+            padding: 4rem 1.5rem 3rem; text-align: center; border-bottom: 1px solid var(--border-dark);
+            background: linear-gradient(180deg, rgba(37,244,244,.05) 0%, transparent 100%);
+        }
+        
+        .post-card {
+            background: var(--card-dark); border: 1px solid var(--border-dark); border-radius: 1.25rem;
+            overflow: hidden; transition: border-color .2s, transform .2s, box-shadow .2s;
+            display: flex; flex-direction: column; cursor: pointer; text-decoration: none; color: inherit;
+        }
+        .post-card:hover {
+            border-color: rgba(37,244,244,.3); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.4);
+        }
+        .post-cover {
+            height: 160px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+        }
+        .post-cover .material-symbols-outlined {
+            font-size: 3rem; color: rgba(255,255,255,.3); font-variation-settings: 'FILL' 1, 'wght' 200, 'GRAD' 0, 'opsz' 48;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-12">
+
+    <!-- Header -->
+    <header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem">
+            <button onclick="window.location.href='index.html'" class="flex items-center justify-center w-8 h-8 rounded-md bg-slate-100 dark:bg-card-dark border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
+            </button>
+            <span style="font-size:.95rem;font-weight:800;letter-spacing:-.01em">
+                Receitas Bônus
+            </span>
+        </div>
+    </header>
+
+    <div class="hero-blog">
+        <div class="text-xs font-bold uppercase tracking-widest text-primary mb-2">Coleção Bônus</div>
+        <h1 class="text-3xl md:text-4xl font-black mb-3">Receitas de Geladinho</h1>
+        <p class="text-slate-400 max-w-lg mx-auto text-sm">
+            O guia definitivo para fazer os melhores geladinhos (sacolés/chup-chups) e lucrar muito no verão. Receitas com vídeo passo a passo!
+        </p>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-5 py-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            
+            <!-- Geladinho Maracujá -->
+            <a href="geladinho-maracuja.html" class="post-card">
+                <div class="post-cover" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">
+                    <span class="material-symbols-outlined">icecream</span>
+                </div>
+                <div class="p-5 flex-1 flex flex-col gap-2">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-primary">Maracujá Cremoso</p>
+                    <h2 class="text-base font-bold text-white">Geladinho de Maracujá com Chocolate</h2>
+                    <p class="text-xs text-slate-400 flex-1 leading-relaxed">
+                        Uma receita refrescante, muito cremosa e altamente lucrativa. Base de maracujá com casquinha de chocolate crocante!
+                    </p>
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-border-dark">
+                        <span class="text-[10px] text-slate-500">Vídeo Passo a Passo</span>
+                        <span class="text-[11px] font-bold text-primary flex items-center gap-1">Ver Receita <span class="material-symbols-outlined text-sm">arrow_forward</span></span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Placeholder 1 -->
+            <div class="post-card opacity-50 cursor-not-allowed hover:transform-none hover:shadow-none hover:border-border-dark" title="Em breve">
+                <div class="post-cover" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
+                    <span class="material-symbols-outlined">lock</span>
+                </div>
+                <div class="p-5 flex-1 flex flex-col gap-2">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Em Breve</p>
+                    <h2 class="text-base font-bold text-white">Geladinho de Morango com Nutella</h2>
+                    <p class="text-xs text-slate-400 flex-1 leading-relaxed">
+                        A combinação perfeita que os clientes mais amam. Aguarde a liberação dessa receita incrível!
+                    </p>
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-border-dark">
+                        <span class="text-[10px] text-slate-500">Liberando em breve...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder 2 -->
+            <div class="post-card opacity-50 cursor-not-allowed hover:transform-none hover:shadow-none hover:border-border-dark" title="Em breve">
+                <div class="post-cover" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
+                    <span class="material-symbols-outlined">lock</span>
+                </div>
+                <div class="p-5 flex-1 flex flex-col gap-2">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Em Breve</p>
+                    <h2 class="text-base font-bold text-white">Geladinho de Ninho com Oreo</h2>
+                    <p class="text-xs text-slate-400 flex-1 leading-relaxed">
+                        Receita gourmet premium que pode ser vendida pelo dobro do preço. Aguarde!
+                    </p>
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-border-dark">
+                        <span class="text-[10px] text-slate-500">Liberando em breve...</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

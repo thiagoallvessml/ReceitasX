@@ -2,6 +2,15 @@
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFKEYKBBCD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LFKEYKBBCD');
+      gtag('config', 'AW-18068821024');
+    </script>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Entrar - ReceitasX</title>
     <link rel="canonical" href="https://receitasx.com.br/login" />
@@ -256,9 +265,35 @@ async function submitForm(e) {
             if (senha !== confirm) throw new Error('As senhas não coincidem.');
             if (!nome) throw new Error('Informe seu nome.');
             console.log('[SIGNUP] Iniciando cadastro para:', email, '| nome:', nome);
+            
+            // Determinar origem do cadastro
+            const urlParams = new URLSearchParams(window.location.search);
+            const ref = sessionStorage.getItem('ref_afiliado') || urlParams.get('ref');
+
+            // Sempre salvar flags de oferta (mesmo que origem já esteja em cache)
+            if (urlParams.get('origin') === 'calculadora') {
+                localStorage.setItem('has_calculadora_offer', 'true');
+            }
+            if (ref && ref !== 'RECEITASX60' && ref !== 'DESCONTO60') {
+                localStorage.setItem('has_afiliado_offer', 'true');
+                localStorage.setItem('afiliado_ref_code', ref);
+            }
+
+            let origem_cadastro = sessionStorage.getItem('origem_cadastro');
+            if (!origem_cadastro) {
+                if (urlParams.get('origin') === 'calculadora') {
+                    origem_cadastro = 'Calculadora Lead';
+                } else if (ref === 'RECEITASX60') origem_cadastro = 'Google Ads';
+                else if (ref === 'DESCONTO60') origem_cadastro = 'Calculadora Lead';
+                else if (ref) origem_cadastro = 'Afiliado: ' + ref;
+                else if (document.referrer && document.referrer.includes('google')) origem_cadastro = 'Google (Orgânico)';
+                else origem_cadastro = 'Direto';
+                sessionStorage.setItem('origem_cadastro', origem_cadastro);
+            }
+
             const { data, error } = await sb.auth.signUp({
                 email, password: senha,
-                options: { data: { nome } }
+                options: { data: { nome, origem_cadastro } }
             });
             console.log('[SIGNUP] Resposta Supabase data:', JSON.stringify(data?.user?.id), 'error:', error?.message);
             if (error) {
@@ -267,15 +302,24 @@ async function submitForm(e) {
             }
             console.log('[SIGNUP] User criado com id:', data?.user?.id, '| meta:', JSON.stringify(data?.user?.user_metadata));
 
-            // Criar perfil manualmente como backup (caso o trigger falhe)
+            // Atualizar perfil com a origem do cadastro
             if (data?.user?.id) {
                 try {
-                    const { error: perfErr } = await sb.from('perfis').upsert({
-                        id:         data.user.id,
-                        nome:       nome,
-                        updated_at: new Date().toISOString(),
-                    }, { onConflict: 'id' });
-                    console.log('[SIGNUP] Perfil upsert resultado:', perfErr ? perfErr.message : 'OK');
+                    const { error: perfErr } = await sb.from('perfis').update({
+                        nome: nome,
+                        origem_cadastro: origem_cadastro,
+                        updated_at: new Date().toISOString()
+                    }).eq('id', data.user.id);
+                    
+                    if (perfErr) {
+                        // Fallback caso o registro não exista ainda
+                        await sb.from('perfis').upsert({
+                            id: data.user.id,
+                            nome: nome,
+                            origem_cadastro: origem_cadastro,
+                            updated_at: new Date().toISOString(),
+                        }, { onConflict: 'id' });
+                    }
                 } catch(pe) {
                     console.warn('[SIGNUP] Perfil upsert excecao:', pe);
                 }
@@ -320,6 +364,24 @@ async function enviarReset() {
 
 /* ─── INIT: se já logado, redireciona ───────────────────────────── */
 (async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'signup') {
+        setTab('signup');
+    }
+
+    // Salvar flags de oferta do afiliado (funciona para login e signup)
+    const refInit = params.get('ref') || sessionStorage.getItem('ref_afiliado');
+    if (refInit) {
+        sessionStorage.setItem('ref_afiliado', refInit);
+        if (refInit !== 'RECEITASX60' && refInit !== 'DESCONTO60') {
+            localStorage.setItem('has_afiliado_offer', 'true');
+            localStorage.setItem('afiliado_ref_code', refInit);
+        }
+    }
+    if (params.get('origin') === 'calculadora') {
+        localStorage.setItem('has_calculadora_offer', 'true');
+    }
+
     const session = await getSession();
     if (session) {
         const { data: profile } = await sb.from('perfis').select('role').eq('id', session.user.id).single();
