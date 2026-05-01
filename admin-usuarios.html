@@ -465,9 +465,7 @@ let currentOriginFilter = null;
 
 function setFilter(filter, btn) {
     currentFilter = filter;
-    currentOriginFilter = null;
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.origin-card').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     filterUsuarios();
 }
@@ -482,10 +480,6 @@ function setOriginFilter(origin, card) {
         document.querySelectorAll('.origin-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
     }
-    // Reset pill filters to "todos"
-    currentFilter = 'todos';
-    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    document.querySelector('.pill[data-filter="todos"]').classList.add('active');
     filterUsuarios();
 }
 
