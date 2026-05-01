@@ -60,6 +60,11 @@
         .progress-bar-bg { height:6px;background:#2A2A2A;border-radius:3px;overflow:hidden;margin-top:.5rem; }
         .progress-bar-fill { height:100%;background:#25f4f4;transition:width .4s ease; }
         .progress-bar-fill.complete { background:#34d399; }
+
+        /* filter pill */
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s; }
+        .pill.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
     </style>
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
@@ -104,9 +109,16 @@
         </div>
     </div>
 
-    <div class="search-wrap flex-1 w-full mt-4">
-        <span class="material-symbols-outlined ico">search</span>
-        <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterProgresso()" />
+    <div class="flex flex-col sm:flex-row gap-3 mt-4 items-start sm:items-center">
+        <div class="search-wrap flex-1 w-full flex-shrink-0" style="min-width: 250px;">
+            <span class="material-symbols-outlined ico">search</span>
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterProgresso()" />
+        </div>
+        <div class="flex gap-2 flex-shrink-0 flex-wrap w-full sm:w-auto">
+            <button class="pill active" data-filter="todos" onclick="setFilter('todos', this)">Todos</button>
+            <button class="pill" data-filter="pagantes" onclick="setFilter('pagantes', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">⭐ Pagantes</button>
+            <button class="pill" data-filter="gratuitos" onclick="setFilter('gratuitos', this)">Gratuitos</button>
+        </div>
     </div>
 
     <div id="progresso-list" class="space-y-3 mt-4">
@@ -118,6 +130,7 @@
 let allProgresso = [];
 let perfisMap = {};
 let emailsMap = {};
+let currentFilter = 'todos';
 
 (async () => {
     await _waitForRole(4000);
@@ -132,7 +145,7 @@ let emailsMap = {};
 async function loadDados() {
     try {
         // 1. Pega os emails e perfis
-        const { data: perfis } = await sb.from('perfis').select('id, nome, sobrenome, created_at').order('created_at', { ascending: false });
+        const { data: perfis } = await sb.from('perfis').select('id, nome, sobrenome, created_at, _pagante').order('created_at', { ascending: false });
         (perfis || []).forEach(p => perfisMap[p.id] = p);
 
         try {
@@ -172,6 +185,7 @@ async function loadDados() {
                 nome: p.nome,
                 sobrenome: p.sobrenome,
                 created_at: p.created_at,
+                _pagante: p._pagante === true,
                 email: emailsMap[r.user_id] || '--',
                 doneCount: done,
                 pct: Math.round((done / 7) * 100)
@@ -205,9 +219,25 @@ function updateStats() {
     document.getElementById('stat-completo').textContent = completos;
 }
 
+function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filterProgresso();
+}
+
 function filterProgresso() {
     const q = (document.getElementById('search').value || '').toLowerCase().trim();
     let res = allProgresso;
+    
+    // Status Filter
+    if (currentFilter === 'pagantes') {
+        res = res.filter(p => p._pagante);
+    } else if (currentFilter === 'gratuitos') {
+        res = res.filter(p => !p._pagante);
+    }
+
+    // Search Filter
     if (q) {
         res = res.filter(p => {
             const n = ((p.nome||'') + ' ' + (p.sobrenome||'')).toLowerCase();
@@ -228,6 +258,10 @@ function renderList(list) {
         const initials = ((p.nome||'?')[0] || '') + ((p.sobrenome||'')[0] || '');
         const nCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem Nome';
         
+        const badgePlano = p._pagante 
+            ? `<span style="font-size:0.6rem;background:rgba(52,211,153,.15);color:#34d399;padding:0.15rem 0.4rem;border-radius:4px;font-weight:700;letter-spacing:0.05em">PAGANTE</span>` 
+            : `<span style="font-size:0.6rem;background:rgba(148,163,184,.15);color:#94a3b8;padding:0.15rem 0.4rem;border-radius:4px;font-weight:700;letter-spacing:0.05em">GRATUITO</span>`;
+        
         const badgeClass = p.doneCount === 7 ? 'complete' : '';
         const barClass = p.doneCount === 7 ? 'progress-bar-fill complete' : 'progress-bar-fill';
 
@@ -243,7 +277,7 @@ function renderList(list) {
             <div style="display:flex;align-items:center;gap:.85rem;">
                 <div class="avatar">${initials.toUpperCase()}</div>
                 <div class="user-info">
-                    <div class="user-name">${esc(nCompleto)}</div>
+                    <div class="user-name" style="display:flex;align-items:center;gap:.5rem">${esc(nCompleto)} ${badgePlano}</div>
                     <div class="user-email">${esc(p.email)}</div>
                 </div>
                 <div style="text-align:right">
