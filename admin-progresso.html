@@ -130,6 +130,7 @@
 let allProgresso = [];
 let perfisMap = {};
 let emailsMap = {};
+let pagantesSet = new Set();
 let currentFilter = 'todos';
 
 (async () => {
@@ -145,7 +146,7 @@ let currentFilter = 'todos';
 async function loadDados() {
     try {
         // 1. Pega os emails e perfis
-        const { data: perfis } = await sb.from('perfis').select('id, nome, sobrenome, created_at, _pagante').order('created_at', { ascending: false });
+        const { data: perfis } = await sb.from('perfis').select('id, nome, sobrenome, created_at, plano').order('created_at', { ascending: false });
         (perfis || []).forEach(p => perfisMap[p.id] = p);
 
         try {
@@ -157,6 +158,13 @@ async function loadDados() {
                 (body.users || []).forEach(u => emailsMap[u.id] = u.email);
             }
         } catch(e) { console.warn("Erro ao puxar emails:", e); }
+
+        try {
+            const { data: peds } = await sb.from('pedidos').select('email, user_id').eq('status', 'pago');
+            if (peds?.length) {
+                pagantesSet = new Set(peds.flatMap(p => [p.email?.toLowerCase(), p.user_id].filter(Boolean)));
+            }
+        } catch(_) {}
 
         // 2. Chama a RPC
         const { data: rpcData, error } = await sb.rpc('admin_progresso_guia');
@@ -180,13 +188,16 @@ async function loadDados() {
             if (r.qtd_produtos > 0) done++;
             if (r.qtd_precificacao > 0) done++;
             
+            const userEmail = emailsMap[r.user_id] || '--';
+            const isPagante = p.plano === 'vitalicio' || pagantesSet.has(r.user_id) || pagantesSet.has(userEmail.toLowerCase());
+
             return {
                 ...r,
                 nome: p.nome,
                 sobrenome: p.sobrenome,
                 created_at: p.created_at,
-                _pagante: p._pagante === true,
-                email: emailsMap[r.user_id] || '--',
+                _pagante: isPagante,
+                email: userEmail,
                 doneCount: done,
                 pct: Math.round((done / 7) * 100)
             };
