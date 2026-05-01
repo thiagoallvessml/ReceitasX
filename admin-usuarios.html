@@ -630,12 +630,12 @@ function renderUsuarios(list) {
                         <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">logout</span>
                         Forçar Logout
                     </button>
-                    <select class="role-sel flex-1 sm:flex-none" id="sel-${u.id}"
+                    <!-- <select class="role-sel flex-1 sm:flex-none" id="sel-${u.id}"
                     onchange="changeRole('${u.id}', this.value)"
                     ${u.id === window.__userProfile?.id ? 'title="N\u00e3o \u00e9 poss\u00edvel alterar seu pr\u00f3prio role"' : ''}>
                     <option value="afiliado" ${u.role === 'afiliado' ? 'selected' : ''}>Afiliado</option>
                     <option value="admin"    ${u.role === 'admin'    ? 'selected' : ''}>Admin</option>
-                </select>
+                </select> -->
                 </div>
             </div>
         </div>`;
