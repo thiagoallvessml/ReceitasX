@@ -291,6 +291,13 @@ async function submitForm(e) {
                 sessionStorage.setItem('origem_cadastro', origem_cadastro);
             }
 
+            // Recuperar dados UTM salvos (keyword do Google Ads etc.)
+            let utmDados = null;
+            try {
+                const utmRaw = localStorage.getItem('receitasx_utm');
+                if (utmRaw) utmDados = JSON.parse(utmRaw);
+            } catch(_) {}
+
             const { data, error } = await sb.auth.signUp({
                 email, password: senha,
                 options: { data: { nome, origem_cadastro } }
@@ -301,25 +308,30 @@ async function submitForm(e) {
                 throw error;
             }
             console.log('[SIGNUP] User criado com id:', data?.user?.id, '| meta:', JSON.stringify(data?.user?.user_metadata));
+            if (utmDados) console.log('[SIGNUP] UTM dados:', JSON.stringify(utmDados));
 
-            // Atualizar perfil com a origem do cadastro
+            // Atualizar perfil com a origem do cadastro + dados UTM
             if (data?.user?.id) {
                 try {
-                    const { error: perfErr } = await sb.from('perfis').update({
+                    const perfilData = {
                         nome: nome,
                         origem_cadastro: origem_cadastro,
                         updated_at: new Date().toISOString()
-                    }).eq('id', data.user.id);
+                    };
+                    if (utmDados) perfilData.utm_dados = utmDados;
+
+                    const { error: perfErr } = await sb.from('perfis').update(perfilData).eq('id', data.user.id);
                     
                     if (perfErr) {
                         // Fallback caso o registro não exista ainda
                         await sb.from('perfis').upsert({
                             id: data.user.id,
-                            nome: nome,
-                            origem_cadastro: origem_cadastro,
-                            updated_at: new Date().toISOString(),
+                            ...perfilData
                         }, { onConflict: 'id' });
                     }
+
+                    // Limpar UTM do localStorage após salvar com sucesso
+                    localStorage.removeItem('receitasx_utm');
                 } catch(pe) {
                     console.warn('[SIGNUP] Perfil upsert excecao:', pe);
                 }
@@ -368,6 +380,23 @@ async function enviarReset() {
     if (params.get('tab') === 'signup') {
         setTab('signup');
     }
+
+    // ── Captura UTM params do Google Ads na página de login também ──
+    (function() {
+        const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid'];
+        const utmData = {};
+        let hasUtm = false;
+        utmKeys.forEach(key => {
+            const val = params.get(key);
+            if (val) { utmData[key] = val; hasUtm = true; }
+        });
+        if (hasUtm) {
+            utmData._captured_at = new Date().toISOString();
+            utmData._landing_page = window.location.pathname;
+            localStorage.setItem('receitasx_utm', JSON.stringify(utmData));
+            console.log('[ReceitasX] UTM capturado no login:', utmData);
+        }
+    })();
 
     // Salvar flags de oferta do afiliado (funciona para login e signup)
     const refInit = params.get('ref') || sessionStorage.getItem('ref_afiliado');

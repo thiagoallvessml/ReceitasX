@@ -334,6 +334,32 @@
 </footer>
 
 <script>
+// ── Captura UTM params do Google Ads e salva em localStorage ──
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid'];
+    const utmData = {};
+    let hasUtm = false;
+
+    utmKeys.forEach(key => {
+        const val = params.get(key);
+        if (val) {
+            utmData[key] = val;
+            hasUtm = true;
+        }
+    });
+
+    // Só sobrescreve se veio UTM novo na URL (preserva dados anteriores)
+    if (hasUtm) {
+        utmData._captured_at = new Date().toISOString();
+        utmData._landing_page = window.location.pathname;
+        localStorage.setItem('receitasx_utm', JSON.stringify(utmData));
+        console.log('[ReceitasX] UTM capturado:', utmData);
+    }
+})();
+</script>
+
+<script>
 function addIng() {
     const list = document.getElementById('ing-list');
     const row = document.createElement('div');

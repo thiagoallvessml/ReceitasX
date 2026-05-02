@@ -559,6 +559,23 @@ if (_ref) {
     })();
 }
 
+// ── Captura UTM params do Google Ads ──────────────────────────────
+(function() {
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid'];
+    const utmData = {};
+    let hasUtm = false;
+    utmKeys.forEach(key => {
+        const val = _params.get(key);
+        if (val) { utmData[key] = val; hasUtm = true; }
+    });
+    if (hasUtm) {
+        utmData._captured_at = new Date().toISOString();
+        utmData._landing_page = window.location.pathname;
+        localStorage.setItem('receitasx_utm', JSON.stringify(utmData));
+        console.log('[ReceitasX] UTM capturado:', utmData);
+    }
+})();
+
 // ── Guard: redireciona vitalício de volta ao app ──────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     try {

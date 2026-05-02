@@ -308,7 +308,7 @@ async function loadUsuarios() {
         // 1. Perfis do Supabase (inclui plano_ativo_em para detectar vitalício)
         const { data, error } = await sb
             .from('perfis')
-            .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at, origem_cadastro')
+            .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at, origem_cadastro, utm_dados')
             .order('created_at', { ascending: false });
         if (error) throw error;
         allUsuarios = data || [];
@@ -595,6 +595,15 @@ function renderUsuarios(list) {
             ? `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)"><span class="material-symbols-outlined" style="font-size:.7rem">confirmation_number</span>${esc(cupomMap[u.id])}</span>`
             : '';
 
+        // Badge de palavra-chave (utm_term) do Google Ads
+        let keywordBadge = '';
+        const utm = u.utm_dados;
+        if (utm && utm.utm_term) {
+            keywordBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(14,165,233,.1);color:#0ea5e9;border:1px solid rgba(14,165,233,.2)" title="Palavra-chave: ${esc(utm.utm_term)}${utm.utm_campaign ? '\nCampanha: ' + esc(utm.utm_campaign) : ''}${utm.utm_source ? '\nFonte: ' + esc(utm.utm_source) : ''}"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">search</span>Palavra: ${esc(utm.utm_term)}</span>`;
+        } else if (utm && utm.utm_campaign) {
+            keywordBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(14,165,233,.1);color:#0ea5e9;border:1px solid rgba(14,165,233,.2)" title="Campanha: ${esc(utm.utm_campaign)}${utm.utm_source ? '\nFonte: ' + esc(utm.utm_source) : ''}"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">campaign</span>${esc(utm.utm_campaign)}</span>`;
+        }
+
         const userOnline = isOnline(u.id);
         const onlineInfo = onlineMap[u.id];
         const onlineBadge = userOnline
@@ -617,6 +626,7 @@ function renderUsuarios(list) {
             <div style="display:flex;flex-direction:column;gap:.6rem;flex-shrink:0;" class="sm:items-end w-full sm:w-auto mt-1 sm:mt-0">
                 <div style="display:flex;gap:.3rem;flex-wrap:wrap;" class="sm:justify-end">
                     ${origemBadge}
+                    ${keywordBadge}
                     ${vitalBadge}
                     ${cupomBadge}
                     ${roleBadge}
@@ -738,7 +748,7 @@ function exportarParaCSV() {
     }
 
     // Cabecalho
-    const headers = ['ID', 'Nome', 'Sobrenome', 'Email', 'Telefone', 'Negocio', 'Plano', 'Vitalicio', 'Valor Pago', 'Cupom', 'Role', 'Origem Cadastro', 'Data de Criacao', 'Ultimo Login', 'Online'];
+    const headers = ['ID', 'Nome', 'Sobrenome', 'Email', 'Telefone', 'Negocio', 'Plano', 'Vitalicio', 'Valor Pago', 'Cupom', 'Role', 'Origem Cadastro', 'Palavra-chave', 'Campanha', 'Data de Criacao', 'Ultimo Login', 'Online'];
     
     // Linhas
     const rows = currentDisplayedUsuarios.map(u => {
@@ -762,6 +772,8 @@ function exportarParaCSV() {
             cupomMap[u.id] || '',
             u.role || 'user',
             `"${u.origem_cadastro || ''}"`,
+            `"${u.utm_dados?.utm_term || ''}"`,
+            `"${u.utm_dados?.utm_campaign || ''}"`,
             new Date(u.created_at).toLocaleDateString('pt-BR'),
             `"${ultimoLoginStr}"`,
             isOnline(u.id) ? 'Sim' : 'Não'
