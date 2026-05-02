@@ -286,6 +286,11 @@ async function submitForm(e) {
                 } else if (ref === 'RECEITASX60') origem_cadastro = 'Google Ads';
                 else if (ref === 'DESCONTO60') origem_cadastro = 'Calculadora Lead';
                 else if (ref) origem_cadastro = 'Afiliado: ' + ref;
+                else if (document.referrer && document.referrer.includes('/blog')) {
+                    const urlParts = document.referrer.split('/blog');
+                    const postSlug = urlParts[1].replace(/^\//, '').split('?')[0].split('#')[0];
+                    origem_cadastro = postSlug ? 'Blog: ' + postSlug : 'Blog (Home)';
+                }
                 else if (document.referrer && document.referrer.includes('google')) origem_cadastro = 'Google (Orgânico)';
                 else origem_cadastro = 'Direto';
                 sessionStorage.setItem('origem_cadastro', origem_cadastro);
