@@ -171,10 +171,11 @@
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Administração</h2>
             <span class="role-badge-admin">Admin</span>
         </div>
+        <!-- ═══ MÉTRICAS & RELATÓRIOS ═══ -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(37,244,244,.1)"><span class="material-symbols-outlined" style="color:#25f4f4">analytics</span></div><h3>Métricas & Relatórios</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Analytics -->
-            <a href="admin-analytics.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-analytics.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">analytics</span>
                 </div>
@@ -184,9 +185,46 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
+            <!-- Sessões de Acesso -->
+            <a href="admin-sessoes.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.1);color:#34d399;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">schedule</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Sessões de Acesso</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Quem acessou, quando e por quanto tempo</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Visão de Progresso -->
+            <a href="admin-progresso.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">query_stats</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Visão de Progresso</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Progresso dos usuários no sistema</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Cliques de Afiliados -->
+            <a href="admin-cliques-afiliados.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Cliques de Afiliados</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">De onde vêm os visitantes via link</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+        </div>
+
+        <!-- ═══ USUÁRIOS & CONTAS ═══ -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(251,146,60,.1)"><span class="material-symbols-outlined" style="color:#fb923c">group</span></div><h3>Usuários & Contas</h3></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Gestão de Usuários -->
-            <a href="admin-usuarios.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">manage_accounts</span>
                 </div>
@@ -201,21 +239,46 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Faturamento de Afiliados -->
-            <a href="admin-faturamento-afiliados.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
+            <!-- Monitorar Configurações -->
+            <a href="admin-usuarios-config.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">settings_account_box</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Faturamento de Afiliados</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Saques, comissões e ranking</p>
+                    <h4 class="text-sm font-bold">Config dos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gás, energia, impostos e metas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
+            <!-- Administrar Acessos -->
+            <a href="admin-vitalicio.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">key</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Administrar Acessos</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ativar ou remover planos premium</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Email Marketing -->
+            <a href="admin-emails.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(56,189,248,.1);color:#38bdf8;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">mail</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Email Marketing</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Copiar e-mails segmentados por plano</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+        </div>
+
+        <!-- ═══ FINANCEIRO ═══ -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(52,211,153,.1)"><span class="material-symbols-outlined" style="color:#34d399">account_balance</span></div><h3>Financeiro</h3></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Pedidos -->
-            <a href="admin-pedidos.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-pedidos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
                 </div>
@@ -225,81 +288,30 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Receitas dos Usuários -->
-            <a href="admin-receitas-usuarios.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Histórico de Pagamentos -->
+            <a href="admin-historico-pagamentos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">menu_book</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">history</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Receitas dos Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Visualize receitas criadas por cada conta</p>
+                    <h4 class="text-sm font-bold">Histórico de Pagamentos</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Registro de pagamentos efetuados</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Ingredientes dos Usuários -->
-            <a href="admin-insumos-usuarios.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Faturamento de Afiliados -->
+            <a href="admin-faturamento-afiliados.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">inventory_2</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Ingredientes dos Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Visualize insumos cadastrados por cada conta</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Embalagens dos Usuários -->
-            <a href="admin-embalagens-usuarios.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Embalagens dos Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Visualize embalagens cadastradas por cada conta</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Configurações do Sistema -->
-            <a href="admin-configuracoes.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">admin_panel_settings</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Configurações do Sistema</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Comissão, saque mínimo e valores</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Avisos aos Usuários -->
-            <a href="admin-avisos.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Avisos aos Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Mensagens popup ao entrar no sistema</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Produtos Vinculados -->
-            <a href="admin-produtos-vinculados.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">link</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Produtos Vinculados</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Quem vinculou receita ao produto</p>
+                    <h4 class="text-sm font-bold">Faturamento de Afiliados</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Saques, comissões e ranking</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Gerenciar Cupons -->
-            <a href="admin-cupons.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-cupons.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(167,139,250,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">confirmation_number</span>
                 </div>
@@ -310,8 +322,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Ver Reembolsos -->
-            <a href="admin-reembolsos.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-reembolsos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">currency_exchange</span>
                 </div>
@@ -321,69 +332,95 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Cliques de Afiliados -->
-            <a href="admin-cliques-afiliados.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+        </div>
+
+        <!-- ═══ CONTEÚDO & DADOS ═══ -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(56,189,248,.1)"><span class="material-symbols-outlined" style="color:#38bdf8">database</span></div><h3>Conteúdo & Dados</h3></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Receitas dos Usuários -->
+            <a href="admin-receitas-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">menu_book</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Receitas dos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Visualize receitas criadas por cada conta</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Ingredientes dos Usuários -->
+            <a href="admin-insumos-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">inventory_2</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Ingredientes dos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Visualize insumos cadastrados por cada conta</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Embalagens dos Usuários -->
+            <a href="admin-embalagens-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Embalagens dos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Visualize embalagens cadastradas por cada conta</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Produtos Vinculados -->
+            <a href="admin-produtos-vinculados.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">link</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold">Produtos Vinculados</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Quem vinculou receita ao produto</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
+            <!-- Vitrine TikTok -->
+            <a href="admin-vitrine-tiktok.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Cliques de Afiliados</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">De onde vêm os visitantes via link</p>
+                    <h4 class="text-sm font-bold">Vitrine TikTok</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Produtos afiliados nas receitas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Email Marketing -->
-            <a href="admin-emails.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(56,189,248,.1);color:#38bdf8;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">mail</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Email Marketing</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Copiar e-mails segmentados por plano</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Visão de Progresso -->
-            <a href="admin-progresso.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+        </div>
+
+        <!-- ═══ CONFIGURAÇÕES & COMUNICAÇÃO ═══ -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(167,139,250,.1)"><span class="material-symbols-outlined" style="color:#a78bfa">settings</span></div><h3>Configurações & Comunicação</h3></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Configurações do Sistema -->
+            <a href="admin-configuracoes.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">query_stats</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">admin_panel_settings</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Visão de Progresso</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Progresso dos usuários no sistema</p>
+                    <h4 class="text-sm font-bold">Configurações do Sistema</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Comissão, saque mínimo e valores</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Administrar Acessos -->
-            <a href="admin-vitalicio.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Avisos aos Usuários -->
+            <a href="admin-avisos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">key</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Administrar Acessos</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Ativar ou remover planos premium</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Histórico de Pagamentos -->
-            <a href="admin-historico-pagamentos.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">history</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Histórico de Pagamentos</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Registro de pagamentos efetuados</p>
+                    <h4 class="text-sm font-bold">Avisos aos Usuários</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Mensagens popup ao entrar no sistema</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Feedbacks dos Usuários -->
-            <a href="admin-feedbacks.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-feedbacks.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(139,92,246,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">forum</span>
                 </div>
@@ -397,8 +434,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Gerenciar Tutoriais -->
-            <a href="admin-tutoriais.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-tutoriais.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">video_library</span>
                 </div>
@@ -408,43 +444,8 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Monitorar Configurações -->
-            <a href="admin-usuarios-config.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">settings_account_box</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Config dos Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Gás, energia, impostos e metas</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Vitrine TikTok -->
-            <a href="admin-vitrine-tiktok.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Vitrine TikTok</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Produtos afiliados nas receitas</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
-            <!-- Sessões de Acesso -->
-            <a href="admin-sessoes.html"
-                class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
-                <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.1);color:#34d399;">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">schedule</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold">Sessões de Acesso</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Quem acessou, quando e por quanto tempo</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
-            </a>
         </div>
+
     </section>
     <script>
     // Controle de visibilidade por role — executa direto ao carregar
