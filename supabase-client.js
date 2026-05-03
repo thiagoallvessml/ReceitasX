@@ -154,6 +154,73 @@ async function dbUpsert(table, payload, onConflict) {
     }
 })();
 
+/* ─── SESSÃO DE ACESSO (Log de duração) ──────────────────────── */
+(async function _sessionTracker() {
+    try {
+        await new Promise(r => setTimeout(r, 1000));
+        const session = await getSession();
+        if (!session) return;
+
+        const pagina = window.location.pathname.split('/').pop() || 'index.html';
+        // Não rastreia páginas admin
+        if (pagina.startsWith('admin')) return;
+
+        // Verifica se já registrou sessão nesta aba (evita duplicar ao navegar SPA)
+        const existingSessionId = sessionStorage.getItem('receitasx_session_id');
+        if (existingSessionId) return;
+
+        // Registrar início da sessão
+        const { data: sessao, error } = await sb.from('sessoes_usuario').insert({
+            user_id: session.user.id,
+            inicio: new Date().toISOString(),
+            pagina_entrada: pagina,
+            user_agent: navigator.userAgent || null
+        }).select('id').single();
+
+        if (error) {
+            console.error('[Sessão] Erro ao registrar:', error.message);
+            return;
+        }
+
+        const sessionId = sessao.id;
+        const sessionStart = Date.now();
+        sessionStorage.setItem('receitasx_session_id', sessionId);
+        console.log('[Sessão] Registrada ID:', sessionId);
+
+        // Finalizar sessão ao sair da página
+        const finalizarSessao = () => {
+            const duracao = Math.round((Date.now() - sessionStart) / 1000);
+            // Usa sendBeacon para garantir envio mesmo fechando a aba
+            const body = JSON.stringify({
+                fim: new Date().toISOString(),
+                duracao_seg: duracao
+            });
+            // Fallback: tenta via fetch keepalive
+            try {
+                navigator.sendBeacon || fetch;
+                fetch(`${SUPABASE_URL}/rest/v1/sessoes_usuario?id=eq.${sessionId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + (session.access_token || SUPABASE_KEY),
+                        'Prefer': 'return=minimal'
+                    },
+                    body: body,
+                    keepalive: true
+                });
+            } catch(_) {}
+        };
+
+        window.addEventListener('beforeunload', finalizarSessao);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') finalizarSessao();
+        });
+    } catch(e) {
+        console.error('[Sessão] Erro init:', e);
+    }
+})();
+
 /* ─── PAGE VIEW TRACKING ──────────────────────────────────────── */
 (async function _trackPageView() {
     try {

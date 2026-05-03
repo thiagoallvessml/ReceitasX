@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sessões de Acesso - ReceitasX Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        .stat-card {
+            background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1.15rem;
+            display:flex;flex-direction:column;gap:.35rem;
+        }
+        .stat-label { font-size:.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em; }
+        .stat-value { font-size:1.5rem;font-weight:900;color:#f1f5f9; }
+        .stat-sub { font-size:.72rem;color:#64748b; }
+
+        .tab-btn {
+            padding:.45rem .85rem;border-radius:.5rem;font-size:.78rem;font-weight:700;
+            border:1px solid transparent;background:transparent;color:#64748b;cursor:pointer;transition:all .15s;
+        }
+        .tab-btn.active { background:rgba(37,244,244,.1);color:#25f4f4;border-color:rgba(37,244,244,.25); }
+        .tab-btn:hover:not(.active) { color:#94a3b8; }
+
+        .session-row {
+            display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:.5rem;
+            padding:.75rem 1rem;border-bottom:1px solid #1f1f1f;font-size:.78rem;
+            align-items:center;transition:background .12s;
+        }
+        .session-row:hover { background:rgba(255,255,255,.02); }
+        .session-row.header { color:#64748b;font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #2A2A2A; }
+        .session-row .name { color:#f1f5f9;font-weight:600; }
+        .session-row .time { color:#94a3b8; }
+        .session-row .duracao { color:#25f4f4;font-weight:700; }
+        .session-row .pagina { color:#64748b;font-size:.72rem; }
+
+        .day-header {
+            display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;margin-top:.75rem;
+            background:rgba(37,244,244,.04);border-radius:.6rem;border:1px solid rgba(37,244,244,.1);
+        }
+        .day-header .material-symbols-outlined { font-size:1rem;color:#25f4f4; }
+        .day-header .label { font-size:.82rem;font-weight:800;color:#f1f5f9; }
+        .day-header .count { font-size:.68rem;font-weight:700;color:#64748b;margin-left:auto; }
+
+        .month-picker {
+            display:flex;align-items:center;gap:.5rem;
+        }
+        .month-picker button {
+            width:2rem;height:2rem;border-radius:.5rem;border:1px solid #2A2A2A;
+            background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;
+            transition:all .15s;
+        }
+        .month-picker button:hover { color:#25f4f4;border-color:rgba(37,244,244,.3); }
+        .month-picker .label { font-size:.88rem;font-weight:800;color:#f1f5f9;min-width:160px;text-align:center; }
+
+        .empty { display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:3rem 1rem;color:#475569;text-align:center; }
+        .empty .material-symbols-outlined { font-size:3rem;color:#2A2A2A; }
+
+        @media (max-width:640px) {
+            .session-row { grid-template-columns:1fr 1fr;gap:.3rem;padding:.65rem .75rem; }
+            .session-row .pagina, .session-row.header .pagina-h { display:none; }
+            .stat-card { padding:.85rem; }
+            .stat-value { font-size:1.25rem; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<script>requireAdmin();</script>
+
+<!-- Header -->
+<header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem">
+        <button class="btn-back" onclick="window.location.href='admin.html'">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_back</span>
+            Voltar
+        </button>
+        <span style="font-size:.95rem;font-weight:800;flex:1;text-align:center;letter-spacing:-.01em">
+            Sessões de Acesso
+        </span>
+        <div style="width:60px"></div>
+    </div>
+</header>
+
+<div style="max-width:1200px;margin:0 auto;padding:1.25rem">
+
+    <!-- Stat Cards -->
+    <div id="stats-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div class="stat-card">
+            <span class="stat-label">Acessos Hoje</span>
+            <span class="stat-value" id="stat-hoje">—</span>
+            <span class="stat-sub" id="stat-hoje-uniq">— únicos</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Acessos Semana</span>
+            <span class="stat-value" id="stat-semana">—</span>
+            <span class="stat-sub" id="stat-semana-uniq">— únicos</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Acessos Mês</span>
+            <span class="stat-value" id="stat-mes">—</span>
+            <span class="stat-sub" id="stat-mes-uniq">— únicos</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Tempo Médio</span>
+            <span class="stat-value" id="stat-duracao">—</span>
+            <span class="stat-sub">por sessão</span>
+        </div>
+    </div>
+
+    <!-- Tabs + Month Picker -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+        <div style="display:flex;gap:.4rem">
+            <button class="tab-btn active" onclick="switchView('dia')" id="tab-dia">Por Dia</button>
+            <button class="tab-btn" onclick="switchView('usuario')" id="tab-usuario">Por Usuário</button>
+        </div>
+        <div class="month-picker">
+            <button onclick="changeMonth(-1)"><span class="material-symbols-outlined" style="font-size:1rem">chevron_left</span></button>
+            <span class="label" id="month-label">Maio 2026</span>
+            <button onclick="changeMonth(1)"><span class="material-symbols-outlined" style="font-size:1rem">chevron_right</span></button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div id="content" style="background:#141414;border:1px solid #2A2A2A;border-radius:1rem;overflow:hidden;min-height:300px">
+        <div class="empty">
+            <span class="material-symbols-outlined">hourglass_empty</span>
+            <p>Carregando sessões...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let currentView = 'dia';
+let allSessoes = [];
+let perfisMap = {};
+
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function formatDuracao(seg) {
+    if (!seg || seg < 0) return '—';
+    if (seg < 60) return seg + 's';
+    if (seg < 3600) return Math.floor(seg/60) + 'min ' + (seg%60) + 's';
+    const h = Math.floor(seg/3600);
+    const m = Math.floor((seg%3600)/60);
+    return h + 'h ' + m + 'min';
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadPerfis();
+    await loadSessoes();
+});
+
+async function loadPerfis() {
+    try {
+        const { data } = await sb.from('perfis').select('id, nome, sobrenome');
+        (data || []).forEach(p => { perfisMap[p.id] = (p.nome || '') + ' ' + (p.sobrenome || ''); });
+    } catch(_) {}
+}
+
+async function loadSessoes() {
+    updateMonthLabel();
+    const inicio = new Date(currentYear, currentMonth, 1).toISOString();
+    const fim = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString();
+
+    try {
+        const { data, error } = await sb
+            .from('sessoes_usuario')
+            .select('*')
+            .gte('inicio', inicio)
+            .lte('inicio', fim)
+            .order('inicio', { ascending: false });
+
+        if (error) throw error;
+        allSessoes = data || [];
+        updateStats();
+        renderView();
+    } catch(e) {
+        document.getElementById('content').innerHTML = `
+            <div class="empty">
+                <span class="material-symbols-outlined">error</span>
+                <p>Erro ao carregar sessões.<br><small>${e.message}</small></p>
+            </div>`;
+    }
+}
+
+function updateStats() {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const weekAgo = new Date(now.getTime() - 7 * 86400000);
+
+    // Hoje
+    const hoje = allSessoes.filter(s => s.inicio.startsWith(today));
+    document.getElementById('stat-hoje').textContent = hoje.length;
+    document.getElementById('stat-hoje-uniq').textContent = new Set(hoje.map(s=>s.user_id)).size + ' únicos';
+
+    // Semana
+    const semana = allSessoes.filter(s => new Date(s.inicio) >= weekAgo);
+    document.getElementById('stat-semana').textContent = semana.length;
+    document.getElementById('stat-semana-uniq').textContent = new Set(semana.map(s=>s.user_id)).size + ' únicos';
+
+    // Mês
+    document.getElementById('stat-mes').textContent = allSessoes.length;
+    document.getElementById('stat-mes-uniq').textContent = new Set(allSessoes.map(s=>s.user_id)).size + ' únicos';
+
+    // Duração média
+    const comDuracao = allSessoes.filter(s => s.duracao_seg && s.duracao_seg > 0);
+    if (comDuracao.length) {
+        const media = Math.round(comDuracao.reduce((a,s) => a + s.duracao_seg, 0) / comDuracao.length);
+        document.getElementById('stat-duracao').textContent = formatDuracao(media);
+    } else {
+        document.getElementById('stat-duracao').textContent = '—';
+    }
+}
+
+function renderView() {
+    if (currentView === 'dia') renderByDay();
+    else renderByUser();
+}
+
+function renderByDay() {
+    const container = document.getElementById('content');
+    if (!allSessoes.length) {
+        container.innerHTML = `
+            <div class="empty">
+                <span class="material-symbols-outlined">event_busy</span>
+                <p>Nenhuma sessão registrada em ${MESES[currentMonth]} ${currentYear}.</p>
+            </div>`;
+        return;
+    }
+
+    // Agrupar por dia
+    const dias = {};
+    allSessoes.forEach(s => {
+        const dia = s.inicio.split('T')[0];
+        if (!dias[dia]) dias[dia] = [];
+        dias[dia].push(s);
+    });
+
+    let html = '';
+    const sortedDays = Object.keys(dias).sort((a,b) => b.localeCompare(a));
+
+    sortedDays.forEach(dia => {
+        const sessoes = dias[dia];
+        const uniqueUsers = new Set(sessoes.map(s => s.user_id)).size;
+        const dataFmt = new Date(dia + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        html += `<div class="day-header">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span class="label">${dataFmt.charAt(0).toUpperCase() + dataFmt.slice(1)}</span>
+            <span class="count">${sessoes.length} sessões · ${uniqueUsers} usuários</span>
+        </div>`;
+
+        // Header row
+        html += `<div class="session-row header">
+            <span>Usuário</span>
+            <span>Entrada</span>
+            <span>Saída</span>
+            <span>Duração</span>
+            <span class="pagina-h">Página</span>
+        </div>`;
+
+        sessoes.forEach(s => {
+            const nome = perfisMap[s.user_id] || s.user_id.substring(0,8) + '…';
+            const horaEntrada = new Date(s.inicio).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+            const horaSaida = s.fim ? new Date(s.fim).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) : '—';
+            const duracao = formatDuracao(s.duracao_seg);
+            const paginaEntrada = s.pagina_entrada || '—';
+
+            html += `<div class="session-row">
+                <span class="name">${esc(nome.trim())}</span>
+                <span class="time">${horaEntrada}</span>
+                <span class="time">${horaSaida}</span>
+                <span class="duracao">${duracao}</span>
+                <span class="pagina">${esc(paginaEntrada)}</span>
+            </div>`;
+        });
+    });
+
+    container.innerHTML = html;
+}
+
+function renderByUser() {
+    const container = document.getElementById('content');
+    if (!allSessoes.length) {
+        container.innerHTML = `
+            <div class="empty">
+                <span class="material-symbols-outlined">event_busy</span>
+                <p>Nenhuma sessão registrada em ${MESES[currentMonth]} ${currentYear}.</p>
+            </div>`;
+        return;
+    }
+
+    // Agrupar por usuário
+    const usuarios = {};
+    allSessoes.forEach(s => {
+        if (!usuarios[s.user_id]) usuarios[s.user_id] = { sessoes: [], totalDuracao: 0 };
+        usuarios[s.user_id].sessoes.push(s);
+        if (s.duracao_seg) usuarios[s.user_id].totalDuracao += s.duracao_seg;
+    });
+
+    // Ordenar por quantidade de sessões (mais ativo primeiro)
+    const sorted = Object.entries(usuarios).sort((a,b) => b[1].sessoes.length - a[1].sessoes.length);
+
+    let html = `<div class="session-row header">
+        <span>Usuário</span>
+        <span>Sessões</span>
+        <span>Tempo Total</span>
+        <span>Tempo Médio</span>
+        <span class="pagina-h">Último Acesso</span>
+    </div>`;
+
+    sorted.forEach(([userId, data]) => {
+        const nome = perfisMap[userId] || userId.substring(0,8) + '…';
+        const totalSessoes = data.sessoes.length;
+        const comDuracao = data.sessoes.filter(s => s.duracao_seg > 0);
+        const tempoTotal = formatDuracao(data.totalDuracao);
+        const tempoMedio = comDuracao.length ? formatDuracao(Math.round(data.totalDuracao / comDuracao.length)) : '—';
+        const ultimoAcesso = new Date(data.sessoes[0].inicio).toLocaleDateString('pt-BR') + ' ' + new Date(data.sessoes[0].inicio).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+        // Dias distintos que o usuário acessou
+        const diasDistintos = new Set(data.sessoes.map(s => s.inicio.split('T')[0])).size;
+
+        html += `<div class="session-row">
+            <span class="name">${esc(nome.trim())}</span>
+            <span class="time">${totalSessoes} <span style="color:#475569;font-size:.68rem">(${diasDistintos} dias)</span></span>
+            <span class="duracao">${tempoTotal}</span>
+            <span class="time">${tempoMedio}</span>
+            <span class="pagina">${ultimoAcesso}</span>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// ── Controls ──────────────────────────────────────────────────────
+function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + view).classList.add('active');
+    renderView();
+}
+
+function changeMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    loadSessoes();
+}
+
+function updateMonthLabel() {
+    document.getElementById('month-label').textContent = MESES[currentMonth] + ' ' + currentYear;
+}
+</script>
+</body>
+</html>
