@@ -52,13 +52,17 @@ async function getUser() {
 async function signOut() {
     _sessionCache = null;
     _sessionPromise = null;
+    sessionStorage.removeItem('receitasx_session_id');
     await sb.auth.signOut();
     window.location.href = 'login.html';
 }
 
 // Atualiza cache quando sessão muda (refresh, login, logout)
-sb.auth.onAuthStateChange((_event, session) => {
+sb.auth.onAuthStateChange((event, session) => {
     _sessionCache = session;
+    if (event === 'SIGNED_OUT') {
+        sessionStorage.removeItem('receitasx_session_id');
+    }
 });
 
 /* ─── Helpers de dados ────────────────────────────────────────── */
