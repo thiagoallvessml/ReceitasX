@@ -109,14 +109,37 @@
         .btn-unlock:hover{opacity:.92;box-shadow:0 8px 40px rgba(37,244,244,.45)}
         .btn-unlock .material-symbols-outlined{font-size:1rem;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24}
 
+        /* SOCIAL PROOF BAR */
+        .social-proof-bar{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.6rem 1rem;margin:-1rem auto 1.5rem;max-width:420px;border-radius:9999px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);font-size:.75rem;color:#94a3b8}
+        .social-proof-bar strong{color:var(--green);font-weight:800}
+        .social-proof-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite}
+        @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+
+        /* TESTIMONIALS */
+        .testimonials{max-width:680px;margin:2.5rem auto;padding:0 1rem}
+        .testimonials-grid{display:grid;grid-template-columns:1fr;gap:.75rem}
+        @media(min-width:500px){.testimonials-grid{grid-template-columns:1fr 1fr}}
+        .testimonial-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.15rem 1.25rem;position:relative}
+        .testimonial-card::before{content:'"';position:absolute;top:.5rem;left:1rem;font-size:2.5rem;color:rgba(37,244,244,.15);font-family:Georgia,serif;line-height:1}
+        .testimonial-text{font-size:.78rem;color:#cbd5e1;line-height:1.6;margin-bottom:.75rem;padding-top:.5rem;font-style:italic}
+        .testimonial-author{display:flex;align-items:center;gap:.6rem}
+        .testimonial-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0dc8c8);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#050505;flex-shrink:0}
+        .testimonial-name{font-size:.7rem;font-weight:700;color:#f1f5f9}
+        .testimonial-role{font-size:.6rem;color:var(--muted)}
+
         /* BENEFITS */
-        .benefits{max-width:680px;margin:3rem auto;padding:0 1rem}
+        .benefits{max-width:680px;margin:2.5rem auto;padding:0 1rem}
         .benefits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem}
         .benefit-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.25rem;text-align:center;transition:border-color .2s,transform .2s}
         .benefit-card:hover{border-color:rgba(37,244,244,.2);transform:translateY(-3px)}
         .benefit-card .material-symbols-outlined{font-size:1.6rem;margin-bottom:.65rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
         .benefit-title{font-size:.82rem;font-weight:700;margin-bottom:.25rem}
         .benefit-desc{font-size:.72rem;color:var(--muted);line-height:1.5}
+
+        /* WHATSAPP FLOAT */
+        .wpp-float{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:transform .2s,box-shadow .2s;text-decoration:none}
+        .wpp-float:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(37,211,102,.55)}
+        .wpp-float svg{width:26px;height:26px;fill:#fff}
 
         /* FOOTER */
         footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted)}
@@ -155,6 +178,10 @@
     </div>
     <h1>Descubra o <em>preço ideal</em> da sua receita</h1>
     <p class="hero-sub">Adicione seus ingredientes, informe o rendimento e veja instantaneamente quanto custa e quanto você deveria cobrar.</p>
+    <div class="social-proof-bar" style="margin-top:1.25rem">
+        <span class="social-proof-dot"></span>
+        <span>Já usado por <strong>+800 confeiteiras</strong> em todo o Brasil</span>
+    </div>
 </section>
 
 <!-- CALCULATOR -->
@@ -283,14 +310,53 @@
                     </div>
                     <div class="locked-gate" id="locked-gate">
                         <span class="material-symbols-outlined">lock_open</span>
-                        <p>Crie sua conta <span style="color:var(--cyan)">grátis</span> para ver o resultado completo</p>
-                        <p class="sub">Preço sugerido, lucro, margem real e muito mais</p>
+                        <p>Veja <span style="color:var(--cyan)">seu lucro real</span> agora mesmo</p>
+                        <p class="sub">Preço sugerido · Lucro por unidade · Margem real</p>
                         <a href="login?tab=signup&origin=calculadora" class="btn-unlock" id="btn-unlock">
                             <span class="material-symbols-outlined">rocket_launch</span>
-                            Criar conta grátis
+                            Ver meu lucro agora — é grátis
                         </a>
+                        <p style="font-size:.65rem;color:#475569;margin-top:.5rem">Sem cartão de crédito · Leva 30 segundos</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DEPOIMENTOS -->
+<div class="testimonials">
+    <div style="text-align:center;margin-bottom:1.5rem">
+        <p style="font-size:.65rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem">Quem já usa, aprova</p>
+        <p style="font-size:1.1rem;font-weight:800">O que confeiteiras dizem sobre o ReceitasX</p>
+    </div>
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <p class="testimonial-text">Eu cobrava R$3 no brigadeiro achando que tava lucrando. Quando coloquei tudo no ReceitasX, vi que tava no PREJUÍZO. Agora cobro R$5,50 e meus clientes continuam comprando!</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">C</div>
+                <div><div class="testimonial-name">Camila R.</div><div class="testimonial-role">Confeiteira · SP</div></div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <p class="testimonial-text">Antes eu ficava horas com caderninho tentando calcular o custo. Com o ReceitasX eu cadastro o insumo UMA VEZ e todas as receitas atualizam sozinhas. Me economiza um tempão!</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">J</div>
+                <div><div class="testimonial-name">Juliana M.</div><div class="testimonial-role">Doceira · MG</div></div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <p class="testimonial-text">O ponto de equilíbrio me abriu os olhos. Descobri que preciso vender só 45 brigadeiros por semana pra cobrir todas as despesas. Antes eu nem sabia disso!</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">A</div>
+                <div><div class="testimonial-name">Ana Paula S.</div><div class="testimonial-role">Boleira · RJ</div></div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <p class="testimonial-text">A lista de compras é genial. Seleciono as receitas da semana e ele já monta tudo que preciso comprar com as quantidades certas. Não esqueço mais nada!</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">F</div>
+                <div><div class="testimonial-name">Fernanda L.</div><div class="testimonial-role">Confeiteira · PR</div></div>
             </div>
         </div>
     </div>
@@ -300,26 +366,40 @@
 <div class="benefits">
     <div style="text-align:center;margin-bottom:1.5rem">
         <p style="font-size:.65rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:.4rem">Por que criar uma conta?</p>
-        <p style="font-size:1.1rem;font-weight:800">Tudo que você ganha ao se cadastrar</p>
+        <p style="font-size:1.1rem;font-weight:800">Pare de perder dinheiro nas suas receitas</p>
     </div>
     <div class="benefits-grid">
         <div class="benefit-card">
             <span class="material-symbols-outlined" style="color:var(--cyan)">menu_book</span>
-            <p class="benefit-title">Receitas ilimitadas</p>
-            <p class="benefit-desc">Salve e organize todas as suas receitas com cálculo automático</p>
+            <p class="benefit-title">Nunca mais erre o preço</p>
+            <p class="benefit-desc">Todas as suas receitas com custo calculado automaticamente, sem caderninho</p>
         </div>
         <div class="benefit-card">
             <span class="material-symbols-outlined" style="color:var(--green)">trending_up</span>
-            <p class="benefit-title">Margem em tempo real</p>
-            <p class="benefit-desc">Veja a margem colorida para cada produto e receita</p>
+            <p class="benefit-title">Saiba se está lucrando</p>
+            <p class="benefit-desc">Margem colorida em cada produto — verde se tá bom, vermelho se tá no prejuízo</p>
         </div>
         <div class="benefit-card">
             <span class="material-symbols-outlined" style="color:var(--yellow)">balance</span>
-            <p class="benefit-title">Ponto de equilíbrio</p>
-            <p class="benefit-desc">Saiba quantas unidades vender para cobrir suas despesas</p>
+            <p class="benefit-title">Quantos bolos vender por mês?</p>
+            <p class="benefit-desc">Descubra o mínimo que você precisa vender para pagar suas contas e ter lucro</p>
         </div>
     </div>
 </div>
+
+<!-- CTA FINAL -->
+<div style="max-width:680px;margin:0 auto 3rem;padding:0 1rem;text-align:center">
+    <a href="login?tab=signup&origin=calculadora" style="display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2.5rem;border-radius:.75rem;background:linear-gradient(135deg,var(--cyan),#0dc8c8);color:#050505;font-size:1rem;font-weight:800;text-decoration:none;box-shadow:0 4px 24px rgba(37,244,244,.3);transition:all .2s">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 600">rocket_launch</span>
+        Começar grátis agora
+    </a>
+    <p style="font-size:.7rem;color:#475569;margin-top:.75rem">Sem cartão de crédito · Leva 30 segundos</p>
+</div>
+
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/5511999999999?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20ReceitasX" target="_blank" class="wpp-float" title="Dúvidas? Fale conosco">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
 
 <!-- FOOTER -->
 <footer>
@@ -328,7 +408,8 @@
     <p style="margin-top:.75rem">
         <a href="landing">Saiba mais</a> &nbsp;·&nbsp;
         <a href="login">Entrar</a> &nbsp;·&nbsp;
-        <a href="blog">Blog</a>
+        <a href="blog">Blog</a> &nbsp;·&nbsp;
+        <a href="https://wa.me/5511999999999?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20ReceitasX" target="_blank">Dúvidas? Fale conosco</a>
     </p>
     <p style="margin-top:1rem;font-size:.68rem;color:#334155">© 2025 ReceitasX · Todos os direitos reservados</p>
 </footer>
