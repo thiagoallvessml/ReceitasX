@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Lista de Compras - ReceitasX</title>
+    
+    <!-- Scripts base -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="plano-guard.js"></script>
+    
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- html2pdf for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1A1A1A",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background-color: #121212; color: #f1f5f9; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+        
+        /* Layout Structure */
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: -0.02em;
+        }
+        .header-icon {
+            padding: 0.5rem;
+            background: rgba(37,244,244,0.1);
+            color: #25f4f4;
+            border-radius: 0.5rem;
+            display: flex;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #25f4f4;
+            color: #0F0F0F;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { background: #1ccbcb; transform: translateY(-1px); }
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid #2A2A2A;
+            color: #cbd5e1;
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+        /* Two Column Layout */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 1024px) {
+            .split-layout { grid-template-columns: 1fr; }
+        }
+
+        /* Cards and Lists */
+        .panel {
+            background: #1A1A1A;
+            border: 1px solid #2A2A2A;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #f8fafc;
+        }
+
+        /* Recipe Items */
+        .recipe-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        .recipe-list::-webkit-scrollbar { width: 6px; }
+        .recipe-list::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        .recipe-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid #2A2A2A;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.2);
+            gap: 1rem;
+        }
+        .recipe-item:hover { border-color: rgba(37,244,244,0.3); }
+        .recipe-item.selected { border-color: #25f4f4; background: rgba(37,244,244,0.03); }
+        
+        .recipe-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            cursor: pointer;
+        }
+        .recipe-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 0.25rem;
+            border: 1px solid #475569;
+            background: #1E1E1E;
+            cursor: pointer;
+            accent-color: #25f4f4;
+        }
+        .recipe-name { font-weight: 500; font-size: 0.95rem; }
+        
+        .recipe-qty {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #121212;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid #2A2A2A;
+        }
+        .qty-btn {
+            background: none; border: none; color: #94a3b8; cursor: pointer;
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            border-radius: 0.25rem; transition: background 0.2s;
+        }
+        .qty-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .qty-input {
+            width: 40px; background: transparent; border: none; color: #fff;
+            text-align: center; font-weight: 600; font-size: 0.9rem; padding: 0; outline: none;
+            -moz-appearance: textfield;
+        }
+        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #64748b;
+        }
+        .empty-state .material-symbols-outlined { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        /* Shopping List output (to be PDF exported) */
+        #pdf-container {
+            background: #fff;
+            color: #0F0F0F;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            display: none; /* hidden until render, used for PDF or styling */
+        }
+
+        .shopping-card {
+            background: rgba(37,244,244,0.03);
+            border: 1px dashed rgba(37,244,244,0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .list-section {
+            margin-bottom: 1.5rem;
+        }
+        .list-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #25f4f4;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(37,244,244,0.1);
+            padding-bottom: 0.5rem;
+        }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #2A2A2A;
+            font-size: 0.9rem;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .item-name { color: #f8fafc; font-weight: 500; }
+        .item-qty { color: #25f4f4; font-weight: 700; background: rgba(37,244,244,0.1); padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem;}
+
+        /* PDF Output Styling (Injected into html2pdf) */
+        .pdf-view {
+            background: white !important;
+            color: black !important;
+            padding: 40px !important;
+            font-family: Arial, sans-serif;
+        }
+        .pdf-view .item-name { color: #333 !important; }
+        .pdf-view .item-qty { background: #eee !important; color: #000 !important; border: 1px solid #ccc; }
+        .pdf-view .list-section-title { color: #000 !important; border-bottom: 2px solid #000 !important; }
+        .pdf-view h2 { margin-bottom: 20px; color: #000 !important; }
+        .pdf-view .pdf-date { font-size: 12px; color: #666; margin-bottom: 30px; }
+        
+        /* Spinner */
+        .spinner {
+            border: 3px solid rgba(255,255,255,.1);
+            border-left-color: #25f4f4;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="btn-secondary" style="padding: 0.5rem; border: none;">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div class="header-title">
+                    <div class="header-icon">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                    </div>
+                    <div>
+                        <h1>Lista de Compras</h1>
+                        <p class="text-sm text-slate-400 mt-1">Gere uma lista consolidada de ingredientes</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btn-download" class="btn-primary" onclick="downloadPDF()" disabled>
+                <span class="material-symbols-outlined">picture_as_pdf</span>
+                Baixar PDF
+            </button>
+        </header>
+
+        <div class="split-layout">
+            <!-- Left: Recipe Selection -->
+            <div class="panel">
+                <h2 class="panel-title">
+                    <span class="material-symbols-outlined" style="color: #25f4f4">menu_book</span>
+                    Selecione as Receitas
+                </h2>
+                
+                <div id="loading-state" class="flex justify-center py-8">
+                    <div class="spinner"></div>
+                </div>
+                
+                <div id="empty-recipes" class="empty-state" style="display:none;">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    <h3>Nenhuma receita cadastrada</h3>
+                    <p class="text-sm mt-2">Vá em 'Receitas' e crie sua primeira receita para gerar listas de compras.</p>
+                </div>
+
+                <div id="recipe-list" class="recipe-list" style="display:none;">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+            <!-- Right: Aggregated List -->
+            <div class="panel">
+                <h2 class="panel-title">
+                    <span class="material-symbols-outlined" style="color: #34d399">receipt_long</span>
+                    Resumo da Compra
+                </h2>
+                
+                <div id="shopping-card" class="shopping-card">
+                    <div id="empty-list" class="empty-state" style="padding: 1rem 0;">
+                        <span class="material-symbols-outlined" style="font-size: 2.5rem; color:#475569">inventory_2</span>
+                        <p class="text-sm mt-3">Selecione receitas ao lado para ver os ingredientes necessários.</p>
+                    </div>
+
+                    <div id="list-content" style="display:none;">
+                        <div class="list-section">
+                            <h3 class="list-section-title"><span class="material-symbols-outlined" style="font-size: 1.1rem;">grocery</span> Ingredientes</h3>
+                            <div id="ing-list-container">
+                                <!-- Items here -->
+                            </div>
+                        </div>
+                        
+                        <div class="list-section" id="emb-section" style="display:none;">
+                            <h3 class="list-section-title" style="color: #f59e0b; border-bottom-color: rgba(245,158,11,0.1);"><span class="material-symbols-outlined" style="font-size: 1.1rem;">package_2</span> Embalagens</h3>
+                            <div id="emb-list-container">
+                                <!-- Items here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden div for PDF Generation -->
+    <div style="display: none;">
+        <div id="pdf-export-container" class="pdf-view">
+            <h2>Lista de Compras - ReceitasX</h2>
+            <div class="pdf-date" id="pdf-date"></div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 14px; margin-bottom: 10px; color: #555;">Receitas Selecionadas:</h3>
+                <ul id="pdf-recipes" style="font-size: 12px; margin-left: 20px; color: #333; margin-bottom: 15px;"></ul>
+            </div>
+
+            <h3 class="list-section-title">Ingredientes</h3>
+            <div id="pdf-ing-list"></div>
+            
+            <div id="pdf-emb-section" style="display:none; margin-top: 20px;">
+                <h3 class="list-section-title">Embalagens</h3>
+                <div id="pdf-emb-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userRecipes = [];
+        let selectedItems = {}; // { recipeId: qtyToMake }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData?.session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadRecipes();
+        });
+
+        async function loadRecipes() {
+            document.getElementById('loading-state').style.display = 'flex';
+            document.getElementById('recipe-list').style.display = 'none';
+            document.getElementById('empty-recipes').style.display = 'none';
+
+            try {
+                const { data, error } = await supabase
+                    .from('receitas')
+                    .select('id, nome, ingredientes, embalagens')
+                    .order('nome');
+
+                if (error) throw error;
+
+                userRecipes = data || [];
+                
+                document.getElementById('loading-state').style.display = 'none';
+                
+                if (userRecipes.length === 0) {
+                    document.getElementById('empty-recipes').style.display = 'block';
+                } else {
+                    renderRecipes();
+                    document.getElementById('recipe-list').style.display = 'flex';
+                }
+            } catch (err) {
+                console.error('Erro ao carregar receitas:', err);
+                alert('Erro ao carregar receitas. Tente novamente.');
+            }
+        }
+
+        function renderRecipes() {
+            const container = document.getElementById('recipe-list');
+            container.innerHTML = '';
+
+            userRecipes.forEach(recipe => {
+                // Determine if valid ingredients
+                const hasIngredients = Array.isArray(recipe.ingredientes) && recipe.ingredientes.length > 0;
+                
+                const div = document.createElement('div');
+                div.className = 'recipe-item';
+                div.id = `recipe-item-${recipe.id}`;
+                
+                div.innerHTML = `
+                    <div class="recipe-info" onclick="toggleRecipe(${recipe.id})">
+                        <input type="checkbox" class="recipe-checkbox" id="check-${recipe.id}" ${hasIngredients ? '' : 'disabled'} />
+                        <div>
+                            <div class="recipe-name ${!hasIngredients ? 'text-slate-500' : ''}">${recipe.nome}</div>
+                            ${!hasIngredients ? '<div class="text-[0.65rem] text-rose-400 uppercase tracking-wider font-bold mt-1">Sem ingredientes</div>' : ''}
+                        </div>
+                    </div>
+                    
+                    ${hasIngredients ? `
+                    <div class="recipe-qty" onclick="event.stopPropagation()">
+                        <button class="qty-btn" onclick="updateQty(${recipe.id}, -1)"><span class="material-symbols-outlined" style="font-size: 1rem">remove</span></button>
+                        <input type="number" class="qty-input" id="qty-${recipe.id}" value="1" min="1" onchange="manualQtyUpdate(${recipe.id})" />
+                        <button class="qty-btn" onclick="updateQty(${recipe.id}, 1)"><span class="material-symbols-outlined" style="font-size: 1rem">add</span></button>
+                    </div>
+                    ` : ''}
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function toggleRecipe(id) {
+            const checkbox = document.getElementById(`check-${id}`);
+            if (checkbox.disabled) return;
+            
+            checkbox.checked = !checkbox.checked;
+            const itemDiv = document.getElementById(`recipe-item-${id}`);
+            
+            if (checkbox.checked) {
+                const qty = parseInt(document.getElementById(`qty-${id}`).value) || 1;
+                selectedItems[id] = qty;
+                itemDiv.classList.add('selected');
+            } else {
+                delete selectedItems[id];
+                itemDiv.classList.remove('selected');
+            }
+            
+            calculateList();
+        }
+
+        function updateQty(id, delta) {
+            const input = document.getElementById(`qty-${id}`);
+            let val = parseInt(input.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            input.value = val;
+            
+            const checkbox = document.getElementById(`check-${id}`);
+            if (checkbox.checked) {
+                selectedItems[id] = val;
+                calculateList();
+            }
+        }
+
+        function manualQtyUpdate(id) {
+            const input = document.getElementById(`qty-${id}`);
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) {
+                val = 1;
+                input.value = val;
+            }
+            
+            const checkbox = document.getElementById(`check-${id}`);
+            if (checkbox.checked) {
+                selectedItems[id] = val;
+                calculateList();
+            }
+        }
+
+        function parseQtyStr(str) {
+            // Parses strings like "500 ml", "2.5 kg", "3 un"
+            if (!str) return { amount: 0, unit: '' };
+            const parts = str.trim().split(' ');
+            const amount = parseFloat(parts[0]) || 0;
+            const unit = parts.slice(1).join(' ').trim().toLowerCase();
+            return { amount, unit };
+        }
+
+        function formatQty(amount, unit) {
+            // Keep it simple and clean
+            // Check if amount is integer to avoid .00
+            const amountStr = Number.isInteger(amount) ? amount.toString() : amount.toFixed(2);
+            return `${amountStr} ${unit}`;
+        }
+
+        function calculateList() {
+            const ingAgg = {}; // { "nome_unit": { nome, amount, unit } }
+            const embAgg = {}; // { "nome": { nome, amount } }
+            let hasItems = false;
+            
+            const pdfRecipesList = [];
+
+            Object.keys(selectedItems).forEach(idStr => {
+                const id = parseInt(idStr);
+                const multiplier = selectedItems[id];
+                const recipe = userRecipes.find(r => r.id === id);
+                
+                if (recipe) {
+                    hasItems = true;
+                    pdfRecipesList.push(`${multiplier}x ${recipe.nome}`);
+                    
+                    // Sum Ingredients
+                    if (Array.isArray(recipe.ingredientes)) {
+                        recipe.ingredientes.forEach(ing => {
+                            const { amount, unit } = parseQtyStr(ing.qty);
+                            const totalAmount = amount * multiplier;
+                            const key = `${ing.nome.trim().toLowerCase()}_${unit}`;
+                            
+                            if (!ingAgg[key]) {
+                                ingAgg[key] = { nome: ing.nome.trim(), amount: 0, unit: unit };
+                            }
+                            ingAgg[key].amount += totalAmount;
+                        });
+                    }
+                    
+                    // Sum Packages (Embalagens)
+                    if (Array.isArray(recipe.embalagens)) {
+                        recipe.embalagens.forEach(emb => {
+                            const totalAmount = (parseInt(emb.qty) || 1) * multiplier;
+                            const key = emb.nome.trim().toLowerCase();
+                            
+                            if (!embAgg[key]) {
+                                embAgg[key] = { nome: emb.nome.trim(), amount: 0 };
+                            }
+                            embAgg[key].amount += totalAmount;
+                        });
+                    }
+                }
+            });
+
+            const btnDownload = document.getElementById('btn-download');
+            const emptyList = document.getElementById('empty-list');
+            const listContent = document.getElementById('list-content');
+
+            if (!hasItems) {
+                emptyList.style.display = 'block';
+                listContent.style.display = 'none';
+                btnDownload.disabled = true;
+                return;
+            }
+
+            emptyList.style.display = 'none';
+            listContent.style.display = 'block';
+            btnDownload.disabled = false;
+
+            // Render UI
+            const ingContainer = document.getElementById('ing-list-container');
+            const pdfIngContainer = document.getElementById('pdf-ing-list');
+            ingContainer.innerHTML = '';
+            pdfIngContainer.innerHTML = '';
+            
+            Object.values(ingAgg).sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
+                const formattedQty = formatQty(item.amount, item.unit);
+                
+                // UI render
+                ingContainer.innerHTML += `
+                    <div class="list-item">
+                        <span class="item-name">${item.nome}</span>
+                        <span class="item-qty">${formattedQty}</span>
+                    </div>
+                `;
+                
+                // PDF render
+                pdfIngContainer.innerHTML += `
+                    <div style="display:flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 5px 0;">
+                        <span>${item.nome}</span>
+                        <strong>${formattedQty}</strong>
+                    </div>
+                `;
+            });
+            
+            const embValues = Object.values(embAgg);
+            const embSectionUI = document.getElementById('emb-section');
+            const embSectionPDF = document.getElementById('pdf-emb-section');
+            
+            if (embValues.length > 0) {
+                embSectionUI.style.display = 'block';
+                embSectionPDF.style.display = 'block';
+                
+                const embContainer = document.getElementById('emb-list-container');
+                const pdfEmbContainer = document.getElementById('pdf-emb-list');
+                embContainer.innerHTML = '';
+                pdfEmbContainer.innerHTML = '';
+                
+                embValues.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(item => {
+                    const formattedQty = `${item.amount} un`;
+                    
+                    embContainer.innerHTML += `
+                        <div class="list-item">
+                            <span class="item-name">${item.nome}</span>
+                            <span class="item-qty" style="background: rgba(245,158,11,0.1); color: #f59e0b;">${formattedQty}</span>
+                        </div>
+                    `;
+                    
+                    pdfEmbContainer.innerHTML += `
+                        <div style="display:flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 5px 0;">
+                            <span>${item.nome}</span>
+                            <strong>${formattedQty}</strong>
+                        </div>
+                    `;
+                });
+            } else {
+                embSectionUI.style.display = 'none';
+                embSectionPDF.style.display = 'none';
+            }
+            
+            // Set PDF Date and Recipes List
+            const now = new Date();
+            document.getElementById('pdf-date').innerText = `Gerado em: ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR')}`;
+            
+            const pdfRecipesUl = document.getElementById('pdf-recipes');
+            pdfRecipesUl.innerHTML = '';
+            pdfRecipesList.forEach(r => {
+                pdfRecipesUl.innerHTML += `<li>${r}</li>`;
+            });
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('pdf-export-container');
+            const opt = {
+                margin:       10,
+                filename:     `Lista_de_Compras_ReceitasX.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Ensure the element is temporarily displayed for html2pdf to process it properly
+            const wrapper = element.parentElement;
+            wrapper.style.display = 'block';
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                wrapper.style.display = 'none'; // Hide again
+            });
+        }
+    </script>
+</body>
+</html>
