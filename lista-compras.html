@@ -402,6 +402,7 @@
                 const { data, error } = await sb
                     .from('receitas')
                     .select('id, nome, ingredientes, embalagens')
+                    .eq('user_id', session.user.id)
                     .order('nome');
 
                 if (error) throw error;
