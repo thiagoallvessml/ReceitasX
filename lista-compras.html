@@ -394,6 +394,9 @@
         });
 
         async function loadRecipes() {
+            const session = await getSession();
+            if (!session) return;
+
             document.getElementById('loading-state').style.display = 'flex';
             document.getElementById('recipe-list').style.display = 'none';
             document.getElementById('empty-recipes').style.display = 'none';
