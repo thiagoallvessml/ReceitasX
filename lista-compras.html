@@ -384,8 +384,8 @@
         let selectedItems = {}; // { recipeId: qtyToMake }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: sessionData } = await supabase.auth.getSession();
-            if (!sessionData?.session) {
+            const session = await getSession();
+            if (!session) {
                 window.location.href = 'login.html';
                 return;
             }
@@ -399,7 +399,7 @@
             document.getElementById('empty-recipes').style.display = 'none';
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await sb
                     .from('receitas')
                     .select('id, nome, ingredientes, embalagens')
                     .order('nome');
