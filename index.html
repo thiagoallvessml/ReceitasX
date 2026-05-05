@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -69,7 +69,7 @@
         }
         .sino-ring { animation: sinoPulse .6s ease both; }
 
-        /* Painel de notificaÃ§Ãµes */
+        /* Painel de notificações */
         #notif-panel {
             position: fixed; top: 3.5rem; right: 1rem;
             width: 320px; max-width: calc(100vw - 2rem);
@@ -134,21 +134,21 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
-<!-- â•â• Header sticky â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ Header sticky ═════════════════════════════════════════ -->
 <header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
     <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.75rem">
         <span style="font-size:.95rem;font-weight:800;flex:1;letter-spacing:-.01em">
             <span style="color:#25f4f4">Receitas</span><span style="color:#f1f5f9">X</span>
         </span>
-        <!-- Sino de notificaÃ§Ãµes -->
-        <button id="sino-btn" onclick="toggleNotifPanel()" title="NotificaÃ§Ãµes"
+        <!-- Sino de notificações -->
+        <button id="sino-btn" onclick="toggleNotifPanel()" title="Notificações"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
             onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
             <span class="material-symbols-outlined" id="sino-icon" style="font-size:1.15rem">notifications</span>
             <span id="sino-badge">0</span>
         </button>
-        <!-- BotÃ£o Sair -->
+        <!-- Botão Sair -->
         <button onclick="sb.auth.signOut().then(() => window.location.replace('login.html'))" title="Sair"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#f87171';this.style.borderColor='rgba(248,113,113,.4)'"
@@ -158,7 +158,7 @@
         <!-- Painel -->
         <div id="notif-panel">
             <div class="notif-panel-head">
-                <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">NotificaÃ§Ãµes</span>
+                <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">Notificações</span>
                 <div style="display:flex;gap:.4rem">
                     <button onclick="marcarTodasLidas()" style="font-size:.68rem;color:#475569;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:.4rem;transition:color .15s" onmouseover="this.style.color='#25f4f4'" onmouseout="this.style.color='#475569'">Marcar todas como lidas</button>
                     <button onclick="limparNotificacoes()" style="font-size:.68rem;color:#475569;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:.4rem;transition:color .15s" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#475569'">Limpar</button>
@@ -169,7 +169,7 @@
     </div>
 </header>
 <div class="p-6 space-y-8">
-    <!-- â”€â”€ Guia de ConfiguraÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Guia de Configuração ─────────────────────────────── -->
     <a href="guia-configuracao" id="banner-guia"
         class="nav-card block p-4 rounded-xl border group"
         style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
@@ -179,7 +179,7 @@
             </div>
             <div class="flex-1">
                 <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                    <h4 class="text-sm font-bold">Guia de ConfiguraÃ§Ã£o</h4>
+                    <h4 class="text-sm font-bold">Guia de Configuração</h4>
                     <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Novo</span>
                 </div>
                 <p class="text-xs" style="color:#64748b;margin-top:.1rem">Siga o passo a passo para configurar tudo corretamente</p>
@@ -188,7 +188,7 @@
         </div>
     </a>
 
-    <!-- â”€â”€ Oferta Especial Calculadora (condicional) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Oferta Especial Calculadora (condicional) ─────────────────────────────── -->
     <a href="checkout.html?ref=DESCONTO60" id="banner-oferta-calculadora"
         class="nav-card block p-4 rounded-xl border group"
         style="display:none;background:linear-gradient(135deg,rgba(52,211,153,.1),rgba(52,211,153,.02));border-color:rgba(52,211,153,.3);">
@@ -201,13 +201,13 @@
                     <h4 class="text-sm font-bold">Cupom DESCONTO60 Aplicado!</h4>
                     <span style="font-size:.6rem;font-weight:700;background:rgba(52,211,153,.2);color:var(--green);border:1px solid rgba(52,211,153,.4);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">-60% OFF</span>
                 </div>
-                <p class="text-xs" style="color:#64748b;margin-top:.1rem">Desbloqueie o sistema completo com 60% de desconto. Oferta vÃ¡lida apenas agora.</p>
+                <p class="text-xs" style="color:#64748b;margin-top:.1rem">Desbloqueie o sistema completo com 60% de desconto. Oferta válida apenas agora.</p>
             </div>
             <span class="material-symbols-outlined" style="color:var(--green);opacity:.7">shopping_cart_checkout</span>
         </div>
     </a>
 
-    <!-- â”€â”€ Oferta Especial Afiliado (condicional) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Oferta Especial Afiliado (condicional) ─────────────────────────────── -->
     <a href="#" id="banner-oferta-afiliado"
         class="nav-card block p-4 rounded-xl border group"
         style="display:none;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.02));border-color:rgba(251,191,36,.3);">
@@ -218,19 +218,19 @@
             <div class="flex-1">
                 <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
                     <h4 class="text-sm font-bold" id="banner-afiliado-title">Desconto Exclusivo Desbloqueado!</h4>
-                    <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.4);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">IndicaÃ§Ã£o</span>
+                    <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.4);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Indicação</span>
                 </div>
-                <p class="text-xs" id="banner-afiliado-desc" style="color:#64748b;margin-top:.1rem">VocÃª foi indicado! Aproveite um desconto especial no plano VitalÃ­cio.</p>
+                <p class="text-xs" id="banner-afiliado-desc" style="color:#64748b;margin-top:.1rem">Você foi indicado! Aproveite um desconto especial no plano Vitalício.</p>
             </div>
             <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.7">shopping_cart_checkout</span>
         </div>
     </a>
 
-    <!-- â”€â”€ Receitas BÃ´nus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Receitas Bônus ─────────────────────────────── -->
     <section style="display:none">
         <div class="flex items-center gap-2 mb-4 px-1 mt-6">
             <span class="material-symbols-outlined text-primary text-sm">icecream</span>
-            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Receitas BÃ´nus</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Receitas Bônus</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <a href="receitas-geladinho"
@@ -242,23 +242,23 @@
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
                         <h4 class="text-sm font-bold">Receitas de Geladinho</h4>
-                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">ColeÃ§Ã£o</span>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Coleção</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Veja todas as receitas e vÃ­deos passo a passo</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Veja todas as receitas e vídeos passo a passo</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
             </a>
         </div>
     </section>
 
-    <!-- â”€â”€ Operacional â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Operacional ──────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">precision_manufacturing</span>
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Operacional</h2>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-            <!-- GestÃ£o Insumos -->
+            <!-- Gestão Insumos -->
             <a href="gerenciar-insumos"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">package_2</span>
@@ -272,7 +272,7 @@
                 <span class="text-xs font-medium text-center">Meus Equipamentos</span>
                 <span id="alert-equipamentos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
-            <!-- GestÃ£o Embalagens -->
+            <!-- Gestão Embalagens -->
             <a href="gerenciar-embalagens"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">inventory</span>
@@ -307,11 +307,11 @@
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">layers</span>
                 <span class="text-xs font-medium text-center">Meus Combos</span>
             </a>
-            <!-- PrecificaÃ§Ã£o -->
+            <!-- Precificação -->
             <a href="precificacao-marketplace"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">storefront</span>
-                <span class="text-xs font-medium text-center">PrecificaÃ§Ã£o</span>
+                <span class="text-xs font-medium text-center">Precificação</span>
             </a>
             <!-- Despesas -->
             <a href="despesas"
@@ -320,13 +320,13 @@
                 <span class="text-xs font-medium text-center">Minhas Despesas</span>
                 <span id="alert-despesas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
-            <!-- Ponto de EquilÃ­brio -->
+            <!-- Ponto de Equilíbrio -->
             <a href="ponto-equilibrio"
                 class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">balance</span>
-                <span class="text-xs font-medium text-center">EquilÃ­brio</span>
+                <span class="text-xs font-medium text-center">Equilíbrio</span>
             </a>
-            <!-- ConfiguraÃ§Ãµes -->
+            <!-- Configurações -->
               <!-- Admin (Somente Admin) -->
               <a href="admin" data-role="admin" style="display: none; border-color: rgba(251,146,60,.3) !important;"
                   class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
@@ -337,18 +337,18 @@
             <a href="configuracoes"
                 class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">settings</span>
-                <span class="text-xs font-medium text-center">ConfiguraÃ§Ãµes</span>
+                <span class="text-xs font-medium text-center">Configurações</span>
             </a>
         </div>
     </section>
-    <!-- â”€â”€ Financeiro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Financeiro ─────────────────────────────────────────────── -->
     <section id="secao-financeiro">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">payments</span>
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Financeiro</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <!-- Acesso VitalÃ­cio -->
+            <!-- Acesso Vitalício -->
             <a href="acesso-vitalicio"
                 id="card-acesso-vitalicio"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
@@ -358,7 +358,7 @@
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">Acesso VitalÃ­cio</h4>
+                        <h4 class="text-sm font-bold">Acesso Vitalício</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Premium</span>
                     </div>
                     <p class="text-xs" style="color:#64748b;margin-top:.1rem">Gerencie seu plano e assinatura</p>
@@ -377,14 +377,14 @@
                         <h4 class="text-sm font-bold">Extrato de Vendas</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Afiliado</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">ComissÃµes, vendas e saques</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Comissões, vendas e saques</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
         </div>
     </section>
 
-    <!-- â”€â”€ Sistema â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Sistema ──────────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">settings_suggest</span>
@@ -403,7 +403,7 @@
                         <h4 class="text-sm font-bold">Indique e Ganhe</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">10% por venda</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Indique amigas e ganhe comissÃ£o em Pix</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Indique amigas e ganhe comissão em Pix</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
@@ -419,7 +419,7 @@
                         <h4 class="text-sm font-bold">Meus Ganhos</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-saldo-idx">R$ 0,00</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Saldo, comissÃµes e solicitar saque</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Saldo, comissões e solicitar saque</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
             </a>
@@ -431,7 +431,7 @@
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Meu Perfil</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua conta e seguranÃ§a</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua conta e segurança</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -447,7 +447,7 @@
                         <h4 class="text-sm font-bold">Como Usar</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Tutoriais</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">VÃ­deos ensinando a usar o sistema</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Vídeos ensinando a usar o sistema</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#f87171;opacity:.5">chevron_right</span>
             </a>
@@ -463,7 +463,7 @@
                         <h4 class="text-sm font-bold">Meus Feedbacks</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Respostas</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">DÃºvida, sugestÃ£o, elogio ou bug</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Dúvida, sugestão, elogio ou bug</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#a78bfa;opacity:.5">chevron_right</span>
             </a>
@@ -479,14 +479,14 @@
                         <h4 class="text-sm font-bold">Dicas e Receitas</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(244,114,182,.15);color:#f472b6;border:1px solid rgba(244,114,182,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Blog</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Artigos sobre precificaÃ§Ã£o e vendas</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Artigos sobre precificação e vendas</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#f472b6;opacity:.5">chevron_right</span>
             </a>
         </div>
     </section>
     <script>
-    // Controle de visibilidade por role â€” executa direto ao carregar
+    // Controle de visibilidade por role — executa direto ao carregar
     (async () => {
         try {
             const session = await getSession();
@@ -540,7 +540,7 @@
                 } catch(_) {}
             }
 
-            // Oculta o card de Acesso VitalÃ­cio se o usuÃ¡rio jÃ¡ tem plano vitalicio
+            // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
             try {
                 const { data: perfilPlano } = await sb
                     .from('perfis')
@@ -549,10 +549,10 @@
                     .maybeSingle();
 
                 if (perfilPlano?.plano === 'vitalicio') {
-                    // UsuÃ¡rio jÃ¡ Ã© vitalÃ­cio â€” mantÃ©m card oculto
-                    // (o card jÃ¡ comeÃ§a com display:none no HTML)
+                    // Usuário já é vitalício — mantém card oculto
+                    // (o card já começa com display:none no HTML)
                 } else {
-                    // NÃ£o Ã© vitalÃ­cio â€” exibe o card de compra
+                    // Não é vitalício — exibe o card de compra
                     const card = document.getElementById('card-acesso-vitalicio');
                     if (card) card.style.display = '';
 
@@ -567,7 +567,7 @@
                         }
                     }
 
-                    // Oferta do Afiliado (Lead via indicaÃ§Ã£o)
+                    // Oferta do Afiliado (Lead via indicação)
                     if (localStorage.getItem('has_afiliado_offer') === 'true') {
                         const refCode = localStorage.getItem('afiliado_ref_code') || '';
                         const checkoutUrl = 'checkout.html?ref=' + encodeURIComponent(refCode);
@@ -673,14 +673,14 @@
     <div style="height:.5rem"></div>
 
     <script>
-    /* â•â• SINO DE NOTIFICAÃ‡Ã•ES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ══ SINO DE NOTIFICAÇÕES ════════════════════════════════ */
     const NOTIF_KEY = 'receitasx_notificacoes';
 
     function getNotifs() {
         return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
     }
     function saveNotifs(arr) {
-        // MantÃ©m no mÃ¡ximo 50
+        // Mantém no máximo 50
         localStorage.setItem(NOTIF_KEY, JSON.stringify(arr.slice(0, 50)));
     }
 
@@ -711,8 +711,8 @@
             el.innerHTML = `
                 <div class="notif-empty">
                     <span class="material-symbols-outlined">notifications_off</span>
-                    <p style="font-size:.82rem;font-weight:600;color:#475569">Nenhuma notificaÃ§Ã£o ainda</p>
-                    <p style="font-size:.72rem;color:#334155">As atividades de venda aparecerÃ£o aqui.</p>
+                    <p style="font-size:.82rem;font-weight:600;color:#475569">Nenhuma notificação ainda</p>
+                    <p style="font-size:.72rem;color:#334155">As atividades de venda aparecerão aqui.</p>
                 </div>`;
             return;
         }
@@ -742,10 +742,10 @@
         const h    = Math.floor(diff / 3600000);
         const d    = Math.floor(diff / 86400000);
         if (min  < 1)  return 'agora mesmo';
-        if (min  < 60) return `hÃ¡ ${min} min`;
-        if (h    < 24) return `hÃ¡ ${h}h`;
+        if (min  < 60) return `há ${min} min`;
+        if (h    < 24) return `há ${h}h`;
         if (d    === 1) return 'ontem';
-        return `hÃ¡ ${d} dias`;
+        return `há ${d} dias`;
     }
 
     function toggleNotifPanel() {
@@ -790,13 +790,13 @@
         }
     });
 
-    // ExpÃµe funÃ§Ã£o para scripts externos (notificacoes-afiliado.js)
+    // Expõe função para scripts externos (notificacoes-afiliado.js)
     window.adicionarNotificacao = function(notif) {
         const list = getNotifs();
         list.unshift({
             id:     Date.now().toString(),
             tipo:   notif.tipo   || 'info',
-            titulo: notif.titulo || 'Nova notificaÃ§Ã£o',
+            titulo: notif.titulo || 'Nova notificação',
             desc:   notif.desc   || '',
             href:   notif.href   || '',
             ts:     Date.now(),
@@ -816,7 +816,7 @@
 
     <script src="notificacoes-afiliado.js"></script>
 
-    <!-- â•â• Modal de Avisos do Admin â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- ══ Modal de Avisos do Admin ══════════════════════════════════ -->
     <style>
         #aviso-overlay {
             position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
@@ -892,7 +892,7 @@
     </div>
 
     <script>
-    /* â•â• AVISOS DO ADMIN â€” Popup ao entrar â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ══ AVISOS DO ADMIN — Popup ao entrar ════════════════════════ */
     let avisosQueue = [];
     let avisoAtualId = null;
 
@@ -902,7 +902,7 @@
             if (!session) return;
             const uid = session.user.id;
 
-            // Buscar avisos ativos (para todos OU para este usuÃ¡rio)
+            // Buscar avisos ativos (para todos OU para este usuário)
             const { data: avisos, error } = await sb
                 .from('avisos_admin')
                 .select('*')
@@ -912,7 +912,7 @@
 
             if (error || !avisos?.length) return;
 
-            // Buscar quais jÃ¡ foram vistos
+            // Buscar quais já foram vistos
             const { data: vistos } = await sb
                 .from('avisos_vistos')
                 .select('aviso_id')
@@ -920,7 +920,7 @@
 
             const vistosSet = new Set((vistos || []).map(v => v.aviso_id));
 
-            // Filtrar nÃ£o vistos
+            // Filtrar não vistos
             avisosQueue = avisos.filter(a => !vistosSet.has(a.id));
 
             if (avisosQueue.length > 0) {
@@ -940,7 +940,7 @@
 
         // Configurar estilo por tipo
         const configs = {
-            info:     { icon:'info',         bg:'rgba(96,165,250,.1)',  border:'rgba(96,165,250,.25)', color:'#60a5fa', label:'InformaÃ§Ã£o',labelBg:'rgba(96,165,250,.12)',labelBorder:'rgba(96,165,250,.25)' },
+            info:     { icon:'info',         bg:'rgba(96,165,250,.1)',  border:'rgba(96,165,250,.25)', color:'#60a5fa', label:'Informação',labelBg:'rgba(96,165,250,.12)',labelBorder:'rgba(96,165,250,.25)' },
             aviso:    { icon:'warning',      bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.25)', color:'#fbbf24', label:'Aviso',      labelBg:'rgba(251,191,36,.12)', labelBorder:'rgba(251,191,36,.25)' },
             urgente:  { icon:'priority_high', bg:'rgba(248,113,113,.1)',border:'rgba(248,113,113,.25)',color:'#f87171', label:'Urgente',    labelBg:'rgba(248,113,113,.12)',labelBorder:'rgba(248,113,113,.25)' },
             novidade: { icon:'auto_awesome', bg:'rgba(52,211,153,.1)', border:'rgba(52,211,153,.25)', color:'#34d399', label:'Novidade',   labelBg:'rgba(52,211,153,.12)', labelBorder:'rgba(52,211,153,.25)' },
@@ -980,13 +980,13 @@
             try {
                 const { data: { session } } = await sb.auth.getSession();
                 if (session) {
-                    // Marcar como visto para este usuÃ¡rio
+                    // Marcar como visto para este usuário
                     await sb.from('avisos_vistos').insert({
                         aviso_id: avisoAtualId,
                         user_id: session.user.id
                     });
 
-                    // Desativar automaticamente SOMENTE se for um aviso direcionado a um usuÃ¡rio especÃ­fico
+                    // Desativar automaticamente SOMENTE se for um aviso direcionado a um usuário específico
                     if (window.avisoAtualInfo && window.avisoAtualInfo.destino === 'usuario') {
                         await sb.from('avisos_admin')
                             .update({ ativo: false })
@@ -998,7 +998,7 @@
 
         document.getElementById('aviso-overlay').classList.remove('show');
 
-        // Mostrar prÃ³ximo aviso (se houver) apÃ³s uma breve pausa
+        // Mostrar próximo aviso (se houver) após uma breve pausa
         if (avisosQueue.length > 0) {
             setTimeout(mostrarProximoAviso, 400);
         }
@@ -1013,7 +1013,7 @@
     </script>
 </div>
 
-<!-- â”€â”€ Modal de Oferta Calculadora â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Modal de Oferta Calculadora ─────────────────────────────── -->
 <div id="oferta-calculadora-modal" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,.8);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:1.5rem">
     <div style="background:#111;border:1px solid rgba(52,211,153,.3);border-radius:1.25rem;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.8);position:relative">
         <button onclick="fecharOfertaCalculadora()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#64748b;cursor:pointer">
@@ -1024,9 +1024,9 @@
         </div>
         <h3 style="font-size:1.5rem;font-weight:800;color:#f1f5f9;margin-bottom:.5rem">Presente Desbloqueado!</h3>
         <p style="font-size:.9rem;color:#94a3b8;margin-bottom:1.5rem;line-height:1.5">
-            Como vocÃª usou nossa calculadora, liberamos o cupom <strong style="color:var(--green)">DESCONTO60</strong> para vocÃª.
+            Como você usou nossa calculadora, liberamos o cupom <strong style="color:var(--green)">DESCONTO60</strong> para você.
             <br><br>
-            Aproveite <strong>60% de Desconto</strong> no plano VitalÃ­cio e tenha suas receitas e precificaÃ§Ã£o 100% automatizadas!
+            Aproveite <strong>60% de Desconto</strong> no plano Vitalício e tenha suas receitas e precificação 100% automatizadas!
         </p>
         <a href="checkout.html?ref=DESCONTO60" style="display:block;width:100%;padding:.85rem;background:var(--green);color:#0a0a0a;font-weight:800;border-radius:.75rem;text-decoration:none;transition:opacity .15s">
             Resgatar Desconto
@@ -1034,7 +1034,7 @@
     </div>
 </div>
 
-<!-- â”€â”€ Modal de Oferta Afiliado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Modal de Oferta Afiliado ─────────────────────────────── -->
 <div id="oferta-afiliado-modal" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,.8);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:1.5rem">
     <div style="background:#111;border:1px solid rgba(251,191,36,.3);border-radius:1.25rem;padding:2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.8);position:relative">
         <button onclick="fecharOfertaAfiliado()" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#64748b;cursor:pointer">
@@ -1045,9 +1045,9 @@
         </div>
         <h3 style="font-size:1.5rem;font-weight:800;color:#f1f5f9;margin-bottom:.5rem">Bem-vindo ao ReceitasX!</h3>
         <p id="modal-afiliado-msg" style="font-size:.9rem;color:#94a3b8;margin-bottom:1.5rem;line-height:1.5">
-            VocÃª foi indicado e tem um <strong style="color:#fbbf24">desconto exclusivo</strong> esperando por vocÃª!
+            Você foi indicado e tem um <strong style="color:#fbbf24">desconto exclusivo</strong> esperando por você!
             <br><br>
-            Aproveite para desbloquear o plano <strong>VitalÃ­cio</strong> com um preÃ§o especial e tenha suas receitas e precificaÃ§Ã£o 100% automatizadas!
+            Aproveite para desbloquear o plano <strong>Vitalício</strong> com um preço especial e tenha suas receitas e precificação 100% automatizadas!
         </p>
         <a href="#" id="modal-afiliado-btn" style="display:block;width:100%;padding:.85rem;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0a0a0a;font-weight:800;border-radius:.75rem;text-decoration:none;transition:opacity .15s">
             Aproveitar Desconto
@@ -1069,4 +1069,3 @@
 
 </body>
 </html>
-

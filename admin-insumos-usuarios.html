@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Admin â€” Ingredientes dos UsuÃ¡rios Â· ReceitasX</title>
+    <title>Admin — Ingredientes dos Usuários · ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -160,46 +160,46 @@
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
 
-<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ Header ══════════════════════════════════════════════════════ -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="history.back()">
             <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
         </button>
         <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
-        <h1 class="text-base font-semibold flex-1">Ingredientes dos UsuÃ¡rios</h1>
+        <h1 class="text-base font-semibold flex-1">Ingredientes dos Usuários</h1>
         <span id="admin-badge" class="badge-admin" style="display:none">
             <span class="material-symbols-outlined">verified</span> Admin
         </span>
     </div>
 </header>
 
-<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
     <!-- Banner -->
     <div class="admin-banner">
         <span class="material-symbols-outlined">inventory_2</span>
-        <span>Visualize todos os ingredientes (insumos) cadastrados por cada usuÃ¡rio. Clique em um usuÃ¡rio para ver os detalhes.</span>
+        <span>Visualize todos os ingredientes (insumos) cadastrados por cada usuário. Clique em um usuário para ver os detalhes.</span>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="stat-card">
-            <div class="stat-val" id="stat-usuarios">â€”</div>
-            <div class="stat-lbl">UsuÃ¡rios</div>
+            <div class="stat-val" id="stat-usuarios">—</div>
+            <div class="stat-lbl">Usuários</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-total-ins" style="color:#25f4f4">â€”</div>
+            <div class="stat-val" id="stat-total-ins" style="color:#25f4f4">—</div>
             <div class="stat-lbl">Total Insumos</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-media" style="color:#34d399">â€”</div>
-            <div class="stat-lbl">MÃ©dia / UsuÃ¡rio</div>
+            <div class="stat-val" id="stat-media" style="color:#34d399">—</div>
+            <div class="stat-lbl">Média / Usuário</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-custo-medio" style="color:#fbbf24">â€”</div>
-            <div class="stat-lbl">Custo MÃ©dio</div>
+            <div class="stat-val" id="stat-custo-medio" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Custo Médio</div>
         </div>
     </div>
 
@@ -207,7 +207,7 @@
     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div class="search-wrap flex-1 w-full">
             <span class="material-symbols-outlined ico">search</span>
-            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou negÃ³cioâ€¦" oninput="filtrar()" />
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou negócio…" oninput="filtrar()" />
         </div>
         <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
             <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
@@ -230,21 +230,21 @@
 
 </main>
 
-<!-- â•â• Drawer Insumos â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ Drawer Insumos ═══════════════════════════════════════════════ -->
 <div id="drawer-bg" class="drawer-bg" onclick="closeDrawer()">
     <div class="drawer" onclick="event.stopPropagation()">
         <div class="drawer-head">
             <div class="avatar" id="drawer-avatar">??</div>
             <div style="flex:1;min-width:0">
-                <p id="drawer-nome" class="font-bold text-sm leading-tight">â€”</p>
-                <p id="drawer-negocio" class="text-xs text-slate-400 mt-0.5">â€”</p>
+                <p id="drawer-nome" class="font-bold text-sm leading-tight">—</p>
+                <p id="drawer-negocio" class="text-xs text-slate-400 mt-0.5">—</p>
             </div>
             <button onclick="closeDrawer()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;flex-shrink:0">
                 <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
             </button>
         </div>
 
-        <!-- sub-info do usuÃ¡rio -->
+        <!-- sub-info do usuário -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-wrap:wrap;flex-shrink:0" id="drawer-tags"></div>
 
         <!-- resumo de insumos -->
@@ -254,7 +254,7 @@
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0">
             <div class="search-wrap">
                 <span class="material-symbols-outlined ico">search</span>
-                <input id="ins-search" class="search-input" type="text" placeholder="Filtrar insumosâ€¦" oninput="filtrarInsumos()" />
+                <input id="ins-search" class="search-input" type="text" placeholder="Filtrar insumos…" oninput="filtrarInsumos()" />
             </div>
         </div>
 
@@ -264,7 +264,7 @@
     </div>
 </div>
 
-<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ Toast ════════════════════════════════════════════════════════ -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
     <span id="toast-msg">OK</span>
@@ -276,7 +276,7 @@ let currentFilter = 'todos';
 let currentUserInsumos = [];
 let sortByCount = true;  // true = mais insumos primeiro
 
-// â”€â”€ Guard admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Guard admin ───────────────────────────────────────────────────
 (async () => {
     await _waitForRole(4000);
     if (window.__userRole !== 'admin') {
@@ -284,8 +284,8 @@ let sortByCount = true;  // true = mais insumos primeiro
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <p style="color:#64748b;font-size:.9rem">VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.</p>
-                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
             </div>`;
         return;
     }
@@ -293,7 +293,7 @@ let sortByCount = true;  // true = mais insumos primeiro
     await carregarDados();
 })();
 
-// â”€â”€ Carregar perfis + insumos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Carregar perfis + insumos ──────────────────────────────────────
 async function carregarDados() {
     showLoading();
     try {
@@ -336,13 +336,13 @@ async function carregarDados() {
     }
 }
 
-// â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Stats ──────────────────────────────────────────────────────────
 function atualizarStats() {
     const total = todosUsuarios.length;
     const totalIns = todosUsuarios.reduce((s, u) => s + u.insumos.length, 0);
     const media = total > 0 ? (totalIns / total).toFixed(1) : '0';
 
-    // Custo mÃ©dio global
+    // Custo médio global
     const todosIns = todosUsuarios.flatMap(u => u.insumos);
     const insComPreco = todosIns.filter(i => i.preco != null && i.preco > 0);
     const custoMedio = insComPreco.length > 0
@@ -355,7 +355,7 @@ function atualizarStats() {
     document.getElementById('stat-custo-medio').textContent = fmtR(custoMedio);
 }
 
-// â”€â”€ Filtro + busca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Filtro + busca ─────────────────────────────────────────────────
 function setFilter(f, btn) {
     currentFilter = f;
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
@@ -370,7 +370,7 @@ function toggleSort() {
     if (sortByCount) {
         lbl.textContent = 'Mais insumos';
     } else {
-        lbl.textContent = 'A â†’ Z';
+        lbl.textContent = 'A → Z';
     }
     btn.classList.toggle('active', sortByCount);
     filtrar();
@@ -403,12 +403,12 @@ function filtrar() {
     }
 
     document.getElementById('count-label').textContent =
-        `${list.length} usuÃ¡rio${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
+        `${list.length} usuário${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
 
     renderLista(list);
 }
 
-// â”€â”€ Render lista de usuÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Render lista de usuários ───────────────────────────────────────
 function renderLista(list) {
     const el = document.getElementById('user-list');
 
@@ -416,7 +416,7 @@ function renderLista(list) {
         el.innerHTML = `
             <div class="empty-state">
                 <span class="material-symbols-outlined">person_search</span>
-                <p>Nenhum usuÃ¡rio encontrado.</p>
+                <p>Nenhum usuário encontrado.</p>
             </div>`;
         return;
     }
@@ -434,7 +434,7 @@ function renderLista(list) {
         // Mini stats: unit breakdown
         const unitCounts = {};
         u.insumos.forEach(ins => {
-            const unit = (ins.unidade || 'â€”').toLowerCase();
+            const unit = (ins.unidade || '—').toLowerCase();
             unitCounts[unit] = (unitCounts[unit] || 0) + 1;
         });
         const unitPills = Object.entries(unitCounts).map(([unit, count]) =>
@@ -446,7 +446,7 @@ function renderLista(list) {
             <div class="avatar">${initials}</div>
             <div class="user-info">
                 <div class="user-name">${esc(nomeCompleto)}</div>
-                <div class="user-sub">${esc(p.negocio || 'â€”')} Â· Desde ${criadoEm}</div>
+                <div class="user-sub">${esc(p.negocio || '—')} · Desde ${criadoEm}</div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0">
                 <span class="ins-badge ${badgeClass}">
@@ -459,7 +459,7 @@ function renderLista(list) {
     }).join('');
 }
 
-// â”€â”€ Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Drawer ─────────────────────────────────────────────────────────
 function abrirDrawer(userId) {
     const found = todosUsuarios.find(u => u.perfil.id === userId);
     if (!found) return;
@@ -471,12 +471,12 @@ function abrirDrawer(userId) {
     const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
     document.getElementById('drawer-avatar').textContent = getInitials(p.nome, p.sobrenome);
     document.getElementById('drawer-nome').textContent    = nomeCompleto;
-    document.getElementById('drawer-negocio').textContent = p.negocio || 'NegÃ³cio nÃ£o informado';
+    document.getElementById('drawer-negocio').textContent = p.negocio || 'Negócio não informado';
 
     // Tags de info
     const tags = [];
     if (p.segmento) tags.push({ ico:'storefront', txt: p.segmento });
-    if (p.cidade || p.estado) tags.push({ ico:'location_on', txt: [p.cidade, p.estado].filter(Boolean).join(' â€“ ') });
+    if (p.cidade || p.estado) tags.push({ ico:'location_on', txt: [p.cidade, p.estado].filter(Boolean).join(' – ') });
     tags.push({ ico:'workspace_premium', txt: p.plano || 'gratuito', cls: p.plano && p.plano !== 'gratuito' ? 'cyan' : '' });
     tags.push({ ico:'inventory_2', txt: `${currentUserInsumos.length} insumo${currentUserInsumos.length !== 1 ? 's' : ''}`, cls: currentUserInsumos.length > 0 ? 'green' : '' });
 
@@ -535,7 +535,7 @@ function renderDrawerSummary() {
                 <div class="sum-val cyan">${ins.length}</div>
             </div>
             <div class="sum-cell">
-                <div class="sum-lbl">Custo MÃ©dio</div>
+                <div class="sum-lbl">Custo Médio</div>
                 <div class="sum-val amber">${fmtR(custoMedio)}</div>
             </div>
             <div class="sum-cell">
@@ -543,7 +543,7 @@ function renderDrawerSummary() {
                 <div class="sum-val green">${fmtR(totalCusto)}</div>
             </div>
             <div class="sum-cell">
-                <div class="sum-lbl">Com PreÃ§o</div>
+                <div class="sum-lbl">Com Preço</div>
                 <div class="sum-val">${comPreco} / ${ins.length}</div>
             </div>
         </div>
@@ -585,7 +585,7 @@ function renderInsumos(lista) {
         body.innerHTML = `
             <div style="text-align:center;padding:3rem 1rem;color:#475569">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem">inventory_2</span>
-                <p>${currentUserInsumos.length === 0 ? 'Este usuÃ¡rio ainda nÃ£o cadastrou insumos.' : 'Nenhum insumo encontrado.'}</p>
+                <p>${currentUserInsumos.length === 0 ? 'Este usuário ainda não cadastrou insumos.' : 'Nenhum insumo encontrado.'}</p>
             </div>`;
         return;
     }
@@ -593,13 +593,13 @@ function renderInsumos(lista) {
     // Tabela header
     const headerHtml = `<div style="display:flex;align-items:center;justify-content:space-between;padding:0 .4rem .4rem;flex-shrink:0">
         <span style="font-size:.7rem;font-weight:700;color:#64748b">${lista.length} insumo${lista.length !== 1 ? 's' : ''}</span>
-        <span style="font-size:.65rem;color:#475569">PreÃ§o emb.</span>
+        <span style="font-size:.65rem;color:#475569">Preço emb.</span>
     </div>`;
 
     const rows = lista.map((ins, idx) => {
         const preco   = Number(ins.preco || 0);
         const pesoEmb = Number(ins.peso_emb || 0);
-        const unidade = (ins.unidade || 'â€”').toLowerCase();
+        const unidade = (ins.unidade || '—').toLowerCase();
         const data    = new Date(ins.created_at).toLocaleDateString('pt-BR');
 
         // Cost per base unit
@@ -627,11 +627,11 @@ function renderInsumos(lista) {
             <div style="flex:1;min-width:0;overflow:hidden">
                 <div style="font-size:.82rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(ins.nome || 'Sem nome')}</div>
                 <div style="font-size:.62rem;color:#64748b;margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                    ${embTxt ? embTxt + ' Â· ' : ''}${custoTxt ? custoTxt + ' Â· ' : ''}${data}
+                    ${embTxt ? embTxt + ' · ' : ''}${custoTxt ? custoTxt + ' · ' : ''}${data}
                 </div>
             </div>
             <div style="flex-shrink:0;text-align:right">
-                <div style="font-size:.85rem;font-weight:800;color:${preco > 0 ? '#25f4f4' : '#334155'}">${preco > 0 ? fmtR(preco) : 'â€”'}</div>
+                <div style="font-size:.85rem;font-weight:800;color:${preco > 0 ? '#25f4f4' : '#334155'}">${preco > 0 ? fmtR(preco) : '—'}</div>
             </div>
         </div>`;
     }).join('');
@@ -639,13 +639,13 @@ function renderInsumos(lista) {
     body.innerHTML = headerHtml + rows;
 }
 
-// â”€â”€ Shimmer loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shimmer loading ────────────────────────────────────────────────
 function showLoading() {
     document.getElementById('user-list').innerHTML =
         Array(6).fill('<div class="shimmer"></div>').join('');
 }
 
-// â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Utilitários ───────────────────────────────────────────────────
 function getInitials(nome, sobrenome) {
     return (((nome || '?')[0] || '') + ((sobrenome || '')[0] || '')).toUpperCase() || '?';
 }
@@ -654,7 +654,7 @@ function esc(str) {
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Toast ──────────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -670,4 +670,3 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 </script>
 </body>
 </html>
-
