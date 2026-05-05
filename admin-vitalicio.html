@@ -75,14 +75,22 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-2 gap-3" id="stats-row">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="stats-row">
         <div class="stat-card">
             <div class="stat-val" id="stat-views" style="color:#25f4f4">—</div>
-            <div class="stat-lbl">Visitas à Página</div>
+            <div class="stat-lbl">Visitas Totais</div>
         </div>
         <div class="stat-card">
             <div class="stat-val" id="stat-clicks" style="color:#f59e0b">—</div>
-            <div class="stat-lbl">Cliques em Comprar</div>
+            <div class="stat-lbl">Cliques Totais</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-avg-views" style="color:#25f4f4">—</div>
+            <div class="stat-lbl">Média/Dia (Visitas)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-avg-clicks" style="color:#f59e0b">—</div>
+            <div class="stat-lbl">Média/Dia (Cliques)</div>
         </div>
     </div>
 
@@ -165,12 +173,30 @@ async function loadDados() {
 
 function updateStats() {
     let views = 0, clicks = 0;
+    const daysSet = new Set();
+
     allUsers.forEach(p => {
-        if (p.vitalicio_view_at) views++;
-        if (p.vitalicio_click_at) clicks++;
+        if (p.vitalicio_view_at) {
+            views++;
+            daysSet.add(new Date(p.vitalicio_view_at).toLocaleDateString('pt-BR'));
+        }
+        if (p.vitalicio_click_at) {
+            clicks++;
+            daysSet.add(new Date(p.vitalicio_click_at).toLocaleDateString('pt-BR'));
+        }
     });
+
+    const totalDays = daysSet.size || 1;
+    const avgViews = (views / totalDays).toFixed(1);
+    const avgClicks = (clicks / totalDays).toFixed(1);
+
     document.getElementById('stat-views').textContent = views;
     document.getElementById('stat-clicks').textContent = clicks;
+    
+    const avgViewsEl = document.getElementById('stat-avg-views');
+    const avgClicksEl = document.getElementById('stat-avg-clicks');
+    if (avgViewsEl) avgViewsEl.textContent = avgViews;
+    if (avgClicksEl) avgClicksEl.textContent = avgClicks;
 }
 
 function filterUsuarios() {
