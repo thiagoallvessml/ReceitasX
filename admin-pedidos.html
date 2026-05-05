@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -24,7 +24,7 @@
         .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
         .btn-back:hover { color:#25f4f4; }
 
-        /* ── KPI cards ── */
+        /* â”€â”€ KPI cards â”€â”€ */
         .kpi-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem; }
         @media(min-width:640px){ .kpi-grid { grid-template-columns:repeat(4,1fr); } }
         .kpi { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1rem 1.1rem;position:relative;overflow:hidden; }
@@ -41,20 +41,20 @@
         .kpi-val.cyan   { color:#25f4f4; }
         .kpi-sub { font-size:.68rem;color:#475569;margin-top:.3rem; }
 
-        /* ── Filter tabs ── */
+        /* â”€â”€ Filter tabs â”€â”€ */
         .filter-bar { display:flex;gap:.3rem;flex-wrap:wrap; }
         .filter-chip { padding:.4rem .85rem;border-radius:.6rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap; }
         .filter-chip.active { background:#2A2A2A;color:#f1f5f9;border-color:#3A3A3A; }
         .filter-chip:hover:not(.active) { color:#94a3b8;border-color:#3A3A3A; }
 
-        /* ── Search ── */
+        /* â”€â”€ Search â”€â”€ */
         .search-wrap { position:relative; }
         .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
         .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A !important;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.88rem;outline:none;transition:border-color .2s; }
         .search-input::placeholder { color:#475569 !important; }
         .search-input:focus { border-color:rgba(37,244,244,.4) !important; box-shadow:none !important; }
 
-        /* ── Table ── */
+        /* â”€â”€ Table â”€â”€ */
         .tbl-wrap { overflow-x:auto;border-radius:.85rem;border:1px solid #2A2A2A; }
         table { width:100%;border-collapse:collapse;font-size:.82rem; }
         thead th { background:#1A1A1A;padding:.75rem 1rem;text-align:left;font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#475569;white-space:nowrap;border-bottom:1px solid #2A2A2A;cursor:pointer;user-select:none;transition:color .15s; }
@@ -67,38 +67,38 @@
         tbody td { padding:.75rem 1rem;color:#cbd5e1;vertical-align:middle; }
         .td-bold { font-weight:700;color:#f1f5f9; }
 
-        /* ── Status badges ── */
+        /* â”€â”€ Status badges â”€â”€ */
         .s-badge { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:.4rem;white-space:nowrap; }
         .s-pago     { background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25); }
         .s-pendente { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25); }
         .s-badge .material-symbols-outlined { font-size:.75rem; }
 
-        /* ── Cupom badge ── */
+        /* â”€â”€ Cupom badge â”€â”€ */
         .cupom-badge { display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2); }
         .cupom-badge .material-symbols-outlined { font-size:.7rem; }
 
-        /* ── Ref badge ── */
+        /* â”€â”€ Ref badge â”€â”€ */
         .ref-badge { display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(37,244,244,.08);color:#25f4f4;border:1px solid rgba(37,244,244,.2); }
         .ref-badge .material-symbols-outlined { font-size:.7rem; }
 
-        /* ── Empty ── */
+        /* â”€â”€ Empty â”€â”€ */
         .empty { text-align:center;padding:3rem 1rem;color:#475569; }
         .empty .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
 
-        /* ── Shimmer ── */
+        /* â”€â”€ Shimmer â”€â”€ */
         .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.65rem;height:3.2rem; }
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-        /* ── Admin banner ── */
+        /* â”€â”€ Admin banner â”€â”€ */
         .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:.75rem;font-size:.78rem;color:#fb923c; }
         .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
 
-        /* ── Export btn ── */
+        /* â”€â”€ Export btn â”€â”€ */
         .btn-export { display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s; }
         .btn-export:hover { border-color:#475569;color:#94a3b8; }
         .btn-export .material-symbols-outlined { font-size:.95rem; }
 
-        /* ── Pagination ── */
+        /* â”€â”€ Pagination â”€â”€ */
         .pag-wrap { display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem 0; }
         .pag-btn { padding:.4rem .75rem;border-radius:.5rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s; }
         .pag-btn.active { background:#2A2A2A;color:#f1f5f9; }
@@ -109,7 +109,7 @@
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
 
-<!-- ══ Header ════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="history.back()">
@@ -124,12 +124,12 @@
     </div>
 </header>
 
-<!-- ══ Main ═══════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
 
     <div class="admin-banner">
         <span class="material-symbols-outlined">lock</span>
-        <span>Todos os pedidos do ReceitasX — vendas confirmadas e pendentes.</span>
+        <span>Todos os pedidos do ReceitasX â€” vendas confirmadas e pendentes.</span>
     </div>
 
     <!-- KPIs -->
@@ -159,7 +159,7 @@
         </div>
         <div class="search-wrap flex-1" style="min-width:200px">
             <span class="material-symbols-outlined ico">search</span>
-            <input id="search" class="search-input" type="text" placeholder="Buscar por email, cupom, billing…" oninput="renderTable()" />
+            <input id="search" class="search-input" type="text" placeholder="Buscar por email, cupom, billingâ€¦" oninput="renderTable()" />
         </div>
     </div>
 
@@ -175,7 +175,7 @@
                     <th>Status</th>
                     <th>Cupom</th>
                     <th>Afiliado</th>
-                    <th>Método</th>
+                    <th>MÃ©todo</th>
                     <th>Billing ID</th>
                 </tr>
             </thead>
@@ -190,7 +190,7 @@
 
 </main>
 
-<!-- ══ Script ═══════════════════════════════════════════════════ -->
+<!-- â•â• Script â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script>
 let allPedidos = [];
 let filteredPedidos = [];
@@ -200,7 +200,7 @@ let sortAsc = false;
 let currentPage = 1;
 const PER_PAGE = 20;
 
-// ── Guard: só admin ────────────────────────────────────────────
+// â”€â”€ Guard: sÃ³ admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (async () => {
     await _waitForRole(4000);
     if (window.__userRole !== 'admin') {
@@ -208,7 +208,7 @@ const PER_PAGE = 20;
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
             </div>`;
         return;
     }
@@ -216,7 +216,7 @@ const PER_PAGE = 20;
     await loadPedidos();
 })();
 
-// ── Load ──────────────────────────────────────────────────────
+// â”€â”€ Load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadPedidos() {
     try {
         const { data, error } = await sb
@@ -233,7 +233,7 @@ async function loadPedidos() {
     }
 }
 
-// ── KPIs ──────────────────────────────────────────────────────
+// â”€â”€ KPIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderKPIs() {
     const pagos = allPedidos.filter(p => p.status === 'pago');
     const pendentes = allPedidos.filter(p => p.status === 'pendente');
@@ -259,18 +259,18 @@ function renderKPIs() {
             <div class="kpi-sub">${fmtR(fatHoje)} faturado hoje</div>
         </div>
         <div class="kpi kpi-yellow">
-            <div class="kpi-lbl">Ticket Médio</div>
+            <div class="kpi-lbl">Ticket MÃ©dio</div>
             <div class="kpi-val yellow">${fmtR(ticketMedio)}</div>
-            <div class="kpi-sub">${comCupom} com cupom · ${viaAfiliado} via afiliado</div>
+            <div class="kpi-sub">${comCupom} com cupom Â· ${viaAfiliado} via afiliado</div>
         </div>
         <div class="kpi kpi-cyan">
             <div class="kpi-lbl">Pendentes</div>
             <div class="kpi-val cyan">${pendentes.length}</div>
-            <div class="kpi-sub">aguardando confirmação</div>
+            <div class="kpi-sub">aguardando confirmaÃ§Ã£o</div>
         </div>`;
 }
 
-// ── Filters ───────────────────────────────────────────────────
+// â”€â”€ Filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setFilter(f, btn) {
     currentFilter = f;
     currentPage = 1;
@@ -279,7 +279,7 @@ function setFilter(f, btn) {
     renderTable();
 }
 
-// ── Sort ──────────────────────────────────────────────────────
+// â”€â”€ Sort â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function sortBy(field) {
     if (sortField === field) sortAsc = !sortAsc;
     else { sortField = field; sortAsc = field === 'email'; }
@@ -287,7 +287,7 @@ function sortBy(field) {
     renderTable();
 }
 
-// ── Render ────────────────────────────────────────────────────
+// â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTable() {
     const q = (document.getElementById('search').value || '').toLowerCase().trim();
 
@@ -344,15 +344,15 @@ function renderTable() {
 
         const cupom = p.cupom_usado
             ? `<span class="cupom-badge"><span class="material-symbols-outlined">confirmation_number</span>${esc(p.cupom_usado)}</span>`
-            : `<span style="color:#475569">—</span>`;
+            : `<span style="color:#475569">â€”</span>`;
 
         const ref = p.ref_afiliado
             ? `<span class="ref-badge"><span class="material-symbols-outlined">handshake</span>${esc(p.ref_afiliado)}</span>`
-            : `<span style="color:#475569">—</span>`;
+            : `<span style="color:#475569">â€”</span>`;
 
         const billing = p.billing_id
-            ? `<code style="font-size:.65rem;color:#64748b;background:#111;padding:.1rem .4rem;border-radius:.3rem;border:1px solid #2A2A2A">${esc(p.billing_id.slice(0, 16))}…</code>`
-            : `<span style="color:#475569">—</span>`;
+            ? `<code style="font-size:.65rem;color:#64748b;background:#111;padding:.1rem .4rem;border-radius:.3rem;border:1px solid #2A2A2A">${esc(p.billing_id.slice(0, 16))}â€¦</code>`
+            : `<span style="color:#475569">â€”</span>`;
 
         return `
         <tr>
@@ -362,14 +362,14 @@ function renderTable() {
                 <div style="font-size:.65rem;color:#475569">${fmtTime(p.created_at)}</div>
             </td>
             <td>
-                <div class="td-bold" style="font-size:.82rem">${esc(p.email || '—')}</div>
-                ${p.user_id ? `<div style="font-size:.6rem;color:#475569">${p.user_id.slice(0,8)}…</div>` : `<div style="font-size:.6rem;color:#f87171">sem user_id</div>`}
+                <div class="td-bold" style="font-size:.82rem">${esc(p.email || 'â€”')}</div>
+                ${p.user_id ? `<div style="font-size:.6rem;color:#475569">${p.user_id.slice(0,8)}â€¦</div>` : `<div style="font-size:.6rem;color:#f87171">sem user_id</div>`}
             </td>
             <td class="td-bold" style="color:#34d399;white-space:nowrap;font-size:.95rem">${fmtR(p.valor_pago)}</td>
             <td>${statusBadge}</td>
             <td>${cupom}</td>
             <td>${ref}</td>
-            <td style="font-size:.75rem;color:#64748b">${esc((p.metodo_pag || '—').toUpperCase())}</td>
+            <td style="font-size:.75rem;color:#64748b">${esc((p.metodo_pag || 'â€”').toUpperCase())}</td>
             <td>${billing}</td>
         </tr>`;
     }).join('');
@@ -386,7 +386,7 @@ function renderPagination(totalPages, total) {
 
     for (let i = 1; i <= totalPages; i++) {
         if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
-            if (i === 3 || i === totalPages - 2) html += `<span class="pag-info">…</span>`;
+            if (i === 3 || i === totalPages - 2) html += `<span class="pag-info">â€¦</span>`;
             continue;
         }
         html += `<button class="pag-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
@@ -402,9 +402,9 @@ function goPage(p) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Export CSV ────────────────────────────────────────────────
+// â”€â”€ Export CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function exportarCSV() {
-    const headers = ['ID','Data','Email','Valor','Status','Cupom','Afiliado','Método','Billing ID','User ID'];
+    const headers = ['ID','Data','Email','Valor','Status','Cupom','Afiliado','MÃ©todo','Billing ID','User ID'];
     const rows = filteredPedidos.map(p => [
         p.id,
         p.created_at?.slice(0, 19).replace('T', ' ') || '',
@@ -426,12 +426,12 @@ function exportarCSV() {
     a.click();
 }
 
-// ── Helpers ───────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmtR(v) {
     return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function fmtDate(d) {
-    if (!d) return '—';
+    if (!d) return 'â€”';
     const dt = new Date(d);
     return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
@@ -449,3 +449,4 @@ function esc(s) {
 
 </body>
 </html>
+

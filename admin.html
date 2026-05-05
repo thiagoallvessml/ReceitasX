@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -64,7 +64,7 @@
         }
         .sino-ring { animation: sinoPulse .6s ease both; }
 
-        /* Painel de notificações */
+        /* Painel de notificaÃ§Ãµes */
         #notif-panel {
             position: fixed; top: 3.5rem; right: 1rem;
             width: 320px; max-width: calc(100vw - 2rem);
@@ -129,28 +129,28 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
-<!-- ══ Header sticky ═════════════════════════════════════════ -->
+<!-- â•â• Header sticky â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
     <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.75rem">
         <span style="font-size:.95rem;font-weight:800;flex:1;letter-spacing:-.01em">
             <span style="color:#25f4f4">Receitas</span><span style="color:#f1f5f9">X</span>
         </span>
-        <!-- Voltar ao Início -->
-          <button onclick="window.location.href='index.html'" title="Voltar ao Início"
+        <!-- Voltar ao InÃ­cio -->
+          <button onclick="window.location.href='index.html'" title="Voltar ao InÃ­cio"
               style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
               onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
               onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
               <span class="material-symbols-outlined" style="font-size:1.15rem">home</span>
           </button>
-          <!-- Sino de notificações -->
-        <button id="sino-btn" onclick="toggleNotifPanel()" title="Notificações"
+          <!-- Sino de notificaÃ§Ãµes -->
+        <button id="sino-btn" onclick="toggleNotifPanel()" title="NotificaÃ§Ãµes"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
             onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
             <span class="material-symbols-outlined" id="sino-icon" style="font-size:1.15rem">notifications</span>
             <span id="sino-badge">0</span>
         </button>
-        <!-- Botão Sair -->
+        <!-- BotÃ£o Sair -->
         <button onclick="sb.auth.signOut().then(() => window.location.replace('login.html'))" title="Sair"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#f87171';this.style.borderColor='rgba(248,113,113,.4)'"
@@ -160,7 +160,7 @@
         <!-- Painel -->
         <div id="notif-panel">
             <div class="notif-panel-head">
-                <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">Notificações</span>
+                <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">NotificaÃ§Ãµes</span>
                 <div style="display:flex;gap:.4rem">
                     <button onclick="marcarTodasLidas()" style="font-size:.68rem;color:#475569;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:.4rem;transition:color .15s" onmouseover="this.style.color='#25f4f4'" onmouseout="this.style.color='#475569'">Marcar todas como lidas</button>
                     <button onclick="limparNotificacoes()" style="font-size:.68rem;color:#475569;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:.4rem;transition:color .15s" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#475569'">Limpar</button>
@@ -171,94 +171,94 @@
     </div>
 </header>
 <div class="p-6 space-y-8">
-    <!-- ── Admin (Dashboard Exclusivo) ─────────────── -->
+    <!-- â”€â”€ Admin (Dashboard Exclusivo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <section id="admin-hub">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-sm" style="color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
-            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Administração</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">AdministraÃ§Ã£o</h2>
             <span class="role-badge-admin">Admin</span>
         </div>
-        <!-- ═══ MÉTRICAS & RELATÓRIOS ═══ -->
-        <div class="section-divider"><div class="sec-icon" style="background:rgba(37,244,244,.1)"><span class="material-symbols-outlined" style="color:#25f4f4">analytics</span></div><h3>Métricas & Relatórios</h3></div>
+        <!-- â•â•â• MÃ‰TRICAS & RELATÃ“RIOS â•â•â• -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(37,244,244,.1)"><span class="material-symbols-outlined" style="color:#25f4f4">analytics</span></div><h3>MÃ©tricas & RelatÃ³rios</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Analytics -->
-            <a href="admin-analytics.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-analytics" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">analytics</span>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Analytics</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Métricas, funil e receita em tempo real</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">MÃ©tricas, funil e receita em tempo real</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Sessões de Acesso -->
-            <a href="admin-sessoes.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- SessÃµes de Acesso -->
+            <a href="admin-sessoes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.1);color:#34d399;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">schedule</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Sessões de Acesso</h4>
+                    <h4 class="text-sm font-bold">SessÃµes de Acesso</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Quem acessou, quando e por quanto tempo</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Visão de Progresso -->
-            <a href="admin-progresso.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- VisÃ£o de Progresso -->
+            <a href="admin-progresso" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">query_stats</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Visão de Progresso</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Progresso dos usuários no sistema</p>
+                    <h4 class="text-sm font-bold">VisÃ£o de Progresso</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Progresso dos usuÃ¡rios no sistema</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Cliques de Afiliados -->
-            <a href="admin-cliques-afiliados.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-cliques-afiliados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Cliques de Afiliados</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">De onde vêm os visitantes via link</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">De onde vÃªm os visitantes via link</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
         </div>
 
-        <!-- ═══ USUÁRIOS & CONTAS ═══ -->
-        <div class="section-divider"><div class="sec-icon" style="background:rgba(251,146,60,.1)"><span class="material-symbols-outlined" style="color:#fb923c">group</span></div><h3>Usuários & Contas</h3></div>
+        <!-- â•â•â• USUÃRIOS & CONTAS â•â•â• -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(251,146,60,.1)"><span class="material-symbols-outlined" style="color:#fb923c">group</span></div><h3>UsuÃ¡rios & Contas</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <!-- Gestão de Usuários -->
-            <a href="admin-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- GestÃ£o de UsuÃ¡rios -->
+            <a href="admin-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">manage_accounts</span>
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">Gestão de Usuários</h4>
+                        <h4 class="text-sm font-bold">GestÃ£o de UsuÃ¡rios</h4>
                         <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-online-usuarios">0</span>
                         <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-total-usuarios">0</span>
                         <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-vitalicios">0</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400" style="margin-top:.1rem">Roles, permissões e contas</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" style="margin-top:.1rem">Roles, permissÃµes e contas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Monitorar Configurações -->
-            <a href="admin-usuarios-config.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Monitorar ConfiguraÃ§Ãµes -->
+            <a href="admin-usuarios-config" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">settings_account_box</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Config dos Usuários</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Gás, energia, impostos e metas</p>
+                    <h4 class="text-sm font-bold">Config dos UsuÃ¡rios</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">GÃ¡s, energia, impostos e metas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Administrar Acessos -->
-            <a href="admin-vitalicio.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-vitalicio" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">key</span>
                 </div>
@@ -269,7 +269,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Email Marketing -->
-            <a href="admin-emails.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-emails" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(56,189,248,.1);color:#38bdf8;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">mail</span>
                 </div>
@@ -281,11 +281,11 @@
             </a>
         </div>
 
-        <!-- ═══ FINANCEIRO ═══ -->
+        <!-- â•â•â• FINANCEIRO â•â•â• -->
         <div class="section-divider"><div class="sec-icon" style="background:rgba(52,211,153,.1)"><span class="material-symbols-outlined" style="color:#34d399">account_balance</span></div><h3>Financeiro</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Pedidos -->
-            <a href="admin-pedidos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-pedidos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
                 </div>
@@ -295,30 +295,30 @@
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Histórico de Pagamentos -->
-            <a href="admin-historico-pagamentos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- HistÃ³rico de Pagamentos -->
+            <a href="admin-historico-pagamentos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">history</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Histórico de Pagamentos</h4>
+                    <h4 class="text-sm font-bold">HistÃ³rico de Pagamentos</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Registro de pagamentos efetuados</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Faturamento de Afiliados -->
-            <a href="admin-faturamento-afiliados.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-faturamento-afiliados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Faturamento de Afiliados</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Saques, comissões e ranking</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Saques, comissÃµes e ranking</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Gerenciar Cupons -->
-            <a href="admin-cupons.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-cupons" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(167,139,250,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">confirmation_number</span>
                 </div>
@@ -329,56 +329,56 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Ver Reembolsos -->
-            <a href="admin-reembolsos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-reembolsos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">currency_exchange</span>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Ver Reembolsos</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Solicitações de reembolso dos usuários</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">SolicitaÃ§Ãµes de reembolso dos usuÃ¡rios</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
         </div>
 
-        <!-- ═══ CONTEÚDO & DADOS ═══ -->
-        <div class="section-divider"><div class="sec-icon" style="background:rgba(56,189,248,.1)"><span class="material-symbols-outlined" style="color:#38bdf8">database</span></div><h3>Conteúdo & Dados</h3></div>
+        <!-- â•â•â• CONTEÃšDO & DADOS â•â•â• -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(56,189,248,.1)"><span class="material-symbols-outlined" style="color:#38bdf8">database</span></div><h3>ConteÃºdo & Dados</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <!-- Receitas dos Usuários -->
-            <a href="admin-receitas-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Receitas dos UsuÃ¡rios -->
+            <a href="admin-receitas-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">menu_book</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Receitas dos Usuários</h4>
+                    <h4 class="text-sm font-bold">Receitas dos UsuÃ¡rios</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Visualize receitas criadas por cada conta</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Ingredientes dos Usuários -->
-            <a href="admin-insumos-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Ingredientes dos UsuÃ¡rios -->
+            <a href="admin-insumos-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">inventory_2</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Ingredientes dos Usuários</h4>
+                    <h4 class="text-sm font-bold">Ingredientes dos UsuÃ¡rios</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Visualize insumos cadastrados por cada conta</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Embalagens dos Usuários -->
-            <a href="admin-embalagens-usuarios.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Embalagens dos UsuÃ¡rios -->
+            <a href="admin-embalagens-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Embalagens dos Usuários</h4>
+                    <h4 class="text-sm font-bold">Embalagens dos UsuÃ¡rios</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Visualize embalagens cadastradas por cada conta</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Produtos Vinculados -->
-            <a href="admin-produtos-vinculados.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-produtos-vinculados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">link</span>
                 </div>
@@ -389,7 +389,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Vitrine TikTok -->
-            <a href="admin-vitrine-tiktok.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-vitrine-tiktok" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
                 </div>
@@ -401,53 +401,53 @@
             </a>
         </div>
 
-        <!-- ═══ CONFIGURAÇÕES & COMUNICAÇÃO ═══ -->
-        <div class="section-divider"><div class="sec-icon" style="background:rgba(167,139,250,.1)"><span class="material-symbols-outlined" style="color:#a78bfa">settings</span></div><h3>Configurações & Comunicação</h3></div>
+        <!-- â•â•â• CONFIGURAÃ‡Ã•ES & COMUNICAÃ‡ÃƒO â•â•â• -->
+        <div class="section-divider"><div class="sec-icon" style="background:rgba(167,139,250,.1)"><span class="material-symbols-outlined" style="color:#a78bfa">settings</span></div><h3>ConfiguraÃ§Ãµes & ComunicaÃ§Ã£o</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <!-- Configurações do Sistema -->
-            <a href="admin-configuracoes.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- ConfiguraÃ§Ãµes do Sistema -->
+            <a href="admin-configuracoes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">admin_panel_settings</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Configurações do Sistema</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Comissão, saque mínimo e valores</p>
+                    <h4 class="text-sm font-bold">ConfiguraÃ§Ãµes do Sistema</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">ComissÃ£o, saque mÃ­nimo e valores</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Avisos aos Usuários -->
-            <a href="admin-avisos.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Avisos aos UsuÃ¡rios -->
+            <a href="admin-avisos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">Avisos aos Usuários</h4>
+                    <h4 class="text-sm font-bold">Avisos aos UsuÃ¡rios</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Mensagens popup ao entrar no sistema</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Feedbacks dos Usuários -->
-            <a href="admin-feedbacks.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <!-- Feedbacks dos UsuÃ¡rios -->
+            <a href="admin-feedbacks" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(139,92,246,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">forum</span>
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">Feedbacks dos Usuários</h4>
+                        <h4 class="text-sm font-bold">Feedbacks dos UsuÃ¡rios</h4>
                         <span style="display:none;font-size:.6rem;font-weight:700;background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-feedbacks-admin">0 Pendentes</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400" style="margin-top:.1rem">Dúvidas, sugestões, elogios e bugs</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" style="margin-top:.1rem">DÃºvidas, sugestÃµes, elogios e bugs</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Gerenciar Tutoriais -->
-            <a href="admin-tutoriais.html" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-tutoriais" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">video_library</span>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Gerenciar Tutoriais</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Adicionar vídeos do YouTube</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Adicionar vÃ­deos do YouTube</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -455,7 +455,7 @@
 
     </section>
     <script>
-    // Controle de visibilidade por role — executa direto ao carregar
+    // Controle de visibilidade por role â€” executa direto ao carregar
     (async () => {
         try {
             const session = await getSession();
@@ -493,7 +493,7 @@
                     }
                 } catch(_) {}
 
-                // Contar total de usuários
+                // Contar total de usuÃ¡rios
                 try {
                     const { count: totalUsuarios } = await sb
                         .from('perfis')
@@ -508,7 +508,7 @@
                     }
                 } catch(_) {}
 
-                // Contar vitalícios
+                // Contar vitalÃ­cios
                 try {
                     const { count: vitaliciosCount } = await sb
                         .from('perfis')
@@ -537,7 +537,7 @@
                 } catch(_) {}
             }
 
-            // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
+            // Oculta o card de Acesso VitalÃ­cio se o usuÃ¡rio jÃ¡ tem plano vitalicio
             try {
                 const { data: perfilPlano } = await sb
                     .from('perfis')
@@ -546,10 +546,10 @@
                     .maybeSingle();
 
                 if (perfilPlano?.plano === 'vitalicio') {
-                    // Usuário já é vitalício — mantém card oculto
-                    // (o card já começa com display:none no HTML)
+                    // UsuÃ¡rio jÃ¡ Ã© vitalÃ­cio â€” mantÃ©m card oculto
+                    // (o card jÃ¡ comeÃ§a com display:none no HTML)
                 } else {
-                    // Não é vitalício — exibe o card de compra
+                    // NÃ£o Ã© vitalÃ­cio â€” exibe o card de compra
                     const card = document.getElementById('card-acesso-vitalicio');
                     if (card) card.style.display = '';
                 }
@@ -621,14 +621,14 @@
     <div style="height:.5rem"></div>
 
     <script>
-    /* ══ SINO DE NOTIFICAÇÕES ════════════════════════════════ */
+    /* â•â• SINO DE NOTIFICAÃ‡Ã•ES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     const NOTIF_KEY = 'receitasx_notificacoes';
 
     function getNotifs() {
         return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
     }
     function saveNotifs(arr) {
-        // Mantém no máximo 50
+        // MantÃ©m no mÃ¡ximo 50
         localStorage.setItem(NOTIF_KEY, JSON.stringify(arr.slice(0, 50)));
     }
 
@@ -659,8 +659,8 @@
             el.innerHTML = `
                 <div class="notif-empty">
                     <span class="material-symbols-outlined">notifications_off</span>
-                    <p style="font-size:.82rem;font-weight:600;color:#475569">Nenhuma notificação ainda</p>
-                    <p style="font-size:.72rem;color:#334155">As atividades de venda aparecerão aqui.</p>
+                    <p style="font-size:.82rem;font-weight:600;color:#475569">Nenhuma notificaÃ§Ã£o ainda</p>
+                    <p style="font-size:.72rem;color:#334155">As atividades de venda aparecerÃ£o aqui.</p>
                 </div>`;
             return;
         }
@@ -690,10 +690,10 @@
         const h    = Math.floor(diff / 3600000);
         const d    = Math.floor(diff / 86400000);
         if (min  < 1)  return 'agora mesmo';
-        if (min  < 60) return `há ${min} min`;
-        if (h    < 24) return `há ${h}h`;
+        if (min  < 60) return `hÃ¡ ${min} min`;
+        if (h    < 24) return `hÃ¡ ${h}h`;
         if (d    === 1) return 'ontem';
-        return `há ${d} dias`;
+        return `hÃ¡ ${d} dias`;
     }
 
     function toggleNotifPanel() {
@@ -738,13 +738,13 @@
         }
     });
 
-    // Expõe função para scripts externos (notificacoes-afiliado.js)
+    // ExpÃµe funÃ§Ã£o para scripts externos (notificacoes-afiliado.js)
     window.adicionarNotificacao = function(notif) {
         const list = getNotifs();
         list.unshift({
             id:     Date.now().toString(),
             tipo:   notif.tipo   || 'info',
-            titulo: notif.titulo || 'Nova notificação',
+            titulo: notif.titulo || 'Nova notificaÃ§Ã£o',
             desc:   notif.desc   || '',
             href:   notif.href   || '',
             ts:     Date.now(),
@@ -764,7 +764,7 @@
 
     <script src="notificacoes-afiliado.js"></script>
 
-    <!-- ══ Modal de Avisos do Admin ══════════════════════════════════ -->
+    <!-- â•â• Modal de Avisos do Admin â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
     <style>
         #aviso-overlay {
             position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
@@ -839,7 +839,7 @@
     </div>
 
     <script>
-    /* ══ AVISOS DO ADMIN — Popup ao entrar ════════════════════════ */
+    /* â•â• AVISOS DO ADMIN â€” Popup ao entrar â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     let avisosQueue = [];
     let avisoAtualId = null;
 
@@ -849,7 +849,7 @@
             if (!session) return;
             const uid = session.user.id;
 
-            // Buscar avisos ativos (para todos OU para este usuário)
+            // Buscar avisos ativos (para todos OU para este usuÃ¡rio)
             const { data: avisos, error } = await sb
                 .from('avisos_admin')
                 .select('*')
@@ -859,7 +859,7 @@
 
             if (error || !avisos?.length) return;
 
-            // Buscar quais já foram vistos
+            // Buscar quais jÃ¡ foram vistos
             const { data: vistos } = await sb
                 .from('avisos_vistos')
                 .select('aviso_id')
@@ -867,7 +867,7 @@
 
             const vistosSet = new Set((vistos || []).map(v => v.aviso_id));
 
-            // Filtrar não vistos
+            // Filtrar nÃ£o vistos
             avisosQueue = avisos.filter(a => !vistosSet.has(a.id));
 
             if (avisosQueue.length > 0) {
@@ -887,7 +887,7 @@
 
         // Configurar estilo por tipo
         const configs = {
-            info:     { icon:'info',         bg:'rgba(96,165,250,.1)',  border:'rgba(96,165,250,.25)', color:'#60a5fa', label:'Informação',labelBg:'rgba(96,165,250,.12)',labelBorder:'rgba(96,165,250,.25)' },
+            info:     { icon:'info',         bg:'rgba(96,165,250,.1)',  border:'rgba(96,165,250,.25)', color:'#60a5fa', label:'InformaÃ§Ã£o',labelBg:'rgba(96,165,250,.12)',labelBorder:'rgba(96,165,250,.25)' },
             aviso:    { icon:'warning',      bg:'rgba(251,191,36,.1)', border:'rgba(251,191,36,.25)', color:'#fbbf24', label:'Aviso',      labelBg:'rgba(251,191,36,.12)', labelBorder:'rgba(251,191,36,.25)' },
             urgente:  { icon:'priority_high', bg:'rgba(248,113,113,.1)',border:'rgba(248,113,113,.25)',color:'#f87171', label:'Urgente',    labelBg:'rgba(248,113,113,.12)',labelBorder:'rgba(248,113,113,.25)' },
             novidade: { icon:'auto_awesome', bg:'rgba(52,211,153,.1)', border:'rgba(52,211,153,.25)', color:'#34d399', label:'Novidade',   labelBg:'rgba(52,211,153,.12)', labelBorder:'rgba(52,211,153,.25)' },
@@ -918,13 +918,13 @@
             try {
                 const { data: { session } } = await sb.auth.getSession();
                 if (session) {
-                    // Marcar como visto para este usuário
+                    // Marcar como visto para este usuÃ¡rio
                     await sb.from('avisos_vistos').insert({
                         aviso_id: avisoAtualId,
                         user_id: session.user.id
                     });
 
-                    // Desativar automaticamente SOMENTE se for um aviso direcionado a um usuário específico
+                    // Desativar automaticamente SOMENTE se for um aviso direcionado a um usuÃ¡rio especÃ­fico
                     if (window.avisoAtualInfo && window.avisoAtualInfo.destino === 'usuario') {
                         await sb.from('avisos_admin')
                             .update({ ativo: false })
@@ -936,7 +936,7 @@
 
         document.getElementById('aviso-overlay').classList.remove('show');
 
-        // Mostrar próximo aviso (se houver) após uma breve pausa
+        // Mostrar prÃ³ximo aviso (se houver) apÃ³s uma breve pausa
         if (avisosQueue.length > 0) {
             setTimeout(mostrarProximoAviso, 400);
         }
@@ -952,3 +952,4 @@
 </div>
 </body>
 </html>
+

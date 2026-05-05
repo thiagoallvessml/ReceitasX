@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -112,7 +112,7 @@
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
 
-<!-- ══ Header ════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="history.back()">
@@ -127,55 +127,55 @@
     </div>
 </header>
 
-<!-- ══ Main ═══════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
     <!-- Banner de acesso restrito -->
     <div class="admin-banner" style="margin-bottom:0.5rem">
         <span class="material-symbols-outlined">lock</span>
-        <span>Área restrita aos administradores do ReceitasX. Aqui você pode gerenciar os roles de todos os usuários.</span>
+        <span>Ãrea restrita aos administradores do ReceitasX. Aqui vocÃª pode gerenciar os roles de todos os usuÃ¡rios.</span>
     </div>
 
-    <!-- Botões pros novos painéis -->
+    <!-- BotÃµes pros novos painÃ©is -->
     <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
-        <a href="admin-cadastros.html" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(139,92,246,.3);color:#a78bfa;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
+        <a href="admin-cadastros" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(139,92,246,.3);color:#a78bfa;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
             <span class="material-symbols-outlined" style="font-size:1.15rem;">monitoring</span>
-            Evolução de Cadastros
+            EvoluÃ§Ã£o de Cadastros
         </a>
-        <a href="admin-progresso.html" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
+        <a href="admin-progresso" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
             <span class="material-symbols-outlined" style="font-size:1.15rem;">rule</span>
             Progresso do Guia
         </a>
-        <a href="admin-vitalicio.html" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(245,158,11,.3);color:#f59e0b;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
+        <a href="admin-vitalicio" style="display:flex;flex:1;min-width:200px;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:.75rem;background:#1E1E1E;border:1px solid rgba(245,158,11,.3);color:#f59e0b;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .2s;">
             <span class="material-symbols-outlined" style="font-size:1.15rem;">track_changes</span>
-            Acessos Vitalício
+            Acessos VitalÃ­cio
         </a>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-3" id="stats-row">
         <div class="stat-card" style="border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.03)">
-            <div class="stat-val" id="stat-online" style="color:#34d399;display:flex;align-items:center;gap:.4rem"><span class="online-dot"></span>—</div>
+            <div class="stat-val" id="stat-online" style="color:#34d399;display:flex;align-items:center;gap:.4rem"><span class="online-dot"></span>â€”</div>
             <div class="stat-lbl">Online agora</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-val" id="stat-total">â€”</div>
             <div class="stat-lbl">Total</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-gratuito" style="color:#94a3b8">—</div>
+            <div class="stat-val" id="stat-gratuito" style="color:#94a3b8">â€”</div>
             <div class="stat-lbl">Gratuito</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-vitalicio" style="color:#34d399">—</div>
-            <div class="stat-lbl">Vitálício</div>
+            <div class="stat-val" id="stat-vitalicio" style="color:#34d399">â€”</div>
+            <div class="stat-lbl">VitÃ¡lÃ­cio</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-pagantes" style="color:#a78bfa">—</div>
+            <div class="stat-val" id="stat-pagantes" style="color:#a78bfa">â€”</div>
             <div class="stat-lbl">Pagantes</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-afiliado" style="color:#25f4f4">—</div>
+            <div class="stat-val" id="stat-afiliado" style="color:#25f4f4">â€”</div>
             <div class="stat-lbl">Afiliados</div>
         </div>
     </div>
@@ -192,7 +192,7 @@
                     <span class="material-symbols-outlined" style="color:#facc15">ads_click</span>
                 </div>
                 <div>
-                    <div class="oc-count" id="oc-ads" style="color:#facc15">—</div>
+                    <div class="oc-count" id="oc-ads" style="color:#facc15">â€”</div>
                     <div class="oc-label">Google Ads</div>
                 </div>
             </div>
@@ -201,7 +201,7 @@
                     <span class="material-symbols-outlined" style="color:#ec4899">calculate</span>
                 </div>
                 <div>
-                    <div class="oc-count" id="oc-calculadora" style="color:#ec4899">—</div>
+                    <div class="oc-count" id="oc-calculadora" style="color:#ec4899">â€”</div>
                     <div class="oc-label">Calculadora</div>
                 </div>
             </div>
@@ -210,7 +210,7 @@
                     <span class="material-symbols-outlined" style="color:#a855f7">handshake</span>
                 </div>
                 <div>
-                    <div class="oc-count" id="oc-afiliado-origem" style="color:#a855f7">—</div>
+                    <div class="oc-count" id="oc-afiliado-origem" style="color:#a855f7">â€”</div>
                     <div class="oc-label">Afiliado</div>
                 </div>
             </div>
@@ -219,8 +219,8 @@
                     <span class="material-symbols-outlined" style="color:#3b82f6">travel_explore</span>
                 </div>
                 <div>
-                    <div class="oc-count" id="oc-organico" style="color:#3b82f6">—</div>
-                    <div class="oc-label">Orgânico</div>
+                    <div class="oc-count" id="oc-organico" style="color:#3b82f6">â€”</div>
+                    <div class="oc-label">OrgÃ¢nico</div>
                 </div>
             </div>
             <div class="origin-card" data-origin="direto" onclick="setOriginFilter('direto', this)" style="border-color:rgba(100,116,139,.2)">
@@ -228,7 +228,7 @@
                     <span class="material-symbols-outlined" style="color:#94a3b8">link</span>
                 </div>
                 <div>
-                    <div class="oc-count" id="oc-direto" style="color:#94a3b8">—</div>
+                    <div class="oc-count" id="oc-direto" style="color:#94a3b8">â€”</div>
                     <div class="oc-label">Direto</div>
                 </div>
             </div>
@@ -239,16 +239,16 @@
     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div class="search-wrap flex-1 w-full flex-shrink-0" style="min-width: 250px;">
             <span class="material-symbols-outlined ico">search</span>
-            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterUsuarios()" />
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mailâ€¦" oninput="filterUsuarios()" />
         </div>
         <select id="sort-usuarios" class="role-sel flex-shrink-0" onchange="filterUsuarios()" style="padding:.7rem;border-radius:.75rem;font-size:.85rem;font-weight:600;min-height:2.6rem;appearance:auto;">
             <option value="cadastro_desc">Recentes (Novo Cadastro)</option>
-            <option value="login_desc">Último Login (Mais Recente)</option>
-            <option value="nome_asc">Ordem Alfabética (A-Z)</option>
+            <option value="login_desc">Ãšltimo Login (Mais Recente)</option>
+            <option value="nome_asc">Ordem AlfabÃ©tica (A-Z)</option>
         </select>
         <div class="flex gap-2 flex-shrink-0 flex-wrap w-full">
             <button class="pill active" data-filter="todos"    onclick="setFilter('todos', this)">Todos</button>
-            <button class="pill" data-filter="online"         onclick="setFilter('online', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">🟢 Online</button>
+            <button class="pill" data-filter="online"         onclick="setFilter('online', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">ðŸŸ¢ Online</button>
             <button class="pill" data-filter="pagantes"        onclick="setFilter('pagantes', this)">Pagantes</button>
             <button class="pill" data-filter="afiliado"       onclick="setFilter('afiliado', this)">Afiliado</button>
             <button class="pill flex items-center justify-center gap-1" onclick="exportarParaCSV()" style="border-color:rgba(37,244,244,.3);color:#25f4f4" title="Exportar dados exibidos para CSV">
@@ -257,31 +257,31 @@
         </div>
     </div>
 
-    <!-- Lista de usuários -->
+    <!-- Lista de usuÃ¡rios -->
     <div id="user-list" class="space-y-2"></div>
 
 </main>
 
-<!-- ══ Toast ════════════════════════════════════════════════════ -->
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="toast" role="status">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
     <span id="toast-msg">Role atualizado!</span>
 </div>
 
-<!-- ══ Script ═══════════════════════════════════════════════════ -->
+<!-- â•â• Script â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script>
 let allUsuarios = [];
-let emailsMap   = {};   // user_id → email
-let lastLoginMap = {};  // user_id → last_sign_in_at
+let emailsMap   = {};   // user_id â†’ email
+let lastLoginMap = {};  // user_id â†’ last_sign_in_at
 let pagantesSet = new Set(); // emails de quem pagou
-let cupomMap    = {};  // user_id → cupom_usado
-let valorPagoMap = {}; // user_id → valor_pago
-let refAfiliadoMap = {}; // user_id → ref_afiliado
-let onlineMap   = {};  // user_id → { last_seen, pagina }
+let cupomMap    = {};  // user_id â†’ cupom_usado
+let valorPagoMap = {}; // user_id â†’ valor_pago
+let refAfiliadoMap = {}; // user_id â†’ ref_afiliado
+let onlineMap   = {};  // user_id â†’ { last_seen, pagina }
 let currentFilter = 'todos';
 let currentDisplayedUsuarios = []; // Lista atualmente exibida (para CSV)
 
-// ── Guard: só admin pode acessar ───────────────────────────────────
+// â”€â”€ Guard: sÃ³ admin pode acessar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (async () => {
     await _waitForRole(4000);
 
@@ -290,8 +290,8 @@ let currentDisplayedUsuarios = []; // Lista atualmente exibida (para CSV)
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
-                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+                <p style="color:#64748b;font-size:.9rem">VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.</p>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
             </div>`;
         return;
     }
@@ -300,12 +300,12 @@ let currentDisplayedUsuarios = []; // Lista atualmente exibida (para CSV)
     loadUsuarios();
 })();
 
-// ── Carregar usuários ─────────────────────────────────────────────────────
+// â”€â”€ Carregar usuÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _allEmails = []; // lista de {id, email} carregada do edge
 async function loadUsuarios() {
     showLoading();
     try {
-        // 1. Perfis do Supabase (inclui plano_ativo_em para detectar vitalício)
+        // 1. Perfis do Supabase (inclui plano_ativo_em para detectar vitalÃ­cio)
         const { data, error } = await sb
             .from('perfis')
             .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at, origem_cadastro, utm_dados')
@@ -339,8 +339,8 @@ async function loadUsuarios() {
             console.error("Falha ao fazer request list-users:", errFetch);
         }
 
-        // 3. Pagantes via tabela pedidos (complemento — pode ser bloqueado por RLS se policy admin não existir)
-        //    SOLUÇÃO PRINCIPAL: usar plano='vitalicio' direto da tabela perfis (sempre funciona para admin)
+        // 3. Pagantes via tabela pedidos (complemento â€” pode ser bloqueado por RLS se policy admin nÃ£o existir)
+        //    SOLUÃ‡ÃƒO PRINCIPAL: usar plano='vitalicio' direto da tabela perfis (sempre funciona para admin)
         try {
             const { data: peds, error: pedErr } = await sb
                 .from('pedidos')
@@ -361,8 +361,8 @@ async function loadUsuarios() {
         } catch(_) {}
 
         // Marca _pagante usando AMBAS as fontes:
-        // • plano = 'vitalicio' na tabela perfis  ← fonte primária (sempre disponível para admin)
-        // • email ou user_id encontrado em pedidos ← complemento
+        // â€¢ plano = 'vitalicio' na tabela perfis  â† fonte primÃ¡ria (sempre disponÃ­vel para admin)
+        // â€¢ email ou user_id encontrado em pedidos â† complemento
         allUsuarios.forEach(u => {
             const email = (emailsMap[u.id] || '').toLowerCase();
             if (u.plano === 'vitalicio' ||
@@ -372,39 +372,39 @@ async function loadUsuarios() {
             }
         });
 
-        // Carregar presença online
+        // Carregar presenÃ§a online
         await refreshPresenca();
 
         updateStats();
         filterUsuarios();
 
-        // Auto-refresh presença a cada 30s
+        // Auto-refresh presenÃ§a a cada 30s
         setInterval(async () => {
             await refreshPresenca();
             updateStats();
             filterUsuarios();
         }, 30000);
     } catch (e) {
-        console.error('Erro ao carregar usuários', e);
+        console.error('Erro ao carregar usuÃ¡rios', e);
         document.getElementById('user-list').innerHTML = `
             <div class="empty">
                 <span class="material-symbols-outlined">error</span>
-                <p>Erro ao carregar usuários.<br><small>${e.message}</small></p>
+                <p>Erro ao carregar usuÃ¡rios.<br><small>${e.message}</small></p>
             </div>`;
     }
 }
 
-// ── Presença Online ───────────────────────────────────────────────────
+// â”€â”€ PresenÃ§a Online â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function refreshPresenca() {
     try {
         const { data, error } = await sb.from('presenca_online').select('user_id, last_seen, pagina');
         
         if (error) {
-            console.error('[Presença] Erro ao buscar presença:', error.message, error);
+            console.error('[PresenÃ§a] Erro ao buscar presenÃ§a:', error.message, error);
             return;
         }
 
-        console.log('[Presença] Total registros:', (data||[]).length);
+        console.log('[PresenÃ§a] Total registros:', (data||[]).length);
         
         onlineMap = {};
         const agora = Date.now();
@@ -416,9 +416,9 @@ async function refreshPresenca() {
             }
         });
         
-        console.log('[Presença] Usuários online:', Object.keys(onlineMap).length);
+        console.log('[PresenÃ§a] UsuÃ¡rios online:', Object.keys(onlineMap).length);
     } catch(e) {
-        console.error('[Presença] Exceção:', e);
+        console.error('[PresenÃ§a] ExceÃ§Ã£o:', e);
     }
 }
 
@@ -426,14 +426,14 @@ function isOnline(userId) {
     return !!onlineMap[userId];
 }
 
-// ── Stats ──────────────────────────────────────────────────────────────
+// â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getOriginType(u) {
     const oc = u.origem_cadastro || '';
     const ref = refAfiliadoMap[u.id] || '';
     const cupom = cupomMap[u.id] || '';
     const isAds = ref === 'RECEITASX60' || cupom === 'RECEITASX60' || oc === 'Google Ads' || oc === 'RECEITASX60';
     if (isAds) return 'ads';
-    if (oc.includes('Google (Orgânico)')) return 'organico';
+    if (oc.includes('Google (OrgÃ¢nico)')) return 'organico';
     if (oc === 'Calculadora Lead' || ref === 'DESCONTO60') return 'calculadora';
     if ((ref && ref !== 'DESCONTO60') || oc.startsWith('Afiliado:')) return 'afiliado_origem';
     if (oc === 'Direto') return 'direto';
@@ -460,7 +460,7 @@ function updateStats() {
     document.getElementById('oc-direto').textContent = counts.direto;
 }
 
-// ── Filtro + busca ────────────────────────────────────────────────
+// â”€â”€ Filtro + busca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let currentOriginFilter = null;
 
 function setFilter(filter, btn) {
@@ -521,7 +521,7 @@ function filterUsuarios() {
             const nB = (b.nome || '').toLowerCase();
             return nA.localeCompare(nB);
         } else {
-            // cadastro_desc (padrão)
+            // cadastro_desc (padrÃ£o)
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         }
     });
@@ -539,7 +539,7 @@ function filterUsuarios() {
     renderUsuarios(list);
 }
 
-// ── Render ──────────────────────────────────────────────────────────────
+// â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderUsuarios(list) {
     const el = document.getElementById('user-list');
 
@@ -547,7 +547,7 @@ function renderUsuarios(list) {
         el.innerHTML = `
             <div class="empty">
                 <span class="material-symbols-outlined">person_search</span>
-                <p>Nenhum usuário encontrado.</p>
+                <p>Nenhum usuÃ¡rio encontrado.</p>
             </div>`;
         return;
     }
@@ -556,14 +556,14 @@ function renderUsuarios(list) {
         const initials    = getInitials(u.nome, u.sobrenome);
         const nomeCompleto = [u.nome, u.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
         const criadoEm   = new Date(u.created_at).toLocaleDateString('pt-BR');
-        const emailExib  = esc(emailsMap[u.id] || '—');
-        const planoLabel = u._pagante ? 'Vitálicio' : (u.plano || 'gratuito');
+        const emailExib  = esc(emailsMap[u.id] || 'â€”');
+        const planoLabel = u._pagante ? 'VitÃ¡licio' : (u.plano || 'gratuito');
 
         const ultimoLoginDate = lastLoginMap[u.id] ? new Date(lastLoginMap[u.id]) : null;
         let ultimoLoginStr = 'Nunca fez login';
         if (ultimoLoginDate) {
             const d = ultimoLoginDate;
-            ultimoLoginStr = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+            ultimoLoginStr = `${d.toLocaleDateString('pt-BR')} Ã s ${d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
         }
 
         const roleBadge = u.role === 'admin'
@@ -571,7 +571,7 @@ function renderUsuarios(list) {
             : `<span class="badge-afiliado"><span class="material-symbols-outlined">person</span>Afiliado</span>`;
 
         const vitalBadge = u._pagante
-            ? `<span class="badge-vital"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">workspace_premium</span>Vitálicio${valorPagoMap[u.id] ? ' · R$ ' + Number(valorPagoMap[u.id]).toFixed(2).replace('.',',') : ''}</span>`
+            ? `<span class="badge-vital"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">workspace_premium</span>VitÃ¡licio${valorPagoMap[u.id] ? ' Â· R$ ' + Number(valorPagoMap[u.id]).toFixed(2).replace('.',',') : ''}</span>`
             : '';
 
         let origemBadge = '';
@@ -580,8 +580,8 @@ function renderUsuarios(list) {
         
         if (isAds) {
             origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(250, 204, 21, 0.1);color:#facc15;border:1px solid rgba(250, 204, 21, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">ads_click</span>Google Ads</span>`;
-        } else if (oc.includes('Google (Orgânico)')) {
-            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(59, 130, 246, 0.1);color:#3b82f6;border:1px solid rgba(59, 130, 246, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">travel_explore</span>Google (Orgânico)</span>`;
+        } else if (oc.includes('Google (OrgÃ¢nico)')) {
+            origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(59, 130, 246, 0.1);color:#3b82f6;border:1px solid rgba(59, 130, 246, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">travel_explore</span>Google (OrgÃ¢nico)</span>`;
         } else if (oc === 'Calculadora Lead' || refAfiliadoMap[u.id] === 'DESCONTO60') {
             origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(236, 72, 153, 0.1);color:#ec4899;border:1px solid rgba(236, 72, 153, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">calculate</span>Calculadora</span>`;
         } else if ((refAfiliadoMap[u.id] && refAfiliadoMap[u.id] !== 'DESCONTO60') || oc.startsWith('Afiliado:')) {
@@ -603,14 +603,14 @@ function renderUsuarios(list) {
         } else if (utm && utm.utm_campaign) {
             keywordBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(14,165,233,.1);color:#0ea5e9;border:1px solid rgba(14,165,233,.2)" title="Campanha: ${esc(utm.utm_campaign)}${utm.utm_source ? '\nFonte: ' + esc(utm.utm_source) : ''}${utm.gclid ? '\nGCLID: ' + esc(utm.gclid) : ''}"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">campaign</span>${esc(utm.utm_campaign)}</span>`;
         } else if (utm && utm.gclid) {
-            const gclidShort = utm.gclid.substring(0, 12) + '…';
-            keywordBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(14,165,233,.1);color:#0ea5e9;border:1px solid rgba(14,165,233,.2)" title="GCLID: ${esc(utm.gclid)}${utm._landing_page ? '\nPágina: ' + esc(utm._landing_page) : ''}${utm._captured_at ? '\nCapturado: ' + new Date(utm._captured_at).toLocaleString('pt-BR') : ''}"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">ads_click</span>Google Ads · ${esc(gclidShort)}</span>`;
+            const gclidShort = utm.gclid.substring(0, 12) + 'â€¦';
+            keywordBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(14,165,233,.1);color:#0ea5e9;border:1px solid rgba(14,165,233,.2)" title="GCLID: ${esc(utm.gclid)}${utm._landing_page ? '\nPÃ¡gina: ' + esc(utm._landing_page) : ''}${utm._captured_at ? '\nCapturado: ' + new Date(utm._captured_at).toLocaleString('pt-BR') : ''}"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">ads_click</span>Google Ads Â· ${esc(gclidShort)}</span>`;
         }
 
         const userOnline = isOnline(u.id);
         const onlineInfo = onlineMap[u.id];
         const onlineBadge = userOnline
-            ? `<span class="badge-online"><span class="online-dot"></span>Online · ${esc(onlineInfo.pagina || '')}</span>`
+            ? `<span class="badge-online"><span class="online-dot"></span>Online Â· ${esc(onlineInfo.pagina || '')}</span>`
             : '';
 
         return `
@@ -620,9 +620,9 @@ function renderUsuarios(list) {
                 <div class="user-info">
                     <div class="user-name" style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">${esc(nomeCompleto)} ${onlineBadge}</div>
                     <div class="user-email">${emailExib}</div>
-                    <div class="user-meta">${esc(u.negocio || '—')} · Desde ${criadoEm}</div>
+                    <div class="user-meta">${esc(u.negocio || 'â€”')} Â· Desde ${criadoEm}</div>
                     <div class="user-meta" style="font-size:0.7rem;margin-top:0.2rem;color:#94a3b8">
-                        Último login: <span style="color:#cbd5e1;font-weight:500">${ultimoLoginStr}</span>
+                        Ãšltimo login: <span style="color:#cbd5e1;font-weight:500">${ultimoLoginStr}</span>
                     </div>
                 </div>
             </div>
@@ -641,7 +641,7 @@ function renderUsuarios(list) {
                     </button>
                     <button onclick="forcarLogout('${u.id}', '${emailsMap[u.id] || ''}')" title="Invalidar todas as sess\u00f5es do usu\u00e1rio" style="display:flex;align-items:center;gap:.25rem;padding:.4rem .65rem;border-radius:.5rem;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.06);color:#f87171;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;" onmouseover="this.style.background='rgba(248,113,113,.15)'" onmouseout="this.style.background='rgba(248,113,113,.06)'">
                         <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">logout</span>
-                        Forçar Logout
+                        ForÃ§ar Logout
                     </button>
                     <!-- <select class="role-sel flex-1 sm:flex-none" id="sel-${u.id}"
                     onchange="changeRole('${u.id}', this.value)"
@@ -655,10 +655,10 @@ function renderUsuarios(list) {
     }).join('');
 }
 
-// ── Forçar Logout ────────────────────────────────────────────────
+// â”€â”€ ForÃ§ar Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function forcarLogout(userId, email) {
     const exibEmail = email ? ` (${email})` : '';
-    if (!confirm(`Tem certeza que deseja forçar o logout de${exibEmail}?\n\nTodas as sessões ativas serão invalidadas.`)) return;
+    if (!confirm(`Tem certeza que deseja forÃ§ar o logout de${exibEmail}?\n\nTodas as sessÃµes ativas serÃ£o invalidadas.`)) return;
 
     const btn = document.querySelector(`#card-${userId} button[onclick*='forcarLogout']`);
     if (btn) { btn.disabled = true; btn.textContent = 'Aguarde...'; }
@@ -671,7 +671,7 @@ async function forcarLogout(userId, email) {
         console.log('[forcarLogout] Iniciando para:', userId, 'Token presente:', !!token);
 
         if (!token || token === 'undefined') {
-            throw new Error('Sessão inválida ou expirada. Por favor, saia e entre novamente no painel.');
+            throw new Error('SessÃ£o invÃ¡lida ou expirada. Por favor, saia e entre novamente no painel.');
         }
 
         const resp = await fetch(
@@ -696,19 +696,19 @@ async function forcarLogout(userId, email) {
         }
 
         if (!resp.ok) throw new Error(json.error || `Erro ${resp.status}`);
-        showToast(`Logout forçado com sucesso!${exibEmail}`, 'success');
+        showToast(`Logout forÃ§ado com sucesso!${exibEmail}`, 'success');
     } catch(e) {
         console.error('[forcarLogout]', e);
-        showToast('Erro ao forçar logout: ' + e.message, 'error');
+        showToast('Erro ao forÃ§ar logout: ' + e.message, 'error');
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:\'FILL\' 1,\'wght\' 700,\'GRAD\' 0,\'opsz\' 24">logout</span> Forçar Logout';
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:\'FILL\' 1,\'wght\' 700,\'GRAD\' 0,\'opsz\' 24">logout</span> ForÃ§ar Logout';
         }
     }
 }
 
-// ── Dar / Revogar Vitalício ───────────────────────────────────────
+// â”€â”€ Dar / Revogar VitalÃ­cio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function toggleVitalicio(userId, jaEVitalicio) {
     const acao   = jaEVitalicio ? 'revogar' : 'dar';
     const label  = jaEVitalicio ? 'Revogar Vit\u00e1licio' : 'Dar Vit\u00e1licio';
@@ -743,10 +743,10 @@ async function toggleVitalicio(userId, jaEVitalicio) {
     }
 }
 
-// ── Exportar CSV ──────────────────────────────────────────────────
+// â”€â”€ Exportar CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function exportarParaCSV() {
     if (!currentDisplayedUsuarios || currentDisplayedUsuarios.length === 0) {
-        showToast('Nenhum usuário para exportar.', 'error');
+        showToast('Nenhum usuÃ¡rio para exportar.', 'error');
         return;
     }
 
@@ -770,7 +770,7 @@ function exportarParaCSV() {
             `"${u.telefone || ''}"`,
             `"${u.negocio || ''}"`,
             u.plano || 'gratuito',
-            u._pagante ? 'Sim' : 'Não',
+            u._pagante ? 'Sim' : 'NÃ£o',
             u._pagante && valorPagoMap[u.id] ? Number(valorPagoMap[u.id]).toFixed(2).replace('.',',') : '',
             cupomMap[u.id] || '',
             u.role || 'user',
@@ -779,7 +779,7 @@ function exportarParaCSV() {
             `"${u.utm_dados?.utm_campaign || ''}"`,
             new Date(u.created_at).toLocaleDateString('pt-BR'),
             `"${ultimoLoginStr}"`,
-            isOnline(u.id) ? 'Sim' : 'Não'
+            isOnline(u.id) ? 'Sim' : 'NÃ£o'
         ].join(',');
     });
 
@@ -796,14 +796,14 @@ function exportarParaCSV() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    showToast('Exportação concluída!');
+    showToast('ExportaÃ§Ã£o concluÃ­da!');
 }
 
-// ── Alterar role ──────────────────────────────────────────────────
+// â”€â”€ Alterar role â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function changeRole(userId, novoRole) {
-    // Impede admin de retirar o próprio role
+    // Impede admin de retirar o prÃ³prio role
     if (userId === window.__userProfile?.id && novoRole !== 'admin') {
-        showToast('Você não pode remover seu próprio role Admin.', 'error');
+        showToast('VocÃª nÃ£o pode remover seu prÃ³prio role Admin.', 'error');
         // Reverter select
         document.getElementById(`sel-${userId}`).value = 'admin';
         return;
@@ -823,7 +823,7 @@ async function changeRole(userId, novoRole) {
 
         updateStats();
         filterUsuarios();
-        showToast(`Role atualizado para "${novoRole}" ✓`);
+        showToast(`Role atualizado para "${novoRole}" âœ“`);
     } catch (e) {
         console.error('Erro ao atualizar role', e);
         showToast('Erro ao atualizar role: ' + e.message, 'error');
@@ -833,13 +833,13 @@ async function changeRole(userId, novoRole) {
     }
 }
 
-// ── Loading shimmer ───────────────────────────────────────────────
+// â”€â”€ Loading shimmer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showLoading() {
     const el = document.getElementById('user-list');
     el.innerHTML = Array(4).fill('<div class="shimmer"></div>').join('');
 }
 
-// ── Utilitários ───────────────────────────────────────────────────
+// â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getInitials(nome, sobrenome) {
     const a = (nome || '?')[0] || '';
     const b = (sobrenome || '')[0] || '';
@@ -850,7 +850,7 @@ function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Toast ─────────────────────────────────────────────────────────
+// â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let toastTimer;
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -864,3 +864,4 @@ function showToast(msg, type = 'success') {
 </script>
 </body>
 </html>
+

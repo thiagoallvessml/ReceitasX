@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Avisos aos Usuários - Admin · ReceitasX</title>
+    <title>Avisos aos UsuÃ¡rios - Admin Â· ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -92,23 +92,23 @@
 </head>
 <body class="min-h-screen pb-24">
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header style="position:sticky;top:0;z-index:30;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #2A2A2A;">
     <div style="max-width:680px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem;">
         <button class="btn-back" onclick="history.back()">
             <span class="material-symbols-outlined" style="font-size:1.2rem">arrow_back</span>
         </button>
         <span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span>
-        <h1 style="font-size:.95rem;font-weight:700;flex:1">Avisos aos Usuários</h1>
+        <h1 style="font-size:.95rem;font-weight:700;flex:1">Avisos aos UsuÃ¡rios</h1>
     </div>
 </header>
 
-<!-- ══ Main ════════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main style="max-width:680px;margin:0 auto;padding:1.5rem 1.25rem;">
 
     <div class="admin-banner">
         <span class="material-symbols-outlined" style="font-size:1rem;color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">info</span>
-        <span>Crie mensagens que aparecerão como popup quando os usuários entrarem no sistema. Execute o script <strong>avisos_admin_schema.sql</strong> no Supabase antes de usar.</span>
+        <span>Crie mensagens que aparecerÃ£o como popup quando os usuÃ¡rios entrarem no sistema. Execute o script <strong>avisos_admin_schema.sql</strong> no Supabase antes de usar.</span>
     </div>
 
     <!-- Tabs -->
@@ -119,11 +119,11 @@
         </button>
         <button class="tab-btn" onclick="switchTab('historico')">
             <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:middle;margin-right:.2rem">history</span>
-            Histórico
+            HistÃ³rico
         </button>
     </div>
 
-    <!-- ── Tab: Novo Aviso ── -->
+    <!-- â”€â”€ Tab: Novo Aviso â”€â”€ -->
     <div class="tab-content active" id="tab-novo">
         <div class="cfg-card">
             <div class="cfg-card-head">
@@ -132,14 +132,14 @@
                 </div>
                 <div>
                     <h2>Criar Aviso</h2>
-                    <p>A mensagem será exibida ao usuário ao entrar no sistema.</p>
+                    <p>A mensagem serÃ¡ exibida ao usuÃ¡rio ao entrar no sistema.</p>
                 </div>
             </div>
             <div class="cfg-body">
 
-                <!-- Título -->
+                <!-- TÃ­tulo -->
                 <div class="field">
-                    <label>Título</label>
+                    <label>TÃ­tulo</label>
                     <div class="input-wrap">
                         <input class="cfg-input" id="inp-titulo" type="text" placeholder="Ex: Novidade no ReceitasX!" maxlength="120" />
                     </div>
@@ -148,7 +148,7 @@
                 <!-- Mensagem -->
                 <div class="field">
                     <label>Mensagem</label>
-                    <textarea class="cfg-textarea" id="inp-mensagem" placeholder="Escreva a mensagem que o usuário verá..." maxlength="2000"></textarea>
+                    <textarea class="cfg-textarea" id="inp-mensagem" placeholder="Escreva a mensagem que o usuÃ¡rio verÃ¡..." maxlength="2000"></textarea>
                 </div>
 
                 <!-- Imagem (Opcional) -->
@@ -156,7 +156,7 @@
                     <label>Imagem (Opcional)</label>
                     <div style="display:flex;gap:.5rem;align-items:center;">
                         <div class="input-wrap" style="flex:1">
-                            <input class="cfg-input" id="inp-imagem" type="text" placeholder="Cole a URL ou faça upload..." />
+                            <input class="cfg-input" id="inp-imagem" type="text" placeholder="Cole a URL ou faÃ§a upload..." />
                         </div>
                         <label style="cursor:pointer;padding:.7rem;border-radius:.75rem;background:#1A1A1A;border:1px solid #2A2A2A;color:#25f4f4;display:flex;align-items:center;transition:border-color .2s">
                             <input type="file" id="inp-file" accept="image/*" style="display:none" onchange="uploadImagemAviso(this)" />
@@ -170,25 +170,25 @@
                 <div class="field">
                     <label>Tipo</label>
                     <select class="cfg-select" id="inp-tipo">
-                        <option value="info">ℹ️ Informação</option>
-                        <option value="novidade">🎉 Novidade</option>
-                        <option value="aviso">⚠️ Aviso</option>
-                        <option value="urgente">🚨 Urgente</option>
+                        <option value="info">â„¹ï¸ InformaÃ§Ã£o</option>
+                        <option value="novidade">ðŸŽ‰ Novidade</option>
+                        <option value="aviso">âš ï¸ Aviso</option>
+                        <option value="urgente">ðŸš¨ Urgente</option>
                     </select>
                 </div>
 
                 <!-- Destino -->
                 <div class="field">
-                    <label>Destinatário</label>
+                    <label>DestinatÃ¡rio</label>
                     <select class="cfg-select" id="inp-destino" onchange="toggleDestinoUser()">
-                        <option value="todos">📢 Todos os usuários</option>
-                        <option value="usuario">👤 Usuário específico</option>
+                        <option value="todos">ðŸ“¢ Todos os usuÃ¡rios</option>
+                        <option value="usuario">ðŸ‘¤ UsuÃ¡rio especÃ­fico</option>
                     </select>
                 </div>
 
-                <!-- Buscar usuário (condicional) -->
+                <!-- Buscar usuÃ¡rio (condicional) -->
                 <div class="field" id="field-user" style="display:none">
-                    <label>Buscar Usuário</label>
+                    <label>Buscar UsuÃ¡rio</label>
                     <div class="user-search-wrap">
                         <div class="input-wrap">
                             <input class="cfg-input" id="inp-user-search" type="text" placeholder="Digite nome ou e-mail..." oninput="searchUsers()" autocomplete="off" />
@@ -198,7 +198,7 @@
                     <div id="selected-user" style="display:none;margin-top:.35rem;padding:.5rem .75rem;background:rgba(37,244,244,.06);border:1px solid rgba(37,244,244,.18);border-radius:.6rem;font-size:.8rem;color:#25f4f4;font-weight:600;display:flex;align-items:center;gap:.5rem;"></div>
                 </div>
 
-                <!-- Botão enviar -->
+                <!-- BotÃ£o enviar -->
                 <div style="display:flex;justify-content:flex-end;margin-top:.5rem">
                     <button class="btn-send" id="btn-enviar" onclick="enviarAviso()">
                         <span class="material-symbols-outlined">send</span>
@@ -210,7 +210,7 @@
         </div>
     </div>
 
-    <!-- ── Tab: Histórico ── -->
+    <!-- â”€â”€ Tab: HistÃ³rico â”€â”€ -->
     <div class="tab-content" id="tab-historico">
         <div id="historico-list">
             <div class="skeleton" style="height:4rem;margin-bottom:.75rem"></div>
@@ -220,14 +220,14 @@
 
 </main>
 
-<!-- ══ Toast ══════════════════════════════════════════════════════ -->
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
     <span id="toast-msg">Salvo!</span>
 </div>
 
 <script>
-/* ── Guard: só admin ─────────────────────────────────────────────── */
+/* â”€â”€ Guard: sÃ³ admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 let currentUserId = null;
 let allPerfis = [];
 let emailsMap = {};
@@ -240,7 +240,7 @@ let selectedUserId = null;
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <a href="index.html" style="color:#25f4f4;font-weight:600">← Voltar</a>
+                <a href="index" style="color:#25f4f4;font-weight:600">â† Voltar</a>
             </div>`;
         return;
     }
@@ -265,7 +265,7 @@ let selectedUserId = null;
     loadHistorico();
 })();
 
-/* ── Tabs ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (tab === 'novo' ? i === 0 : i === 1)));
     document.getElementById('tab-novo').classList.toggle('active', tab === 'novo');
@@ -273,7 +273,7 @@ function switchTab(tab) {
     if (tab === 'historico') loadHistorico();
 }
 
-/* ── Toggle destino usuário ───────────────────────────────────────── */
+/* â”€â”€ Toggle destino usuÃ¡rio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function toggleDestinoUser() {
     const val = document.getElementById('inp-destino').value;
     document.getElementById('field-user').style.display = val === 'usuario' ? '' : 'none';
@@ -283,7 +283,7 @@ function toggleDestinoUser() {
     }
 }
 
-/* ── Buscar usuários ──────────────────────────────────────────────── */
+/* â”€â”€ Buscar usuÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 let searchTimeout;
 function searchUsers() {
     clearTimeout(searchTimeout);
@@ -335,7 +335,7 @@ function clearSelectedUser() {
     document.getElementById('selected-user').style.display = 'none';
 }
 
-/* ── Enviar aviso ─────────────────────────────────────────────────── */
+/* â”€â”€ Enviar aviso â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 async function uploadImagemAviso(input) {
     const file = input.files[0];
     if (!file) return;
@@ -357,7 +357,7 @@ async function uploadImagemAviso(input) {
         document.getElementById('inp-imagem').value = data.publicUrl;
         
         statusEl.style.color = '#34d399';
-        statusEl.textContent = 'Upload concluído!';
+        statusEl.textContent = 'Upload concluÃ­do!';
         setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
     } catch (e) {
         console.error('Erro upload:', e);
@@ -373,13 +373,13 @@ async function enviarAviso() {
     const destino = document.getElementById('inp-destino').value;
     const imagem_url = document.getElementById('inp-imagem').value.trim();
 
-    if (!titulo) { showToast('Preencha o título', 'error'); return; }
+    if (!titulo) { showToast('Preencha o tÃ­tulo', 'error'); return; }
     if (!mensagem) { showToast('Preencha a mensagem', 'error'); return; }
-    if (destino === 'usuario' && !selectedUserId) { showToast('Selecione um usuário', 'error'); return; }
+    if (destino === 'usuario' && !selectedUserId) { showToast('Selecione um usuÃ¡rio', 'error'); return; }
 
     const btn = document.getElementById('btn-enviar');
     btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin .8s linear infinite">sync</span> Publicando…`;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin .8s linear infinite">sync</span> Publicandoâ€¦`;
 
     try {
         const payload = {
@@ -396,7 +396,7 @@ async function enviarAviso() {
         const { error } = await sb.from('avisos_admin').insert(payload);
         if (error) throw error;
 
-        showToast('✓ Aviso publicado com sucesso!');
+        showToast('âœ“ Aviso publicado com sucesso!');
 
         // Limpar campos
         document.getElementById('inp-titulo').value = '';
@@ -416,7 +416,7 @@ async function enviarAviso() {
     }
 }
 
-/* ── Histórico ────────────────────────────────────────────────────── */
+/* â”€â”€ HistÃ³rico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 async function loadHistorico() {
     const el = document.getElementById('historico-list');
     try {
@@ -432,7 +432,7 @@ async function loadHistorico() {
             return;
         }
 
-        // Buscar quem já viu (para os avisos carregados)
+        // Buscar quem jÃ¡ viu (para os avisos carregados)
         const avisoIds = data.map(a => a.id);
         const { data: vistos } = await sb.from('avisos_vistos')
             .select('aviso_id, user_id, visto_em')
@@ -445,9 +445,9 @@ async function loadHistorico() {
         });
 
         el.innerHTML = data.map(a => {
-            const tipoLabel = { info:'Informação', aviso:'Aviso', urgente:'Urgente', novidade:'Novidade' }[a.tipo] || a.tipo;
+            const tipoLabel = { info:'InformaÃ§Ã£o', aviso:'Aviso', urgente:'Urgente', novidade:'Novidade' }[a.tipo] || a.tipo;
             const tipoClass = `tipo-${a.tipo}`;
-            const destinoLabel = a.destino === 'todos' ? '📢 Todos' : '👤 ' + getUserName(a.destino_user_id);
+            const destinoLabel = a.destino === 'todos' ? 'ðŸ“¢ Todos' : 'ðŸ‘¤ ' + getUserName(a.destino_user_id);
             const dt = new Date(a.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
             
             const avisoVistos = vistosMap[a.id] || [];
@@ -459,13 +459,13 @@ async function loadHistorico() {
                     const dtLido = new Date(avisoVistos.find(v => v.user_id === a.destino_user_id).visto_em).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
                     statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:#34d399;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">done_all</span> Lido (${dtLido})</span>`;
                 } else {
-                    statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">schedule</span> Pendente (Não Lido)</span>`;
+                    statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">schedule</span> Pendente (NÃ£o Lido)</span>`;
                 }
             } else {
                 if (avisoVistos.length > 0) {
-                    statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);color:#25f4f4;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">visibility</span> ${avisoVistos.length} visualizações</span>`;
+                    statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.25);color:#25f4f4;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">visibility</span> ${avisoVistos.length} visualizaÃ§Ãµes</span>`;
                 } else {
-                    statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#94a3b8;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">visibility_off</span> 0 visualizações</span>`;
+                    statusBadge = `<span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#94a3b8;padding:.2rem .5rem;border-radius:.5rem;font-size:.65rem;font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem">visibility_off</span> 0 visualizaÃ§Ãµes</span>`;
                 }
             }
 
@@ -504,7 +504,7 @@ async function loadHistorico() {
 }
 
 function getUserName(userId) {
-    if (!userId) return '—';
+    if (!userId) return 'â€”';
     const p = allPerfis.find(x => x.id === userId);
     if (p) return [p.nome, p.sobrenome].filter(Boolean).join(' ') || emailsMap[userId] || userId.slice(0,8);
     return emailsMap[userId] || userId.slice(0,8);
@@ -519,11 +519,11 @@ async function toggleAviso(id, ativo) {
 async function deletarAviso(id) {
     if (!confirm('Excluir este aviso permanentemente?')) return;
     await sb.from('avisos_admin').delete().eq('id', id);
-    showToast('Aviso excluído');
+    showToast('Aviso excluÃ­do');
     loadHistorico();
 }
 
-/* ── Toast ───────────────────────────────────────────────────────── */
+/* â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 let toastTimer;
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -551,3 +551,4 @@ document.addEventListener('click', e => {
 </script>
 </body>
 </html>
+

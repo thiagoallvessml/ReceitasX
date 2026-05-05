@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Admin — Receitas dos Usuários · ReceitasX</title>
+    <title>Admin â€” Receitas dos UsuÃ¡rios Â· ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -127,42 +127,42 @@
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="history.back()">
             <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
         </button>
         <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
-        <h1 class="text-base font-semibold flex-1">Receitas dos Usuários</h1>
+        <h1 class="text-base font-semibold flex-1">Receitas dos UsuÃ¡rios</h1>
         <span id="admin-badge" class="badge-admin" style="display:none">
             <span class="material-symbols-outlined">verified</span> Admin
         </span>
     </div>
 </header>
 
-<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
     <!-- Banner -->
     <div class="admin-banner">
         <span class="material-symbols-outlined">menu_book</span>
-        <span>Visualize todas as receitas criadas por cada usuário. Clique em um usuário para ver detalhes.</span>
+        <span>Visualize todas as receitas criadas por cada usuÃ¡rio. Clique em um usuÃ¡rio para ver detalhes.</span>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-3">
         <div class="stat-card">
-            <div class="stat-val" id="stat-usuarios">—</div>
-            <div class="stat-lbl">Usuários</div>
+            <div class="stat-val" id="stat-usuarios">â€”</div>
+            <div class="stat-lbl">UsuÃ¡rios</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-total-rec" style="color:#25f4f4">—</div>
+            <div class="stat-val" id="stat-total-rec" style="color:#25f4f4">â€”</div>
             <div class="stat-lbl">Total Receitas</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-media" style="color:#34d399">—</div>
-            <div class="stat-lbl">Média / Usuário</div>
+            <div class="stat-val" id="stat-media" style="color:#34d399">â€”</div>
+            <div class="stat-lbl">MÃ©dia / UsuÃ¡rio</div>
         </div>
     </div>
 
@@ -170,7 +170,7 @@
     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div class="search-wrap flex-1 w-full">
             <span class="material-symbols-outlined ico">search</span>
-            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou negócio…" oninput="filtrar()" />
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou negÃ³cioâ€¦" oninput="filtrar()" />
         </div>
         <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
             <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
@@ -187,28 +187,28 @@
 
 </main>
 
-<!-- ══ Drawer Receitas ═══════════════════════════════════════════════ -->
+<!-- â•â• Drawer Receitas â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="drawer-bg" class="drawer-bg" onclick="closeDrawer()">
     <div class="drawer" onclick="event.stopPropagation()">
         <div class="drawer-head">
             <div class="avatar" id="drawer-avatar">??</div>
             <div style="flex:1;min-width:0">
-                <p id="drawer-nome" class="font-bold text-sm leading-tight">—</p>
-                <p id="drawer-negocio" class="text-xs text-slate-400 mt-0.5">—</p>
+                <p id="drawer-nome" class="font-bold text-sm leading-tight">â€”</p>
+                <p id="drawer-negocio" class="text-xs text-slate-400 mt-0.5">â€”</p>
             </div>
             <button onclick="closeDrawer()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;flex-shrink:0">
                 <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
             </button>
         </div>
 
-        <!-- sub-info do usuário -->
+        <!-- sub-info do usuÃ¡rio -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-wrap:wrap;flex-shrink:0" id="drawer-tags"></div>
 
         <!-- busca receitas -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0">
             <div class="search-wrap">
                 <span class="material-symbols-outlined ico">search</span>
-                <input id="rec-search" class="search-input" type="text" placeholder="Filtrar receitas…" oninput="filtrarReceitas()" />
+                <input id="rec-search" class="search-input" type="text" placeholder="Filtrar receitasâ€¦" oninput="filtrarReceitas()" />
             </div>
         </div>
 
@@ -218,7 +218,7 @@
     </div>
 </div>
 
-<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
     <span id="toast-msg">OK</span>
@@ -229,7 +229,7 @@ let todosUsuarios = [];  // [{ perfil, receitas:[] }]
 let currentFilter = 'todos';
 let currentUserReceitas = [];
 
-// ── Guard admin ───────────────────────────────────────────────────
+// â”€â”€ Guard admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (async () => {
     await _waitForRole(4000);
     if (window.__userRole !== 'admin') {
@@ -237,8 +237,8 @@ let currentUserReceitas = [];
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
-                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+                <p style="color:#64748b;font-size:.9rem">VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.</p>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
             </div>`;
         return;
     }
@@ -246,7 +246,7 @@ let currentUserReceitas = [];
     await carregarDados();
 })();
 
-// ── Carregar perfis + contagem de receitas ─────────────────────────
+// â”€â”€ Carregar perfis + contagem de receitas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarDados() {
     showLoading();
     try {
@@ -264,13 +264,13 @@ async function carregarDados() {
         ]);
         if (er) throw er;
 
-        // Mapeia receita_id → produto.preco
+        // Mapeia receita_id â†’ produto.preco
         const precoPorReceita = {};
         (produtos || []).forEach(p => {
             if (p.receita_id) precoPorReceita[p.receita_id] = parseFloat(p.preco || 0);
         });
 
-        // 3. Agrupa receitas por user_id, injeta preçoTotal do produto vinculado
+        // 3. Agrupa receitas por user_id, injeta preÃ§oTotal do produto vinculado
         const recMap = {};
         (receitas || []).forEach(r => {
             if (!recMap[r.user_id]) recMap[r.user_id] = [];
@@ -299,7 +299,7 @@ async function carregarDados() {
     }
 }
 
-// ── Stats ──────────────────────────────────────────────────────────
+// â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function atualizarStats() {
     const total = todosUsuarios.length;
     const totalRec = todosUsuarios.reduce((s, u) => s + u.receitas.length, 0);
@@ -309,7 +309,7 @@ function atualizarStats() {
     document.getElementById('stat-media').textContent      = media;
 }
 
-// ── Filtro + busca ─────────────────────────────────────────────────
+// â”€â”€ Filtro + busca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setFilter(f, btn) {
     currentFilter = f;
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
@@ -333,12 +333,12 @@ function filtrar() {
     }
 
     document.getElementById('count-label').textContent =
-        `${list.length} usuário${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
+        `${list.length} usuÃ¡rio${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
 
     renderLista(list);
 }
 
-// ── Render lista de usuários ───────────────────────────────────────
+// â”€â”€ Render lista de usuÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderLista(list) {
     const el = document.getElementById('user-list');
 
@@ -346,7 +346,7 @@ function renderLista(list) {
         el.innerHTML = `
             <div class="empty-state">
                 <span class="material-symbols-outlined">person_search</span>
-                <p>Nenhum usuário encontrado.</p>
+                <p>Nenhum usuÃ¡rio encontrado.</p>
             </div>`;
         return;
     }
@@ -366,7 +366,7 @@ function renderLista(list) {
             <div class="avatar">${initials}</div>
             <div class="user-info">
                 <div class="user-name">${esc(nomeCompleto)}</div>
-                <div class="user-sub">${esc(p.negocio || '—')} · Desde ${criadoEm}</div>
+                <div class="user-sub">${esc(p.negocio || 'â€”')} Â· Desde ${criadoEm}</div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0">
                 <span class="rec-badge ${badgeClass}">
@@ -379,7 +379,7 @@ function renderLista(list) {
     }).join('');
 }
 
-// ── Drawer ─────────────────────────────────────────────────────────
+// â”€â”€ Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function abrirDrawer(userId) {
     const found = todosUsuarios.find(u => u.perfil.id === userId);
     if (!found) return;
@@ -391,12 +391,12 @@ function abrirDrawer(userId) {
     const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
     document.getElementById('drawer-avatar').textContent = getInitials(p.nome, p.sobrenome);
     document.getElementById('drawer-nome').textContent    = nomeCompleto;
-    document.getElementById('drawer-negocio').textContent = p.negocio || 'Negócio não informado';
+    document.getElementById('drawer-negocio').textContent = p.negocio || 'NegÃ³cio nÃ£o informado';
 
     // Tags de info
     const tags = [];
     if (p.segmento) tags.push({ ico:'storefront', txt: p.segmento });
-    if (p.cidade || p.estado) tags.push({ ico:'location_on', txt: [p.cidade, p.estado].filter(Boolean).join(' – ') });
+    if (p.cidade || p.estado) tags.push({ ico:'location_on', txt: [p.cidade, p.estado].filter(Boolean).join(' â€“ ') });
     tags.push({ ico:'workspace_premium', txt: p.plano || 'gratuito', cls: p.plano && p.plano !== 'gratuito' ? 'cyan' : '' });
     tags.push({ ico:'menu_book', txt: `${currentUserReceitas.length} receita${currentUserReceitas.length !== 1 ? 's' : ''}`, cls: currentUserReceitas.length > 0 ? 'green' : '' });
 
@@ -442,7 +442,7 @@ function renderReceitas(lista) {
         body.innerHTML = `
             <div class="empty-state">
                 <span class="material-symbols-outlined">menu_book</span>
-                <p>${currentUserReceitas.length === 0 ? 'Este usuário ainda não criou receitas.' : 'Nenhuma receita encontrada.'}</p>
+                <p>${currentUserReceitas.length === 0 ? 'Este usuÃ¡rio ainda nÃ£o criou receitas.' : 'Nenhuma receita encontrada.'}</p>
             </div>`;
         return;
     }
@@ -468,24 +468,24 @@ function renderReceitas(lista) {
 
         const ingRows = ings.map(i => `
             <div class="ing-item">
-                <span class="name">${esc(i.nome || '—')}</span>
-                <span class="val">${i.qty ? esc(i.qty) : '—'}
+                <span class="name">${esc(i.nome || 'â€”')}</span>
+                <span class="val">${i.qty ? esc(i.qty) : 'â€”'}
                     ${i.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(i.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
 
         const embRows = embs.map(e => `
             <div class="ing-item">
-                <span class="name">${esc(e.nome || '—')}</span>
-                <span class="val">${e.qty ? esc(e.qty) : '—'}
+                <span class="name">${esc(e.nome || 'â€”')}</span>
+                <span class="val">${e.qty ? esc(e.qty) : 'â€”'}
                     ${e.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(e.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
 
         const eqpRows = eqps.map(e => `
             <div class="ing-item">
-                <span class="name">${esc(e.nome || '—')}</span>
-                <span class="val">${e.qty ? esc(e.qty) : '—'}
+                <span class="name">${esc(e.nome || 'â€”')}</span>
+                <span class="val">${e.qty ? esc(e.qty) : 'â€”'}
                     ${e.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(e.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
@@ -493,7 +493,7 @@ function renderReceitas(lista) {
         return `
         <div class="rec-card" style="animation:fadeUp .2s ease both">
 
-          <!-- Cabeçalho -->
+          <!-- CabeÃ§alho -->
           <div class="rec-card-header">
             <div class="rec-card-name">${esc(r.nome || 'Sem nome')}</div>
             <div class="rec-card-meta" style="margin-top:.4rem">
@@ -516,11 +516,11 @@ function renderReceitas(lista) {
             </div>
             ${temPreco ? `
             <div class="fin-cell">
-              <div class="fin-lbl">Preço Total</div>
+              <div class="fin-lbl">PreÃ§o Total</div>
               <div class="fin-val cyan">${fmtR(precoTotal)}</div>
             </div>
             <div class="fin-cell">
-              <div class="fin-lbl">Preço Unit.</div>
+              <div class="fin-lbl">PreÃ§o Unit.</div>
               <div class="fin-val cyan">${fmtR(precoUnit)}</div>
             </div>
             <div class="fin-cell">
@@ -540,15 +540,15 @@ function renderReceitas(lista) {
               <div class="fin-val amber">${markup.toFixed(2)}x</div>
             </div>` : `
             <div class="fin-cell" style="grid-column:1/-1">
-              <div class="fin-lbl">Preço</div>
+              <div class="fin-lbl">PreÃ§o</div>
               <div class="fin-val" style="color:#475569;font-size:.75rem">Sem produto vinculado</div>
             </div>`}
           </div>
 
-          <!-- Composição de custos -->
+          <!-- ComposiÃ§Ã£o de custos -->
           ${(r.custo_ing || r.custo_emb || r.custo_eqp || r.custo_mob) ? `
           <div style="padding:.5rem 1rem .3rem;border-bottom:1px solid #2A2A2A">
-            <div class="ing-list-title"><span class="material-symbols-outlined">receipt_long</span>Composição de Custo</div>
+            <div class="ing-list-title"><span class="material-symbols-outlined">receipt_long</span>ComposiÃ§Ã£o de Custo</div>
             <div style="display:flex;flex-wrap:wrap;gap:.35rem">
               ${r.custo_ing ? `<span class="rec-tag"><span class="material-symbols-outlined">inventory_2</span>Ing: ${fmtR(r.custo_ing)}</span>` : ''}
               ${r.custo_emb ? `<span class="rec-tag"><span class="material-symbols-outlined">package_2</span>Emb: ${fmtR(r.custo_emb)}</span>` : ''}
@@ -582,13 +582,13 @@ function renderReceitas(lista) {
     }).join('');
 }
 
-// ── Shimmer loading ────────────────────────────────────────────────
+// â”€â”€ Shimmer loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showLoading() {
     document.getElementById('user-list').innerHTML =
         Array(6).fill('<div class="shimmer"></div>').join('');
 }
 
-// ── Utilitários ───────────────────────────────────────────────────
+// â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getInitials(nome, sobrenome) {
     return (((nome || '?')[0] || '') + ((sobrenome || '')[0] || '')).toUpperCase() || '?';
 }
@@ -597,7 +597,7 @@ function esc(str) {
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Toast ──────────────────────────────────────────────────────────
+// â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let toastTimer;
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -613,3 +613,4 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 </script>
 </body>
 </html>
+

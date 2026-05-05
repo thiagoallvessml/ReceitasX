@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Guia de Configuração - ReceitasX</title>
+    <title>Guia de ConfiguraÃ§Ã£o - ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -38,7 +38,7 @@
             vertical-align: middle;
         }
 
-        /* ── Header ── */
+        /* â”€â”€ Header â”€â”€ */
         .btn-back {
             display: flex; align-items: center; gap: .3rem;
             color: #94a3b8; font-size: .85rem; cursor: pointer;
@@ -46,7 +46,7 @@
         }
         .btn-back:hover { color: #25f4f4; }
 
-        /* ── Hero ── */
+        /* â”€â”€ Hero â”€â”€ */
         .hero-section {
             position: relative;
             padding: 2.5rem 1.25rem 2rem;
@@ -82,7 +82,7 @@
             max-width: 520px; margin: 0 auto; line-height: 1.5;
         }
 
-        /* ── Progress Bar ── */
+        /* â”€â”€ Progress Bar â”€â”€ */
         .progress-wrap {
             max-width: 680px; margin: 0 auto 2rem;
             padding: 0 1.25rem;
@@ -112,7 +112,7 @@
             font-size: .82rem; font-weight: 800; color: #25f4f4;
         }
 
-        /* ── Timeline ── */
+        /* â”€â”€ Timeline â”€â”€ */
         .timeline {
             max-width: 680px;
             margin: 0 auto;
@@ -131,7 +131,7 @@
             .timeline::before { left: 1.85rem; }
         }
 
-        /* ── Step Card ── */
+        /* â”€â”€ Step Card â”€â”€ */
         .step-card {
             position: relative;
             display: flex;
@@ -312,7 +312,7 @@
             background: rgba(52,211,153,.08);
         }
 
-        /* ── Tip box ── */
+        /* â”€â”€ Tip box â”€â”€ */
         .tip-box {
             display: flex; align-items: flex-start; gap: .55rem;
             background: rgba(251,191,36,.04);
@@ -326,7 +326,7 @@
             font-size: 1rem; color: #fbbf24; flex-shrink: 0; margin-top: .05rem;
         }
 
-        /* ── Completed banner ── */
+        /* â”€â”€ Completed banner â”€â”€ */
         .banner-complete {
             display: none;
             max-width: 680px;
@@ -355,7 +355,7 @@
             font-size: .82rem; color: #64748b;
         }
 
-        /* ── Reset btn ── */
+        /* â”€â”€ Reset btn â”€â”€ */
         .btn-reset {
             display: flex; align-items: center; gap: .35rem;
             margin: 0 auto; padding: .45rem .9rem;
@@ -385,38 +385,38 @@
 </head>
 <body>
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="location.href='index.html'">
             <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
         </button>
-        <h1 class="text-base font-semibold flex-1">Guia de Configuração</h1>
+        <h1 class="text-base font-semibold flex-1">Guia de ConfiguraÃ§Ã£o</h1>
     </div>
 </header>
 
-<!-- ══ Hero ════════════════════════════════════════════════════════ -->
+<!-- â•â• Hero â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="hero-section">
     <div class="hero-badge">
         <span class="material-symbols-outlined" style="font-size:.85rem">rocket_launch</span>
         Primeiros Passos
     </div>
     <h2 class="hero-title">Configure o <span>ReceitasX</span> do zero</h2>
-    <p class="hero-desc">Siga os passos abaixo na ordem indicada para configurar tudo corretamente. O progresso é atualizado automaticamente.</p>
+    <p class="hero-desc">Siga os passos abaixo na ordem indicada para configurar tudo corretamente. O progresso Ã© atualizado automaticamente.</p>
 </div>
 
-<!-- ══ Progress ════════════════════════════════════════════════════ -->
+<!-- â•â• Progress â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="progress-wrap">
     <div class="progress-bar-outer">
         <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
     </div>
     <div class="progress-label">
-        <span class="progress-text"><span id="done-count">0</span> de <span id="total-count">7</span> etapas concluídas <span style="color:#475569;font-weight:400">+ 3 opcionais</span></span>
+        <span class="progress-text"><span id="done-count">0</span> de <span id="total-count">7</span> etapas concluÃ­das <span style="color:#475569;font-weight:400">+ 3 opcionais</span></span>
         <span class="progress-pct" id="progress-pct">0%</span>
     </div>
 </div>
 
-<!-- ══ Legend ══════════════════════════════════════════════════════ -->
+<!-- â•â• Legend â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="legend">
     <div class="legend-item">
         <span class="legend-dot" style="background:#25f4f4"></span>
@@ -428,23 +428,23 @@
     </div>
     <div class="legend-item">
         <span class="legend-dot" style="background:#34d399"></span>
-        Concluído
+        ConcluÃ­do
     </div>
 </div>
 
-<!-- ══ Banner 100% ════════════════════════════════════════════════ -->
+<!-- â•â• Banner 100% â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="banner-complete" id="banner-complete">
     <div class="banner-complete-icon">
         <span class="material-symbols-outlined">celebration</span>
     </div>
-    <h3>Parabéns! Tudo configurado 🎉</h3>
-    <p>O ReceitasX está pronto para uso. Agora é só cadastrar suas receitas e começar a precificar!</p>
+    <h3>ParabÃ©ns! Tudo configurado ðŸŽ‰</h3>
+    <p>O ReceitasX estÃ¡ pronto para uso. Agora Ã© sÃ³ cadastrar suas receitas e comeÃ§ar a precificar!</p>
 </div>
 
-<!-- ══ Timeline Steps ═════════════════════════════════════════════ -->
+<!-- â•â• Timeline Steps â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="timeline" id="timeline">
 
-    <!-- ── 1. Configurações ── -->
+    <!-- â”€â”€ 1. ConfiguraÃ§Ãµes â”€â”€ -->
     <div class="step-card required" data-step="1">
         <div class="step-node">1</div>
         <div class="step-body">
@@ -454,17 +454,17 @@
                 </div>
                 <div class="step-title-group">
                     <div class="step-title">
-                        Configurações
+                        ConfiguraÃ§Ãµes
                         <span class="step-required-badge">Importante</span>
                     </div>
-                    <p class="step-subtitle">Base de cálculo do sistema</p>
+                    <p class="step-subtitle">Base de cÃ¡lculo do sistema</p>
                 </div>
             </div>
-            <p class="step-desc">Configure os valores essenciais que servem de base para todos os cálculos de custo no ReceitasX.</p>
+            <p class="step-desc">Configure os valores essenciais que servem de base para todos os cÃ¡lculos de custo no ReceitasX.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Peso e preço do botijão de gás</span>
+                    <span>Peso e preÃ§o do botijÃ£o de gÃ¡s</span>
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -472,11 +472,11 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Valor da hora trabalhada (mão de obra)</span>
+                    <span>Valor da hora trabalhada (mÃ£o de obra)</span>
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Metas de margem (baixa, razoável, excelente)</span>
+                    <span>Metas de margem (baixa, razoÃ¡vel, excelente)</span>
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -484,15 +484,15 @@
                 </div>
             </div>
             <div class="step-actions">
-                <a href="configuracoes.html" class="btn-go">
+                <a href="configuracoes" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
-                    Ir para Configurações
+                    Ir para ConfiguraÃ§Ãµes
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- ── 2. Equipamentos ── -->
+    <!-- â”€â”€ 2. Equipamentos â”€â”€ -->
     <div class="step-card required" data-step="2">
         <div class="step-node">2</div>
         <div class="step-body">
@@ -505,10 +505,10 @@
                         Equipamentos
                         <span class="step-required-badge">Importante</span>
                     </div>
-                    <p class="step-subtitle">Forno, batedeira, fogão, etc.</p>
+                    <p class="step-subtitle">Forno, batedeira, fogÃ£o, etc.</p>
                 </div>
             </div>
-            <p class="step-desc">Cadastre os equipamentos que você usa na produção. O custo de energia/gás deles será calculado automaticamente nas receitas.</p>
+            <p class="step-desc">Cadastre os equipamentos que vocÃª usa na produÃ§Ã£o. O custo de energia/gÃ¡s deles serÃ¡ calculado automaticamente nas receitas.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -516,19 +516,19 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Tipo de energia (Gás ou Elétrico)</span>
+                    <span>Tipo de energia (GÃ¡s ou ElÃ©trico)</span>
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Potência (watts) ou consumo (kg/h)</span>
+                    <span>PotÃªncia (watts) ou consumo (kg/h)</span>
                 </div>
             </div>
             <div class="tip-box">
                 <span class="material-symbols-outlined">lightbulb</span>
-                <span><strong>Dica:</strong> A potência em watts está na etiqueta atrás do equipamento ou no manual. Se usa gás, informe o consumo em kg/hora.</span>
+                <span><strong>Dica:</strong> A potÃªncia em watts estÃ¡ na etiqueta atrÃ¡s do equipamento ou no manual. Se usa gÃ¡s, informe o consumo em kg/hora.</span>
             </div>
             <div class="step-actions" style="margin-top:.85rem">
-                <a href="gerenciar-equipamentos.html" class="btn-go">
+                <a href="gerenciar-equipamentos" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Equipamentos
                 </a>
@@ -536,7 +536,7 @@
         </div>
     </div>
 
-    <!-- ── 3. Insumos ── -->
+    <!-- â”€â”€ 3. Insumos â”€â”€ -->
     <div class="step-card required" data-step="3">
         <div class="step-node">3</div>
         <div class="step-body">
@@ -549,10 +549,10 @@
                         Insumos
                         <span class="step-required-badge">Importante</span>
                     </div>
-                    <p class="step-subtitle">Ingredientes e matéria-prima</p>
+                    <p class="step-subtitle">Ingredientes e matÃ©ria-prima</p>
                 </div>
             </div>
-            <p class="step-desc">Cadastre todos os ingredientes que você compra. É a base para o cálculo do custo de cada receita.</p>
+            <p class="step-desc">Cadastre todos os ingredientes que vocÃª compra. Ã‰ a base para o cÃ¡lculo do custo de cada receita.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -568,15 +568,15 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Preço pago pela embalagem</span>
+                    <span>PreÃ§o pago pela embalagem</span>
                 </div>
             </div>
             <div class="tip-box">
                 <span class="material-symbols-outlined">lightbulb</span>
-                <span><strong>Dica:</strong> Você pode importar uma lista inteira de insumos de uma vez pelo botão de importação na página de insumos.</span>
+                <span><strong>Dica:</strong> VocÃª pode importar uma lista inteira de insumos de uma vez pelo botÃ£o de importaÃ§Ã£o na pÃ¡gina de insumos.</span>
             </div>
             <div class="step-actions" style="margin-top:.85rem">
-                <a href="gerenciar-insumos.html" class="btn-go">
+                <a href="gerenciar-insumos" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Insumos
                 </a>
@@ -584,7 +584,7 @@
         </div>
     </div>
 
-    <!-- ── 4. Embalagens ── -->
+    <!-- â”€â”€ 4. Embalagens â”€â”€ -->
     <div class="step-card required" data-step="4">
         <div class="step-node">4</div>
         <div class="step-body">
@@ -600,7 +600,7 @@
                     <p class="step-subtitle">Caixas, potes, sacolas, tags</p>
                 </div>
             </div>
-            <p class="step-desc">Cadastre as embalagens usadas para embalar seus produtos. O custo unitário entra na composição do preço final.</p>
+            <p class="step-desc">Cadastre as embalagens usadas para embalar seus produtos. O custo unitÃ¡rio entra na composiÃ§Ã£o do preÃ§o final.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -612,11 +612,11 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Preço pago pelo pacote</span>
+                    <span>PreÃ§o pago pelo pacote</span>
                 </div>
             </div>
             <div class="step-actions">
-                <a href="gerenciar-embalagens.html" class="btn-go">
+                <a href="gerenciar-embalagens" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Embalagens
                 </a>
@@ -624,7 +624,7 @@
         </div>
     </div>
 
-    <!-- ── 5. Receitas ── -->
+    <!-- â”€â”€ 5. Receitas â”€â”€ -->
     <div class="step-card required" data-step="5">
         <div class="step-node">5</div>
         <div class="step-body">
@@ -660,15 +660,15 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Tempo de mão de obra (preparo)</span>
+                    <span>Tempo de mÃ£o de obra (preparo)</span>
                 </div>
             </div>
             <div class="tip-box">
                 <span class="material-symbols-outlined">lightbulb</span>
-                <span><strong>Dica:</strong> Se a receita rende 30 brigadeiros, coloque rendimento = 30. Assim o custo unitário será calculado corretamente.</span>
+                <span><strong>Dica:</strong> Se a receita rende 30 brigadeiros, coloque rendimento = 30. Assim o custo unitÃ¡rio serÃ¡ calculado corretamente.</span>
             </div>
             <div class="step-actions" style="margin-top:.85rem">
-                <a href="receitas.html" class="btn-go">
+                <a href="receitas" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Receitas
                 </a>
@@ -676,7 +676,7 @@
         </div>
     </div>
 
-    <!-- ── 6. Produtos ── -->
+    <!-- â”€â”€ 6. Produtos â”€â”€ -->
     <div class="step-card required" data-step="6">
         <div class="step-node">6</div>
         <div class="step-body">
@@ -689,10 +689,10 @@
                         Produtos
                         <span class="step-required-badge">Importante</span>
                     </div>
-                    <p class="step-subtitle">O que você vende de fato</p>
+                    <p class="step-subtitle">O que vocÃª vende de fato</p>
                 </div>
             </div>
-            <p class="step-desc">Un produto é vinculado a uma receita + embalagem. É aqui que você define o preço de venda e visualiza a margem de lucro.</p>
+            <p class="step-desc">Un produto Ã© vinculado a uma receita + embalagem. Ã‰ aqui que vocÃª define o preÃ§o de venda e visualiza a margem de lucro.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -708,11 +708,11 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Preço de venda</span>
+                    <span>PreÃ§o de venda</span>
                 </div>
             </div>
             <div class="step-actions">
-                <a href="gestao-produtos.html" class="btn-go">
+                <a href="gestao-produtos" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Produtos
                 </a>
@@ -720,7 +720,7 @@
         </div>
     </div>
 
-    <!-- ── 7. Precificação ── -->
+    <!-- â”€â”€ 7. PrecificaÃ§Ã£o â”€â”€ -->
     <div class="step-card required" data-step="7">
         <div class="step-node">7</div>
         <div class="step-body">
@@ -730,13 +730,13 @@
                 </div>
                 <div class="step-title-group">
                     <div class="step-title">
-                        Precificação
+                        PrecificaÃ§Ã£o
                         <span class="step-required-badge">Importante</span>
                     </div>
-                    <p class="step-subtitle">Análise por canal de venda</p>
+                    <p class="step-subtitle">AnÃ¡lise por canal de venda</p>
                 </div>
             </div>
-            <p class="step-desc">Veja o preço ideal para cada canal (Porta de Casa, iFood, etc.) com base nas taxas configuradas. Aqui você valida se a margem está saudável.</p>
+            <p class="step-desc">Veja o preÃ§o ideal para cada canal (Porta de Casa, iFood, etc.) com base nas taxas configuradas. Aqui vocÃª valida se a margem estÃ¡ saudÃ¡vel.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -744,19 +744,19 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Ajuste preços se a margem estiver baixa</span>
+                    <span>Ajuste preÃ§os se a margem estiver baixa</span>
                 </div>
             </div>
             <div class="step-actions">
-                <a href="precificacao-marketplace.html" class="btn-go">
+                <a href="precificacao-marketplace" class="btn-go">
                     <span class="material-symbols-outlined">arrow_forward</span>
-                    Ir para Precificação
+                    Ir para PrecificaÃ§Ã£o
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- ── 8. Combos ── -->
+    <!-- â”€â”€ 8. Combos â”€â”€ -->
     <div class="step-card optional" data-step="8">
         <div class="step-node">8</div>
         <div class="step-body">
@@ -769,10 +769,10 @@
                         Combos
                         <span class="step-optional-badge">Opcional</span>
                     </div>
-                    <p class="step-subtitle">Se você vende kits ou combos</p>
+                    <p class="step-subtitle">Se vocÃª vende kits ou combos</p>
                 </div>
             </div>
-            <p class="step-desc">Monte combos agrupando produtos. Ideal para caixas com mix de doces, cestas de presente, etc. Só configure se você pretende vender combos.</p>
+            <p class="step-desc">Monte combos agrupando produtos. Ideal para caixas com mix de doces, cestas de presente, etc. SÃ³ configure se vocÃª pretende vender combos.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -780,15 +780,15 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Produtos que compõem o combo</span>
+                    <span>Produtos que compÃµem o combo</span>
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Preço de venda do combo</span>
+                    <span>PreÃ§o de venda do combo</span>
                 </div>
             </div>
             <div class="step-actions">
-                <a href="combos.html" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
+                <a href="combos" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Combos
                 </a>
@@ -796,7 +796,7 @@
         </div>
     </div>
 
-    <!-- ── 9. Despesas ── -->
+    <!-- â”€â”€ 9. Despesas â”€â”€ -->
     <div class="step-card optional" data-step="9">
         <div class="step-node">9</div>
         <div class="step-body">
@@ -809,10 +809,10 @@
                         Despesas
                         <span class="step-optional-badge">Opcional</span>
                     </div>
-                    <p class="step-subtitle">Custos fixos e variáveis do mês</p>
+                    <p class="step-subtitle">Custos fixos e variÃ¡veis do mÃªs</p>
                 </div>
             </div>
-            <p class="step-desc">Cadastre suas despesas fixas mensais (aluguel, internet, embalagens, etc.) para ter uma visão completa da lucratividade real do seu negócio.</p>
+            <p class="step-desc">Cadastre suas despesas fixas mensais (aluguel, internet, embalagens, etc.) para ter uma visÃ£o completa da lucratividade real do seu negÃ³cio.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -824,11 +824,11 @@
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Categoria (Fixa ou Variável)</span>
+                    <span>Categoria (Fixa ou VariÃ¡vel)</span>
                 </div>
             </div>
             <div class="step-actions">
-                <a href="despesas.html" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
+                <a href="despesas" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Despesas
                 </a>
@@ -836,7 +836,7 @@
         </div>
     </div>
 
-    <!-- ── 10. Ponto de Equilíbrio ── -->
+    <!-- â”€â”€ 10. Ponto de EquilÃ­brio â”€â”€ -->
     <div class="step-card optional" data-step="10">
         <div class="step-node">10</div>
         <div class="step-body">
@@ -846,17 +846,17 @@
                 </div>
                 <div class="step-title-group">
                     <div class="step-title">
-                        Ponto de Equilíbrio
+                        Ponto de EquilÃ­brio
                         <span class="step-optional-badge">Opcional</span>
                     </div>
-                    <p class="step-subtitle">Quanto precisa vender por mês</p>
+                    <p class="step-subtitle">Quanto precisa vender por mÃªs</p>
                 </div>
             </div>
-            <p class="step-desc">Descubra quantas unidades ou quanto em faturamento você precisa atingir por mês para cobrir todas as despesas e começar a ter lucro.</p>
+            <p class="step-desc">Descubra quantas unidades ou quanto em faturamento vocÃª precisa atingir por mÃªs para cobrir todas as despesas e comeÃ§ar a ter lucro.</p>
             <div class="step-checklist">
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>Analise o faturamento mínimo necessário</span>
+                    <span>Analise o faturamento mÃ­nimo necessÃ¡rio</span>
                 </div>
                 <div class="check-item">
                     <span class="material-symbols-outlined">check_circle</span>
@@ -865,12 +865,12 @@
             </div>
             <div class="tip-box">
                 <span class="material-symbols-outlined">lightbulb</span>
-                <span><strong>Dica:</strong> Para usar o Ponto de Equilíbrio, é ideal ter preenchido as Despesas (passo 9) antes.</span>
+                <span><strong>Dica:</strong> Para usar o Ponto de EquilÃ­brio, Ã© ideal ter preenchido as Despesas (passo 9) antes.</span>
             </div>
             <div class="step-actions" style="margin-top:.85rem">
-                <a href="ponto-equilibrio.html" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
+                <a href="ponto-equilibrio" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
                     <span class="material-symbols-outlined">arrow_forward</span>
-                    Ir para Equilíbrio
+                    Ir para EquilÃ­brio
                 </a>
             </div>
         </div>
@@ -878,12 +878,12 @@
 
 </div><!-- /timeline -->
 
-<!-- ══ Reset Button ═══════════════════════════════════════════════ -->
+<!-- â•â• Reset Button â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 
 
-<!-- ══ Script ═════════════════════════════════════════════════════ -->
+<!-- â•â• Script â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script>
-const TOTAL_STEPS = 7; // Combos, Despesas e Ponto de Equilíbrio são opcionais e não contam para o progresso
+const TOTAL_STEPS = 7; // Combos, Despesas e Ponto de EquilÃ­brio sÃ£o opcionais e nÃ£o contam para o progresso
 let userSession = null;
 
 async function checkProgress() {
@@ -909,7 +909,7 @@ async function checkProgress() {
             return false;
         };
 
-        // 1. Configurações
+        // 1. ConfiguraÃ§Ãµes
         const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
         progress[1] = cfgCount > 0;
 
@@ -928,7 +928,7 @@ async function checkProgress() {
         // 6. Produtos
         progress[6] = await checkItem('produtos', 'receitasx_produtos');
 
-        // 7. Precificação (Pelo menos 1 preço cadastrado ou hit na página)
+        // 7. PrecificaÃ§Ã£o (Pelo menos 1 preÃ§o cadastrado ou hit na pÃ¡gina)
         const precHit = localStorage.getItem('receitasx_precificacao_hit');
         let temPrecos = false;
         try {
@@ -943,7 +943,7 @@ async function checkProgress() {
         // 9. Despesas (Opcional)
         progress[9] = await checkItem('despesas', 'receitasx_despesas');
 
-        // 10. Ponto de Equilíbrio (Acessou a aba)
+        // 10. Ponto de EquilÃ­brio (Acessou a aba)
         const peqHit = localStorage.getItem('receitasx_peq_hit');
         progress[10] = peqHit === 'true';
 
@@ -991,12 +991,12 @@ function renderProgress(progress) {
         }
     });
 
-    // Banner 100% (Mostra se fez pelo menos o básico ou tudo)
+    // Banner 100% (Mostra se fez pelo menos o bÃ¡sico ou tudo)
     const banner = document.getElementById('banner-complete');
     if (banner) {
         if (requiredCount >= TOTAL_REQUIRED) {
             banner.classList.add('show');
-            banner.querySelector('p').textContent = 'O ReceitasX está pronto para uso. Suas configurações essenciais estão concluídas!';
+            banner.querySelector('p').textContent = 'O ReceitasX estÃ¡ pronto para uso. Suas configuraÃ§Ãµes essenciais estÃ£o concluÃ­das!';
         } else {
             banner.classList.remove('show');
         }
@@ -1004,7 +1004,7 @@ function renderProgress(progress) {
 }
 
 function resetProgress() {
-    // Como agora é automático, o reset visual não serve muito.
+    // Como agora Ã© automÃ¡tico, o reset visual nÃ£o serve muito.
     // Vamos apenas recarregar para buscar do DB.
     checkProgress();
 }
@@ -1015,3 +1015,4 @@ checkProgress();
 
 </body>
 </html>
+

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Admin — Feedbacks dos Usuários · ReceitasX</title>
+    <title>Admin â€” Feedbacks dos UsuÃ¡rios Â· ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -110,49 +110,49 @@
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="history.back()">
             <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
         </button>
         <span class="material-symbols-outlined text-orange-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
-        <h1 class="text-base font-semibold flex-1">Feedbacks dos Usuários</h1>
+        <h1 class="text-base font-semibold flex-1">Feedbacks dos UsuÃ¡rios</h1>
         <span id="admin-badge" class="badge-admin" style="display:none">
             <span class="material-symbols-outlined">verified</span> Admin
         </span>
     </div>
 </header>
 
-<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
     <!-- Banner -->
     <div class="admin-banner">
         <span class="material-symbols-outlined">forum</span>
-        <span>Gerencie dúvidas, sugestões, elogios e bugs reportados pelos usuários. Clique para ver detalhes e responder.</span>
+        <span>Gerencie dÃºvidas, sugestÃµes, elogios e bugs reportados pelos usuÃ¡rios. Clique para ver detalhes e responder.</span>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div class="stat-card">
-            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-val" id="stat-total">â€”</div>
             <div class="stat-lbl">Total</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-pendentes" style="color:#fbbf24">—</div>
+            <div class="stat-val" id="stat-pendentes" style="color:#fbbf24">â€”</div>
             <div class="stat-lbl">Pendentes</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-duvidas" style="color:#38bdf8">—</div>
-            <div class="stat-lbl">Dúvidas</div>
+            <div class="stat-val" id="stat-duvidas" style="color:#38bdf8">â€”</div>
+            <div class="stat-lbl">DÃºvidas</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-bugs" style="color:#f87171">—</div>
+            <div class="stat-val" id="stat-bugs" style="color:#f87171">â€”</div>
             <div class="stat-lbl">Bugs</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-elogios" style="color:#34d399">—</div>
+            <div class="stat-val" id="stat-elogios" style="color:#34d399">â€”</div>
             <div class="stat-lbl">Elogios</div>
         </div>
     </div>
@@ -161,13 +161,13 @@
     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div class="search-wrap flex-1 w-full">
             <span class="material-symbols-outlined ico">search</span>
-            <input id="search" class="search-input" type="text" placeholder="Buscar por nome, negócio ou mensagem…" oninput="filtrar()" />
+            <input id="search" class="search-input" type="text" placeholder="Buscar por nome, negÃ³cio ou mensagemâ€¦" oninput="filtrar()" />
         </div>
         <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
             <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
             <button class="pill" data-filter="pendente" onclick="setFilter('pendente',this)">Pendentes</button>
-            <button class="pill" data-filter="duvida" onclick="setFilter('duvida',this)">Dúvidas</button>
-            <button class="pill" data-filter="sugestao" onclick="setFilter('sugestao',this)">Sugestões</button>
+            <button class="pill" data-filter="duvida" onclick="setFilter('duvida',this)">DÃºvidas</button>
+            <button class="pill" data-filter="sugestao" onclick="setFilter('sugestao',this)">SugestÃµes</button>
             <button class="pill" data-filter="elogio" onclick="setFilter('elogio',this)">Elogios</button>
             <button class="pill" data-filter="bug" onclick="setFilter('bug',this)">Bugs</button>
         </div>
@@ -181,14 +181,14 @@
 
 </main>
 
-<!-- ══ Drawer Detalhes ════════════════════════════════════════════ -->
+<!-- â•â• Drawer Detalhes â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="drawer-bg" class="drawer-bg" onclick="closeDrawer()">
     <div class="drawer" onclick="event.stopPropagation()">
         <div class="drawer-head">
             <div class="avatar" id="drawer-avatar">??</div>
             <div style="flex:1;min-width:0">
-                <p id="drawer-nome" class="font-bold text-sm leading-tight">—</p>
-                <p id="drawer-email" class="text-xs text-slate-400 mt-0.5">—</p>
+                <p id="drawer-nome" class="font-bold text-sm leading-tight">â€”</p>
+                <p id="drawer-email" class="text-xs text-slate-400 mt-0.5">â€”</p>
             </div>
             <button onclick="closeDrawer()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;flex-shrink:0">
                 <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
@@ -201,7 +201,7 @@
     </div>
 </div>
 
-<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#a78bfa">check_circle</span>
     <span id="toast-msg">OK</span>
@@ -209,8 +209,8 @@
 
 <script>
 const TIPO_CONFIG = {
-    duvida:   { ico:'help',        label:'Dúvida',   color:'#38bdf8' },
-    sugestao: { ico:'lightbulb',   label:'Sugestão', color:'#fbbf24' },
+    duvida:   { ico:'help',        label:'DÃºvida',   color:'#38bdf8' },
+    sugestao: { ico:'lightbulb',   label:'SugestÃ£o', color:'#fbbf24' },
     elogio:   { ico:'thumb_up',    label:'Elogio',   color:'#34d399' },
     bug:      { ico:'bug_report',  label:'Bug',      color:'#f87171' },
 };
@@ -219,7 +219,7 @@ let todosFeedbacks = [];
 let currentFilter = 'todos';
 let currentFbId = null;
 
-// ── Guard admin ───────────────────────────────────────────────────
+// â”€â”€ Guard admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (async () => {
     await _waitForRole(4000);
     if (window.__userRole !== 'admin') {
@@ -227,8 +227,8 @@ let currentFbId = null;
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
-                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+                <p style="color:#64748b;font-size:.9rem">VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.</p>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
             </div>`;
         return;
     }
@@ -236,7 +236,7 @@ let currentFbId = null;
     await carregarDados();
 })();
 
-// ── Carregar feedbacks via RPC ────────────────────────────────────
+// â”€â”€ Carregar feedbacks via RPC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarDados() {
     showLoading();
     try {
@@ -256,7 +256,7 @@ async function carregarDados() {
     }
 }
 
-// ── Stats ──────────────────────────────────────────────────────────
+// â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function atualizarStats() {
     const total = todosFeedbacks.length;
     const pendentes = todosFeedbacks.filter(f => f.status === 'pendente').length;
@@ -271,7 +271,7 @@ function atualizarStats() {
     document.getElementById('stat-elogios').textContent   = elogios;
 }
 
-// ── Filtro + busca ─────────────────────────────────────────────────
+// â”€â”€ Filtro + busca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setFilter(f, btn) {
     currentFilter = f;
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
@@ -301,7 +301,7 @@ function filtrar() {
     renderLista(list);
 }
 
-// ── Render lista ───────────────────────────────────────────────────
+// â”€â”€ Render lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderLista(list) {
     const el = document.getElementById('fb-list');
 
@@ -319,7 +319,7 @@ function renderLista(list) {
         const nomeCompleto = [f.user_nome, f.user_sobrenome].filter(Boolean).join(' ') || 'Sem nome';
         const initials = getInitials(f.user_nome, f.user_sobrenome);
         const data = new Date(f.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-        const msgPreview = (f.mensagem || '').substring(0, 100) + (f.mensagem?.length > 100 ? '…' : '');
+        const msgPreview = (f.mensagem || '').substring(0, 100) + (f.mensagem?.length > 100 ? 'â€¦' : '');
         const isNew = f.status === 'pendente';
 
         return `
@@ -338,10 +338,10 @@ function renderLista(list) {
                     </div>
                     <p style="font-size:.78rem;color:#94a3b8;line-height:1.4;margin-bottom:.3rem">${esc(msgPreview)}</p>
                     <div style="display:flex;align-items:center;gap:.5rem">
-                        <span style="font-size:.62rem;color:#475569">${esc(f.user_negocio || '—')}</span>
+                        <span style="font-size:.62rem;color:#475569">${esc(f.user_negocio || 'â€”')}</span>
                         <span style="width:2px;height:2px;border-radius:50%;background:#334155;flex-shrink:0"></span>
                         <span style="font-size:.62rem;color:#475569">${data}</span>
-                        ${f.resposta ? '<span style="font-size:.55rem;color:#34d399;font-weight:600">✓ Respondido</span>' : ''}
+                        ${f.resposta ? '<span style="font-size:.55rem;color:#34d399;font-weight:600">âœ“ Respondido</span>' : ''}
                     </div>
                 </div>
             </div>
@@ -349,7 +349,7 @@ function renderLista(list) {
     }).join('');
 }
 
-// ── Drawer ─────────────────────────────────────────────────────────
+// â”€â”€ Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function abrirDrawer(fbId) {
     const fb = todosFeedbacks.find(f => f.id === fbId);
     if (!fb) return;
@@ -361,7 +361,7 @@ function abrirDrawer(fbId) {
 
     document.getElementById('drawer-avatar').textContent = getInitials(fb.user_nome, fb.user_sobrenome);
     document.getElementById('drawer-nome').textContent = nomeCompleto;
-    document.getElementById('drawer-email').textContent = fb.user_email || fb.user_negocio || '—';
+    document.getElementById('drawer-email').textContent = fb.user_email || fb.user_negocio || 'â€”';
 
     const body = document.getElementById('drawer-body');
     body.innerHTML = `
@@ -377,7 +377,7 @@ function abrirDrawer(fbId) {
                 ${data}
             </span>
         </div>
-        ${fb.user_negocio ? `<p style="font-size:.72rem;color:#64748b"><strong>Negócio:</strong> ${esc(fb.user_negocio)}</p>` : ''}
+        ${fb.user_negocio ? `<p style="font-size:.72rem;color:#64748b"><strong>NegÃ³cio:</strong> ${esc(fb.user_negocio)}</p>` : ''}
 
         <!-- Mensagem -->
         <div style="background:#111;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem">
@@ -395,10 +395,10 @@ function abrirDrawer(fbId) {
             <p style="font-size:.82rem;color:#e2e8f0;line-height:1.5;white-space:pre-wrap">${esc(fb.resposta)}</p>
         </div>` : ''}
 
-        <!-- Área de responder -->
+        <!-- Ãrea de responder -->
         <div style="background:#141414;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem">
             <p style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.5rem">${fb.resposta ? 'Atualizar Resposta' : 'Responder'}</p>
-            <textarea id="drawer-resposta" class="resp-textarea" placeholder="Escreva sua resposta…">${fb.resposta || ''}</textarea>
+            <textarea id="drawer-resposta" class="resp-textarea" placeholder="Escreva sua respostaâ€¦">${fb.resposta || ''}</textarea>
             <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem">
                 <button class="action-btn green" onclick="responderFeedback('${fb.id}','respondido')">
                     <span class="material-symbols-outlined">reply</span>
@@ -482,13 +482,13 @@ function closeDrawer() {
     document.querySelectorAll('.fb-card').forEach(c => c.classList.remove('active'));
 }
 
-// ── Shimmer ────────────────────────────────────────────────────────
+// â”€â”€ Shimmer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showLoading() {
     document.getElementById('fb-list').innerHTML =
         Array(5).fill('<div class="shimmer"></div>').join('');
 }
 
-// ── Utilitários ───────────────────────────────────────────────────
+// â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getInitials(nome, sobrenome) {
     return (((nome || '?')[0] || '') + ((sobrenome || '')[0] || '')).toUpperCase() || '?';
 }
@@ -497,7 +497,7 @@ function esc(str) {
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Toast ──────────────────────────────────────────────────────────
+// â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let toastTimer;
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -513,3 +513,4 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 </script>
 </body>
 </html>
+

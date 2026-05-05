@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Histórico de Pagamentos · Admin</title>
+    <title>HistÃ³rico de Pagamentos Â· Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -116,7 +116,7 @@
             <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
         </button>
         <span class="material-symbols-outlined" style="color:#34d399;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
-        <h1 class="text-base font-semibold flex-1">Histórico de Pagamentos</h1>
+        <h1 class="text-base font-semibold flex-1">HistÃ³rico de Pagamentos</h1>
         <button class="btn-export" id="btn-export" onclick="exportarCSV()" style="display:none">
             <span class="material-symbols-outlined">download</span>
             Exportar CSV
@@ -129,7 +129,7 @@
     <!-- Banner admin -->
     <div class="admin-banner">
         <span class="material-symbols-outlined">lock</span>
-        <span>Área exclusiva para administradores — histórico completo de pagamentos a afiliados.</span>
+        <span>Ãrea exclusiva para administradores â€” histÃ³rico completo de pagamentos a afiliados.</span>
     </div>
 
     <!-- KPIs -->
@@ -144,12 +144,12 @@
     <div style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;">
         <div class="search-wrap" style="flex:1;min-width:200px">
             <span class="material-symbols-outlined ico">search</span>
-            <input id="search" class="search-input" type="text" placeholder="Buscar por afiliado, e-mail ou chave Pix…" oninput="renderTabela()" />
+            <input id="search" class="search-input" type="text" placeholder="Buscar por afiliado, e-mail ou chave Pixâ€¦" oninput="renderTabela()" />
         </div>
         <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
             <label style="font-size:.72rem;color:#64748b;white-space:nowrap">De:</label>
             <input id="filtro-de"  class="date-input" type="date" onchange="renderTabela()" />
-            <label style="font-size:.72rem;color:#64748b;white-space:nowrap">Até:</label>
+            <label style="font-size:.72rem;color:#64748b;white-space:nowrap">AtÃ©:</label>
             <input id="filtro-ate" class="date-input" type="date" onchange="renderTabela()" />
             <button onclick="limparFiltros()" style="padding:.55rem .85rem;border-radius:.65rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">
                 Limpar
@@ -161,7 +161,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
         <div class="sec-title">
             <span class="material-symbols-outlined">payments</span>
-            <span id="count-label">Carregando…</span>
+            <span id="count-label">Carregandoâ€¦</span>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem;">
             <label style="font-size:.72rem;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:.35rem;">
@@ -199,10 +199,10 @@
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    admin-historico-pagamentos.html
-   Histórico completo de pagamentos efetuados a afiliados
-════════════════════════════════════════════════════════════ */
+   HistÃ³rico completo de pagamentos efetuados a afiliados
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 let allPagamentos = [];
 let allAfiliados  = [];
@@ -215,8 +215,8 @@ let allAfiliados  = [];
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <p style="color:#64748b;font-size:.9rem">Você não tem permissão para acessar esta página.</p>
-                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+                <p style="color:#64748b;font-size:.9rem">VocÃª nÃ£o tem permissÃ£o para acessar esta pÃ¡gina.</p>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
             </div>`;
         return;
     }
@@ -224,7 +224,7 @@ let allAfiliados  = [];
     await loadDados();
 })();
 
-// ── Carregar dados ──────────────────────────────────────────
+// â”€â”€ Carregar dados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadDados() {
     try {
         const [resSaques, resAfil] = await Promise.all([
@@ -251,7 +251,7 @@ async function loadDados() {
     }
 }
 
-// ── KPIs ─────────────────────────────────────────────────
+// â”€â”€ KPIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderKPIs() {
     const total       = allPagamentos.reduce((s, p) => s + Number(p.valor || 0), 0);
     const afiliSet    = new Set(allPagamentos.map(p => p.user_id));
@@ -262,8 +262,8 @@ function renderKPIs() {
     })).sort((a, b) => b.total - a.total)[0];
 
     const emailMaisPago = maisPago
-        ? (allAfiliados.find(a => a.user_id === maisPago.uid)?.email || '—').split('@')[0]
-        : '—';
+        ? (allAfiliados.find(a => a.user_id === maisPago.uid)?.email || 'â€”').split('@')[0]
+        : 'â€”';
 
     document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi kpi-green">
@@ -277,24 +277,24 @@ function renderKPIs() {
             <div class="kpi-sub">afiliados distintos</div>
         </div>
         <div class="kpi kpi-yellow">
-            <div class="kpi-lbl">Ticket Médio</div>
+            <div class="kpi-lbl">Ticket MÃ©dio</div>
             <div class="kpi-val yellow">${fmtR(media)}</div>
             <div class="kpi-sub">por pagamento</div>
         </div>
         <div class="kpi kpi-pink">
             <div class="kpi-lbl">Maior Recebedor</div>
             <div class="kpi-val pink" style="font-size:1rem">${esc(emailMaisPago)}</div>
-            <div class="kpi-sub">${maisPago ? fmtR(maisPago.total) : '—'} no total</div>
+            <div class="kpi-sub">${maisPago ? fmtR(maisPago.total) : 'â€”'} no total</div>
         </div>`;
 }
 
-// ── Filtros utilitários ───────────────────────────────────
+// â”€â”€ Filtros utilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function filtrados() {
     const q   = (document.getElementById('search').value || '').toLowerCase().trim();
     const de  = document.getElementById('filtro-de').value;
     const ate = document.getElementById('filtro-ate').value;
 
-    // Mapa user_id → afiliado
+    // Mapa user_id â†’ afiliado
     const afilMap = {};
     allAfiliados.forEach(a => { afilMap[a.user_id] = a; });
 
@@ -321,7 +321,7 @@ function limparFiltros() {
     renderTabela();
 }
 
-// ── Render tabela ─────────────────────────────────────────
+// â”€â”€ Render tabela â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTabela() {
     const lista    = filtrados();
     const agrupar  = document.getElementById('toggle-grupo').checked;
@@ -347,7 +347,7 @@ function renderTabela() {
 function renderFlat(lista, afilMap, tbody) {
     tbody.innerHTML = lista.map(p => {
         const af = afilMap[p.user_id];
-        const email  = p.email || af?.email || '—';
+        const email  = p.email || af?.email || 'â€”';
         const initl  = initials(email.split('@')[0]);
         const isAdmin = (p.obs || '').toLowerCase().includes('admin');
         return `
@@ -358,7 +358,7 @@ function renderFlat(lista, afilMap, tbody) {
                     <div class="av-sm">${initl}</div>
                     <div>
                         <div class="td-bold" style="font-size:.83rem">${esc(email)}</div>
-                        ${af?.codigo ? `<div style="font-size:.68rem;color:#64748b">cód: ${esc(af.codigo)}</div>` : ''}
+                        ${af?.codigo ? `<div style="font-size:.68rem;color:#64748b">cÃ³d: ${esc(af.codigo)}</div>` : ''}
                     </div>
                 </div>
             </td>
@@ -366,14 +366,14 @@ function renderFlat(lista, afilMap, tbody) {
             <td>
                 ${p.pix_chave
                     ? `<div style="display:flex;align-items:center;gap:.35rem"><span class="pix-chip">${esc((p.pix_tipo||'PIX').toUpperCase())}</span><span style="font-size:.78rem;color:#94a3b8">${esc(p.pix_chave)}</span></div>`
-                    : `<span style="font-size:.75rem;color:#475569">—</span>`}
+                    : `<span style="font-size:.75rem;color:#475569">â€”</span>`}
             </td>
             <td>
                 ${isAdmin
                     ? `<span class="s-badge s-admin"><span class="material-symbols-outlined">admin_panel_settings</span>Admin</span>`
                     : `<span class="s-badge s-pago"><span class="material-symbols-outlined">person</span>Solicitado</span>`}
             </td>
-            <td style="font-size:.75rem;color:#64748b;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.obs || '—')}</td>
+            <td style="font-size:.75rem;color:#64748b;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.obs || 'â€”')}</td>
         </tr>`;
     }).join('');
 }
@@ -389,7 +389,7 @@ function renderAgrupado(lista, afilMap, tbody) {
     let html = '';
     Object.entries(grupos).forEach(([uid, pagamentos]) => {
         const af    = afilMap[uid];
-        const email = pagamentos[0]?.email || af?.email || '—';
+        const email = pagamentos[0]?.email || af?.email || 'â€”';
         const total = pagamentos.reduce((s, p) => s + Number(p.valor || 0), 0);
 
         html += `
@@ -401,7 +401,7 @@ function renderAgrupado(lista, afilMap, tbody) {
                     ${af?.codigo ? `<span style="background:#111;border:1px solid #2A2A2A;border-radius:.35rem;padding:.1rem .4rem;font-size:.65rem;color:#25f4f4">${esc(af.codigo)}</span>` : ''}
                 </div>
             </td>
-            <td colspan="4" style="text-align:right;color:#64748b">${pagamentos.length} pagamento${pagamentos.length!==1?'s':''} · Total: <strong style="color:#34d399">${fmtR(total)}</strong></td>
+            <td colspan="4" style="text-align:right;color:#64748b">${pagamentos.length} pagamento${pagamentos.length!==1?'s':''} Â· Total: <strong style="color:#34d399">${fmtR(total)}</strong></td>
         </tr>`;
 
         pagamentos.forEach(p => {
@@ -409,19 +409,19 @@ function renderAgrupado(lista, afilMap, tbody) {
             html += `
             <tr>
                 <td style="color:#64748b;font-size:.78rem;white-space:nowrap;padding-left:1.5rem">${fmtDate(p.created_at)}</td>
-                <td style="color:#475569;font-size:.75rem">—</td>
+                <td style="color:#475569;font-size:.75rem">â€”</td>
                 <td class="td-bold" style="color:#34d399">${fmtR(p.valor)}</td>
                 <td>
                     ${p.pix_chave
                         ? `<div style="display:flex;align-items:center;gap:.35rem"><span class="pix-chip">${esc((p.pix_tipo||'PIX').toUpperCase())}</span><span style="font-size:.78rem;color:#94a3b8">${esc(p.pix_chave)}</span></div>`
-                        : `<span style="font-size:.75rem;color:#475569">—</span>`}
+                        : `<span style="font-size:.75rem;color:#475569">â€”</span>`}
                 </td>
                 <td>
                     ${isAdmin
                         ? `<span class="s-badge s-admin"><span class="material-symbols-outlined">admin_panel_settings</span>Admin</span>`
                         : `<span class="s-badge s-pago"><span class="material-symbols-outlined">person</span>Solicitado</span>`}
                 </td>
-                <td style="font-size:.75rem;color:#64748b;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.obs || '—')}</td>
+                <td style="font-size:.75rem;color:#64748b;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.obs || 'â€”')}</td>
             </tr>`;
         });
     });
@@ -429,13 +429,13 @@ function renderAgrupado(lista, afilMap, tbody) {
     tbody.innerHTML = html;
 }
 
-// ── Exportar CSV ──────────────────────────────────────────
+// â”€â”€ Exportar CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function exportarCSV() {
     const lista = filtrados();
     const afilMap = {};
     allAfiliados.forEach(a => { afilMap[a.user_id] = a; });
 
-    const rows = [['Data','Email','Código','Valor (R$)','Tipo Pix','Chave Pix','Origem','Obs']];
+    const rows = [['Data','Email','CÃ³digo','Valor (R$)','Tipo Pix','Chave Pix','Origem','Obs']];
     lista.forEach(p => {
         const af = afilMap[p.user_id];
         const isAdmin = (p.obs||'').toLowerCase().includes('admin');
@@ -463,12 +463,12 @@ function exportarCSV() {
     showToast('CSV exportado!');
 }
 
-// ── Utilitários ───────────────────────────────────────────
+// â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmtR(v) {
     return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
 }
 function fmtDate(d) {
-    if (!d) return '—';
+    if (!d) return 'â€”';
     return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' })
         + ' ' + new Date(d).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
 }
@@ -492,3 +492,4 @@ function showToast(msg, type = 'success') {
 </script>
 </body>
 </html>
+

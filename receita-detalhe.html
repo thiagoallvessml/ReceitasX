@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -20,14 +20,14 @@
         body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; color:#f1f5f9; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
 
-        /* ── header ── */
+        /* â”€â”€ header â”€â”€ */
         .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
         .btn-back:hover { color:#25f4f4; }
         .btn-icon { width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s; }
         .btn-icon:hover { border-color:rgba(37,244,244,.4);color:#25f4f4; }
         .btn-icon .material-symbols-outlined { font-size:1.1rem; }
 
-        /* ── gradient covers ── */
+        /* â”€â”€ gradient covers â”€â”€ */
         .grad-1 { background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%); }
         .grad-2 { background:linear-gradient(135deg,#f59e0b 0%,#ef4444 100%); }
         .grad-3 { background:linear-gradient(135deg,#8b5cf6 0%,#ec4899 100%); }
@@ -35,7 +35,7 @@
         .grad-5 { background:linear-gradient(135deg,#84cc16 0%,#22d3ee 100%); }
         .grad-6 { background:linear-gradient(135deg,#f97316 0%,#facc15 100%); }
 
-        /* ── hero card ── */
+        /* â”€â”€ hero card â”€â”€ */
         .hero-card { background:#141414;border:1px solid #1E1E1E;border-radius:1.25rem;padding:1.25rem;display:flex;align-items:center;gap:1.1rem;margin-bottom:1rem; }
         .cover-thumb { width:72px;height:72px;border-radius:.85rem;flex-shrink:0;display:flex;align-items:center;justify-content:center; }
         .cover-thumb .material-symbols-outlined { font-size:2rem;color:rgba(255,255,255,.5);font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48; }
@@ -50,14 +50,14 @@
         .btn-edit .material-symbols-outlined,
         .btn-delete .material-symbols-outlined { font-size:.95rem; }
 
-        /* ── stat strip ── */
+        /* â”€â”€ stat strip â”€â”€ */
         .stat-strip { display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem; }
         .stat-box { background:#141414;border:1px solid #1E1E1E;border-radius:.85rem;padding:.85rem 1rem; }
         .stat-box-lbl { font-size:.55rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#475569;margin-bottom:.25rem;display:flex;align-items:center;gap:.25rem; }
         .stat-box-lbl .material-symbols-outlined { font-size:.8rem; }
         .stat-box-val { font-size:1.15rem;font-weight:800;color:#f1f5f9; }
 
-        /* ── custo accordion ── */
+        /* â”€â”€ custo accordion â”€â”€ */
         .cost-section { background:#141414;border:1px solid #1E1E1E;border-radius:1rem;overflow:hidden;margin-bottom:.6rem; }
         .cost-head { display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;transition:background .15s;gap:.6rem; }
         .cost-head:hover { background:rgba(255,255,255,.02); }
@@ -77,7 +77,7 @@
         .cost-item-qty { color:#475569;font-size:.72rem;margin-left:.3rem; }
         .empty-items { color:#475569;font-size:.78rem;padding:.25rem 0; }
 
-        /* ── resumo financeiro ── */
+        /* â”€â”€ resumo financeiro â”€â”€ */
         .resumo { border-radius:1.25rem;padding:1.5rem;background:linear-gradient(135deg,#0d2626 0%,#0a1a1a 60%,#0a0a0a 100%);border:1px solid rgba(37,244,244,.15);margin-bottom:1.5rem;position:relative;overflow:hidden; }
         .resumo::before { content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(37,244,244,.1),transparent 70%);pointer-events:none; }
         .resumo-label { font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#25f4f4;margin-bottom:.25rem; }
@@ -95,15 +95,15 @@
         .rc-markup .resumo-cell-val { color:#a78bfa; }
         .rc-preco-unit .resumo-cell-val { color:#25f4f4; }
 
-        /* ── toast ── */
+        /* â”€â”€ toast â”€â”€ */
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
 
-        /* ── not found ── */
+        /* â”€â”€ not found â”€â”€ */
         .not-found { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:1rem;text-align:center; }
         .not-found .material-symbols-outlined { font-size:3.5rem;color:#334155; }
 
-        /* ── modal confirm ── */
+        /* â”€â”€ modal confirm â”€â”€ */
         .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px); }
         .modal-overlay.open { display:flex; }
         .modal-box { background:#141414;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:380px;padding:1.5rem; }
@@ -120,7 +120,7 @@
 </head>
 <body>
 
-<!-- ── HEADER ── -->
+<!-- â”€â”€ HEADER â”€â”€ -->
 <header style="position:sticky;top:0;z-index:40;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1A1A1A">
     <div style="max-width:860px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.85rem">
         <button class="btn-back" onclick="history.back()">
@@ -130,7 +130,7 @@
         <button class="btn-icon" onclick="compartilhar()" title="Compartilhar">
             <span class="material-symbols-outlined">share</span>
         </button>
-        <button class="btn-icon" id="btn-menu" onclick="toggleMenu()" title="Mais opções">
+        <button class="btn-icon" id="btn-menu" onclick="toggleMenu()" title="Mais opÃ§Ãµes">
             <span class="material-symbols-outlined">more_vert</span>
         </button>
         <!-- Dropdown menu -->
@@ -145,24 +145,24 @@
     </div>
 </header>
 
-<!-- ── CONTEÚDO ── -->
+<!-- â”€â”€ CONTEÃšDO â”€â”€ -->
 <div id="page-content" style="max-width:860px;margin:0 auto;padding:1.25rem 1.25rem 5rem" class="page-enter">
     <!-- preenchido por JS -->
 </div>
 
-<!-- ── NOT FOUND ── -->
+<!-- â”€â”€ NOT FOUND â”€â”€ -->
 <div id="not-found" class="not-found" style="display:none">
     <span class="material-symbols-outlined">search_off</span>
-    <p style="font-size:1rem;font-weight:700">Receita não encontrada</p>
-    <p style="font-size:.85rem;color:#64748b">Esta receita pode ter sido excluída.</p>
-    <a href="receitas.html" style="margin-top:.5rem;padding:.65rem 1.4rem;border-radius:.75rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Ver todas as receitas</a>
+    <p style="font-size:1rem;font-weight:700">Receita nÃ£o encontrada</p>
+    <p style="font-size:.85rem;color:#64748b">Esta receita pode ter sido excluÃ­da.</p>
+    <a href="receitas" style="margin-top:.5rem;padding:.65rem 1.4rem;border-radius:.75rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Ver todas as receitas</a>
 </div>
 
-<!-- ── MODAL EXCLUIR ── -->
+<!-- â”€â”€ MODAL EXCLUIR â”€â”€ -->
 <div class="modal-overlay" id="modal-excluir">
     <div class="modal-box">
         <h3>Excluir receita?</h3>
-        <p id="modal-nome-receita">Esta ação não pode ser desfeita.</p>
+        <p id="modal-nome-receita">Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
         <div class="modal-btns">
             <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
             <button class="btn-confirm-del" onclick="confirmarExclusao()">
@@ -172,44 +172,44 @@
     </div>
 </div>
 
-<!-- ── TOAST ── -->
+<!-- â”€â”€ TOAST â”€â”€ -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
     <span id="toast-msg"></span>
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    receita-detalhe.html
-   Lê receita do Supabase por ID (UUID) na URL (?id=X)
+   LÃª receita do Supabase por ID (UUID) na URL (?id=X)
    Fallback: localStorage
-════════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 const GRADIENTS = ['grad-1','grad-2','grad-3','grad-4','grad-5','grad-6'];
 
-/* ── helpers ── */
+/* â”€â”€ helpers â”€â”€ */
 function fmtR(v) {
     return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function catLabel(c) {
-    return { gourmet:'Receita Gourmet', classica:'Receita Clássica', fitness:'Receita Fitness', vegana:'Receita Vegana', personalizada:'Receita Personalizada' }[c] || (c || 'Receita');
+    return { gourmet:'Receita Gourmet', classica:'Receita ClÃ¡ssica', fitness:'Receita Fitness', vegana:'Receita Vegana', personalizada:'Receita Personalizada' }[c] || (c || 'Receita');
 }
 function esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-/* ── ID da URL ── */
+/* â”€â”€ ID da URL â”€â”€ */
 const params = new URLSearchParams(location.search);
 const receitaId = params.get('id'); // UUID do Supabase
 
 let receitaAtual = null;
 
-/* ── carregar do Supabase com fallback localStorage ── */
+/* â”€â”€ carregar do Supabase com fallback localStorage â”€â”€ */
 async function carregarReceita() {
     if (!receitaId) { mostrarNotFound(); return; }
 
     try {
-        // Aguarda sessão estar pronta
+        // Aguarda sessÃ£o estar pronta
         await new Promise(r => setTimeout(r, 300));
         const user = await getUser();
 
@@ -221,13 +221,13 @@ async function carregarReceita() {
             throw resRec.error;
         }
         if (!resRec.data) {
-            console.warn('[Detalhe] Receita não encontrada no Supabase para id:', receitaId);
+            console.warn('[Detalhe] Receita nÃ£o encontrada no Supabase para id:', receitaId);
             throw new Error('not found');
         }
 
         const data = resRec.data;
 
-        // Busca produto vinculado (separado para não quebrar se falhar)
+        // Busca produto vinculado (separado para nÃ£o quebrar se falhar)
         let prodVinculado = 0;
         let prodNome = null;
         try {
@@ -246,7 +246,7 @@ async function carregarReceita() {
             console.warn('[Detalhe] Erro ao buscar produto vinculado:', pe);
         }
 
-        // Mão de obra: lida do localStorage
+        // MÃ£o de obra: lida do localStorage
         const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
         const maoObraHoraLocal = parseFloat(_cfg.horaFinal || 0);
 
@@ -255,14 +255,14 @@ async function carregarReceita() {
         const unidades  = data.unidades || 1;
         const tempo     = data.tempo || 0;
 
-        // Mão de obra: maoObraHora (R$/h) × tempo em horas
+        // MÃ£o de obra: maoObraHora (R$/h) Ã— tempo em horas
         const maoObraHora = maoObraHoraLocal;
         const custoMobCalc = maoObraHora > 0 ? (tempo / 60) * maoObraHora : parseFloat(data.custo_mob || 0);
         const maoDeObraItens = maoObraHora > 0 && tempo > 0
-            ? [{ nome: 'Mão de obra', qty: `${tempo} min`, valor: custoMobCalc }]
+            ? [{ nome: 'MÃ£o de obra', qty: `${tempo} min`, valor: custoMobCalc }]
             : (data.mao_de_obra || []);
 
-        // Custo total recalculado incluindo mão de obra
+        // Custo total recalculado incluindo mÃ£o de obra
         const custoIngVal = parseFloat(data.custo_ing || 0);
         const custoEmbVal = parseFloat(data.custo_emb || 0);
         const custoEqpVal = parseFloat(data.custo_eqp || 0);
@@ -292,10 +292,10 @@ async function carregarReceita() {
         render();
         return;
     } catch(e) {
-        console.warn('Supabase indisponível, tentando localStorage:', e);
+        console.warn('Supabase indisponÃ­vel, tentando localStorage:', e);
     }
 
-    // Fallback localStorage (IDs numéricos antigos)
+    // Fallback localStorage (IDs numÃ©ricos antigos)
     const local = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
     const r = local.find(x => String(x.id) === String(receitaId));
     if (r) {
@@ -311,7 +311,7 @@ function mostrarNotFound() {
     document.getElementById('not-found').style.display = 'flex';
 }
 
-/* ── carregar receitas do localStorage (mantido para exclusão de fallback) ── */
+/* â”€â”€ carregar receitas do localStorage (mantido para exclusÃ£o de fallback) â”€â”€ */
 function getReceitas() {
     return JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
 }
@@ -319,11 +319,11 @@ function salvarReceitas(arr) {
     localStorage.setItem('receitasx_receitas', JSON.stringify(arr));
 }
 
-/* ── cálculos ── */
+/* â”€â”€ cÃ¡lculos â”€â”€ */
 function calc(r) {
     const unidades    = r.unidades || 1;
-    // precoUnit: vem do produto vinculado (já é por unidade)
-    // precoTotal: precoUnit × unidades (ou o campo salvo para fallback)
+    // precoUnit: vem do produto vinculado (jÃ¡ Ã© por unidade)
+    // precoTotal: precoUnit Ã— unidades (ou o campo salvo para fallback)
     const precoUnit   = r.precoUnit  || (r.precoTotal / unidades) || 0;
     const precoTotal  = r.precoTotal || (precoUnit * unidades)    || 0;
     const custoTotal  = r.custoTotal || 0;
@@ -335,7 +335,7 @@ function calc(r) {
     return { precoTotal, custoTotal, precoUnit, custoUnit, lucroTotal, lucroUnit, margem, markup };
 }
 
-/* ── montar seção de custo (accordion) ── */
+/* â”€â”€ montar seÃ§Ã£o de custo (accordion) â”€â”€ */
 function makeSection(icon, label, valor, itens, aberto) {
     const id = 'sec-' + label.replace(/\s/g,'-').toLowerCase();
     const cls = aberto ? 'cost-section open' : 'cost-section';
@@ -367,7 +367,7 @@ function toggleSection(id) {
     document.getElementById(id)?.classList.toggle('open');
 }
 
-/* ── render principal ── */
+/* â”€â”€ render principal â”€â”€ */
 function render() {
     const r = receitaAtual;
     if (!r) { mostrarNotFound(); return; }
@@ -375,7 +375,7 @@ function render() {
     const c = calc(r);
     const grad = r.grad || GRADIENTS[0];
 
-    // ingredientes, embalagens, equipamentos, mão de obra
+    // ingredientes, embalagens, equipamentos, mÃ£o de obra
     const ings  = r.ingredientes  || [];
     const embs  = r.embalagens    || [];
     const eqps  = r.equipamentos  || [];
@@ -414,7 +414,7 @@ function render() {
                 <div class="stat-box-val">${r.unidades || 0} unid.</div>
             </div>
             <div class="stat-box">
-                <div class="stat-box-lbl"><span class="material-symbols-outlined">sell</span> PREÇO BASE</div>
+                <div class="stat-box-lbl"><span class="material-symbols-outlined">sell</span> PREÃ‡O BASE</div>
                 <div class="stat-box-val" style="color:#25f4f4">${fmtR(c.precoUnit)}</div>
             </div>
             <div class="stat-box">
@@ -433,8 +433,8 @@ function render() {
         ${makeSection('inventory_2',         'Embalagens',   custoEmb, embs, false)}
         ${makeSection('blender',             'Equipamentos', custoEqp, eqps, false)}
         ${makeSection('person',              r.maoObraHora > 0
-            ? `Mão de Obra (R$ ${r.maoObraHora.toLocaleString('pt-BR',{minimumFractionDigits:2})}/h)`
-            : 'Mão de Obra',
+            ? `MÃ£o de Obra (R$ ${r.maoObraHora.toLocaleString('pt-BR',{minimumFractionDigits:2})}/h)`
+            : 'MÃ£o de Obra',
             custoMob, mobs, false)}
 
         <!-- Resumo Financeiro -->
@@ -452,11 +452,11 @@ function render() {
             </div>
             <div class="resumo-grid" style="position:relative;z-index:1">
                 <div class="resumo-cell rc-preco">
-                    <div class="resumo-cell-lbl">Preço Total</div>
+                    <div class="resumo-cell-lbl">PreÃ§o Total</div>
                     <div class="resumo-cell-val">${fmtR(c.precoTotal)}</div>
                 </div>
                 <div class="resumo-cell rc-preco-unit">
-                    <div class="resumo-cell-lbl">Preço Unit.</div>
+                    <div class="resumo-cell-lbl">PreÃ§o Unit.</div>
                     <div class="resumo-cell-val">${fmtR(c.precoUnit)}</div>
                 </div>
                 <div class="resumo-cell rc-custo">
@@ -486,23 +486,23 @@ function render() {
         ${c.precoTotal === 0 ? `
         <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:.85rem;padding:.85rem 1rem;display:flex;gap:.65rem;align-items:flex-start;margin-top:-.5rem;margin-bottom:1rem">
             <span class="material-symbols-outlined" style="color:#fbbf24;font-size:1.1rem;flex-shrink:0;margin-top:.05rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">info</span>
-            <p style="font-size:.8rem;color:#fbbf24;line-height:1.6">Defina um <strong>Preço Unit.</strong> para esta receita (via Gestão de Produtos) para ver os cálculos de lucro e margem.</p>
+            <p style="font-size:.8rem;color:#fbbf24;line-height:1.6">Defina um <strong>PreÃ§o Unit.</strong> para esta receita (via GestÃ£o de Produtos) para ver os cÃ¡lculos de lucro e margem.</p>
         </div>` : ''}
     `;
 
-    // atualiza título da página
+    // atualiza tÃ­tulo da pÃ¡gina
     document.title = `${r.nome} - ReceitasX`;
 
     // modal
     document.getElementById('modal-nome-receita').textContent =
-        `Tem certeza que deseja excluir "${r.nome}"? Esta ação não pode ser desfeita.`;
+        `Tem certeza que deseja excluir "${r.nome}"? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`;
 }
 
-/* ── ações ── */
+/* â”€â”€ aÃ§Ãµes â”€â”€ */
 function editarReceita() {
     fecharDropdown();
     if (!receitaId) return;
-    // Sinaliza para receitas.html abrir o modal de edição automaticamente
+    // Sinaliza para receitas.html abrir o modal de ediÃ§Ã£o automaticamente
     sessionStorage.setItem('receitasx_editar_id', receitaId);
     location.href = 'receitas.html';
 }
@@ -523,27 +523,27 @@ async function confirmarExclusao() {
     } catch(e) {
         console.warn('Deletar Supabase falhou, removendo local:', e);
     }
-    // remove do localStorage também
+    // remove do localStorage tambÃ©m
     const local = JSON.parse(localStorage.getItem('receitasx_receitas') || '[]');
     localStorage.setItem('receitasx_receitas', JSON.stringify(local.filter(x => String(x.id) !== String(receitaId))));
     fecharModal();
-    showToast('Receita excluída!');
+    showToast('Receita excluÃ­da!');
     setTimeout(() => { location.href = 'receitas.html'; }, 1200);
 }
 
 async function compartilhar() {
     const r = receitaAtual;
     if (!r) return;
-    const txt = `🍰 ${r.nome}\n💰 Custo: ${fmtR(r.custoTotal)} | Preço: ${fmtR(r.precoTotal)}\n📊 ${r.unidades} unidades · ${r.tempo} min`;
+    const txt = `ðŸ° ${r.nome}\nðŸ’° Custo: ${fmtR(r.custoTotal)} | PreÃ§o: ${fmtR(r.precoTotal)}\nðŸ“Š ${r.unidades} unidades Â· ${r.tempo} min`;
     if (navigator.share) {
         try { await navigator.share({ title: r.nome, text: txt }); } catch(_) {}
     } else {
         await navigator.clipboard.writeText(txt);
-        showToast('Informações copiadas!');
+        showToast('InformaÃ§Ãµes copiadas!');
     }
 }
 
-/* ── dropdown menu ── */
+/* â”€â”€ dropdown menu â”€â”€ */
 function toggleMenu() {
     const d = document.getElementById('dropdown');
     d.style.display = d.style.display === 'block' ? 'none' : 'block';
@@ -563,7 +563,7 @@ document.getElementById('modal-excluir').addEventListener('click', function(e) {
     if (e.target === this) fecharModal();
 });
 
-/* ── toast ── */
+/* â”€â”€ toast â”€â”€ */
 let toastTimer;
 function showToast(msg, type='success') {
     const t = document.getElementById('toast');
@@ -575,8 +575,9 @@ function showToast(msg, type='success') {
     toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* ── init ── */
+/* â”€â”€ init â”€â”€ */
 carregarReceita();
 </script>
 </body>
 </html>
+

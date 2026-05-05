@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Admin — Gerenciar Tutoriais · ReceitasX</title>
+    <title>Admin â€” Gerenciar Tutoriais Â· ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -150,7 +150,7 @@
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
     <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
         <button class="btn-back" onclick="history.back()">
@@ -164,27 +164,27 @@
     </div>
 </header>
 
-<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
     <!-- Banner -->
     <div class="admin-banner">
         <span class="material-symbols-outlined">video_library</span>
-        <span>Adicione links do YouTube para os tutoriais do sistema. Os vídeos ativos aparecem na página "Como Usar" dos usuários.</span>
+        <span>Adicione links do YouTube para os tutoriais do sistema. Os vÃ­deos ativos aparecem na pÃ¡gina "Como Usar" dos usuÃ¡rios.</span>
     </div>
 
-    <!-- Stats + botão -->
+    <!-- Stats + botÃ£o -->
     <div class="flex items-center gap-3 flex-wrap">
         <div class="stat-card flex-1 min-w-[100px]">
-            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-val" id="stat-total">â€”</div>
             <div class="stat-lbl">Total</div>
         </div>
         <div class="stat-card flex-1 min-w-[100px]">
-            <div class="stat-val" id="stat-ativos" style="color:#34d399">—</div>
+            <div class="stat-val" id="stat-ativos" style="color:#34d399">â€”</div>
             <div class="stat-lbl">Ativos</div>
         </div>
         <div class="stat-card flex-1 min-w-[100px]">
-            <div class="stat-val" id="stat-inativos" style="color:#64748b">—</div>
+            <div class="stat-val" id="stat-inativos" style="color:#64748b">â€”</div>
             <div class="stat-lbl">Inativos</div>
         </div>
         <button class="btn-primary" onclick="abrirForm()">
@@ -198,7 +198,7 @@
 
 </main>
 
-<!-- ══ Modal de Formulário ═════════════════════════════════════════ -->
+<!-- â•â• Modal de FormulÃ¡rio â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="form-overlay" onclick="fecharForm(event)">
     <div id="form-modal" onclick="event.stopPropagation()">
         <div class="fm-header">
@@ -207,7 +207,7 @@
             </div>
             <div>
                 <p id="fm-title" style="font-size:.95rem;font-weight:700;color:#f1f5f9">Novo Tutorial</p>
-                <p style="font-size:.72rem;color:#64748b">Adicione um vídeo do YouTube</p>
+                <p style="font-size:.72rem;color:#64748b">Adicione um vÃ­deo do YouTube</p>
             </div>
             <button onclick="fecharForm()" style="margin-left:auto;background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center">
                 <span class="material-symbols-outlined" style="font-size:1.2rem">close</span>
@@ -222,12 +222,12 @@
                 <span class="fm-preview-empty">Cole o link acima para ver o preview</span>
             </div>
             <div class="fm-field">
-                <label>Título *</label>
+                <label>TÃ­tulo *</label>
                 <input id="fm-titulo" type="text" placeholder="Ex: Como cadastrar uma receita" maxlength="120" />
             </div>
             <div class="fm-field">
-                <label>Descrição (opcional)</label>
-                <textarea id="fm-descricao" placeholder="Breve descrição do tutorial…" maxlength="300"></textarea>
+                <label>DescriÃ§Ã£o (opcional)</label>
+                <textarea id="fm-descricao" placeholder="Breve descriÃ§Ã£o do tutorialâ€¦" maxlength="300"></textarea>
             </div>
             <div class="fm-row">
                 <div class="fm-field">
@@ -253,7 +253,7 @@
     </div>
 </div>
 
-<!-- ══ Toast ════════════════════════════════════════════════════════ -->
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#f87171">check_circle</span>
     <span id="toast-msg">OK</span>
@@ -263,7 +263,7 @@
 let todosTutoriais = [];
 let editandoId = null;
 
-// ── Guard admin ───────────────────────────────────────────────────
+// â”€â”€ Guard admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (async () => {
     await _waitForRole(4000);
     if (window.__userRole !== 'admin') {
@@ -271,7 +271,7 @@ let editandoId = null;
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao início</a>
+                <a href="index" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao inÃ­cio</a>
             </div>`;
         return;
     }
@@ -279,7 +279,7 @@ let editandoId = null;
     await carregarTutoriais();
 })();
 
-// ── Carregar ──────────────────────────────────────────────────────
+// â”€â”€ Carregar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarTutoriais() {
     showLoading();
     try {
@@ -306,7 +306,7 @@ function atualizarStats() {
     document.getElementById('stat-inativos').textContent = total - ativos;
 }
 
-// ── Render lista ──────────────────────────────────────────────────
+// â”€â”€ Render lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderLista() {
     const el = document.getElementById('videos-list');
 
@@ -315,7 +315,7 @@ function renderLista() {
             <div class="empty-state">
                 <span class="material-symbols-outlined">video_library</span>
                 <p>Nenhum tutorial cadastrado.</p>
-                <p style="font-size:.75rem;margin-top:.25rem">Clique em "Novo Tutorial" para começar.</p>
+                <p style="font-size:.75rem;margin-top:.25rem">Clique em "Novo Tutorial" para comeÃ§ar.</p>
             </div>`;
         return;
     }
@@ -352,7 +352,7 @@ function renderLista() {
     }).join('');
 }
 
-// ── Formulário ────────────────────────────────────────────────────
+// â”€â”€ FormulÃ¡rio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function abrirForm(id) {
     editandoId = id || null;
     const tut = editandoId ? todosTutoriais.find(t => t.id === editandoId) : null;
@@ -383,11 +383,11 @@ function previewThumb() {
         preview.innerHTML = `
             <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="preview" />
             <div>
-                <p style="font-size:.72rem;font-weight:700;color:#34d399">✓ Vídeo detectado</p>
+                <p style="font-size:.72rem;font-weight:700;color:#34d399">âœ“ VÃ­deo detectado</p>
                 <p style="font-size:.6rem;color:#475569">ID: ${videoId}</p>
             </div>`;
     } else if (url.length > 5) {
-        preview.innerHTML = `<span class="fm-preview-empty" style="color:#f87171">Link inválido — use um link do YouTube</span>`;
+        preview.innerHTML = `<span class="fm-preview-empty" style="color:#f87171">Link invÃ¡lido â€” use um link do YouTube</span>`;
     } else {
         preview.innerHTML = `<span class="fm-preview-empty">Cole o link acima para ver o preview</span>`;
     }
@@ -402,16 +402,16 @@ async function salvarTutorial() {
     const ativo = document.getElementById('fm-ativo').value === 'true';
 
     if (!url || !titulo) {
-        showToast('Preencha o link e o título.', 'error');
+        showToast('Preencha o link e o tÃ­tulo.', 'error');
         return;
     }
     if (!extractYouTubeId(url)) {
-        showToast('Link do YouTube inválido.', 'error');
+        showToast('Link do YouTube invÃ¡lido.', 'error');
         return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite">progress_activity</span> Salvando…';
+    btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite">progress_activity</span> Salvandoâ€¦';
 
     try {
         const { error } = await sb.rpc('admin_upsert_tutorial', {
@@ -448,7 +448,7 @@ async function confirmarExclusao(id) {
     try {
         const { error } = await sb.rpc('admin_deletar_tutorial', { p_id: id });
         if (error) throw error;
-        showToast('Tutorial excluído.');
+        showToast('Tutorial excluÃ­do.');
         await carregarTutoriais();
     } catch (e) {
         console.error('Erro ao excluir:', e);
@@ -456,7 +456,7 @@ async function confirmarExclusao(id) {
     }
 }
 
-// ── Utilitários ───────────────────────────────────────────────────
+// â”€â”€ UtilitÃ¡rios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function extractYouTubeId(url) {
     if (!url) return null;
     const patterns = [
@@ -496,3 +496,4 @@ document.addEventListener('keydown', e => {
 </script>
 </body>
 </html>
+
