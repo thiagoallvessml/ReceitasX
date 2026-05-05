@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -85,6 +86,14 @@
         </div>
     </div>
 
+    <!-- Chart -->
+    <div class="mt-4 p-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl">
+        <h2 class="text-sm font-semibold mb-3 text-slate-300">Visitas e Cliques por Dia</h2>
+        <div style="position: relative; height:200px; width:100%">
+            <canvas id="vitalicioChart"></canvas>
+        </div>
+    </div>
+
     <div class="search-wrap flex-1 w-full mt-4">
         <span class="material-symbols-outlined ico">search</span>
         <input id="search" class="search-input" type="text" placeholder="Buscar por nome, telefone ou e-mail…" oninput="filterUsuarios()" />
@@ -140,6 +149,7 @@ async function loadDados() {
         }));
 
         updateStats();
+        renderChart(allUsers);
         filterUsuarios();
 
     } catch (e) {
@@ -220,6 +230,73 @@ function renderList(list) {
         </div>
         `;
     }).join('');
+}
+
+function renderChart(users) {
+    const dataByDay = {};
+
+    users.forEach(u => {
+        if (u.vitalicio_view_at) {
+            const dayV = new Date(u.vitalicio_view_at).toLocaleDateString('pt-BR');
+            if (!dataByDay[dayV]) dataByDay[dayV] = { views: 0, clicks: 0 };
+            dataByDay[dayV].views++;
+        }
+        if (u.vitalicio_click_at) {
+            const dayC = new Date(u.vitalicio_click_at).toLocaleDateString('pt-BR');
+            if (!dataByDay[dayC]) dataByDay[dayC] = { views: 0, clicks: 0 };
+            dataByDay[dayC].clicks++;
+        }
+    });
+
+    const sortedDays = Object.keys(dataByDay).sort((a,b) => {
+        const [dA, mA, yA] = a.split('/');
+        const [dB, mB, yB] = b.split('/');
+        return new Date(`${yA}-${mA}-${dA}`) - new Date(`${yB}-${mB}-${dB}`);
+    });
+
+    const labels = sortedDays;
+    const viewsData = sortedDays.map(d => dataByDay[d].views);
+    const clicksData = sortedDays.map(d => dataByDay[d].clicks);
+
+    const ctx = document.getElementById('vitalicioChart').getContext('2d');
+    
+    if (window.vitalicioChartInstance) {
+        window.vitalicioChartInstance.destroy();
+    }
+
+    window.vitalicioChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Visitas (Vistos)',
+                    data: viewsData,
+                    borderColor: '#25f4f4',
+                    backgroundColor: 'rgba(37,244,244,0.1)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Cliques (Comprar)',
+                    data: clicksData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245,158,11,0.1)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#f1f5f9' } } },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { color: '#2A2A2A' } },
+                y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: '#2A2A2A' }, beginAtZero: true }
+            }
+        }
+    });
 }
 
 function esc(str) {
