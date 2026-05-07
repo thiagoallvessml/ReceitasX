@@ -436,9 +436,9 @@ let saqueAtivoId  = null; // id do saque sendo processado no modal
 // ── Carregar todos os dados ────────────────────────────────────
 async function loadTudo() {
     try {
-        const [resAfil, resSaques, resIndic, resPedidos] = await Promise.all([
+        const [resAfil, resSaques, resIndic, resPedidos, resPerfis] = await Promise.all([
             sb.from('afiliados')
-              .select('*, perfis:user_id(nome, sobrenome)')
+              .select('*')
               .order('total_ganhos', { ascending: false }),
 
             sb.from('saques_afiliado')
@@ -452,13 +452,23 @@ async function loadTudo() {
             sb.from('pedidos')
               .select('valor_pago, status')
               .eq('status', 'pago'),
+
+            sb.from('perfis')
+              .select('id, nome, sobrenome'),
         ]);
 
         if (resAfil.error)   throw resAfil.error;
         if (resSaques.error) throw resSaques.error;
         if (resIndic.error)  throw resIndic.error;
 
-        allAfiliados  = resAfil.data  || [];
+        // Monta mapa de perfis (id → {nome, sobrenome})
+        const perfisMap = {};
+        (resPerfis.data || []).forEach(p => { perfisMap[p.id] = p; });
+
+        allAfiliados  = (resAfil.data || []).map(a => ({
+            ...a,
+            perfis: perfisMap[a.user_id] || null
+        }));
         allSaques     = resSaques.data || [];
         allIndicacoes = resIndic.data  || [];
         allPedidos    = (resPedidos.error ? [] : resPedidos.data) || [];
