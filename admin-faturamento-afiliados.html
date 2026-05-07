@@ -438,7 +438,7 @@ async function loadTudo() {
     try {
         const [resAfil, resSaques, resIndic, resPedidos] = await Promise.all([
             sb.from('afiliados')
-              .select('*, perfis:user_id(nome, sobrenome, pix_tipo, pix_chave)')
+              .select('*, perfis:user_id(nome, sobrenome)')
               .order('total_ganhos', { ascending: false }),
 
             sb.from('saques_afiliado')
@@ -568,17 +568,9 @@ function calcularSaldos() {
 function renderPagamento(q = '') {
     const saldos = calcularSaldos();
 
-    // Ultima chave Pix: prioriza perfil do afiliado, fallback para histórico de saques
+    // Ultima chave Pix cadastrada por afiliado (do histórico de saques)
     const ultimaChave = {};
     const ultimoTipo  = {};
-    // 1. Do perfil (fonte primária)
-    allAfiliados.forEach(a => {
-        if (a.perfis?.pix_chave) {
-            ultimaChave[a.user_id] = a.perfis.pix_chave;
-            ultimoTipo[a.user_id]  = a.perfis.pix_tipo || 'PIX';
-        }
-    });
-    // 2. Do histórico de saques (fallback, sobrescreve se existir)
     [...allSaques].reverse().forEach(s => {
         if (s.pix_chave && s.pix_chave !== 'A COMBINAR') {
             ultimaChave[s.user_id] = s.pix_chave;
