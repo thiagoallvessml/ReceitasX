@@ -312,7 +312,7 @@ async function carregarDados(user) {
 
         let totalSacado = 0;
         (saques || []).forEach(s => {
-            if (s.status !== 'cancelado') totalSacado += parseFloat(s.valor || 0);
+            if (s.status === 'pago') totalSacado += parseFloat(s.valor || 0);
         });
 
         saldoDisp = Math.max(0, ganhos - totalSacado);

@@ -438,7 +438,7 @@ async function loadTudo() {
     try {
         const [resAfil, resSaques, resIndic, resPedidos] = await Promise.all([
             sb.from('afiliados')
-              .select('*')
+              .select('*, perfis:user_id(nome, sobrenome, pix_tipo, pix_chave)')
               .order('total_ganhos', { ascending: false }),
 
             sb.from('saques_afiliado')
@@ -549,13 +549,15 @@ function renderAtivo() {
     if (abaAtiva === 'pagamento')  renderPagamento(q);
 }
 
-// ── Calcula saldo disponível por afiliado (ganhos - saques já processados) ──
+// ── Calcula saldo disponível por afiliado (ganhos - saques PAGOS) ──
+// Apenas saques com status 'pago' reduzem o saldo.
+// Saques pendentes e rejeitados NÃO devem subtrair do saldo.
 function calcularSaldos() {
     const saldos = {};
     allAfiliados.forEach(a => {
         const ganhos = Number(a.total_ganhos || 0);
         const sacado = allSaques
-            .filter(s => s.user_id === a.user_id && s.status !== 'cancelado')
+            .filter(s => s.user_id === a.user_id && s.status === 'pago')
             .reduce((acc, s) => acc + Number(s.valor || 0), 0);
         saldos[a.user_id] = Math.max(0, ganhos - sacado);
     });
@@ -566,11 +568,22 @@ function calcularSaldos() {
 function renderPagamento(q = '') {
     const saldos = calcularSaldos();
 
-    // Ultima chave Pix cadastrada por afiliado
+    // Ultima chave Pix: prioriza perfil do afiliado, fallback para histórico de saques
     const ultimaChave = {};
     const ultimoTipo  = {};
+    // 1. Do perfil (fonte primária)
+    allAfiliados.forEach(a => {
+        if (a.perfis?.pix_chave) {
+            ultimaChave[a.user_id] = a.perfis.pix_chave;
+            ultimoTipo[a.user_id]  = a.perfis.pix_tipo || 'PIX';
+        }
+    });
+    // 2. Do histórico de saques (fallback, sobrescreve se existir)
     [...allSaques].reverse().forEach(s => {
-        if (s.pix_chave) { ultimaChave[s.user_id] = s.pix_chave; ultimoTipo[s.user_id] = s.pix_tipo || 'PIX'; }
+        if (s.pix_chave && s.pix_chave !== 'A COMBINAR') {
+            ultimaChave[s.user_id] = s.pix_chave;
+            ultimoTipo[s.user_id]  = s.pix_tipo || 'PIX';
+        }
     });
 
     let list = allAfiliados.filter(a => (saldos[a.user_id] || 0) > 0);
