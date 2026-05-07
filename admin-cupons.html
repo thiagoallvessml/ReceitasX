@@ -257,12 +257,26 @@ let currentFilter = 'todos';
 
 async function carregarCupons() {
     try {
-        const { data, error } = await sb
-            .from('cupons')
-            .select('*, afiliados(codigo)')
-            .order('created_at', { ascending: false });
+        const [ { data, error }, { data: peds } ] = await Promise.all([
+            sb.from('cupons').select('*, afiliados(codigo)').order('created_at', { ascending: false }),
+            sb.from('pedidos').select('cupom_usado, valor_pago').eq('status', 'pago').not('cupom_usado', 'is', null)
+        ]);
+
         if (error) throw error;
-        allCupons = data || [];
+        
+        let revenueMap = {};
+        if (peds) {
+            peds.forEach(p => {
+                const cupomId = (p.cupom_usado || '').trim().toUpperCase();
+                if (!cupomId) return;
+                revenueMap[cupomId] = (revenueMap[cupomId] || 0) + (parseFloat(p.valor_pago) || 0);
+            });
+        }
+
+        allCupons = (data || []).map(c => ({
+            ...c,
+            receita_gerada: revenueMap[(c.codigo || '').trim().toUpperCase()] || 0
+        }));
         updateStats();
         filtrar();
     } catch (e) {
@@ -332,6 +346,12 @@ function renderList(list) {
                 ? `<span class="badge-inativo">Esgotado</span>`
                 : `<span class="badge-ativo">Ativo</span>`;
 
+        const tipoCriador = c.afiliado_id ? 
+            `<span style="color:#25f4f4; font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem; margin-right:2px">handshake</span>Afiliado (${esc(c.afiliados?.codigo || '---')})</span>` : 
+            `<span style="color:#fb923c; font-weight:700;"><span class="material-symbols-outlined" style="font-size:.8rem; margin-right:2px">admin_panel_settings</span>Admin</span>`;
+
+        const receitaDisplay = `R$ ${(c.receita_gerada || 0).toFixed(2).replace('.', ',')}`;
+
         return `
         <div class="cupom-card ${!c.ativo ? 'inativo' : ''}">
             <div class="cupom-icon" style="background:${iconBg}">
@@ -348,12 +368,12 @@ function renderList(list) {
                 </div>
                 <div class="cupom-meta">
                     <span><span class="material-symbols-outlined">calendar_today</span>Criado ${dt}</span>
-                    <span><span class="material-symbols-outlined">ads_click</span>${c.cliques || 0} cliques</span>
+                    <span>${tipoCriador}</span>
+                    <span style="color:#34d399; font-weight:bold"><span class="material-symbols-outlined">payments</span>${receitaDisplay} gerados</span>
                     <span><span class="material-symbols-outlined">group</span>${usosLabel}</span>
                     <span><span class="material-symbols-outlined">sell</span>${c.tipo === '%' ? 'Porcentagem' : 'Valor fixo'}</span>
                     ${c.data_inicio ? `<span><span class="material-symbols-outlined" style="color:#60a5fa">schedule</span>Início: ${new Date(c.data_inicio).toLocaleString('pt-BR').slice(0, -3)}</span>` : ''}
                     ${c.data_expiracao ? `<span><span class="material-symbols-outlined" style="color:#fb923c">timer</span>Fim: ${new Date(c.data_expiracao).toLocaleString('pt-BR').slice(0, -3)}</span>` : ''}
-                    ${c.afiliados ? `<span style="color:#25f4f4"><span class="material-symbols-outlined">person</span>Afil.: ${esc(c.afiliados.codigo)}</span>` : ''}
                 </div>
             </div>
             <div class="cupom-valor">

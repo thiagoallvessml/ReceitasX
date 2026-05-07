@@ -114,10 +114,33 @@
             <span class="material-symbols-outlined ico">search</span>
             <input id="search" class="search-input" type="text" placeholder="Buscar por nome ou e-mail…" oninput="filterProgresso()" />
         </div>
+        
+        <!-- Filtro de Período -->
+        <div class="flex gap-2 flex-shrink-0 flex-wrap w-full sm:w-auto ml-auto">
+            <select id="time-filter" class="role-sel" style="background:#1A1A1A; border-color:#2A2A2A;" onchange="setTimeFilter()">
+                <option value="todos">Todo o período</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="7">Últimos 7 dias</option>
+            </select>
+        </div>
+
         <div class="flex gap-2 flex-shrink-0 flex-wrap w-full sm:w-auto">
             <button class="pill active" data-filter="todos" onclick="setFilter('todos', this)">Todos</button>
             <button class="pill" data-filter="pagantes" onclick="setFilter('pagantes', this)" style="border-color:rgba(52,211,153,.3);color:#34d399">⭐ Pagantes</button>
             <button class="pill" data-filter="gratuitos" onclick="setFilter('gratuitos', this)">Gratuitos</button>
+        </div>
+    </div>
+
+    <!-- Funil Detalhado Geral -->
+    <div class="mt-6 p-5 rounded-xl border border-border-dark bg-card-dark">
+        <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined" style="color:#25f4f4">insights</span>
+            <h3 class="font-bold text-slate-200">Taxa de Conclusão por Etapa (Geral)</h3>
+        </div>
+        <div id="overall-progress" class="space-y-4">
+            <!-- Renderizado via JS -->
+            <div class="shimmer" style="height:30px"></div>
+            <div class="shimmer" style="height:30px"></div>
         </div>
     </div>
 
@@ -230,6 +253,8 @@ function updateStats() {
     document.getElementById('stat-completo').textContent = completos;
 }
 
+let currentTimeFilter = 'todos';
+
 function setFilter(filter, btn) {
     currentFilter = filter;
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
@@ -237,10 +262,23 @@ function setFilter(filter, btn) {
     filterProgresso();
 }
 
+function setTimeFilter() {
+    currentTimeFilter = document.getElementById('time-filter').value;
+    filterProgresso();
+}
+
 function filterProgresso() {
     const q = (document.getElementById('search').value || '').toLowerCase().trim();
     let res = allProgresso;
     
+    // Time Filter (based on user created_at)
+    if (currentTimeFilter !== 'todos') {
+        const dias = parseInt(currentTimeFilter, 10);
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - dias);
+        res = res.filter(p => new Date(p.created_at) >= cutoff);
+    }
+
     // Status Filter
     if (currentFilter === 'pagantes') {
         res = res.filter(p => p._pagante);
@@ -255,7 +293,46 @@ function filterProgresso() {
             return n.includes(q) || (p.email||'').toLowerCase().includes(q);
         });
     }
+
+    renderOverallProgress(res);
     renderList(res);
+}
+
+function renderOverallProgress(list) {
+    const el = document.getElementById('overall-progress');
+    const total = list.length;
+    if (total === 0) {
+        el.innerHTML = '<div class="text-slate-500 text-sm">Nenhum dado no período selecionado.</div>';
+        return;
+    }
+
+    let cInsumos = 0, cReceitas = 0, cPrecificacao = 0;
+    list.forEach(p => {
+        if (p.qtd_insumos > 0) cInsumos++;
+        if (p.qtd_receitas > 0) cReceitas++;
+        if (p.qtd_precificacao > 0) cPrecificacao++;
+    });
+
+    const metrics = [
+        { label: 'Criou Insumo', count: cInsumos },
+        { label: 'Criou Receita', count: cReceitas },
+        { label: 'Calculou Preço', count: cPrecificacao }
+    ];
+
+    el.innerHTML = metrics.map(m => {
+        const pct = Math.round((m.count / total) * 100);
+        return `
+        <div class="flex flex-col gap-1">
+            <div class="flex justify-between text-xs font-semibold text-slate-300">
+                <span>${m.label} <span class="text-slate-500 font-normal">(${m.count} usuários)</span></span>
+                <span>${pct}%</span>
+            </div>
+            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-primary" style="width: ${pct}%"></div>
+            </div>
+        </div>
+        `;
+    }).join('');
 }
 
 function renderList(list) {

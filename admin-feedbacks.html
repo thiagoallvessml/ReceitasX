@@ -132,6 +132,16 @@
         <span class="material-symbols-outlined">forum</span>
         <span>Gerencie dúvidas, sugestões, elogios e bugs reportados pelos usuários. Clique para ver detalhes e responder.</span>
     </div>
+    
+    <div class="bg-card-dark border border-purple-500/30 p-4 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-purple-400 text-3xl">mark_email_unread</span>
+            <div>
+                <h3 class="font-bold text-slate-200">Feedbacks Pendentes</h3>
+                <p class="text-xs text-slate-400"><strong id="counter-novos" class="text-white">0</strong> feedbacks novos aguardando resposta.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -140,8 +150,8 @@
             <div class="stat-lbl">Total</div>
         </div>
         <div class="stat-card">
-            <div class="stat-val" id="stat-pendentes" style="color:#fbbf24">—</div>
-            <div class="stat-lbl">Pendentes</div>
+            <div class="stat-val" id="stat-novos" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Novos</div>
         </div>
         <div class="stat-card">
             <div class="stat-val" id="stat-duvidas" style="color:#38bdf8">—</div>
@@ -165,11 +175,9 @@
         </div>
         <div class="flex gap-2 flex-shrink-0 overflow-x-auto" style="scrollbar-width:none">
             <button class="pill active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
-            <button class="pill" data-filter="pendente" onclick="setFilter('pendente',this)">Pendentes</button>
-            <button class="pill" data-filter="duvida" onclick="setFilter('duvida',this)">Dúvidas</button>
-            <button class="pill" data-filter="sugestao" onclick="setFilter('sugestao',this)">Sugestões</button>
-            <button class="pill" data-filter="elogio" onclick="setFilter('elogio',this)">Elogios</button>
-            <button class="pill" data-filter="bug" onclick="setFilter('bug',this)">Bugs</button>
+            <button class="pill" data-filter="novo" onclick="setFilter('novo',this)">Novos</button>
+            <button class="pill" data-filter="analise" onclick="setFilter('analise',this)">Em Análise</button>
+            <button class="pill" data-filter="resolvido" onclick="setFilter('resolvido',this)">Resolvidos</button>
         </div>
     </div>
 
@@ -259,13 +267,14 @@ async function carregarDados() {
 // ── Stats ──────────────────────────────────────────────────────────
 function atualizarStats() {
     const total = todosFeedbacks.length;
-    const pendentes = todosFeedbacks.filter(f => f.status === 'pendente').length;
+    const pendentes = todosFeedbacks.filter(f => f.status === 'novo' || f.status === 'pendente').length;
     const duvidas = todosFeedbacks.filter(f => f.tipo === 'duvida').length;
     const bugs = todosFeedbacks.filter(f => f.tipo === 'bug').length;
     const elogios = todosFeedbacks.filter(f => f.tipo === 'elogio').length;
 
     document.getElementById('stat-total').textContent     = total;
-    document.getElementById('stat-pendentes').textContent = pendentes;
+    document.getElementById('stat-novos').textContent     = pendentes;
+    document.getElementById('counter-novos').textContent  = pendentes;
     document.getElementById('stat-duvidas').textContent   = duvidas;
     document.getElementById('stat-bugs').textContent      = bugs;
     document.getElementById('stat-elogios').textContent   = elogios;
@@ -283,7 +292,9 @@ function filtrar() {
     const q = (document.getElementById('search').value || '').toLowerCase().trim();
     let list = todosFeedbacks;
 
-    if (currentFilter === 'pendente') list = list.filter(f => f.status === 'pendente');
+    if (currentFilter === 'novo') list = list.filter(f => f.status === 'novo' || f.status === 'pendente');
+    else if (currentFilter === 'analise') list = list.filter(f => f.status === 'analise' || f.status === 'lido');
+    else if (currentFilter === 'resolvido') list = list.filter(f => f.status === 'resolvido' || f.status === 'respondido');
     else if (currentFilter !== 'todos') list = list.filter(f => f.tipo === currentFilter);
 
     if (q) {
@@ -320,7 +331,8 @@ function renderLista(list) {
         const initials = getInitials(f.user_nome, f.user_sobrenome);
         const data = new Date(f.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
         const msgPreview = (f.mensagem || '').substring(0, 100) + (f.mensagem?.length > 100 ? '…' : '');
-        const isNew = f.status === 'pendente';
+        const isNew = f.status === 'pendente' || f.status === 'novo';
+        let statusView = f.status === 'novo' || f.status === 'pendente' ? 'novo' : (f.status === 'analise' || f.status === 'lido' ? 'em análise' : (f.status === 'resolvido' || f.status === 'respondido' ? 'resolvido' : f.status));
 
         return `
         <div class="fb-card ${currentFbId === f.id ? 'active' : ''}" onclick="abrirDrawer('${f.id}')" style="animation:fadeUp .25s ease both">
@@ -333,7 +345,7 @@ function renderLista(list) {
                             <span class="material-symbols-outlined">${tc.ico}</span>
                             ${tc.label}
                         </span>
-                        <span class="status-badge ${f.status}">${f.status}</span>
+                        <span class="status-badge" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#cbd5e1;">${statusView}</span>
                         ${isNew ? '<span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;flex-shrink:0;box-shadow:0 0 8px rgba(139,92,246,.5)"></span>' : ''}
                     </div>
                     <p style="font-size:.78rem;color:#94a3b8;line-height:1.4;margin-bottom:.3rem">${esc(msgPreview)}</p>
@@ -341,7 +353,6 @@ function renderLista(list) {
                         <span style="font-size:.62rem;color:#475569">${esc(f.user_negocio || '—')}</span>
                         <span style="width:2px;height:2px;border-radius:50%;background:#334155;flex-shrink:0"></span>
                         <span style="font-size:.62rem;color:#475569">${data}</span>
-                        ${f.resposta ? '<span style="font-size:.55rem;color:#34d399;font-weight:600">✓ Respondido</span>' : ''}
                     </div>
                 </div>
             </div>
@@ -359,6 +370,8 @@ function abrirDrawer(fbId) {
     const nomeCompleto = [fb.user_nome, fb.user_sobrenome].filter(Boolean).join(' ') || 'Sem nome';
     const data = new Date(fb.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
 
+    let statusView = fb.status === 'novo' || fb.status === 'pendente' ? 'novo' : (fb.status === 'analise' || fb.status === 'lido' ? 'em análise' : (fb.status === 'resolvido' || fb.status === 'respondido' ? 'resolvido' : fb.status));
+    
     document.getElementById('drawer-avatar').textContent = getInitials(fb.user_nome, fb.user_sobrenome);
     document.getElementById('drawer-nome').textContent = nomeCompleto;
     document.getElementById('drawer-email').textContent = fb.user_email || fb.user_negocio || '—';
@@ -371,7 +384,7 @@ function abrirDrawer(fbId) {
                 <span class="material-symbols-outlined" style="font-size:.85rem">${tc.ico}</span>
                 ${tc.label}
             </span>
-            <span class="status-badge ${fb.status}" style="font-size:.65rem;padding:.2rem .55rem">${fb.status}</span>
+            <span class="status-badge" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#cbd5e1;font-size:.65rem;padding:.2rem .55rem">${statusView}</span>
             <span style="font-size:.65rem;color:#475569;display:flex;align-items:center;gap:.2rem">
                 <span class="material-symbols-outlined" style="font-size:.8rem">schedule</span>
                 ${data}
@@ -379,15 +392,26 @@ function abrirDrawer(fbId) {
         </div>
         ${fb.user_negocio ? `<p style="font-size:.72rem;color:#64748b"><strong>Negócio:</strong> ${esc(fb.user_negocio)}</p>` : ''}
 
+        <!-- Categoria Dropdown -->
+        <div style="margin-top:1rem;">
+            <label class="text-[0.65rem] font-bold text-slate-500 uppercase">Categoria do Feedback</label>
+            <select class="role-sel text-xs py-1 px-2 w-full mt-1" onchange="alterarCategoriaFeedback('${fb.id}', this.value)">
+                <option value="bug" ${fb.tipo === 'bug' ? 'selected' : ''}>Bug</option>
+                <option value="sugestao" ${fb.tipo === 'sugestao' ? 'selected' : ''}>Sugestão</option>
+                <option value="duvida" ${fb.tipo === 'duvida' ? 'selected' : ''}>Dúvida</option>
+                <option value="elogio" ${fb.tipo === 'elogio' ? 'selected' : ''}>Elogio</option>
+            </select>
+        </div>
+
         <!-- Mensagem -->
-        <div style="background:#111;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem">
+        <div style="background:#111;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem;margin-top:1rem;">
             <p style="font-size:.7rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Mensagem</p>
             <p style="font-size:.85rem;color:#e2e8f0;line-height:1.65;white-space:pre-wrap">${esc(fb.mensagem)}</p>
         </div>
 
         <!-- Resposta existente -->
         ${fb.resposta ? `
-        <div style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15);border-radius:.75rem;padding:1rem">
+        <div style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15);border-radius:.75rem;padding:1rem;margin-top:1rem;">
             <p style="font-size:.7rem;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem">
                 <span class="material-symbols-outlined" style="font-size:.8rem">reply</span>
                 Sua Resposta
@@ -396,28 +420,21 @@ function abrirDrawer(fbId) {
         </div>` : ''}
 
         <!-- Área de responder -->
-        <div style="background:#141414;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem">
-            <p style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.5rem">${fb.resposta ? 'Atualizar Resposta' : 'Responder'}</p>
-            <textarea id="drawer-resposta" class="resp-textarea" placeholder="Escreva sua resposta…">${fb.resposta || ''}</textarea>
+        <div style="background:#141414;border:1px solid #2A2A2A;border-radius:.75rem;padding:1rem;margin-top:1rem;">
+            <p style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.5rem">${fb.resposta ? 'Atualizar Resposta' : 'Responder (Opcional)'}</p>
+            <textarea id="drawer-resposta" class="resp-textarea" placeholder="Escreva uma nota ou resposta…">${fb.resposta || ''}</textarea>
+            
             <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem">
-                <button class="action-btn green" onclick="responderFeedback('${fb.id}','respondido')">
-                    <span class="material-symbols-outlined">reply</span>
-                    ${fb.resposta ? 'Atualizar' : 'Responder'}
-                </button>
-                ${fb.status !== 'lido' ? `
-                <button class="action-btn primary" onclick="mudarStatus('${fb.id}','lido')">
+                ${fb.status !== 'resolvido' && fb.status !== 'respondido' ? `
+                <button class="action-btn green" onclick="responderFeedback('${fb.id}','resolvido')">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Marcar Resolvido
+                </button>` : ''}
+
+                ${fb.status === 'novo' || fb.status === 'pendente' ? `
+                <button class="action-btn primary" onclick="mudarStatus('${fb.id}','analise')">
                     <span class="material-symbols-outlined">visibility</span>
-                    Marcar como Lido
-                </button>` : ''}
-                ${fb.status !== 'arquivado' ? `
-                <button class="action-btn" onclick="mudarStatus('${fb.id}','arquivado')">
-                    <span class="material-symbols-outlined">archive</span>
-                    Arquivar
-                </button>` : ''}
-                ${fb.status === 'arquivado' ? `
-                <button class="action-btn primary" onclick="mudarStatus('${fb.id}','pendente')">
-                    <span class="material-symbols-outlined">unarchive</span>
-                    Desarquivar
+                    Em Análise
                 </button>` : ''}
             </div>
         </div>
@@ -429,8 +446,7 @@ function abrirDrawer(fbId) {
 }
 
 async function responderFeedback(fbId, novoStatus) {
-    const resp = document.getElementById('drawer-resposta')?.value?.trim();
-    if (!resp) { showToast('Escreva uma resposta antes de enviar.', 'error'); return; }
+    const resp = document.getElementById('drawer-resposta')?.value?.trim() || null;
 
     try {
         const { error } = await sb.rpc('admin_responder_feedback', {
@@ -438,7 +454,11 @@ async function responderFeedback(fbId, novoStatus) {
             novo_status: novoStatus,
             nova_resposta: resp,
         });
-        if (error) throw error;
+        if (error) {
+            // Falha pela RPC: Update direto
+            const { error: err2 } = await sb.from('feedbacks').update({ status: novoStatus, resposta: resp }).eq('id', fbId);
+            if (err2) throw err2;
+        }
 
         // Atualiza local
         const fb = todosFeedbacks.find(f => f.id === fbId);
@@ -461,7 +481,11 @@ async function mudarStatus(fbId, novoStatus) {
             novo_status: novoStatus,
             nova_resposta: null,
         });
-        if (error) throw error;
+        if (error) {
+            // Se falhar, tentamos atualizar diretamente na tabela caso a RPC trave pelo constraint de status
+            const { error: err2 } = await sb.from('feedbacks').update({ status: novoStatus }).eq('id', fbId);
+            if (err2) throw err2;
+        }
 
         const fb = todosFeedbacks.find(f => f.id === fbId);
         if (fb) fb.status = novoStatus;
@@ -480,6 +504,22 @@ function closeDrawer() {
     document.getElementById('drawer-bg').classList.remove('open');
     currentFbId = null;
     document.querySelectorAll('.fb-card').forEach(c => c.classList.remove('active'));
+}
+
+async function alterarCategoriaFeedback(fbId, tipo) {
+    try {
+        const { error } = await sb.from('feedbacks').update({ tipo: tipo }).eq('id', fbId);
+        if (error) throw error;
+        
+        const fb = todosFeedbacks.find(f => f.id === fbId);
+        if (fb) fb.tipo = tipo;
+
+        atualizarStats();
+        filtrar();
+        showToast('Categoria atualizada com sucesso!');
+    } catch(e) {
+        showToast('Erro ao atualizar categoria: ' + e.message, 'error');
+    }
 }
 
 // ── Shimmer ────────────────────────────────────────────────────────

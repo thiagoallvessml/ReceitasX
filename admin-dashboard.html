@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard Principal - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        .kpi-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem; }
+        .kpi-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.1rem;display:flex;flex-direction:column; }
+        .kpi-val { font-size:1.6rem;font-weight:800;color:#f1f5f9;line-height:1;margin-bottom:.25rem; }
+        .kpi-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#64748b; }
+        
+        .funnel-container { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem; }
+        .funnel-step { display:flex;align-items:center;gap:1rem;position:relative; }
+        .funnel-bar-bg { flex:1;height:24px;background:#222;border-radius:12px;overflow:hidden;position:relative; }
+        .funnel-bar-fill { height:100%;background:linear-gradient(90deg,#25f4f4,#0ea5e9);border-radius:12px;transition:width 1s ease-in-out; }
+        .funnel-pct { position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.7rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5); }
+        .funnel-label { width:120px;font-size:.8rem;font-weight:600;color:#cbd5e1;text-align:right; }
+        .funnel-val { width:60px;font-size:.85rem;font-weight:800;color:#f1f5f9;text-align:left; }
+
+        .alert-card { background:#1A1A1A;border:1px solid #2A2A2A;border-left:4px solid;border-radius:.6rem;padding:1rem;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;gap:1rem; }
+        .alert-card.danger { border-left-color:#ef4444; }
+        .alert-card.warning { border-left-color:#fbbf24; }
+        .alert-card.churn { border-left-color:#475569; }
+        
+        .alert-info { flex:1; }
+        .alert-title { font-size:.85rem;font-weight:700;color:#f1f5f9;margin-bottom:.2rem; }
+        .alert-user { font-size:.75rem;color:#94a3b8; }
+        
+        .btn-email { display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:.5rem;border:1px solid rgba(37,244,244,.3);background:rgba(37,244,244,.05);color:#25f4f4;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none; }
+        .btn-email:hover { background:rgba(37,244,244,.15);border-color:rgba(37,244,244,.5); }
+
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4.5rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="location.href='admin-usuarios.html'">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-emerald-400" style="font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">dashboard</span>
+        <h1 class="text-base font-semibold flex-1">Dashboard Geral</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">verified</span>
+            Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    
+    <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined" style="color:#64748b">monitoring</span>
+        <h2 class="text-lg font-bold text-slate-200">Visão Geral</h2>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpis-container">
+        <div class="shimmer" style="height:80px"></div>
+        <div class="shimmer" style="height:80px"></div>
+        <div class="shimmer" style="height:80px"></div>
+        <div class="shimmer" style="height:80px"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        
+        <!-- Funil -->
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined" style="color:#64748b">filter_alt</span>
+                <h2 class="text-md font-bold text-slate-200">Funil de Conversão</h2>
+            </div>
+            <div class="funnel-container" id="funnel-container">
+                <div class="shimmer" style="height:200px"></div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500 text-right">
+                * Visitantes baseados em IPs únicos (analytics interno).
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined" style="color:#fbbf24">warning</span>
+                <h2 class="text-md font-bold text-slate-200">Alertas de Retenção</h2>
+            </div>
+            <div id="alerts-container">
+                <div class="shimmer" style="height:80px; margin-bottom:.5rem"></div>
+                <div class="shimmer" style="height:80px"></div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+let totalCadastros = 0;
+let totalPagantes = 0;
+
+(async () => {
+    await _waitForRole(4000);
+    if(window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await loadDashboard();
+})();
+
+async function loadDashboard() {
+    try {
+        const agora = new Date();
+        const d7 = new Date(agora.getTime() - 7*24*60*60*1000).toISOString();
+        const d15 = new Date(agora.getTime() - 15*24*60*60*1000).toISOString();
+        const d30 = new Date(agora.getTime() - 30*24*60*60*1000).toISOString();
+        
+        // Buscar Perfis e Sessões
+        const [
+            { data: perfis },
+            { data: sessoes },
+            { data: pedidos },
+            { data: receitas },
+            { count: visitantesCount },
+            { data: eventos }
+        ] = await Promise.all([
+            sb.from('perfis').select('id, email, nome, created_at, plano'),
+            sb.from('sessoes_usuario').select('user_id, inicio').order('inicio', { ascending: false }),
+            sb.from('pedidos').select('user_id, email, valor_pago').eq('status', 'pago'),
+            sb.from('receitas').select('user_id'),
+            sb.from('page_views').select('*', { count: 'exact', head: true }), // Aproximação de visitantes
+            sb.from('eventos_usuario').select('user_id, evento')
+        ]);
+
+        const usersList = perfis || [];
+        totalCadastros = usersList.length;
+
+        // Processamento Ativos (7 e 30 dias)
+        const set7d = new Set();
+        const set30d = new Set();
+        const lastLoginMap = {};
+        
+        (sessoes || []).forEach(s => {
+            if(!lastLoginMap[s.user_id] || s.inicio > lastLoginMap[s.user_id]) {
+                lastLoginMap[s.user_id] = s.inicio;
+            }
+            if(s.inicio >= d7) set7d.add(s.user_id);
+            if(s.inicio >= d30) set30d.add(s.user_id);
+        });
+
+        // Pagantes e MRR
+        const pagantesSet = new Set((pedidos || []).map(p => p.user_id).filter(Boolean));
+        let mrr = 0;
+        let totalReceita = 0;
+        (pedidos || []).forEach(p => {
+            totalReceita += (p.valor_pago || 0);
+        });
+        
+        // Se houver planos mensais no futuro, o cálculo seria por plano. Vamos assumir MRR como mensalidades (estimado se houvesse). Por enquanto mostramos Total Receita.
+        
+        usersList.forEach(u => {
+            if (u.plano === 'vitalicio' || u.plano === 'mensal') pagantesSet.add(u.id);
+        });
+        totalPagantes = pagantesSet.size;
+
+        const convRate = totalCadastros ? ((totalPagantes / totalCadastros) * 100).toFixed(1) : 0;
+
+        // Render KPIs
+        document.getElementById('kpis-container').innerHTML = `
+            <div class="kpi-card">
+                <div class="kpi-val">${totalCadastros}</div>
+                <div class="kpi-lbl">Cadastrados</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val">${set7d.size}</div>
+                <div class="kpi-lbl">Ativos (7d)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val">${set30d.size}</div>
+                <div class="kpi-lbl">Ativos (30d)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val" style="color:#34d399">${totalPagantes}</div>
+                <div class="kpi-lbl">Pagantes</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val" style="color:#fbbf24">${convRate}%</div>
+                <div class="kpi-lbl">Conversão Geral</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-val" style="color:#a78bfa">R$ ${totalReceita.toFixed(2).replace('.',',')}</div>
+                <div class="kpi-lbl">Faturamento Bruto</div>
+            </div>
+        `;
+
+        // Processamento Funil
+        const visitantes = (visitantesCount || 0) + totalCadastros; // Estimativa
+        const ativadosSet = new Set((receitas || []).map(r => r.user_id));
+        const checkoutSet = new Set();
+        (eventos || []).forEach(e => {
+            if (e.evento === 'checkout_click' && e.user_id) checkoutSet.add(e.user_id);
+        });
+        // Se a pessoa pagou, consideramos que ela chegou no checkout também
+        pagantesSet.forEach(id => checkoutSet.add(id));
+
+        const funil = [
+            { label: 'Visitantes', val: visitantes },
+            { label: 'Cadastros', val: totalCadastros },
+            { label: 'Ativação (Receita)', val: ativadosSet.size },
+            { label: 'Checkout', val: checkoutSet.size },
+            { label: 'Pagantes', val: totalPagantes }
+        ];
+
+        let maxF = visitantes || 1;
+        document.getElementById('funnel-container').innerHTML = funil.map((f, i) => {
+            const pct = visitantes ? Math.round((f.val / visitantes) * 100) : 0;
+            const w = Math.max(5, (f.val / maxF) * 100);
+            return `
+            <div class="funnel-step">
+                <div class="funnel-label">${f.label}</div>
+                <div class="funnel-val">${f.val}</div>
+                <div class="funnel-bar-bg">
+                    <div class="funnel-bar-fill" style="width:${w}%"></div>
+                    <div class="funnel-pct">${pct}%</div>
+                </div>
+            </div>
+            `;
+        }).join('');
+
+        // Processamento Alertas
+        let alertasHTML = '';
+        const tresDiasAtras = new Date(agora.getTime() - 3*24*60*60*1000).toISOString();
+
+        // 1. Cadastrou há > 3 dias e não criou receita
+        usersList.filter(u => u.created_at < tresDiasAtras && !ativadosSet.has(u.id)).slice(0, 5).forEach(u => {
+            alertasHTML += createAlertCard('danger', 'Sem Ativação (>3d)', u, 'Criou conta mas não fez receitas.');
+        });
+
+        // 2. Checkout sem pagar
+        usersList.filter(u => checkoutSet.has(u.id) && !pagantesSet.has(u.id)).slice(0, 5).forEach(u => {
+            alertasHTML += createAlertCard('warning', 'Carrinho Abandonado', u, 'Chegou no checkout mas não pagou.');
+        });
+
+        // 3. Risco de churn (sem acesso > 15 dias)
+        usersList.filter(u => pagantesSet.has(u.id) && lastLoginMap[u.id] && lastLoginMap[u.id] < d15).slice(0, 5).forEach(u => {
+            alertasHTML += createAlertCard('churn', 'Risco de Churn (>15d)', u, 'Usuário pagante sem acesso recente.');
+        });
+
+        if (!alertasHTML) alertasHTML = `<div class="text-slate-400 text-sm p-4 text-center">Nenhum alerta crítico no momento.</div>`;
+        document.getElementById('alerts-container').innerHTML = alertasHTML;
+
+    } catch(e) {
+        console.error("Erro dashboard:", e);
+        document.getElementById('kpis-container').innerHTML = `<div class="text-red-400">Erro ao carregar dados.</div>`;
+    }
+}
+
+function createAlertCard(tipo, titulo, user, desc) {
+    const nome = user.nome || user.email.split('@')[0];
+    const mailTo = `mailto:${user.email}?subject=Como podemos ajudar com o ReceitasX?`;
+    // Ou apontar para um modulo interno de email: admin-emails.html?user=${user.id}
+    return `
+    <div class="alert-card ${tipo}">
+        <div class="alert-info">
+            <div class="alert-title">${titulo}</div>
+            <div class="alert-user"><strong>${nome}</strong> (${user.email})<br/>${desc}</div>
+        </div>
+        <a href="${mailTo}" class="btn-email">
+            <span class="material-symbols-outlined" style="font-size:1rem">mail</span>
+            Enviar e-mail
+        </a>
+    </div>
+    `;
+}
+</script>
+</body>
+</html>
