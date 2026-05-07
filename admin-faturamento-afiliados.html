@@ -273,13 +273,14 @@
                         <th>Data</th>
                         <th>Afiliado (código)</th>
                         <th>E-mail Indicado</th>
+                        <th>Cupom</th>
                         <th>Converteu?</th>
                         <th>Valor Pago</th>
                         <th>Comissão</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-indicacoes">
-                    <tr><td colspan="6"><div class="shimmer" style="margin:.5rem"></div></td></tr>
+                    <tr><td colspan="7"><div class="shimmer" style="margin:.5rem"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -450,7 +451,7 @@ async function loadTudo() {
               .order('created_at', { ascending: false }),
 
             sb.from('pedidos')
-              .select('valor_pago, status')
+              .select('valor_pago, status, email, cupom_usado')
               .eq('status', 'pago'),
 
             sb.from('perfis')
@@ -846,11 +847,21 @@ function renderIndicacoes(q = '') {
     const afiliadoMap = {};
     allAfiliados.forEach(a => { afiliadoMap[a.id] = a; });
 
+    // Mapa email -> cupom_usado (dos pedidos)
+    const cupomMap = {};
+    allPedidos.forEach(p => { 
+        if (p.email && p.cupom_usado) {
+            cupomMap[p.email.toLowerCase()] = p.cupom_usado;
+        }
+    });
+
     if (q) list = list.filter(i => {
         const af = afiliadoMap[i.afiliado_id];
+        const cpm = cupomMap[(i.indicado_email || '').toLowerCase()] || '';
         return (i.indicado_email || '').toLowerCase().includes(q) ||
                (af?.codigo || '').toLowerCase().includes(q) ||
-               (af?.email  || '').toLowerCase().includes(q);
+               (af?.email  || '').toLowerCase().includes(q) ||
+               cpm.toLowerCase().includes(q);
     });
 
     const tbody = document.getElementById('tbody-indicacoes');
@@ -858,6 +869,11 @@ function renderIndicacoes(q = '') {
 
     tbody.innerHTML = list.map(i => {
         const af = afiliadoMap[i.afiliado_id];
+        const cupom = cupomMap[(i.indicado_email || '').toLowerCase()];
+        const cupomBadge = cupom 
+            ? `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)"><span class="material-symbols-outlined" style="font-size:.7rem">confirmation_number</span>${esc(cupom)}</span>` 
+            : '<span style="color:#475569">—</span>';
+
         const conv = i.converteu
             ? `<span class="s-badge s-pago"><span class="material-symbols-outlined">check_circle</span>Sim</span>`
             : `<span class="s-badge" style="background:#1E1E1E;color:#475569;border-color:#2A2A2A"><span class="material-symbols-outlined">schedule</span>Não</span>`;
@@ -869,6 +885,7 @@ function renderIndicacoes(q = '') {
                 <div style="font-size:.7rem;color:#64748b">${esc(af?.email || '')}</div>
             </td>
             <td style="font-size:.82rem;color:#94a3b8">${esc(i.indicado_email)}</td>
+            <td>${cupomBadge}</td>
             <td>${conv}</td>
             <td class="td-bold" style="color:${i.valor_pago ? '#f1f5f9' : '#475569'}">${i.valor_pago ? fmtR(i.valor_pago) : '—'}</td>
             <td class="td-bold" style="color:${i.comissao ? '#25f4f4' : '#475569'}">${i.comissao ? fmtR(i.comissao) : '—'}</td>
