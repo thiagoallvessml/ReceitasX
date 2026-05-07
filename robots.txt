@@ -13,6 +13,20 @@ Allow: /politica-de-privacidade
 Allow: /termos-de-uso
 Allow: /receitas-geladinho
 Allow: /geladinho-maracuja
+Allow: /calculadora
+
+# ── Arquivos sensíveis — bloquear sempre ──
+Disallow: /.git
+Disallow: /.env
+Disallow: /.vercel
+Disallow: /node_modules
+Disallow: /*.sql$
+Disallow: /*.js$
+Disallow: /*.json$
+Disallow: /*.ps1$
+Disallow: /supabase
+Disallow: /admin
+Disallow: /tmp
 
 # ── Páginas do app — bloquear TUDO que não foi liberado acima ──
 Disallow: /

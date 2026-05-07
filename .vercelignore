@@ -1,0 +1,40 @@
+# ── Arquivos sensíveis — NÃO enviar para produção ──
+
+# SQL schemas, migrations e fixes
+*.sql
+
+# Scripts utilitários
+fix-blog-links.ps1
+fix-links-utf8.js
+fix-canonicals.ps1
+fix-links.ps1
+fix.js
+fix3.js
+inject-analytics.js
+fix_analytics_path.js
+check_*.js
+add_*.js
+update_afiliado.js
+update_indicacoes.js
+exportar.js
+
+# Dados exportados
+produtos_exportados.json
+
+# Documentação interna
+Claude.md
+design.md
+
+# Arquivos temporários
+tmp.html
+tmp_admin_old.html
+
+# Node / local
+node_modules
+.vercel
+.env
+.env.local
+
+# Imagens de anúncios (não necessárias em prod)
+ads_*.png
+logo_receitasx_200x200_*.png
