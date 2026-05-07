@@ -482,10 +482,25 @@ async function loadTudo() {
     }
 }
 
+// ── Calcula vendas e ganhos reais por afiliado a partir das indicacoes ──
+function calcularEstatisticasReais() {
+    const stats = {}; // afiliado_id → {vendas, ganhos}
+    allIndicacoes.forEach(i => {
+        if (i.converteu) {
+            if (!stats[i.afiliado_id]) stats[i.afiliado_id] = { vendas: 0, ganhos: 0 };
+            stats[i.afiliado_id].vendas += 1;
+            stats[i.afiliado_id].ganhos += Number(i.comissao || 0);
+        }
+    });
+    return stats;
+}
+
 // ── KPIs ──────────────────────────────────────────────────────
 function renderKPIs() {
+    const statsReais = calcularEstatisticasReais();
     const faturamentoTotal = allPedidos.reduce((s, p) => s + Number(p.valor_pago || 0), 0);
-    const totalComissoes = allAfiliados.reduce((s, a) => s + Number(a.total_ganhos || 0), 0);
+    const totalComissoes = Object.values(statsReais).reduce((s, x) => s + x.ganhos, 0);
+    const totalVendas    = Object.values(statsReais).reduce((s, x) => s + x.vendas, 0);
     const pendente = allSaques
         .filter(s => s.status === 'pendente')
         .reduce((s, x) => s + Number(x.valor || 0), 0);
@@ -493,8 +508,6 @@ function renderKPIs() {
         .filter(s => s.status === 'pago')
         .reduce((s, x) => s + Number(x.valor || 0), 0);
     const totalAfil = allAfiliados.length;
-    const totalVendas = allAfiliados.reduce((s, a) => s + Number(a.total_vendas || 0), 0);
-    const lucroLiquido = faturamentoTotal - totalComissoes;
 
     document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi kpi-blue">
@@ -725,6 +738,8 @@ async function pagarTodos() {
 
 // ── Render Afiliados ──────────────────────────────────────────
 function renderAfiliados(q = '') {
+    const statsReais = calcularEstatisticasReais();
+
     let list = allAfiliados;
     if (q) list = list.filter(a => {
         const nome = nomeAfiliado(a).toLowerCase();
@@ -740,9 +755,18 @@ function renderAfiliados(q = '') {
         saldoPend[s.user_id] = (saldoPend[s.user_id] || 0) + Number(s.valor);
     });
 
+    // Ordenar pelo ganho real (indicacoes), não pelo contador desnormalizado
+    list = [...list].sort((a, b) => {
+        const gA = statsReais[a.id]?.ganhos || 0;
+        const gB = statsReais[b.id]?.ganhos || 0;
+        return gB - gA;
+    });
+
     tbody.innerHTML = list.map((a, i) => {
         const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
         const pend = saldoPend[a.user_id] || 0;
+        const vendas = statsReais[a.id]?.vendas || 0;
+        const ganhos = statsReais[a.id]?.ganhos || 0;
         return `
         <tr>
             <td class="td-bold" style="text-align:center">${rank}</td>
@@ -758,8 +782,8 @@ function renderAfiliados(q = '') {
             <td><code style="background:#111;border:1px solid #2A2A2A;border-radius:.4rem;padding:.15rem .5rem;font-size:.8rem;color:#25f4f4">${esc(a.codigo)}</code></td>
             <td>${fmt(a.total_cliques)}</td>
             <td>${fmt(a.total_cupons)}</td>
-            <td>${fmt(a.total_vendas)}</td>
-            <td class="td-bold" style="color:#25f4f4">${fmtR(a.total_ganhos)}</td>
+            <td>${fmt(vendas)}</td>
+            <td class="td-bold" style="color:#25f4f4">${fmtR(ganhos)}</td>
             <td class="td-bold" style="color:${pend > 0 ? '#fbbf24' : '#475569'}">${fmtR(pend)}</td>
             <td style="color:#475569;font-size:.78rem">${fmtDate(a.created_at)}</td>
         </tr>`;
