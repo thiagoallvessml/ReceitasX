@@ -1,41 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://receitasx.com.br/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+
+  <!-- ══ Páginas principais ══ -->
   <url><loc>https://receitasx.com.br/landing</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://receitasx.com.br/blog</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://receitasx.com.br/calculadora</loc><changefreq>monthly</changefreq><priority>0.95</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-calcular-preco-bolo</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/ponto-de-equilibrio-confeitaria</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/margem-de-lucro-confeitaria</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-brigadeiro-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/quanto-cobrar-bolo-ifood</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/custo-fixo-confeitaria-em-casa</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-geladinho-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-paleta-mexicana</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-picole-artesanal</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-sorvete-artesanal</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-acai-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-brownie-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-trufas-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-bombons-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-bolo-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-cupcake</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-donuts-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-cookies-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-cheesecake-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-pave-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-mousse-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-geleia-artesanal</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-doce-de-leite-caseiro</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-bala-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-pipoca-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-churros-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-crepe-no-palito</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-maca-do-amor-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://receitasx.com.br/blog/como-precificar-pudim-de-leite-condensado</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://receitasx.com.br/acesso-vitalicio</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://receitasx.com.br/blog</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://receitasx.com.br/comecegratis</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/receitas-geladinho</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://receitasx.com.br/geladinho-maracuja</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- ══ Blog — artigos de precificação ══ -->
+  <url><loc>https://receitasx.com.br/blog/como-calcular-preco-bolo</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-acai-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-bala-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-bolo-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-bombons-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-brigadeiro-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-brownie-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-cheesecake-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-churros-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-cookies-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-crepe-no-palito</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-cupcake</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-doce-de-leite-caseiro</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-donuts-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-geladinho-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-geleia-artesanal</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-maca-do-amor-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-mousse-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-paleta-mexicana</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-pave-no-pote</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-picole-artesanal</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-pipoca-gourmet</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-pudim-de-leite-condensado</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-sorvete-artesanal</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/como-precificar-trufas-artesanais</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
+  <!-- ══ Blog — artigos financeiros ══ -->
+  <url><loc>https://receitasx.com.br/blog/custo-fixo-confeitaria-em-casa</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/margem-de-lucro-confeitaria</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/ponto-de-equilibrio-confeitaria</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://receitasx.com.br/blog/quanto-cobrar-bolo-ifood</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
+  <!-- ══ Páginas institucionais ══ -->
   <url><loc>https://receitasx.com.br/login</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://receitasx.com.br/checkout</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://receitasx.com.br/politica-de-privacidade</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://receitasx.com.br/termos-de-uso</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://receitasx.com.br/politica-de-privacidade</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://receitasx.com.br/termos-de-uso</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+
 </urlset>

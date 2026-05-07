@@ -1,24 +1,25 @@
 User-agent: *
 
-# ── Recursos essenciais — sempre acessíveis ──
+# ── Recursos essenciais ──
 Allow: /sitemap.xml
+Allow: /robots.txt
 
-# ── Páginas públicas — liberar para indexação ──
-Allow: /$
+# ── Páginas públicas — indexáveis ──
 Allow: /landing
+Allow: /calculadora
 Allow: /acesso-vitalicio
-Allow: /login
-Allow: /checkout
-Allow: /blog/
-Allow: /blog$
 Allow: /comecegratis
-Allow: /politica-de-privacidade
-Allow: /termos-de-uso
+Allow: /login
+Allow: /blog
+Allow: /blog/
 Allow: /receitas-geladinho
 Allow: /geladinho-maracuja
-Allow: /calculadora
+Allow: /politica-de-privacidade
+Allow: /termos-de-uso
 
-# ── Páginas do app — bloquear TUDO que não foi liberado acima ──
+# ── Bloquear TUDO que não foi liberado acima ──
+# Isso garante que URLs antigas do domínio anterior
+# e páginas internas do app não sejam indexadas.
 Disallow: /
 
 Sitemap: https://receitasx.com.br/sitemap.xml
