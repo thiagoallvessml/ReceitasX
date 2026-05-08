@@ -411,7 +411,7 @@
         <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
     </div>
     <div class="progress-label">
-        <span class="progress-text"><span id="done-count">0</span> de <span id="total-count">7</span> etapas concluídas <span style="color:#475569;font-weight:400">+ 3 opcionais</span></span>
+        <span class="progress-text"><span id="done-count">0</span> de <span id="total-count">6</span> etapas concluídas <span style="color:#475569;font-weight:400">+ 4 opcionais</span></span>
         <span class="progress-pct" id="progress-pct">0%</span>
     </div>
 </div>
@@ -721,17 +721,17 @@
     </div>
 
     <!-- ── 7. Precificação ── -->
-    <div class="step-card required" data-step="7">
+    <div class="step-card optional" data-step="7">
         <div class="step-node">7</div>
         <div class="step-body">
             <div class="step-head">
-                <div class="step-icon-wrap" style="background:rgba(37,244,244,.1)">
-                    <span class="material-symbols-outlined" style="color:#25f4f4">storefront</span>
+                <div class="step-icon-wrap" style="background:rgba(100,116,139,.1)">
+                    <span class="material-symbols-outlined" style="color:#94a3b8">storefront</span>
                 </div>
                 <div class="step-title-group">
                     <div class="step-title">
                         Precificação
-                        <span class="step-required-badge">Importante</span>
+                        <span class="step-optional-badge">Opcional</span>
                     </div>
                     <p class="step-subtitle">Análise por canal de venda</p>
                 </div>
@@ -748,7 +748,7 @@
                 </div>
             </div>
             <div class="step-actions">
-                <a href="precificacao-marketplace" class="btn-go">
+                <a href="precificacao-marketplace" class="btn-go" style="border-color:rgba(100,116,139,.3);background:rgba(100,116,139,.06);color:#94a3b8">
                     <span class="material-symbols-outlined">arrow_forward</span>
                     Ir para Precificação
                 </a>
@@ -883,7 +883,7 @@
 
 <!-- ══ Script ═════════════════════════════════════════════════════ -->
 <script>
-const TOTAL_STEPS = 7; // Combos, Despesas e Ponto de Equilíbrio são opcionais e não contam para o progresso
+const TOTAL_STEPS = 6; // Precificação, Combos, Despesas e Ponto de Equilíbrio são opcionais e não contam para o progresso
 let userSession = null;
 
 async function checkProgress() {
@@ -954,12 +954,12 @@ async function checkProgress() {
 }
 
 function renderProgress(progress) {
-    // Conta apenas etapas que contam para o progresso (exclui 8=Combos e 9=Despesas)
-    const requiredSteps = [1,2,3,4,5,6,7];
+    // Conta apenas etapas que contam para o progresso (exclui 7=Precificacao, 8=Combos, 9=Despesas, 10=Ponto de Equilibrio)
+    const requiredSteps = [1,2,3,4,5,6];
     const doneCount = requiredSteps.filter(k => progress[k]).length;
     let requiredCount = 0;
-    const TOTAL_REQUIRED = 7;
-    for(let i=1; i<=7; i++) {
+    const TOTAL_REQUIRED = 6;
+    for(let i=1; i<=6; i++) {
         if(progress[i]) requiredCount++;
     }
 
