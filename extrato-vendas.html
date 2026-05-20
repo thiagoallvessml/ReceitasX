@@ -459,6 +459,7 @@
 let SAQUE_MINIMO = 50; // sera sobrescrito pelo AppConfig
 let _todasIndicacoes = [];
 let _todosSaquesPagos = [];
+let _todosSaquesPendentes = [];
 let _saldoDisponivel = 0;
 let _filtroAtivo = 'todos';
 let _pixTipo = 'cpf';
@@ -615,14 +616,23 @@ function fmtData(iso) {
 
 /* -- Renderiza lista (indicacoes + saques recebidos) -- */
 function renderItem(item, i) {
-    if (item._tipo === 'recebido') {
+    if (item._tipo === 'recebido' || item._tipo === 'saque_pendente') {
+        const isRecebido = item._tipo === 'recebido';
+        const color = isRecebido ? '#34d399' : '#fbbf24';
+        const bgIco = isRecebido ? 'rgba(52,211,153,.12)' : 'rgba(251,191,36,.12)';
+        const borderIco = isRecebido ? 'rgba(52,211,153,.25)' : 'rgba(251,191,36,.25)';
+        const title = isRecebido ? 'Pagamento Recebido' : 'Saque Solicitado';
+        const badgeBg = isRecebido ? 'rgba(52,211,153,.1)' : 'rgba(251,191,36,.1)';
+        const badgeBorder = isRecebido ? 'rgba(52,211,153,.2)' : 'rgba(251,191,36,.2)';
+        const badgeText = isRecebido ? 'Recebido' : 'Pendente';
+        const operator = isRecebido ? '+' : '-';
         return `
         <div class="activity-item" style="animation-delay:${i * 0.05}s">
-            <div class="ico-wrap" style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25)">
-                <span class="material-symbols-outlined" style="font-size:1.2rem;color:#34d399;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
+            <div class="ico-wrap" style="background:${bgIco};border:1px solid ${borderIco}">
+                <span class="material-symbols-outlined" style="font-size:1.2rem;color:${color};font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
             </div>
             <div style="flex:1;min-width:0;">
-                <p style="font-size:.85rem;font-weight:600;">Pagamento Recebido</p>
+                <p style="font-size:.85rem;font-weight:600;">${title}</p>
                 <p style="font-size:.68rem;color:#475569;margin-top:.1rem">${fmtData(item.created_at)}</p>
                 ${item.pix_chave ? `<p style="font-size:.65rem;color:#64748b;margin-top:.1rem">${(item.pix_tipo||'').toUpperCase()}: ${item.pix_chave}</p>` : ''}
             </div>
@@ -681,7 +691,7 @@ function filtrar(tipo, btn) {
     if (tipo === 'recebido') { renderLista(_todosSaquesPagos); return; }
 
     if (tipo === 'todos') {
-        const tudo = [..._todasIndicacoes, ..._todosSaquesPagos]
+        const tudo = [..._todasIndicacoes, ..._todosSaquesPagos, ..._todosSaquesPendentes]
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         renderLista(tudo);
         return;
@@ -689,7 +699,13 @@ function filtrar(tipo, btn) {
 
     let items = _todasIndicacoes;
     if (tipo === 'converteu') items = items.filter(i => i.converteu);
-    if (tipo === 'pendente')  items = items.filter(i => !i.converteu);
+    if (tipo === 'pendente')  {
+        const indPends = items.filter(i => !i.converteu);
+        const tudoPend = [...indPends, ..._todosSaquesPendentes]
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        renderLista(tudoPend);
+        return;
+    }
     renderLista(items);
 }
 
@@ -717,15 +733,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const liMinSaque = document.getElementById('li-min-saque');
     if (liMinSaque) liMinSaque.innerHTML = '<span class="dot">•</span><span>O valor mínimo para saque é de <strong style="color:#25f4f4">' + fmtR(SAQUE_MINIMO) + '</strong>.</span>';
-
-    try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { location.href = 'login.html'; return; }
 
         // Busca afiliado
         const { data: afiliado } = await sb
             .from('afiliados')
-            .select('id, total_ganhos, codigo')
+            .select('id, total_ganhos, total_vendas, saldo_disponivel, codigo')
             .eq('user_id', user.id)
             .maybeSingle();
 
@@ -766,22 +780,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             .filter(s => s.status === 'pago')
             .map(s => ({ ...s, _tipo: 'recebido' }));
 
+        _todosSaquesPendentes = (saques || [])
+            .filter(s => s.status !== 'pago' && s.status !== 'cancelado')
+            .map(s => ({ ...s, _tipo: 'saque_pendente' }));
+
         const sacado = (saques || []).reduce((acc, s) => {
             if (s.status !== 'cancelado') acc += parseFloat(s.valor || 0);
             return acc;
         }, 0);
 
-        const totalGanhos = parseFloat(afiliado.total_ganhos || 0);
-        _saldoDisponivel  = Math.max(0, totalGanhos - sacado);
-
         const confirmadas = _todasIndicacoes.filter(i => i.converteu);
         const pendentes   = _todasIndicacoes.filter(i => !i.converteu);
-        const totalComissao = confirmadas.reduce((a, i) => a + parseFloat(i.comissao || 0), 0);
+
+        // Calcula ganhos via indicacoes detalhadas
+        const ganhosCalc = confirmadas.reduce((a, i) => a + parseFloat(i.comissao || 0), 0);
+        const vendasCalc = confirmadas.length;
+
+        // FONTE DE VERDADE: se indicacoes esta vazia, usa totais do afiliado
+        const totalGanhos = ganhosCalc > 0 ? ganhosCalc : parseFloat(afiliado.total_ganhos || 0);
+        const totalVendas = vendasCalc > 0 ? vendasCalc : parseInt(afiliado.total_vendas || 0);
+
+        // Saldo disponivel = ganhos - sacado (com fallback para campo do banco)
+        _saldoDisponivel = Math.max(0, totalGanhos - sacado);
+        if (_saldoDisponivel === 0 && parseFloat(afiliado.saldo_disponivel || 0) > 0) {
+            _saldoDisponivel = parseFloat(afiliado.saldo_disponivel);
+        }
 
         // Atualiza resumo
-        document.getElementById('total-ganhos').textContent   = fmtR(totalComissao);
+        document.getElementById('total-ganhos').textContent   = fmtR(totalGanhos);
         document.getElementById('a-receber').textContent      = fmtR(_saldoDisponivel);
-        document.getElementById('total-vendas').textContent   = confirmadas.length + ' venda' + (confirmadas.length !== 1 ? 's' : '');
+        document.getElementById('total-vendas').textContent   = totalVendas + ' venda' + (totalVendas !== 1 ? 's' : '');
         document.getElementById('total-pendentes').textContent = pendentes.length;
 
         // Exibe aviso se houver pendentes
