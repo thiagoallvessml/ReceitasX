@@ -91,6 +91,16 @@
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
 
+        /* ── chart ── */
+        .chart-container { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;margin-top:1.5rem;animation:fadeUp .5s forwards; }
+        .chart-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem; }
+        .chart-title { font-size:1rem;font-weight:700;color:#f1f5f9;display:flex;align-items:center;gap:.4rem; }
+        .bar-chart { display:flex;align-items:flex-end;justify-content:space-between;height:180px;gap:.5rem;padding-bottom:1.5rem;position:relative;border-bottom:1px solid #2A2A2A; }
+        .bar-col { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative; }
+        .bar-fill { width:100%;max-width:32px;background:linear-gradient(to top, rgba(37,244,244,.2), #25f4f4);border-radius:.3rem .3rem 0 0;transition:height .4s ease, opacity .2s; cursor:pointer; }
+        .bar-fill:hover { opacity:.8; }
+        .bar-val { position:absolute;top:-1.4rem;font-size:.7rem;font-weight:700;color:#f1f5f9; }
+        .bar-label { position:absolute;bottom:-1.5rem;font-size:.65rem;font-weight:600;color:#64748b;white-space:nowrap; }
 
     </style>
 </head>
@@ -138,6 +148,12 @@
             <div class="stat-val" id="stat-vendas">–</div>
             <div class="stat-sub">convertidas</div>
         </div>
+        <div class="stat-card stat-ticket">
+            <div class="stat-icon"><span class="material-symbols-outlined">receipt_long</span></div>
+            <div class="stat-label">Ticket Médio</div>
+            <div class="stat-val" id="stat-ticket">–</div>
+            <div class="stat-sub">por comissão</div>
+        </div>
         <div class="stat-card stat-pendente">
             <div class="stat-icon"><span class="material-symbols-outlined">account_balance_wallet</span></div>
             <div class="stat-label">A Receber</div>
@@ -161,6 +177,20 @@
     </div>
 
 
+
+    <!-- GRÁFICO: CONVERSÕES POR MÊS -->
+    <div class="chart-container" style="margin-bottom:1.5rem">
+        <div class="chart-header">
+            <div class="chart-title">
+                <span class="material-symbols-outlined" style="color:#25f4f4">monitoring</span>
+                Conversões nos últimos 6 meses
+            </div>
+            <div style="font-size:.75rem;color:#64748b;font-weight:600">Vendas Aprovadas</div>
+        </div>
+        <div class="bar-chart" id="chart-months">
+            <div style="width:100%;text-align:center;color:#475569;font-size:.8rem;align-self:center">Carregando dados...</div>
+        </div>
+    </div>
 
     <!-- HISTÓRICO DE INDICAÇÕES -->
     <div class="table-card">
@@ -277,6 +307,51 @@ function renderTabela(indicacoes) {
     });
 }
 
+/* ── RENDERIZAR GRÁFICO ── */
+function renderChart(indicacoes) {
+    const chartEl = document.getElementById('chart-months');
+    if (!chartEl) return;
+
+    const converts = indicacoes.filter(i => i.converteu);
+    if (converts.length === 0) {
+        chartEl.innerHTML = `<div style="width:100%;text-align:center;color:#475569;font-size:.8rem;align-self:center">Nenhuma venda convertida ainda.</div>`;
+        return;
+    }
+
+    const now = new Date();
+    let monthsMap = {};
+    for(let i=5; i>=0; i--) {
+        let m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        let key = `${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}`;
+        monthsMap[key] = { count: 0, date: m };
+    }
+
+    converts.forEach(ind => {
+        if (!ind.created_at) return;
+        const dt = new Date(ind.created_at);
+        const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+        if (monthsMap[key]) monthsMap[key].count++;
+    });
+
+    const vals = Object.values(monthsMap);
+    const maxVal = Math.max(...vals.map(v => v.count), 1);
+
+    const html = vals.map(v => {
+        const pct = Math.floor((v.count / maxVal) * 100);
+        let txt = v.date.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
+        txt = txt.charAt(0).toUpperCase() + txt.slice(1);
+        return `
+            <div class="bar-col">
+                <span class="bar-val" style="opacity:${v.count===0 ? '0' : '1'}">${v.count}</span>
+                <div class="bar-fill" style="height:${pct}%"></div>
+                <span class="bar-label">${txt}</span>
+            </div>
+        `;
+    }).join('');
+
+    chartEl.innerHTML = html;
+}
+
 /* ── BUSCAR DADOS ── */
 async function carregarDados(user) {
     try {
@@ -294,19 +369,33 @@ async function carregarDados(user) {
             throw afErr;
         }
 
-        const ganhos  = parseFloat(afiliado.total_ganhos  || 0);
-        const vendas  = parseInt(afiliado.total_vendas    || 0);
-        const cliques = parseInt(afiliado.total_cliques   || 0);
-        const cupons  = parseInt(afiliado.total_cupons    || 0);
+        const cliques = parseInt(afiliado.total_cliques || 0);
+        const cupons  = parseInt(afiliado.total_cupons  || 0);
 
-        // Buscar indicações
+        // Buscar indicações (usado para tabela e gráfico)
         const { data: indicacoes } = await sb
             .from('indicacoes')
             .select('*')
             .eq('afiliado_id', afiliado.id)
             .order('created_at', { ascending: false });
 
-        // Calcular saldo disponível
+        // Calcular totais a partir das indicacoes detalhadas
+        let ganhosCalc = 0;
+        let vendasCalc = 0;
+        (indicacoes || []).forEach(ind => {
+            if (ind.converteu) {
+                ganhosCalc += parseFloat(ind.comissao || 0);
+                vendasCalc += 1;
+            }
+        });
+
+        // ✅ FONTE DE VERDADE: se a tabela indicacoes está vazia mas o afiliado
+        // tem totais desnormalizados registrados, usamos os valores do banco.
+        // Isso garante que vendas registradas via trigger/admin apareçam corretamente.
+        const ganhos = ganhosCalc > 0 ? ganhosCalc : parseFloat(afiliado.total_ganhos || 0);
+        const vendas = vendasCalc > 0 ? vendasCalc : parseInt(afiliado.total_vendas   || 0);
+
+        // Calcular saldo disponível (ganhos - saques não cancelados)
         const { data: saques } = await sb
             .from('saques_afiliado')
             .select('valor,status')
@@ -314,13 +403,18 @@ async function carregarDados(user) {
 
         let totalSacado = 0;
         (saques || []).forEach(s => {
-            if (s.status === 'pago') totalSacado += parseFloat(s.valor || 0);
+            if (s.status !== 'cancelado') totalSacado += parseFloat(s.valor || 0);
         });
 
+        // Se o banco tiver saldo_disponivel calculado, usar como fallback também
         saldoDisp = Math.max(0, ganhos - totalSacado);
+        if (saldoDisp === 0 && afiliado.saldo_disponivel > 0) {
+            saldoDisp = parseFloat(afiliado.saldo_disponivel);
+        }
 
         renderStats({ ganhos, vendas, pendente: saldoDisp, cliques, cupons });
         renderTabela(indicacoes || []);
+        renderChart(indicacoes || []);
     } catch(e) {
         console.error('Erro ao carregar dados:', e);
         renderStats({ ganhos:0, vendas:0, pendente:0, cliques:0, cupons:0 });
@@ -334,6 +428,9 @@ function renderStats({ ganhos, vendas, pendente, cliques, cupons }) {
     document.getElementById('stat-pendente').textContent = fmtR(pendente);
     document.getElementById('stat-cliques').textContent  = cliques.toString();
     document.getElementById('stat-cupons').textContent   = (cupons || 0).toString();
+    const ticket = vendas > 0 ? ganhos / vendas : 0;
+    const ticketEl = document.getElementById('stat-ticket');
+    if (ticketEl) ticketEl.textContent = fmtR(ticket);
 }
 
 /* ── CARREGAR CONFIG DO BANCO ── */
