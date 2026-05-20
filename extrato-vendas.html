@@ -725,7 +725,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Busca afiliado
         const { data: afiliado } = await sb
             .from('afiliados')
-            .select('id, total_ganhos, codigo')
+            .select('id, total_ganhos, total_vendas, saldo_disponivel, codigo')
             .eq('user_id', user.id)
             .maybeSingle();
 
@@ -773,6 +773,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const totalGanhos = parseFloat(afiliado.total_ganhos || 0);
         _saldoDisponivel  = Math.max(0, totalGanhos - sacado);
+        // Fallback: se o cálculo der 0 mas o banco tem saldo, usar o do banco
+        if (_saldoDisponivel === 0 && parseFloat(afiliado.saldo_disponivel || 0) > 0) {
+            _saldoDisponivel = parseFloat(afiliado.saldo_disponivel);
+        }
 
         const confirmadas = _todasIndicacoes.filter(i => i.converteu);
         const pendentes   = _todasIndicacoes.filter(i => !i.converteu);
