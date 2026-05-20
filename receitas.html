@@ -547,6 +547,14 @@
               <span class="material-symbols-outlined">add_circle</span> Adicionar
             </button>
           </div>
+          
+          <div class="warn-row" style="margin-bottom: 1rem; border-color: #fbbf24; background: rgba(251, 191, 36, 0.05); color: #fde68a;">
+            <span class="material-symbols-outlined" style="color: #fbbf24;">lightbulb</span>
+            <div>
+              <strong>Dica importante:</strong> Cadastre a quantidade <strong>total</strong> usada para todo o rendimento da receita.<br>
+              <span style="font-size: 0.75rem; opacity: 0.9;">Ex: Se a receita rende 10 unidades e você gasta 20g de Nutella por unidade, cadastre <strong>200g</strong> (20g x 10).</span>
+            </div>
+          </div>
           <div id="ing-list"></div>
           <div id="ing-warn" class="warn-row">
             <span class="material-symbols-outlined">info</span>
@@ -664,10 +672,27 @@
 
             <!-- Preço de Venda -->
             <div>
-              <label class="fl" for="prod-preco">Preço de Venda (R$)</label>
-              <div style="position:relative">
+              <label class="fl" for="prod-preco">Preço de Venda Unitário (R$)</label>
+              <div style="position:relative; margin-bottom:.85rem;">
                 <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
-                <input id="prod-preco" type="number" min="0" step="0.01" class="fi" placeholder="0,00" style="padding-left:2.2rem" />
+                <input id="prod-preco" type="number" min="0" step="0.01" class="fi" placeholder="0,00" style="padding-left:2.2rem" oninput="calcVendaPrevia()" />
+              </div>
+              
+              <!-- Preview de Composição de Venda -->
+              <div class="preview-box" id="venda-preview-box" style="display:none; background:#111; border:1px solid #2A2A2A; border-radius:.875rem; overflow:hidden;">
+                <div class="preview-head" style="padding:.5rem .75rem; border-bottom:1px solid #1E1E1E;">
+                  <p style="font-size:.7rem; font-weight:700; color:#f1f5f9;">Composição para Venda</p>
+                </div>
+                <div class="preview-body" style="padding:.6rem .75rem; display:flex; flex-direction:column; gap:.4rem;">
+                  <div class="cost-row"><span class="lbl">Preço Unitário:</span><span class="val" id="pv-unit">R$ 0,00</span></div>
+                  <div class="cost-row"><span class="lbl">Preço Total (Fornada):</span><span class="val" id="pv-total">R$ 0,00</span></div>
+                  <div class="cost-row" style="margin-top:.2rem; padding-top:.4rem; border-top:1px dashed #222;"><span class="lbl">Lucro Unitário:</span><span class="val" id="pv-lucro-un" style="color:#4ade80">R$ 0,00</span></div>
+                  <div class="cost-row"><span class="lbl">Lucro Total:</span><span class="val" id="pv-lucro-tot" style="color:#4ade80">R$ 0,00</span></div>
+                  <div class="cost-row total" style="margin-top:.2rem; padding-top:.4rem; border-top:1px solid #222; display:flex; justify-content:space-between;">
+                    <div><span class="lbl" style="font-size:.7rem; color:#64748b;">Margem:</span> <span class="val" id="pv-margem" style="color:#fbbf24; font-size:.8rem; font-weight:700; margin-left:.2rem;">0.0%</span></div>
+                    <div><span class="lbl" style="font-size:.7rem; color:#64748b;">Markup:</span> <span class="val" id="pv-markup" style="color:#a78bfa; font-size:.8rem; font-weight:700; margin-left:.2rem;">0.00x</span></div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1473,6 +1498,67 @@ function calcPrevia() {
     document.getElementById('cv-tot').textContent  = fmtR(total);
     document.getElementById('cv-unit').textContent = fmtR(unit);
     document.getElementById('cv-rend').textContent = rend + ' un';
+    
+    calcVendaPrevia(total, unit, rend);
+}
+
+function calcVendaPrevia(custoTot = null, custoUn = null, rendimento = null) {
+    if (custoTot === null) {
+        // Se não foi passado, extrai da UI
+        const valTotStr = document.getElementById('cv-tot').textContent.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+        const valUnStr  = document.getElementById('cv-unit').textContent.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+        const rendStr   = document.getElementById('cv-rend').textContent.replace(' un', '').trim();
+        custoTot = parseFloat(valTotStr) || 0;
+        custoUn  = parseFloat(valUnStr)  || 0;
+        rendimento = parseInt(rendStr)   || 1;
+    }
+
+    const prodPreco = parseFloat(document.getElementById('prod-preco').value) || 0;
+    const previewBox = document.getElementById('venda-preview-box');
+    
+    if (prodPreco > 0) {
+        previewBox.style.display = 'block';
+        const precoTotal = prodPreco * rendimento;
+        const lucroTotal = precoTotal - custoTot;
+        const lucroUnit  = prodPreco - custoUn;
+        
+        const margem = precoTotal > 0 ? (lucroTotal / precoTotal) * 100 : 0;
+        const markup = custoTot > 0 ? (precoTotal / custoTot) : 0;
+
+        document.getElementById('pv-unit').textContent = fmtR(prodPreco);
+        document.getElementById('pv-total').textContent = fmtR(precoTotal);
+        document.getElementById('pv-lucro-un').textContent = fmtR(lucroUnit);
+        document.getElementById('pv-lucro-tot').textContent = fmtR(lucroTotal);
+        
+        const cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
+        const mRazo  = cfg.precRazo  || 20;
+        const mExcel = cfg.precExcel || 35;
+
+        let margemLabel = '';
+        let margemColor = '#f87171'; // Baixa (vermelho)
+        
+        if (margem >= mExcel) {
+            margemLabel = 'Excelente';
+            margemColor = '#34d399'; // Verde
+        } else if (margem >= mRazo) {
+            margemLabel = 'Razoável';
+            margemColor = '#fbbf24'; // Amarelo
+        } else {
+            margemLabel = 'Baixa';
+            margemColor = '#f87171'; // Vermelho
+        }
+
+        const elMargem = document.getElementById('pv-margem');
+        elMargem.innerHTML = `${margem.toFixed(1)}% <span style="font-size:0.65rem; font-weight:500; margin-left:0.15rem; color:${margemColor}">(${margemLabel})</span>`;
+        elMargem.style.color = margemColor;
+
+        document.getElementById('pv-markup').textContent = markup.toFixed(2) + 'x';
+        
+        document.getElementById('pv-lucro-un').style.color = lucroUnit >= 0 ? '#4ade80' : '#f87171';
+        document.getElementById('pv-lucro-tot').style.color = lucroTotal >= 0 ? '#4ade80' : '#f87171';
+    } else {
+        if(previewBox) previewBox.style.display = 'none';
+    }
 }
 
 
@@ -1731,6 +1817,11 @@ carregarReceitas().then(() => {
         sessionStorage.removeItem('receitasx_editar_id');
         const r = receitas.find(x => String(x.id) === String(editarId));
         if (r) editarReceita(r.id);
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'new') {
+        setTimeout(openCadastrar, 100);
     }
 });
 injetarAviso('receitas');
