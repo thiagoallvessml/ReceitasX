@@ -1371,7 +1371,7 @@
         cards.forEach(card => {
             const id = card.getAttribute('data-card-id');
             // Ignorar banners e cards dinâmicos que não devem ser configuráveis
-            if (['guia-configuracao', 'checkout.html?ref=DESCONTO60', '#', 'receitas-geladinho'].includes(id)) return;
+            if (['guia-configuracao', 'checkout.html?ref=DESCONTO60', '#', 'receitas-geladinho', 'acesso-vitalicio'].includes(id)) return;
             if (card.id && card.id.startsWith('banner-')) return;
             
             let titleEl = card.querySelector('h4');
