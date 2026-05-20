@@ -725,7 +725,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Busca afiliado
         const { data: afiliado } = await sb
             .from('afiliados')
-            .select('id, total_ganhos, total_vendas, saldo_disponivel, codigo')
+            .select('id, total_ganhos, total_vendas, codigo')
             .eq('user_id', user.id)
             .maybeSingle();
 
