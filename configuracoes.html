@@ -353,52 +353,52 @@
                 </div>
             </section>
 
+            <!-- ════ SEÇÃO MARKETPLACES ════ -->
+            <section>
+                <h2 class="sec-title">
+                    <span class="material-symbols-outlined" style="color:#25f4f4;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
+                    Marketplaces e Taxas
+                </h2>
+                <div class="cfg-card">
+                    <p class="text-xs text-slate-400 mb-3">Configure os marketplaces onde você vende e suas respectivas taxas. Eles aparecerão automaticamente nos Combos e Produtos.</p>
+
+                    <!-- Lista dinâmica -->
+                    <div id="mkt-list" style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem"></div>
+
+                    <!-- Formulário de adição -->
+                    <div class="mkt-form" id="mkt-form">
+                        <p style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4">Novo Marketplace</p>
+                        <div class="mkt-form-row">
+                            <div>
+                                <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Nome do Marketplace</p>
+                                <input id="mkt-new-nome" type="text" class="fc" placeholder="Ex: Rappi, iFood..." autocomplete="off" style="padding:.6rem .8rem;font-size:.85rem" />
+                            </div>
+                            <div class="mkt-taxa-wrap">
+                                <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Taxa</p>
+                                <input id="mkt-new-taxa" type="number" min="0" max="100" step="0.1" placeholder="0" />
+                                <span class="pct-sfx">%</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:.5rem">
+                            <button class="btn-mkt-cancel" onclick="closeMktForm()">Cancelar</button>
+                            <button class="btn-mkt-add-confirm" onclick="addMkt()">Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- Botão adicionar -->
+                    <button class="btn-add-mkt" id="btn-add-mkt" onclick="openMktForm()">
+                        <span class="material-symbols-outlined">add</span> Adicionar Marketplace
+                    </button>
+
+                    <div class="hint" style="margin-top:.85rem">
+                        <span class="material-symbols-outlined">info</span>
+                        <span>As taxas são descontadas do lucro bruto para calcular o lucro líquido por canal de venda.</span>
+                    </div>
+                </div>
+            </section>
+
         </div><!-- /col direita -->
     </div><!-- /two-col -->
-
-    <!-- ════ SEÇÃO MARKETPLACES (largura total) ════ -->
-    <section style="margin-top:1.5rem">
-        <h2 class="sec-title">
-            <span class="material-symbols-outlined" style="color:#25f4f4;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
-            Marketplaces e Taxas
-        </h2>
-        <div class="cfg-card">
-            <p class="text-xs text-slate-400 mb-3">Configure os marketplaces onde você vende e suas respectivas taxas. Eles aparecerão automaticamente nos Combos e Produtos.</p>
-
-            <!-- Lista dinâmica -->
-            <div id="mkt-list" style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem"></div>
-
-            <!-- Formulário de adição -->
-            <div class="mkt-form" id="mkt-form">
-                <p style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4">Novo Marketplace</p>
-                <div class="mkt-form-row">
-                    <div>
-                        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Nome do Marketplace</p>
-                        <input id="mkt-new-nome" type="text" class="fc" placeholder="Ex: Rappi, iFood..." autocomplete="off" style="padding:.6rem .8rem;font-size:.85rem" />
-                    </div>
-                    <div class="mkt-taxa-wrap">
-                        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Taxa</p>
-                        <input id="mkt-new-taxa" type="number" min="0" max="100" step="0.1" placeholder="0" />
-                        <span class="pct-sfx">%</span>
-                    </div>
-                </div>
-                <div style="display:flex;gap:.5rem">
-                    <button class="btn-mkt-cancel" onclick="closeMktForm()">Cancelar</button>
-                    <button class="btn-mkt-add-confirm" onclick="addMkt()">Adicionar</button>
-                </div>
-            </div>
-
-            <!-- Botão adicionar -->
-            <button class="btn-add-mkt" id="btn-add-mkt" onclick="openMktForm()">
-                <span class="material-symbols-outlined">add</span> Adicionar Marketplace
-            </button>
-
-            <div class="hint" style="margin-top:.85rem">
-                <span class="material-symbols-outlined">info</span>
-                <span>As taxas são descontadas do lucro bruto para calcular o lucro líquido por canal de venda.</span>
-            </div>
-        </div>
-    </section>
 
     <!-- Botão salvar bottom mobile -->
     <div class="mt-6 flex justify-end md:hidden">
