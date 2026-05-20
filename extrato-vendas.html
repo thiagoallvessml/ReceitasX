@@ -733,6 +733,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const liMinSaque = document.getElementById('li-min-saque');
     if (liMinSaque) liMinSaque.innerHTML = '<span class="dot">•</span><span>O valor mínimo para saque é de <strong style="color:#25f4f4">' + fmtR(SAQUE_MINIMO) + '</strong>.</span>';
+
+    try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { location.href = 'login.html'; return; }
 
