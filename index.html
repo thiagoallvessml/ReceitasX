@@ -372,93 +372,201 @@
             <span class="material-symbols-outlined text-primary text-sm">precision_manufacturing</span>
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Operacional</h2>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-            <!-- Gestão Insumos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <a data-card-id="gerenciar-insumos" href="gerenciar-insumos"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">package_2</span>
-                <span class="text-xs font-medium text-center">Meus Insumos</span>
-                <span id="alert-insumos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">package_2</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Meus Insumos</h4>
+                        
+                        <span id="alert-insumos" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gerencie ingredientes e custos</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Equipamentos -->
             <a data-card-id="gerenciar-equipamentos" href="gerenciar-equipamentos"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">construction</span>
-                <span class="text-xs font-medium text-center">Meus Equipamentos</span>
-                <span id="alert-equipamentos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">construction</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Meus Equipamentos</h4>
+                        
+                        <span id="alert-equipamentos" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Depreciação e custos de maquinário</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Gestão Embalagens -->
             <a data-card-id="gerenciar-embalagens" href="gerenciar-embalagens"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">inventory</span>
-                <span class="text-xs font-medium text-center">Minhas Embalagens</span>
-                <span id="alert-embalagens" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">inventory</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Minhas Embalagens</h4>
+                        
+                        <span id="alert-embalagens" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Controle de caixas, fitas e potes</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            
-              <!-- Lista de Compras -->
-              <a data-card-id="lista-compras" href="lista-compras"
-                    class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                    <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary text-[#0F0F0F] uppercase tracking-wider">Novo</span>
-                  <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">shopping_cart_checkout</span>
-                  <span class="text-xs font-medium text-center">Lista de Compras</span>
-              </a>
-              <!-- Receitas -->
+            <a data-card-id="lista-compras" href="lista-compras"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">shopping_cart_checkout</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Lista de Compras</h4>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Novo</span>
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gere listas do que falta comprar</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
             <a data-card-id="receitas" href="receitas"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">menu_book</span>
-                <span class="text-xs font-medium text-center">Minhas Receitas</span>
-                <span id="alert-receitas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">menu_book</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Minhas Receitas</h4>
+                        
+                        <span id="alert-receitas" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Crie e visualize fichas técnicas</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Produtos -->
             <a data-card-id="gestao-produtos" href="gestao-produtos"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">shopping_basket</span>
-                <span class="text-xs font-medium text-center">Meus Produtos</span>
-                <span id="alert-produtos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">shopping_basket</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Meus Produtos</h4>
+                        
+                        <span id="alert-produtos" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ative e venda receitas prontas</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Combos -->
             <a data-card-id="combos" href="combos"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">layers</span>
-                <span class="text-xs font-medium text-center">Meus Combos</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">layers</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Meus Combos</h4>
+                        
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Crie pacotes e kits de produtos</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Precificação -->
             <a data-card-id="precificacao-marketplace" href="precificacao-marketplace"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">storefront</span>
-                <span class="text-xs font-medium text-center">Precificação</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">storefront</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Precificação</h4>
+                        
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Preços para iFood, Mercado Livre...</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Despesas -->
             <a data-card-id="despesas" href="despesas"
-                class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">receipt_long</span>
-                <span class="text-xs font-medium text-center">Minhas Despesas</span>
-                <span id="alert-despesas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Minhas Despesas</h4>
+                        
+                        <span id="alert-despesas" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Custos fixos e variáveis do negócio</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Vendas do Cliente -->
             <a data-card-id="registrar-vendas" href="registrar-vendas"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">point_of_sale</span>
-                <span class="text-xs font-medium text-center">Minhas Vendas</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">point_of_sale</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Minhas Vendas</h4>
+                        
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Registre pedidos dos clientes</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Ponto de Equilíbrio -->
             <a data-card-id="ponto-equilibrio" href="ponto-equilibrio"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">balance</span>
-                <span class="text-xs font-medium text-center">Equilíbrio</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">balance</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Equilíbrio</h4>
+                        
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua meta mínima de vendas</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
-            <!-- Configurações -->
-              <!-- Admin (Somente Admin) -->
-              <a data-card-id="admin" href="admin" data-role="admin" style="display: none; border-color: rgba(251,146,60,.3) !important;"
-                  class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                  <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-400 text-[#0F0F0F] uppercase tracking-wider">Admin</span>
-                  <span class="material-symbols-outlined text-3xl mb-2 text-orange-400 group-hover:text-orange-500 transition-colors">shield</span>
-                  <span class="text-xs font-medium text-center text-orange-400">Painel Admin</span>
-              </a>
+            <a data-card-id="admin" href="admin" data-role="admin" style="display: none; border-color: rgba(251,146,60,.3) !important;"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-orange-400 group-hover:text-orange-500 transition-colors">
+                    <span class="material-symbols-outlined">shield</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold text-orange-400">Painel Admin</h4>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Admin</span>
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Área exclusiva da administração</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+            </a>
             <a data-card-id="configuracoes" href="configuracoes"
-                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
-                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">settings</span>
-                <span class="text-xs font-medium text-center">Configurações</span>
+                class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
+                <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">settings</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Configurações</h4>
+                        
+                        
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ajustes gerais do sistema</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
         </div>
     </section>
