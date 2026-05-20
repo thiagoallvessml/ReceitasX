@@ -133,6 +133,7 @@
             box-shadow: 0 2px 8px rgba(239,68,68,.5);
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
@@ -142,6 +143,14 @@
         <span style="font-size:.95rem;font-weight:800;flex:1;letter-spacing:-.01em">
             <span style="color:#25f4f4">Receitas</span><span style="color:#f1f5f9">X</span>
         </span>
+        
+        <!-- Personalizar Menu -->
+        <button onclick="openCustomMenuModal()" title="Personalizar Menu"
+            style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
+            onmouseover="this.style.color='#e11d48';this.style.borderColor='rgba(225,29,72,.4)'"
+            onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+            <span class="material-symbols-outlined" style="font-size:1.15rem">tune</span>
+        </button>
         <!-- Sino de notificações -->
         <button id="sino-btn" onclick="toggleNotifPanel()" title="Notificações"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
@@ -172,7 +181,7 @@
 </header>
 <div class="p-6 space-y-8">
     <!-- ── Guia de Configuração ─────────────────────────────── -->
-    <a href="guia-configuracao" id="banner-guia"
+    <a data-card-id="guia-configuracao" href="guia-configuracao" id="banner-guia"
         class="nav-card block p-4 rounded-xl border group"
         style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
         <div class="flex items-center gap-4">
@@ -191,7 +200,7 @@
     </a>
 
     <!-- ── Oferta Especial Calculadora (condicional) ─────────────────────────────── -->
-    <a href="checkout.html?ref=DESCONTO60" id="banner-oferta-calculadora"
+    <a data-card-id="checkout.html?ref=DESCONTO60" href="checkout.html?ref=DESCONTO60" id="banner-oferta-calculadora"
         class="nav-card block p-4 rounded-xl border group"
         style="display:none;background:linear-gradient(135deg,rgba(52,211,153,.1),rgba(52,211,153,.02));border-color:rgba(52,211,153,.3);">
         <div class="flex items-center gap-4">
@@ -210,7 +219,7 @@
     </a>
 
     <!-- ── Oferta Especial Afiliado (condicional) ─────────────────────────────── -->
-    <a href="#" id="banner-oferta-afiliado"
+    <a data-card-id="#" href="#" id="banner-oferta-afiliado"
         class="nav-card block p-4 rounded-xl border group"
         style="display:none;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.02));border-color:rgba(251,191,36,.3);">
         <div class="flex items-center gap-4">
@@ -228,6 +237,76 @@
         </div>
     </a>
 
+    <!-- ── Onboarding / Wizard ── -->
+    <section id="onboarding-wizard" style="display:none; margin-top:1.5rem">
+        <div class="flex items-center gap-2 mb-3 px-1">
+            <span class="material-symbols-outlined text-primary text-sm">school</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Primeiros Passos</h2>
+        </div>
+        <div class="nav-card block p-4 rounded-xl border bg-white dark:bg-card-dark border-slate-200 dark:border-border-dark">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-slate-800 dark:text-f1f5f9">Sua primeira receita em 5 min</h3>
+                <span id="wizard-prog-text" class="text-xs font-bold text-primary">0%</span>
+            </div>
+            
+            <!-- Barra de Progresso -->
+            <div class="w-full bg-slate-100 dark:bg-[#111] rounded-full h-2.5 mb-6 border border-slate-200 dark:border-[#2A2A2A] overflow-hidden">
+                <div id="wizard-prog-bar" class="bg-primary h-2.5 rounded-full" style="width: 0%; transition: width 0.5s ease-out"></div>
+            </div>
+
+            <!-- Steps -->
+            <div class="space-y-3">
+                <!-- Step 1 -->
+                <a href="cadastrar-insumo.html" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
+                    <div id="wizard-step-1-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
+                        <span class="material-symbols-outlined text-sm">looks_one</span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-1-title">Cadastre 1 Insumo</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Ex: Farinha, Leite condensado...</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
+                </a>
+                
+                <!-- Step 2 -->
+                <a href="receitas.html?action=new" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
+                    <div id="wizard-step-2-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
+                        <span class="material-symbols-outlined text-sm">looks_two</span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-2-title">Crie uma Receita</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Junte insumos e descubra o custo real</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
+                </a>
+
+                <!-- Step 3 -->
+                <a href="gestao-produtos.html" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
+                    <div id="wizard-step-3-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
+                        <span class="material-symbols-outlined text-sm">looks_3</span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-3-title">Gere um Produto</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Ative o produto vinculado à sua receita</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
+                </a>
+
+                <!-- Step 4 -->
+                <a href="gestao-produtos.html" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
+                    <div id="wizard-step-4-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
+                        <span class="material-symbols-outlined text-sm">looks_4</span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-4-title">Defina o Preço</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Descubra seu lucro e margem exatos</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- ── Receitas Bônus ─────────────────────────────── -->
     <section style="display:none">
         <div class="flex items-center gap-2 mb-4 px-1 mt-6">
@@ -235,7 +314,7 @@
             <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Receitas Bônus</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <a href="receitas-geladinho"
+            <a data-card-id="receitas-geladinho" href="receitas-geladinho"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(251,191,36,.02));border-color:rgba(251,191,36,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(251,191,36,.1);color:#fbbf24;">
@@ -253,6 +332,36 @@
         </div>
     </section>
 
+    <!-- ── Acesso Rápido ──────────────────────────────────────── -->
+    <section>
+        <div class="flex items-center gap-2 mb-3 px-1 mt-6">
+            <span class="material-symbols-outlined text-primary text-sm">bolt</span>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Acesso Rápido</h2>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <a data-card-id="cadastrar-insumo" href="cadastrar-insumo"
+                class="nav-card flex items-center gap-3 p-3 rounded-xl border group"
+                style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
+                <div class="p-2 rounded-lg flex items-center justify-center" style="background:rgba(37,244,244,.1);color:#25f4f4;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">add</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-xs sm:text-sm font-bold">Cadastrar Insumo</h4>
+                </div>
+            </a>
+            <a data-card-id="receitas?action=new" href="receitas?action=new"
+                class="nav-card flex items-center gap-3 p-3 rounded-xl border group"
+                style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
+                <div class="p-2 rounded-lg flex items-center justify-center" style="background:rgba(37,244,244,.1);color:#25f4f4;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">add</span>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-xs sm:text-sm font-bold">Cadastrar Receitas</h4>
+                </div>
+            </a>
+        </div>
+    </section>
+
     <!-- ── Operacional ──────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-4 px-1">
@@ -261,21 +370,21 @@
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             <!-- Gestão Insumos -->
-            <a href="gerenciar-insumos"
+            <a data-card-id="gerenciar-insumos" href="gerenciar-insumos"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">package_2</span>
                 <span class="text-xs font-medium text-center">Meus Insumos</span>
                 <span id="alert-insumos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Equipamentos -->
-            <a href="gerenciar-equipamentos"
+            <a data-card-id="gerenciar-equipamentos" href="gerenciar-equipamentos"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">construction</span>
                 <span class="text-xs font-medium text-center">Meus Equipamentos</span>
                 <span id="alert-equipamentos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Gestão Embalagens -->
-            <a href="gerenciar-embalagens"
+            <a data-card-id="gerenciar-embalagens" href="gerenciar-embalagens"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">inventory</span>
                 <span class="text-xs font-medium text-center">Minhas Embalagens</span>
@@ -283,60 +392,66 @@
             </a>
             
               <!-- Lista de Compras -->
-              <a href="lista-compras"
+              <a data-card-id="lista-compras" href="lista-compras"
                     class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                     <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary text-[#0F0F0F] uppercase tracking-wider">Novo</span>
                   <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">shopping_cart_checkout</span>
                   <span class="text-xs font-medium text-center">Lista de Compras</span>
               </a>
               <!-- Receitas -->
-            <a href="receitas"
+            <a data-card-id="receitas" href="receitas"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">menu_book</span>
                 <span class="text-xs font-medium text-center">Minhas Receitas</span>
                 <span id="alert-receitas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Produtos -->
-            <a href="gestao-produtos"
+            <a data-card-id="gestao-produtos" href="gestao-produtos"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">shopping_basket</span>
                 <span class="text-xs font-medium text-center">Meus Produtos</span>
                 <span id="alert-produtos" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
             <!-- Combos -->
-            <a href="combos"
+            <a data-card-id="combos" href="combos"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">layers</span>
                 <span class="text-xs font-medium text-center">Meus Combos</span>
             </a>
             <!-- Precificação -->
-            <a href="precificacao-marketplace"
+            <a data-card-id="precificacao-marketplace" href="precificacao-marketplace"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">storefront</span>
                 <span class="text-xs font-medium text-center">Precificação</span>
             </a>
             <!-- Despesas -->
-            <a href="despesas"
+            <a data-card-id="despesas" href="despesas"
                 class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">receipt_long</span>
                 <span class="text-xs font-medium text-center">Minhas Despesas</span>
                 <span id="alert-despesas" style="display:none;font-size:0.55rem;font-weight:700;color:#fbbf24;margin-top:0.3rem;text-align:center;line-height:1.2">Cadastrar<br>dados</span>
             </a>
+            <!-- Vendas do Cliente -->
+            <a data-card-id="registrar-vendas" href="registrar-vendas"
+                class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
+                <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">point_of_sale</span>
+                <span class="text-xs font-medium text-center">Minhas Vendas</span>
+            </a>
             <!-- Ponto de Equilíbrio -->
-            <a href="ponto-equilibrio"
+            <a data-card-id="ponto-equilibrio" href="ponto-equilibrio"
                 class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">balance</span>
                 <span class="text-xs font-medium text-center">Equilíbrio</span>
             </a>
             <!-- Configurações -->
               <!-- Admin (Somente Admin) -->
-              <a href="admin" data-role="admin" style="display: none; border-color: rgba(251,146,60,.3) !important;"
+              <a data-card-id="admin" href="admin" data-role="admin" style="display: none; border-color: rgba(251,146,60,.3) !important;"
                   class="nav-card group relative flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                   <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-400 text-[#0F0F0F] uppercase tracking-wider">Admin</span>
                   <span class="material-symbols-outlined text-3xl mb-2 text-orange-400 group-hover:text-orange-500 transition-colors">shield</span>
                   <span class="text-xs font-medium text-center text-orange-400">Painel Admin</span>
               </a>
-            <a href="configuracoes"
+            <a data-card-id="configuracoes" href="configuracoes"
                 class="nav-card group flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark">
                 <span class="material-symbols-outlined text-3xl mb-2 text-slate-400 group-hover:text-primary transition-colors">settings</span>
                 <span class="text-xs font-medium text-center">Configurações</span>
@@ -351,7 +466,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Acesso Vitalício -->
-            <a href="acesso-vitalicio"
+            <a data-card-id="acesso-vitalicio" href="acesso-vitalicio"
                 id="card-acesso-vitalicio"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(167,139,250,.02));border-color:rgba(167,139,250,.2);display:none">
@@ -368,7 +483,7 @@
                 <span class="material-symbols-outlined" style="color:#a78bfa;opacity:.5">chevron_right</span>
             </a>
             <!-- Extrato de Vendas -->
-            <a href="extrato-vendas"
+            <a data-card-id="extrato-vendas" href="extrato-vendas"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
@@ -383,6 +498,22 @@
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
+            <!-- Registrar Vendas -->
+            <a data-card-id="registrar-vendas" href="registrar-vendas"
+                class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
+                style="background:linear-gradient(135deg,rgba(52,211,153,.06),rgba(52,211,153,.02));border-color:rgba(52,211,153,.2);">
+                <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.1);color:#34d399;">
+                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">point_of_sale</span>
+                </div>
+                <div class="flex-1">
+                    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                        <h4 class="text-sm font-bold">Registrar Vendas</h4>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Novo</span>
+                    </div>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Registre as vendas dos seus produtos</p>
+                </div>
+                <span class="material-symbols-outlined" style="color:#34d399;opacity:.5">chevron_right</span>
+            </a>
         </div>
     </section>
 
@@ -394,7 +525,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <!-- Indique e Ganhe -->
-            <a href="indique-ganhe"
+            <a data-card-id="indique-ganhe" href="indique-ganhe"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
@@ -410,7 +541,7 @@
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
             <!-- Meus Ganhos -->
-            <a href="meus-ganhos"
+            <a data-card-id="meus-ganhos" href="meus-ganhos"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(251,191,36,.02));border-color:rgba(251,191,36,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(251,191,36,.1);color:#fbbf24;">
@@ -426,7 +557,7 @@
                 <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
             </a>
             <!-- Meu Perfil -->
-            <a href="perfil"
+            <a data-card-id="perfil" href="perfil"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark group">
                 <div class="p-2 rounded-lg bg-slate-100 dark:bg-background-dark text-slate-400 group-hover:text-primary transition-colors">
                     <span class="material-symbols-outlined">account_circle</span>
@@ -438,7 +569,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Como Usar -->
-            <a href="como-usar"
+            <a data-card-id="como-usar" href="como-usar"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(248,113,113,.06),rgba(248,113,113,.02));border-color:rgba(248,113,113,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
@@ -454,7 +585,7 @@
                 <span class="material-symbols-outlined" style="color:#f87171;opacity:.5">chevron_right</span>
             </a>
             <!-- Feedback / Fale Conosco -->
-            <a href="meus-feedbacks"
+            <a data-card-id="meus-feedbacks" href="meus-feedbacks"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group text-left w-full"
                 style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(139,92,246,.02));border-color:rgba(139,92,246,.2);cursor:pointer;text-decoration:none">
                 <div class="p-2 rounded-lg" style="background:rgba(139,92,246,.1);color:#a78bfa;">
@@ -470,7 +601,7 @@
                 <span class="material-symbols-outlined" style="color:#a78bfa;opacity:.5">chevron_right</span>
             </a>
             <!-- Blog de Artigos -->
-            <a href="blog"
+            <a data-card-id="blog" href="blog"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(244,114,182,.06),rgba(244,114,182,.02));border-color:rgba(244,114,182,.2);">
                 <div class="p-2 rounded-lg" style="background:rgba(244,114,182,.1);color:#f472b6;">
@@ -592,30 +723,29 @@
                 }
             } catch(_) {}
 
-            // Buscar saldo do afiliado para exibir no badge
+            // Buscar ganhos do afiliado para exibir no badge
             try {
                 const { data: afiliado } = await sb
                     .from('afiliados')
-                    .select('total_ganhos')
+                    .select('id')
                     .eq('user_id', session.user.id)
                     .single();
 
                 if (afiliado) {
-                    const { data: saques } = await sb
-                        .from('saques_afiliado')
-                        .select('valor, status')
-                        .eq('user_id', session.user.id);
+                    const { data: indicacoes } = await sb
+                        .from('indicacoes')
+                        .select('comissao, converteu')
+                        .eq('afiliado_id', afiliado.id);
 
-                    const ganhos = parseFloat(afiliado.total_ganhos || 0);
-                    let sacado = 0;
-                    (saques || []).forEach(s => {
-                        if (s.status !== 'cancelado') sacado += parseFloat(s.valor || 0);
+                    let ganhos = 0;
+                    (indicacoes || []).forEach(ind => {
+                        if (ind.converteu) ganhos += parseFloat(ind.comissao || 0);
                     });
-                    const saldo = Math.max(0, ganhos - sacado);
+
                     const badge = document.getElementById('badge-saldo-idx');
                     if (badge) {
-                        badge.textContent = 'R$ ' + saldo.toFixed(2).replace('.', ',');
-                        if (saldo > 0) {
+                        badge.textContent = 'Ganhos: R$ ' + ganhos.toFixed(2).replace('.', ',');
+                        if (ganhos > 0) {
                             badge.style.background = 'rgba(52,211,153,.15)';
                             badge.style.color = '#34d399';
                             badge.style.borderColor = 'rgba(52,211,153,.3)';
@@ -664,6 +794,48 @@
                 if (doneCount >= 7) {
                     const bannerGuia = document.getElementById('banner-guia');
                     if (bannerGuia) bannerGuia.style.display = 'none';
+                }
+
+                // --- 4-Step Wizard ---
+                try {
+                    let wizProg = 0;
+                    const wizSteps = [false, false, false, false];
+                    
+                    if (countInsum > 0) { wizSteps[0] = true; wizProg += 25; }
+                    if (countRecei > 0) { wizSteps[1] = true; wizProg += 25; }
+                    if (countProdu > 0) {
+                        wizSteps[2] = true; wizProg += 25;
+                        const { data: prods } = await sb.from('produtos').select('preco').eq('user_id', uid).limit(50);
+                        if (prods && prods.some(p => p.preco > 0)) {
+                            wizSteps[3] = true; wizProg += 25;
+                        }
+                    }
+
+                    if (wizProg < 100) {
+                        document.getElementById('onboarding-wizard').style.display = 'block';
+                        setTimeout(() => {
+                            document.getElementById('wizard-prog-bar').style.width = wizProg + '%';
+                        }, 100);
+                        document.getElementById('wizard-prog-text').textContent = wizProg + '%';
+
+                        for (let i = 0; i < 4; i++) {
+                            const idx = i + 1;
+                            if (wizSteps[i]) {
+                                const iconEl = document.getElementById(`wizard-step-${idx}-icon`);
+                                const titleEl = document.getElementById(`wizard-step-${idx}-title`);
+                                if (iconEl) {
+                                    iconEl.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>';
+                                    iconEl.className = "w-8 h-8 rounded-full flex items-center justify-center bg-[#22c55e] text-white border border-[#22c55e]";
+                                }
+                                if (titleEl) {
+                                    titleEl.style.textDecoration = 'line-through';
+                                    titleEl.style.opacity = '0.5';
+                                }
+                            }
+                        }
+                    }
+                } catch(we) {
+                    console.warn('[ReceitasX] Erro no wizard:', we);
                 }
             } catch(_) {}
         } catch (e) {
@@ -1067,6 +1239,303 @@
         document.getElementById('oferta-afiliado-modal').style.display = 'none';
         sessionStorage.setItem('afiliado_offer_shown', 'true');
     }
+</script>
+
+
+<!-- Modal Personalizar Menu -->
+<style>
+    #custom-menu-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        z-index: 99999; display: flex; align-items: flex-end; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    #custom-menu-overlay.open { opacity: 1; pointer-events: auto; }
+    
+    #custom-menu-modal {
+        background: #f8fafc; width: 100%; max-width: 500px;
+        border-radius: 24px 24px 0 0; padding: 1.5rem;
+        transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; max-height: 90vh;
+    }
+    .dark #custom-menu-modal { background: #121212; border: 1px solid #2A2A2A; border-bottom: none; }
+    
+    #custom-menu-overlay.open #custom-menu-modal { transform: translateY(0); }
+    
+    .cm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .cm-title { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+    .dark .cm-title { color: #f1f5f9; }
+    
+    .cm-btn-desmarcar { 
+        background: #ffe4e6; color: #be123c; font-size: 0.8rem; font-weight: 600;
+        padding: 0.35rem 0.75rem; border-radius: 9999px; border: none; cursor: pointer;
+    }
+    .dark .cm-btn-desmarcar { background: rgba(225,29,72,0.15); color: #fb7185; }
+    
+    .cm-subtitle { text-align: center; font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; }
+    
+    .cm-list { overflow-y: auto; flex: 1; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem; }
+    .cm-list::-webkit-scrollbar { width: 4px; }
+    .cm-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .cm-list::-webkit-scrollbar-thumb { background: #334155; }
+    
+    .cm-item {
+        background: #ffffff; border-radius: 12px; padding: 0.75rem 1rem;
+        display: flex; align-items: center; gap: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
+    }
+    .dark .cm-item { background: #1e1e1e; border-color: #2A2A2A; box-shadow: none; }
+    
+    .cm-drag { color: #cbd5e1; cursor: grab; display: flex; align-items: center; }
+    .dark .cm-drag { color: #475569; }
+    .cm-icon { color: #be123c; display: flex; align-items: center; justify-content: center; width: 24px; }
+    .dark .cm-icon { color: #fb7185; }
+    
+    .cm-name { flex: 1; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dark .cm-name { color: #e2e8f0; }
+    
+    /* Toggle Switch */
+    .cm-switch {
+        position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0;
+    }
+    .cm-switch input { opacity: 0; width: 0; height: 0; }
+    .cm-slider {
+        position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #e2e8f0; transition: .3s; border-radius: 34px;
+    }
+    .dark .cm-slider { background-color: #334155; }
+    .cm-slider:before {
+        position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+        background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .cm-slider { background-color: #be123c; }
+    input:checked + .cm-slider:before { transform: translateX(20px); }
+    
+    .cm-btn-concluir {
+        background: #be123c; color: white; border: none; padding: 0.85rem;
+        border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer;
+        width: 100%; transition: background 0.2s;
+    }
+    .cm-btn-concluir:hover { background: #9f1239; }
+    
+    @media (min-width: 640px) {
+        #custom-menu-overlay { align-items: center; }
+        #custom-menu-modal { border-radius: 24px; border-bottom: 1px solid #2A2A2A; }
+    }
+
+    /* Estilos do grid customizado responsivo para cards diferentes */
+    #custom-user-grid {
+        display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;
+    }
+    .custom-square {
+        width: calc(50% - 0.375rem);
+    }
+    .custom-wide {
+        width: 100%;
+    }
+    @media(min-width: 640px){
+        .custom-square { width: calc(25% - 0.5625rem); }
+        .custom-wide { width: calc(50% - 0.375rem); }
+    }
+    @media(min-width: 1024px){
+        .custom-square { width: calc(16.666% - 0.625rem); }
+        .custom-wide { width: calc(25% - 0.5625rem); }
+    }
+</style>
+
+<div id="custom-menu-overlay" onclick="if(event.target===this) closeCustomMenuModal()">
+    <div id="custom-menu-modal">
+        <div class="cm-header">
+            <span class="cm-title">Personalizar Menu</span>
+            <button class="cm-btn-desmarcar" onclick="desmarcarTudo()">Desmarcar tudo</button>
+        </div>
+        <div class="cm-subtitle">Segure e arraste para reordenar</div>
+        
+        <div class="cm-list" id="custom-menu-list">
+            <!-- Items inseridos via JS -->
+        </div>
+        
+        <div style="display:flex;gap:0.5rem">
+            <button class="cm-btn-concluir" style="background:transparent;color:#64748b;border:1px solid #e2e8f0;width:30%" onclick="resetCustomMenu()">Restaurar</button>
+            <button class="cm-btn-concluir" style="width:70%" onclick="saveCustomMenu()">Concluir</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let sortableMenu = null;
+    let allCardsData = [];
+
+    function extractCardsData() {
+        const cards = document.querySelectorAll('a.nav-card[data-card-id]');
+        const data = [];
+        cards.forEach(card => {
+            const id = card.getAttribute('data-card-id');
+            // Ignorar banners e cards dinâmicos que não devem ser configuráveis
+            if (['guia-configuracao', 'checkout.html?ref=DESCONTO60', '#', 'receitas-geladinho'].includes(id)) return;
+            if (card.id && card.id.startsWith('banner-')) return;
+            
+            let titleEl = card.querySelector('h4');
+            if (!titleEl) {
+                const spans = Array.from(card.querySelectorAll('span'));
+                titleEl = spans.find(s => s.classList.contains('text-center') && s.innerText.trim() !== '');
+            }
+            
+            const iconEl = card.querySelector('.material-symbols-outlined');
+            if (id && titleEl && iconEl) {
+                let color = '#be123c';
+                const iconContainer = iconEl.parentElement;
+                
+                if (iconContainer.style && iconContainer.style.color) {
+                    color = iconContainer.style.color;
+                } else if (iconEl.classList.contains('text-primary')) {
+                    color = '#25f4f4';
+                } else if (iconEl.classList.contains('text-slate-400')) {
+                    color = '#94a3b8';
+                }
+                
+                data.push({
+                    id: id,
+                    title: titleEl.innerText,
+                    icon: iconEl.innerText,
+                    color: color,
+                    el: card
+                });
+            }
+        });
+        return data;
+    }
+
+    function openCustomMenuModal() {
+        const listEl = document.getElementById('custom-menu-list');
+        listEl.innerHTML = '';
+        allCardsData = extractCardsData();
+        
+        let prefs = null;
+        try { prefs = JSON.parse(localStorage.getItem('receitasx_user_cards')); } catch(e){}
+
+        let orderedData = [];
+        if (prefs && Array.isArray(prefs)) {
+            prefs.forEach(p => {
+                const found = allCardsData.find(c => c.id === p.id);
+                if (found) {
+                    found.visible = p.visible;
+                    orderedData.push(found);
+                }
+            });
+            allCardsData.forEach(c => {
+                if (!orderedData.find(o => o.id === c.id)) {
+                    c.visible = true;
+                    orderedData.push(c);
+                }
+            });
+        } else {
+            orderedData = allCardsData.map(c => ({...c, visible: true}));
+        }
+
+        orderedData.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'cm-item';
+            item.dataset.id = c.id;
+            item.innerHTML = `
+                <div class="cm-drag">
+                    <span class="material-symbols-outlined" style="font-size:1.2rem">drag_indicator</span>
+                </div>
+                <div class="cm-icon" style="color:${c.color}">
+                    <span class="material-symbols-outlined" style="font-size:1.2rem;font-variation-settings:'FILL' 1">${c.icon}</span>
+                </div>
+                <div class="cm-name">${c.title}</div>
+                <label class="cm-switch">
+                    <input type="checkbox" class="cm-toggle" ${c.visible ? 'checked' : ''}>
+                    <span class="cm-slider"></span>
+                </label>
+            `;
+            listEl.appendChild(item);
+        });
+
+        document.getElementById('custom-menu-overlay').classList.add('open');
+
+        if (!sortableMenu) {
+            sortableMenu = new Sortable(listEl, {
+                animation: 150,
+                handle: '.cm-drag',
+                ghostClass: 'opacity-50'
+            });
+        }
+    }
+
+    function closeCustomMenuModal() {
+        document.getElementById('custom-menu-overlay').classList.remove('open');
+    }
+
+    function desmarcarTudo() {
+        document.querySelectorAll('#custom-menu-list .cm-toggle').forEach(cb => cb.checked = false);
+    }
+
+    function saveCustomMenu() {
+        const items = document.querySelectorAll('#custom-menu-list .cm-item');
+        const prefs = [];
+        items.forEach(item => {
+            prefs.push({
+                id: item.dataset.id,
+                visible: item.querySelector('.cm-toggle').checked
+            });
+        });
+        localStorage.setItem('receitasx_user_cards', JSON.stringify(prefs));
+        closeCustomMenuModal();
+        applyCustomMenu(prefs);
+    }
+    
+    function resetCustomMenu() {
+        localStorage.removeItem('receitasx_user_cards');
+        closeCustomMenuModal();
+        location.reload();
+    }
+
+    function applyCustomMenu(prefs) {
+        if (!prefs || !Array.isArray(prefs)) return;
+        
+        const p6 = document.querySelector('.p-6.space-y-8');
+        if (!p6) return;
+        
+        // Hide all original sections except the wizard
+        document.querySelectorAll('section').forEach(el => {
+            if (el.id !== 'onboarding-wizard') {
+                el.style.display = 'none';
+            }
+        });
+        
+        // Custom grid
+        let customGrid = document.getElementById('custom-user-grid');
+        if (!customGrid) {
+            customGrid = document.createElement('div');
+            customGrid.id = 'custom-user-grid';
+            p6.appendChild(customGrid);
+        } else {
+            customGrid.innerHTML = '';
+        }
+        
+        prefs.forEach(p => {
+            const card = document.querySelector(`a.nav-card[data-card-id="${p.id}"]`);
+            if (card) {
+                if (p.visible) {
+                    card.style.display = '';
+                    const isSquare = card.classList.contains('flex-col');
+                    card.classList.add(isSquare ? 'custom-square' : 'custom-wide');
+                    customGrid.appendChild(card);
+                } else {
+                    card.style.display = 'none';
+                    customGrid.appendChild(card);
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const prefs = JSON.parse(localStorage.getItem('receitasx_user_cards'));
+            if (prefs) applyCustomMenu(prefs);
+        } catch(e){}
+    });
 </script>
 
 </body>
