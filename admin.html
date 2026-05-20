@@ -128,6 +128,7 @@
             box-shadow: 0 2px 8px rgba(239,68,68,.5);
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
@@ -144,7 +145,15 @@
               onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
               <span class="material-symbols-outlined" style="font-size:1.15rem">home</span>
           </button>
-          <!-- Sino de notificações -->
+          
+        <!-- Personalizar Menu -->
+        <button onclick="openCustomMenuModal()" title="Personalizar Menu"
+            style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
+            onmouseover="this.style.color='#e11d48';this.style.borderColor='rgba(225,29,72,.4)'"
+            onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+            <span class="material-symbols-outlined" style="font-size:1.15rem">tune</span>
+        </button>
+        <!-- Sino de notificações -->
         <button id="sino-btn" onclick="toggleNotifPanel()" title="Notificações"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
@@ -184,7 +193,7 @@
         <div class="section-divider"><div class="sec-icon" style="background:rgba(37,244,244,.1)"><span class="material-symbols-outlined" style="color:#25f4f4">analytics</span></div><h3>Métricas & Relatórios</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Analytics -->
-            <a href="admin-analytics" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-analytics" data-card-id="admin-analytics" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">analytics</span>
                 </div>
@@ -195,7 +204,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Sessões de Acesso -->
-            <a href="admin-sessoes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-sessoes" data-card-id="admin-sessoes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.1);color:#34d399;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">schedule</span>
                 </div>
@@ -206,7 +215,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Visão de Progresso -->
-            <a href="admin-progresso" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-progresso" data-card-id="admin-progresso" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">query_stats</span>
                 </div>
@@ -217,7 +226,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Cliques de Afiliados -->
-            <a href="admin-cliques-afiliados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-cliques-afiliados" data-card-id="admin-cliques-afiliados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
                 </div>
@@ -233,7 +242,7 @@
         <div class="section-divider"><div class="sec-icon" style="background:rgba(251,146,60,.1)"><span class="material-symbols-outlined" style="color:#fb923c">group</span></div><h3>Usuários & Contas</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Gestão de Usuários -->
-            <a href="admin-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-usuarios" data-card-id="admin-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">manage_accounts</span>
                 </div>
@@ -249,7 +258,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Monitorar Configurações -->
-            <a href="admin-usuarios-config" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-usuarios-config" data-card-id="admin-usuarios-config" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">settings_account_box</span>
                 </div>
@@ -260,7 +269,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Administrar Acessos -->
-            <a href="admin-vitalicio" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-vitalicio" data-card-id="admin-vitalicio" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">key</span>
                 </div>
@@ -271,7 +280,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Email Marketing -->
-            <a href="admin-emails" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-emails" data-card-id="admin-emails" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(56,189,248,.1);color:#38bdf8;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">mail</span>
                 </div>
@@ -287,7 +296,7 @@
         <div class="section-divider"><div class="sec-icon" style="background:rgba(52,211,153,.1)"><span class="material-symbols-outlined" style="color:#34d399">account_balance</span></div><h3>Financeiro</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Pedidos -->
-            <a href="admin-pedidos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-pedidos" data-card-id="admin-pedidos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
                 </div>
@@ -298,7 +307,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Histórico de Pagamentos -->
-            <a href="admin-historico-pagamentos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-historico-pagamentos" data-card-id="admin-historico-pagamentos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">history</span>
                 </div>
@@ -309,7 +318,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Faturamento de Afiliados -->
-            <a href="admin-faturamento-afiliados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-faturamento-afiliados" data-card-id="admin-faturamento-afiliados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">payments</span>
                 </div>
@@ -320,7 +329,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Gerenciar Cupons -->
-            <a href="admin-cupons" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-cupons" data-card-id="admin-cupons" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(167,139,250,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">confirmation_number</span>
                 </div>
@@ -331,7 +340,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Ver Reembolsos -->
-            <a href="admin-reembolsos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-reembolsos" data-card-id="admin-reembolsos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">currency_exchange</span>
                 </div>
@@ -344,7 +353,7 @@
         </div>
 
             <!-- Faturamento de Clientes -->
-            <a href="admin-vendas-clientes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-vendas-clientes" data-card-id="admin-vendas-clientes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(52,211,153,.1);color:#34d399;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">point_of_sale</span>
                 </div>
@@ -362,7 +371,7 @@
         <div class="section-divider"><div class="sec-icon" style="background:rgba(56,189,248,.1)"><span class="material-symbols-outlined" style="color:#38bdf8">database</span></div><h3>Conteúdo & Dados</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Receitas dos Usuários -->
-            <a href="admin-receitas-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-receitas-usuarios" data-card-id="admin-receitas-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">menu_book</span>
                 </div>
@@ -373,7 +382,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Ingredientes dos Usuários -->
-            <a href="admin-insumos-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-insumos-usuarios" data-card-id="admin-insumos-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">inventory_2</span>
                 </div>
@@ -384,7 +393,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Embalagens dos Usuários -->
-            <a href="admin-embalagens-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-embalagens-usuarios" data-card-id="admin-embalagens-usuarios" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">package_2</span>
                 </div>
@@ -395,7 +404,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Produtos Vinculados -->
-            <a href="admin-produtos-vinculados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-produtos-vinculados" data-card-id="admin-produtos-vinculados" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">link</span>
                 </div>
@@ -406,7 +415,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Vitrine TikTok -->
-            <a href="admin-vitrine-tiktok" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-vitrine-tiktok" data-card-id="admin-vitrine-tiktok" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(37,244,244,.1);color:#25f4f4;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">storefront</span>
                 </div>
@@ -422,7 +431,7 @@
         <div class="section-divider"><div class="sec-icon" style="background:rgba(167,139,250,.1)"><span class="material-symbols-outlined" style="color:#a78bfa">settings</span></div><h3>Configurações & Comunicação</h3></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <!-- Configurações do Sistema -->
-            <a href="admin-configuracoes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-configuracoes" data-card-id="admin-configuracoes" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">admin_panel_settings</span>
                 </div>
@@ -433,7 +442,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Avisos aos Usuários -->
-            <a href="admin-avisos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-avisos" data-card-id="admin-avisos" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(251,146,60,.1);color:#fb923c;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">campaign</span>
                 </div>
@@ -444,7 +453,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Feedbacks dos Usuários -->
-            <a href="admin-feedbacks" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-feedbacks" data-card-id="admin-feedbacks" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(139,92,246,.1);color:#a78bfa;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">forum</span>
                 </div>
@@ -458,7 +467,7 @@
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
             <!-- Gerenciar Tutoriais -->
-            <a href="admin-tutoriais" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
+            <a href="admin-tutoriais" data-card-id="admin-tutoriais" class="nav-card nav-card-admin flex items-center gap-4 p-4 rounded-xl border group">
                 <div class="p-2 rounded-lg" style="background:rgba(248,113,113,.1);color:#f87171;">
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">video_library</span>
                 </div>
@@ -967,5 +976,271 @@
     });
     </script>
 </div>
+
+<!-- Modal Personalizar Menu -->
+<style>
+    #custom-menu-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        z-index: 99999; display: flex; align-items: flex-end; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    #custom-menu-overlay.open { opacity: 1; pointer-events: auto; }
+    
+    #custom-menu-modal {
+        background: #f8fafc; width: 100%; max-width: 500px;
+        border-radius: 24px 24px 0 0; padding: 1.5rem;
+        transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; max-height: 90vh;
+    }
+    .dark #custom-menu-modal { background: #121212; border: 1px solid #2A2A2A; border-bottom: none; }
+    
+    #custom-menu-overlay.open #custom-menu-modal { transform: translateY(0); }
+    
+    .cm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .cm-title { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+    .dark .cm-title { color: #f1f5f9; }
+    
+    .cm-btn-desmarcar { 
+        background: #ffe4e6; color: #be123c; font-size: 0.8rem; font-weight: 600;
+        padding: 0.35rem 0.75rem; border-radius: 9999px; border: none; cursor: pointer;
+    }
+    .dark .cm-btn-desmarcar { background: rgba(225,29,72,0.15); color: #fb7185; }
+    
+    .cm-subtitle { text-align: center; font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; }
+    
+    .cm-list { overflow-y: auto; flex: 1; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem; }
+    .cm-list::-webkit-scrollbar { width: 4px; }
+    .cm-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .cm-list::-webkit-scrollbar-thumb { background: #334155; }
+    
+    .cm-item {
+        background: #ffffff; border-radius: 12px; padding: 0.75rem 1rem;
+        display: flex; align-items: center; gap: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
+    }
+    .dark .cm-item { background: #1e1e1e; border-color: #2A2A2A; box-shadow: none; }
+    
+    .cm-drag { color: #cbd5e1; cursor: grab; display: flex; align-items: center; }
+    .dark .cm-drag { color: #475569; }
+    .cm-icon { color: #be123c; display: flex; align-items: center; justify-content: center; width: 24px; }
+    .dark .cm-icon { color: #fb7185; }
+    
+    .cm-name { flex: 1; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dark .cm-name { color: #e2e8f0; }
+    
+    /* Toggle Switch */
+    .cm-switch {
+        position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0;
+    }
+    .cm-switch input { opacity: 0; width: 0; height: 0; }
+    .cm-slider {
+        position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #e2e8f0; transition: .3s; border-radius: 34px;
+    }
+    .dark .cm-slider { background-color: #334155; }
+    .cm-slider:before {
+        position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+        background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .cm-slider { background-color: #be123c; }
+    input:checked + .cm-slider:before { transform: translateX(20px); }
+    
+    .cm-btn-concluir {
+        background: #be123c; color: white; border: none; padding: 0.85rem;
+        border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer;
+        width: 100%; transition: background 0.2s;
+    }
+    .cm-btn-concluir:hover { background: #9f1239; }
+    
+    @media (min-width: 640px) {
+        #custom-menu-overlay { align-items: center; }
+        #custom-menu-modal { border-radius: 24px; border-bottom: 1px solid #2A2A2A; }
+    }
+</style>
+
+<div id="custom-menu-overlay" onclick="if(event.target===this) closeCustomMenuModal()">
+    <div id="custom-menu-modal">
+        <div class="cm-header">
+            <span class="cm-title">Personalizar Menu</span>
+            <button class="cm-btn-desmarcar" onclick="desmarcarTudo()">Desmarcar tudo</button>
+        </div>
+        <div class="cm-subtitle">Segure e arraste para reordenar</div>
+        
+        <div class="cm-list" id="custom-menu-list">
+            <!-- Items inseridos via JS -->
+        </div>
+        
+        <div style="display:flex;gap:0.5rem">
+            <button class="cm-btn-concluir" style="background:transparent;color:#64748b;border:1px solid #e2e8f0;width:30%" onclick="resetCustomMenu()">Restaurar</button>
+            <button class="cm-btn-concluir" style="width:70%" onclick="saveCustomMenu()">Concluir</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let sortableMenu = null;
+    let allCardsData = [];
+
+    function extractCardsData() {
+        const cards = document.querySelectorAll('a.nav-card-admin[data-card-id]');
+        const data = [];
+        cards.forEach(card => {
+            const id = card.getAttribute('data-card-id');
+            const titleEl = card.querySelector('h4');
+            const iconEl = card.querySelector('.material-symbols-outlined');
+            if (id && titleEl && iconEl) {
+                // Get the computed background color of the icon container if possible, or fallback to pink
+                const iconContainer = iconEl.parentElement;
+                let color = iconContainer.style.color || '#be123c';
+                
+                data.push({
+                    id: id,
+                    title: titleEl.innerText,
+                    icon: iconEl.innerText,
+                    color: color,
+                    el: card
+                });
+            }
+        });
+        return data;
+    }
+
+    function openCustomMenuModal() {
+        const listEl = document.getElementById('custom-menu-list');
+        listEl.innerHTML = '';
+        allCardsData = extractCardsData();
+        
+        // Read saved prefs
+        let prefs = null;
+        try {
+            prefs = JSON.parse(localStorage.getItem('receitasx_admin_cards'));
+        } catch(e){}
+
+        // If we have prefs, order the allCardsData based on prefs
+        let orderedData = [];
+        if (prefs && Array.isArray(prefs)) {
+            prefs.forEach(p => {
+                const found = allCardsData.find(c => c.id === p.id);
+                if (found) {
+                    found.visible = p.visible;
+                    orderedData.push(found);
+                }
+            });
+            // Add any missing cards at the bottom (new features)
+            allCardsData.forEach(c => {
+                if (!orderedData.find(o => o.id === c.id)) {
+                    c.visible = true;
+                    orderedData.push(c);
+                }
+            });
+        } else {
+            orderedData = allCardsData.map(c => ({...c, visible: true}));
+        }
+
+        // Render list
+        orderedData.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'cm-item';
+            item.dataset.id = c.id;
+            item.innerHTML = `
+                <div class="cm-drag">
+                    <span class="material-symbols-outlined" style="font-size:1.2rem">drag_indicator</span>
+                </div>
+                <div class="cm-icon" style="color:${c.color}">
+                    <span class="material-symbols-outlined" style="font-size:1.2rem;font-variation-settings:'FILL' 1">${c.icon}</span>
+                </div>
+                <div class="cm-name">${c.title}</div>
+                <label class="cm-switch">
+                    <input type="checkbox" class="cm-toggle" ${c.visible ? 'checked' : ''}>
+                    <span class="cm-slider"></span>
+                </label>
+            `;
+            listEl.appendChild(item);
+        });
+
+        document.getElementById('custom-menu-overlay').classList.add('open');
+
+        if (!sortableMenu) {
+            sortableMenu = new Sortable(listEl, {
+                animation: 150,
+                handle: '.cm-drag',
+                ghostClass: 'opacity-50'
+            });
+        }
+    }
+
+    function closeCustomMenuModal() {
+        document.getElementById('custom-menu-overlay').classList.remove('open');
+    }
+
+    function desmarcarTudo() {
+        document.querySelectorAll('#custom-menu-list .cm-toggle').forEach(cb => cb.checked = false);
+    }
+
+    function saveCustomMenu() {
+        const items = document.querySelectorAll('#custom-menu-list .cm-item');
+        const prefs = [];
+        items.forEach(item => {
+            prefs.push({
+                id: item.dataset.id,
+                visible: item.querySelector('.cm-toggle').checked
+            });
+        });
+        localStorage.setItem('receitasx_admin_cards', JSON.stringify(prefs));
+        closeCustomMenuModal();
+        applyCustomMenu(prefs);
+    }
+    
+    function resetCustomMenu() {
+        localStorage.removeItem('receitasx_admin_cards');
+        closeCustomMenuModal();
+        location.reload(); // Reload to restore original layout
+    }
+
+    function applyCustomMenu(prefs) {
+        if (!prefs || !Array.isArray(prefs)) return;
+        
+        const hub = document.getElementById('admin-hub');
+        
+        // Hide original section dividers and grids
+        document.querySelectorAll('.section-divider').forEach(el => el.style.display = 'none');
+        
+        // Find or create custom grid
+        let customGrid = document.getElementById('custom-admin-grid');
+        if (!customGrid) {
+            customGrid = document.createElement('div');
+            customGrid.id = 'custom-admin-grid';
+            customGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 mt-4';
+            // Insert right after the hub header (the H2 with "Administração")
+            const hubHeader = hub.querySelector('.flex.items-center');
+            hub.insertBefore(customGrid, hubHeader.nextSibling);
+        } else {
+            customGrid.innerHTML = '';
+        }
+        
+        // Move cards
+        prefs.forEach(p => {
+            const card = document.querySelector(`a[data-card-id="${p.id}"]`);
+            if (card) {
+                if (p.visible) {
+                    card.style.display = '';
+                    customGrid.appendChild(card);
+                } else {
+                    card.style.display = 'none';
+                    customGrid.appendChild(card);
+                }
+            }
+        });
+    }
+
+    // On page load, apply custom menu if exists
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const prefs = JSON.parse(localStorage.getItem('receitasx_admin_cards'));
+            if (prefs) applyCustomMenu(prefs);
+        } catch(e){}
+    });
+</script>
+
 </body>
 </html>
