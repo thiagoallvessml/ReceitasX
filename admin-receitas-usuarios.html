@@ -363,20 +363,101 @@ function renderLista(list) {
         const badgeTxt   = qtd > 0 ? `${qtd} receita${qtd > 1 ? 's' : ''}` : 'Nenhuma';
         const criadoEm   = new Date(p.created_at).toLocaleDateString('pt-BR');
 
+        let sumCustoTotal = 0, sumCustoUnit = 0, sumPrecoTotal = 0, sumPrecoUnit = 0;
+        let sumLucroTotal = 0, sumLucroUnit = 0, sumMargem = 0, sumMarkup = 0;
+        
+        if (qtd > 0) {
+            u.receitas.forEach(r => {
+                const cTot = r._custoTotal || 0;
+                const un = r._unidades || 1;
+                const pTot = r._precoTotal || 0;
+                
+                const cUni = cTot / un;
+                const pUni = pTot / un;
+                const lTot = pTot - cTot;
+                const lUni = lTot / un;
+                
+                const mg = pTot > 0 ? (lTot / pTot) * 100 : 0;
+                const mk = cTot > 0 ? (pTot / cTot) : 0;
+                
+                sumCustoTotal += cTot;
+                sumCustoUnit += cUni;
+                sumPrecoTotal += pTot;
+                sumPrecoUnit += pUni;
+                sumLucroTotal += lTot;
+                sumLucroUnit += lUni;
+                sumMargem += mg;
+                sumMarkup += mk;
+            });
+            
+            sumCustoTotal /= qtd;
+            sumCustoUnit /= qtd;
+            sumPrecoTotal /= qtd;
+            sumPrecoUnit /= qtd;
+            sumLucroTotal /= qtd;
+            sumLucroUnit /= qtd;
+            sumMargem /= qtd;
+            sumMarkup /= qtd;
+        }
+
+        const margemClsMed = sumMargem >= 35 ? 'green' : sumMargem >= 20 ? 'amber' : 'red';
+
         return `
-        <div class="user-row" id="row-${p.id}" onclick="abrirDrawer('${p.id}')">
-            <div class="avatar">${initials}</div>
-            <div class="user-info">
-                <div class="user-name">${esc(nomeCompleto)}</div>
-                <div class="user-sub">${esc(p.negocio || '—')} · Desde ${criadoEm}</div>
+        <div class="user-row" id="row-${p.id}" onclick="abrirDrawer('${p.id}')" style="flex-direction:column; align-items:stretch; gap:1rem;">
+            <div style="display:flex;align-items:center;gap:.85rem;">
+                <div class="avatar">${initials}</div>
+                <div class="user-info">
+                    <div class="user-name">${esc(nomeCompleto)}</div>
+                    <div class="user-sub">${esc(p.negocio || '—')} · Desde ${criadoEm}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0">
+                    <span class="rec-badge ${badgeClass}">
+                        <span class="material-symbols-outlined">${badgeIco}</span>
+                        ${badgeTxt}
+                    </span>
+                    <span style="font-size:.65rem;color:#475569">${esc(p.plano || 'gratuito')}</span>
+                </div>
             </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0">
-                <span class="rec-badge ${badgeClass}">
-                    <span class="material-symbols-outlined">${badgeIco}</span>
-                    ${badgeTxt}
-                </span>
-                <span style="font-size:.65rem;color:#475569">${esc(p.plano || 'gratuito')}</span>
+            
+            ${qtd > 0 ? `
+            <div style="background:#111; border:1px solid #2A2A2A; border-radius:.75rem; padding:.75rem;" onclick="event.stopPropagation()">
+                <div style="font-size:.65rem; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:.5rem; letter-spacing:.05em;">Valores Médios (${qtd} receitas)</div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Custo Total</div>
+                        <div class="fin-val">${fmtR(sumCustoTotal)}</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Custo Unit.</div>
+                        <div class="fin-val">${fmtR(sumCustoUnit)}</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Preço Total</div>
+                        <div class="fin-val cyan">${fmtR(sumPrecoTotal)}</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Preço Unit.</div>
+                        <div class="fin-val cyan">${fmtR(sumPrecoUnit)}</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Lucro Total</div>
+                        <div class="fin-val ${margemClsMed}">${fmtR(sumLucroTotal)}</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Lucro Unit.</div>
+                        <div class="fin-val ${margemClsMed}">${fmtR(sumLucroUnit)}</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Margem</div>
+                        <div class="fin-val ${margemClsMed}">${sumMargem.toFixed(1)}%</div>
+                    </div>
+                    <div class="fin-cell" style="background:#1A1A1A;">
+                        <div class="fin-lbl">Markup</div>
+                        <div class="fin-val amber">${sumMarkup.toFixed(2)}x</div>
+                    </div>
+                </div>
             </div>
+            ` : ''}
         </div>`;
     }).join('');
 }
