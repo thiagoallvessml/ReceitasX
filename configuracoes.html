@@ -326,16 +326,24 @@
                         <span>Fórmula: Salário ÷ <strong style="color:#f1f5f9">220 horas mensais</strong> <em>(padrão CLT: 44h/semana)</em>.</span>
                     </div>
 
-                    <!-- Divisor -->
-                    <p class="divider-label">Valor Final</p>
-
                     <!-- Hora trabalhada manual -->
                     <label class="field-label" for="hora-final">Valor da Hora Trabalhada (R$/hora)</label>
                     <div class="fc-prefix">
                         <span class="prefix">R$</span>
                         <input id="hora-final" type="number" min="0" step="0.01" class="fc" placeholder="0,00" />
                     </div>
-                    <p class="text-xs text-slate-500 mt-2">Este valor é usado na composição de custos das receitas (Custo Mão de Obra).</p>
+                    <p class="text-xs text-slate-500 mt-2 mb-4">Este valor é usado na composição de custos das receitas (Custo Mão de Obra).</p>
+
+                    <!-- Divisor -->
+                    <p class="divider-label" style="margin-top:.5rem;">Taxas Padrão</p>
+
+                    <!-- Taxa Cartão -->
+                    <label class="field-label" for="taxa-cartao">Taxa de Cartão (%)</label>
+                    <div style="position:relative">
+                        <input id="taxa-cartao" type="number" min="0" max="100" step="0.1" class="fc" placeholder="3" style="padding-right:2rem" />
+                        <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.85rem;font-weight:600;pointer-events:none">%</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Esta taxa padrão é aplicada em vendas nas maquininhas ou links de pagamento.</p>
                 </div>
             </section>
 
@@ -425,6 +433,7 @@ const DEFAULTS = {
     combExcel:  30,
     salario:    2800,
     horaFinal:  30,
+    taxaCartao: 3,
 };
 
 /* ─── MARKETPLACES ───────────────────────────────────────────── */
@@ -507,6 +516,7 @@ async function load() {
                     combExcel: DEFAULTS.combExcel,
                     salario:   DEFAULTS.salario,
                     horaFinal: parseFloat(data.mao_obra_hora || DEFAULTS.horaFinal),
+                    taxaCartao: DEFAULTS.taxaCartao,
                 };
                 applyConfig(cfg);
                 localStorage.setItem(KEY, JSON.stringify(cfg));
@@ -538,6 +548,7 @@ function applyConfig(cfg) {
     document.getElementById('comb-excel').value = v(cfg?.combExcel);
     document.getElementById('salario').value    = v(cfg?.salario);
     document.getElementById('hora-final').value = v(cfg?.horaFinal);
+    document.getElementById('taxa-cartao').value = v(cfg?.taxaCartao);
     calcHora();
     updateGasKg();
     renderMkts();
@@ -559,6 +570,7 @@ async function salvar() {
         combExcel: parseFloat(document.getElementById('comb-excel').value) || DEFAULTS.combExcel,
         salario:   parseFloat(document.getElementById('salario').value)    || DEFAULTS.salario,
         horaFinal: parseFloat(document.getElementById('hora-final').value) || DEFAULTS.horaFinal,
+        taxaCartao: parseFloat(document.getElementById('taxa-cartao').value) || DEFAULTS.taxaCartao,
     };
 
     // 1. Salva no localStorage (leitura rápida offline / fallback)
