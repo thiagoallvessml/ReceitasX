@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Faturamento de Clientes - Admin · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+
+        /* KPIs */
+        .kpi-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem; }
+        .kpi-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.1rem;display:flex;flex-direction:column; }
+        .kpi-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1;margin-bottom:.25rem; }
+        .kpi-lbl { font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b; }
+
+        /* Search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#475569;pointer-events:none; }
+        .search-box { width:100%;padding:.65rem 1rem .65rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.875rem;outline:none;transition:border-color .2s; }
+        .search-box:focus { border-color:rgba(37,244,244,.45); }
+
+        /* User cards */
+        .user-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.9rem;overflow:hidden;transition:border-color .2s,box-shadow .2s; }
+        .user-card:hover { border-color:rgba(37,244,244,.2);box-shadow:0 4px 24px rgba(0,0,0,.5); }
+        .user-head { display:flex;align-items:center;gap:.85rem;padding:.9rem 1rem;cursor:pointer; }
+        .user-avatar { width:2.5rem;height:2.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.88rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-email { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-stats { display:flex;align-items:center;gap:.75rem;flex-shrink:0; }
+        .stat-pill { text-align:right; }
+        .stat-pill-val { font-size:.9rem;font-weight:800; }
+        .stat-pill-lbl { font-size:.6rem;color:#64748b;font-weight:600;letter-spacing:.06em;text-transform:uppercase; }
+
+        /* Expandable vendas list */
+        .vendas-body { border-top:1px solid #2A2A2A;padding:.75rem 1rem;display:none; }
+        .vendas-body.open { display:block; }
+        .venda-row { display:flex;align-items:flex-start;gap:.65rem;padding:.6rem 0;border-bottom:1px dashed #2A2A2A; }
+        .venda-row:last-child { border-bottom:none; }
+        .venda-idx { font-size:.7rem;color:#475569;font-weight:700;width:1.2rem;flex-shrink:0;margin-top:.1rem; }
+        .venda-nome { flex:1;min-width:0; }
+        .venda-titulo { font-size:.8rem;font-weight:600;color:#f1f5f9; }
+        .venda-meta { font-size:.68rem;color:#64748b; display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.1rem; }
+        .venda-val { font-size:.85rem;font-weight:800;color:#34d399;flex-shrink:0; }
+
+        /* chips */
+        .chip { padding:.3rem .8rem;border-radius:9999px;font-size:.73rem;font-weight:600;border:1px solid #2A2A2A;background:transparent;color:#64748b;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .chip:hover  { border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .chip.active { background:#25f4f4;border-color:#25f4f4;color:#0a0a0a; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* empty */
+        .empty { display:flex;flex-direction:column;align-items:center;padding:4rem 1rem;color:#475569;gap:.5rem; }
+        .empty .material-symbols-outlined { font-size:3rem;color:#2A2A2A; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+        .user-card { animation:fadeUp .2s ease both; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined" style="color:#34d399;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">point_of_sale</span>
+        <h1 class="text-base font-semibold flex-1">Faturamento de Clientes</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined" style="font-size:.8rem">verified</span> Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid">
+        <div class="shimmer" style="height:72px"></div>
+        <div class="shimmer" style="height:72px"></div>
+        <div class="shimmer" style="height:72px"></div>
+        <div class="shimmer" style="height:72px"></div>
+    </div>
+
+    <!-- Filtros + Busca -->
+    <div style="display:flex;flex-wrap:wrap;gap:.65rem;align-items:center">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+            <span class="material-symbols-outlined ico" style="font-size:1.1rem">search</span>
+            <input type="search" id="search-input" class="search-box" placeholder="Buscar por nome ou e-mail..." oninput="renderList()" />
+        </div>
+        <div style="display:flex;gap:.4rem;flex-wrap:nowrap;overflow-x:auto">
+            <button class="chip active" data-ord="fat" onclick="setOrdem('fat',this)">Maior Faturamento</button>
+            <button class="chip" data-ord="qtd" onclick="setOrdem('qtd',this)">Mais Vendas</button>
+            <button class="chip" data-ord="rec" onclick="setOrdem('rec',this)">Mais Recente</button>
+        </div>
+    </div>
+
+    <!-- Count -->
+    <p id="count-lbl" class="text-xs text-slate-500 -mb-2"></p>
+
+    <!-- List -->
+    <div id="users-list" class="space-y-2"></div>
+
+    <!-- Empty -->
+    <div id="empty-state" class="empty hidden">
+        <span class="material-symbols-outlined">point_of_sale</span>
+        <p class="font-semibold text-slate-400">Nenhum cliente registrou vendas ainda</p>
+    </div>
+
+</main>
+
+<script>
+let todosUsuarios = [];   // [{user_id, nome, email, totalVendas, qtdVendas, ultimaVenda, vendas:[]}]
+let ordem = 'fat';
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarDados();
+})();
+
+async function carregarDados() {
+    // 1. Buscar todas as vendas
+    const { data: vendasRaw, error: errVendas } = await sb
+        .from('vendas_clientes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (errVendas) {
+        console.error(errVendas);
+        document.getElementById('kpi-grid').innerHTML = `<p class="text-red-400">Erro ao carregar vendas: ${errVendas.message}</p>`;
+        return;
+    }
+
+    // Agrupar vendas por user_id
+    const map = {};
+    (vendasRaw || []).forEach(v => {
+        if (!map[v.user_id]) {
+            map[v.user_id] = { user_id: v.user_id, totalVendas: 0, qtdVendas: 0, ultimaVenda: null, vendas: [] };
+        }
+        map[v.user_id].totalVendas += Number(v.valor_total || 0);
+        map[v.user_id].qtdVendas  += 1;
+        if (!map[v.user_id].ultimaVenda || v.data_venda > map[v.user_id].ultimaVenda) {
+            map[v.user_id].ultimaVenda = v.data_venda;
+        }
+        map[v.user_id].vendas.push(v);
+    });
+
+    // 2. Buscar dados reais (email + nome) via função admin com SECURITY DEFINER
+    //    Essa função acessa auth.users diretamente, sem bloqueio de RLS
+    const userIds = Object.keys(map);
+    let infoMap = {};
+    if (userIds.length > 0) {
+        try {
+            const { data: userInfo, error: errRpc } = await sb.rpc('admin_get_user_info', { user_ids: userIds });
+            if (errRpc) throw errRpc;
+            (userInfo || []).forEach(u => { infoMap[u.id] = u; });
+        } catch(e) {
+            // Fallback: tentar perfis normais se a função ainda não foi criada no Supabase
+            console.warn('[admin-vendas] Usando fallback de perfis:', e.message);
+            const { data: perfis } = await sb.from('perfis').select('id, nome, email');
+            (perfis || []).forEach(p => { infoMap[p.id] = p; });
+        }
+    }
+
+    todosUsuarios = Object.values(map).map(u => {
+        const info = infoMap[u.user_id] || {};
+        const uuidCurto = u.user_id.substring(0, 8) + '...';
+        return {
+            ...u,
+            nome:  info.nome  || 'Usuário sem nome',
+            email: info.email || `ID: ${uuidCurto}`
+        };
+    });
+
+    // KPIs globais
+    const totalGeral = todosUsuarios.reduce((s, u) => s + u.totalVendas, 0);
+    const totalQtd   = todosUsuarios.reduce((s, u) => s + u.qtdVendas, 0);
+    const tmedio     = todosUsuarios.length ? totalGeral / todosUsuarios.length : 0;
+
+    document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+            <div class="kpi-val" style="color:#34d399">${fmtR(totalGeral)}</div>
+            <div class="kpi-lbl">Faturamento Total</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-val" style="color:#25f4f4">${todosUsuarios.length}</div>
+            <div class="kpi-lbl">Usuários usando</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-val" style="color:#a78bfa">${totalQtd}</div>
+            <div class="kpi-lbl">Vendas Registradas</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-val" style="color:#fbbf24">${fmtR(tmedio)}</div>
+            <div class="kpi-lbl">Fat. Médio / Usuário</div>
+        </div>
+    `;
+
+    renderList();
+}
+
+function setOrdem(ord, btn) {
+    ordem = ord;
+    document.querySelectorAll('.chip[data-ord]').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+}
+
+function renderList() {
+    const q = (document.getElementById('search-input').value || '').toLowerCase();
+    let lista = todosUsuarios.filter(u =>
+        u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+
+    if (ordem === 'fat') lista.sort((a,b) => b.totalVendas - a.totalVendas);
+    else if (ordem === 'qtd') lista.sort((a,b) => b.qtdVendas - a.qtdVendas);
+    else if (ordem === 'rec') lista.sort((a,b) => (b.ultimaVenda||'').localeCompare(a.ultimaVenda||''));
+
+    const container = document.getElementById('users-list');
+    const empty = document.getElementById('empty-state');
+    document.getElementById('count-lbl').textContent = `${lista.length} usuário(s) encontrado(s)`;
+
+    if (!lista.length) {
+        container.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+
+    container.innerHTML = lista.map((u, idx) => {
+        const cor = avatarColor(u.user_id);
+        const ini = (u.nome || u.email || '?')[0].toUpperCase();
+        const tmedio = u.qtdVendas > 0 ? (u.totalVendas / u.qtdVendas) : 0;
+        const ultData = u.ultimaVenda ? u.ultimaVenda.split('-').reverse().join('/') : '—';
+
+        // Inner vendas
+        let vendasHTML = '';
+        const vendasOrdenadas = [...u.vendas].sort((a,b) => (b.data_venda||'').localeCompare(a.data_venda||''));
+        vendasOrdenadas.forEach((v, i) => {
+            let itens = [];
+            try { itens = typeof v.itens === 'string' ? JSON.parse(v.itens) : (v.itens || []); } catch(e) {}
+            const resumoItens = itens.length ? itens.map(it => `${it.quantidade}x ${it.nome}`).join(', ') : (v.nome_item || 'Venda');
+            const pgtoInfo = v.forma_pagamento || '';
+            const dataFmt = v.data_venda ? v.data_venda.split('-').reverse().join('/') : '';
+
+            vendasHTML += `
+            <div class="venda-row">
+                <span class="venda-idx">${i+1}</span>
+                <div class="venda-nome">
+                    <p class="venda-titulo">${resumoItens}</p>
+                    <div class="venda-meta">
+                        <span><span class="material-symbols-outlined" style="font-size:12px">calendar_today</span> ${dataFmt}</span>
+                        ${pgtoInfo ? `<span><span class="material-symbols-outlined" style="font-size:12px">payments</span> ${pgtoInfo}</span>` : ''}
+                        ${v.cliente_nome ? `<span><span class="material-symbols-outlined" style="font-size:12px">person</span> ${v.cliente_nome}</span>` : ''}
+                        ${v.troco > 0 ? `<span style="color:#fbbf24">Troco: ${fmtR(v.troco)}</span>` : ''}
+                    </div>
+                </div>
+                <span class="venda-val">${fmtR(v.valor_total)}</span>
+            </div>`;
+        });
+
+        return `
+        <div class="user-card" id="uc-${idx}">
+            <div class="user-head" onclick="toggleVendas(${idx})">
+                <div class="user-avatar" style="background:${cor}22;color:${cor}">${ini}</div>
+                <div class="user-info">
+                    <p class="user-name">${u.nome}</p>
+                    <p class="user-email">${u.email}</p>
+                </div>
+                <div class="user-stats">
+                    <div class="stat-pill">
+                        <p class="stat-pill-val" style="color:#34d399">${fmtR(u.totalVendas)}</p>
+                        <p class="stat-pill-lbl">Faturado</p>
+                    </div>
+                    <div class="stat-pill">
+                        <p class="stat-pill-val" style="color:#25f4f4">${u.qtdVendas}</p>
+                        <p class="stat-pill-lbl">Vendas</p>
+                    </div>
+                    <div class="stat-pill">
+                        <p class="stat-pill-val" style="color:#a78bfa;font-size:.78rem">${fmtR(tmedio)}</p>
+                        <p class="stat-pill-lbl">T. Médio</p>
+                    </div>
+                    <span class="material-symbols-outlined" id="chev-${idx}" style="color:#475569;transition:transform .2s;font-size:1.1rem">expand_more</span>
+                </div>
+            </div>
+            <div class="vendas-body" id="vb-${idx}">
+                <p style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;margin-bottom:.5rem">
+                    Última venda: ${ultData}
+                </p>
+                ${vendasHTML}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleVendas(idx) {
+    const body = document.getElementById(`vb-${idx}`);
+    const chev = document.getElementById(`chev-${idx}`);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function fmtR(v) {
+    return 'R$ ' + Number(v||0).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+function avatarColor(str) {
+    const colors = ['#25f4f4','#34d399','#a78bfa','#fbbf24','#f87171','#60a5fa','#fb923c','#f472b6'];
+    let hash = 0;
+    for (let i = 0; i < (str||'').length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return colors[Math.abs(hash) % colors.length];
+}
+</script>
+</body>
+</html>
