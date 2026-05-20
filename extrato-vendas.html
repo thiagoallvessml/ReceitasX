@@ -771,20 +771,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             return acc;
         }, 0);
 
-        const totalGanhos = parseFloat(afiliado.total_ganhos || 0);
-        _saldoDisponivel  = Math.max(0, totalGanhos - sacado);
-        // Fallback: se o cálculo der 0 mas o banco tem saldo, usar o do banco
+        const confirmadas = _todasIndicacoes.filter(i => i.converteu);
+        const pendentes   = _todasIndicacoes.filter(i => !i.converteu);
+        
+        // Calcula ganhos primeiro (usa indicacoes ou fallback do banco)
+        const dbTotalGanhos = parseFloat(afiliado.total_ganhos || 0);
+        const totalComissao = confirmadas.length > 0
+            ? confirmadas.reduce((a, i) => a + parseFloat(i.comissao || 0), 0)
+            : dbTotalGanhos;
+            
+        const totalVendas = confirmadas.length > 0 ? confirmadas.length : parseInt(afiliado.total_vendas || 0);
+
+        // Calcula saldo disponível usando totalComissao
+        _saldoDisponivel = Math.max(0, totalComissao - sacado);
+        
+        // Fallback: se o cálculo der 0 mas o banco tem saldo_disponivel
         if (_saldoDisponivel === 0 && parseFloat(afiliado.saldo_disponivel || 0) > 0) {
             _saldoDisponivel = parseFloat(afiliado.saldo_disponivel);
         }
-
-        const confirmadas = _todasIndicacoes.filter(i => i.converteu);
-        const pendentes   = _todasIndicacoes.filter(i => !i.converteu);
-        // Usa total_ganhos do afiliado como fonte de verdade (indicacoes pode estar vazia)
-        const totalComissao = confirmadas.length > 0
-            ? confirmadas.reduce((a, i) => a + parseFloat(i.comissao || 0), 0)
-            : totalGanhos;
-        const totalVendas = confirmadas.length > 0 ? confirmadas.length : parseInt(afiliado.total_vendas || 0);
 
         // Atualiza resumo
         document.getElementById('total-ganhos').textContent   = fmtR(totalComissao);
