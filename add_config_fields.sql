@@ -1,0 +1,16 @@
+ALTER TABLE configuracoes
+ADD COLUMN IF NOT EXISTS taxa_cartao numeric DEFAULT 3,
+ADD COLUMN IF NOT EXISTS taxa_imposto numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS taxa_comissao numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS local_preparo text DEFAULT 'casa',
+ADD COLUMN IF NOT EXISTS cf_aluguel numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_agua numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_luz numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_telefone numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_internet numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_limpeza numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_maquininha numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_mei numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_gasolina numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_outros jsonb DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS marketplaces jsonb DEFAULT '[]'::jsonb;

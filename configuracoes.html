@@ -663,10 +663,20 @@ async function load() {
             localStorage.setItem('receitasx_uid', user.id);
 
             const { data, error } = await sb.from('configuracoes')
-                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem')
+                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem, taxa_cartao, taxa_imposto, taxa_comissao, local_preparo, cf_aluguel, cf_agua, cf_luz, cf_telefone, cf_internet, cf_limpeza, cf_maquininha, cf_mei, cf_gasolina, marketplaces, cf_outros')
                 .eq('user_id', user.id).maybeSingle();
 
             if (!error && data) {
+                // Sincroniza dinâmicos
+                if (data.marketplaces) {
+                    marketplaces = Array.isArray(data.marketplaces) ? data.marketplaces : JSON.parse(data.marketplaces);
+                    localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
+                }
+                if (data.cf_outros) {
+                    custosFixos = Array.isArray(data.cf_outros) ? data.cf_outros : JSON.parse(data.cf_outros);
+                    localStorage.setItem(CF_KEY, JSON.stringify(custosFixos));
+                }
+
                 // Usuário tem dados salvos — carrega normalmente
                 const gasPeso  = parseFloat(data.gas_rendimento || DEFAULTS.gasPeso);
                 const gasPreco = parseFloat(data.gas_custo      || 0) * gasPeso;
@@ -682,19 +692,19 @@ async function load() {
                     combExcel: DEFAULTS.combExcel,
                     salario:   DEFAULTS.salario,
                     horaFinal: parseFloat(data.mao_obra_hora || DEFAULTS.horaFinal),
-                    taxaCartao: DEFAULTS.taxaCartao,
-                    taxaImposto: DEFAULTS.taxaImposto,
-                    taxaComissao: DEFAULTS.taxaComissao,
-                    localPreparo: DEFAULTS.localPreparo,
-                    cfAluguel: DEFAULTS.cfAluguel,
-                    cfAgua: DEFAULTS.cfAgua,
-                    cfLuz: DEFAULTS.cfLuz,
-                    cfTelefone: DEFAULTS.cfTelefone,
-                    cfInternet: DEFAULTS.cfInternet,
-                    cfLimpeza: DEFAULTS.cfLimpeza,
-                    cfMaquininha: DEFAULTS.cfMaquininha,
-                    cfMei: DEFAULTS.cfMei,
-                    cfGasolina: DEFAULTS.cfGasolina,
+                    taxaCartao: parseFloat(data.taxa_cartao ?? DEFAULTS.taxaCartao),
+                    taxaImposto: parseFloat(data.taxa_imposto ?? DEFAULTS.taxaImposto),
+                    taxaComissao: parseFloat(data.taxa_comissao ?? DEFAULTS.taxaComissao),
+                    localPreparo: data.local_preparo || DEFAULTS.localPreparo,
+                    cfAluguel: parseFloat(data.cf_aluguel ?? DEFAULTS.cfAluguel),
+                    cfAgua: parseFloat(data.cf_agua ?? DEFAULTS.cfAgua),
+                    cfLuz: parseFloat(data.cf_luz ?? DEFAULTS.cfLuz),
+                    cfTelefone: parseFloat(data.cf_telefone ?? DEFAULTS.cfTelefone),
+                    cfInternet: parseFloat(data.cf_internet ?? DEFAULTS.cfInternet),
+                    cfLimpeza: parseFloat(data.cf_limpeza ?? DEFAULTS.cfLimpeza),
+                    cfMaquininha: parseFloat(data.cf_maquininha ?? DEFAULTS.cfMaquininha),
+                    cfMei: parseFloat(data.cf_mei ?? DEFAULTS.cfMei),
+                    cfGasolina: parseFloat(data.cf_gasolina ?? DEFAULTS.cfGasolina),
                 };
                 applyConfig(cfg);
                 localStorage.setItem(KEY, JSON.stringify(cfg));
@@ -799,6 +809,21 @@ async function salvar() {
                 energia_kwh:   cfg.kwh,
                 mao_obra_hora: cfg.horaFinal,
                 meta_margem:   cfg.precExcel,
+                taxa_cartao:   cfg.taxaCartao,
+                taxa_imposto:  cfg.taxaImposto,
+                taxa_comissao: cfg.taxaComissao,
+                local_preparo: cfg.localPreparo,
+                cf_aluguel:    cfg.cfAluguel,
+                cf_agua:       cfg.cfAgua,
+                cf_luz:        cfg.cfLuz,
+                cf_telefone:   cfg.cfTelefone,
+                cf_internet:   cfg.cfInternet,
+                cf_limpeza:    cfg.cfLimpeza,
+                cf_maquininha: cfg.cfMaquininha,
+                cf_mei:        cfg.cfMei,
+                cf_gasolina:   cfg.cfGasolina,
+                marketplaces:  marketplaces,
+                cf_outros:     custosFixos,
                 updated_at:    new Date().toISOString(),
             };
             const { error } = await sb.from('configuracoes')
