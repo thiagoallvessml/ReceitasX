@@ -292,12 +292,18 @@ async function carregarCatalogos() {
     
     if (resProd.data && resProd.data.length > 0) {
         resProd.data.forEach(p => {
-            console.log('🏷️ PRODUTO:', p.nome, '| custo (tabela produtos):', p.custo, '| receita_id:', p.receita_id);
+            // Se tem receita vinculada, recalcula custo SEM mão de obra (vai em Despesas Operacionais)
+            let custoFinal = p.custo || 0;
             if (p.receitas) {
-                console.log('   📋 RECEITA VINCULADA:', '| custo_ing:', p.receitas.custo_ing, '| custo_emb:', p.receitas.custo_emb, '| custo_eqp:', p.receitas.custo_eqp, '| custo_total:', p.receitas.custo_total, '| unidades:', p.receitas.unidades);
-                console.log('   🧮 CÁLCULO: (', p.receitas.custo_ing, '+', p.receitas.custo_emb, '+', p.receitas.custo_eqp, ') /', p.receitas.unidades, '=', ((parseFloat(p.receitas.custo_ing||0) + parseFloat(p.receitas.custo_emb||0) + parseFloat(p.receitas.custo_eqp||0)) / (p.receitas.unidades||1)).toFixed(4));
+                const sumSemMob = parseFloat(p.receitas.custo_ing || 0) + parseFloat(p.receitas.custo_emb || 0) + parseFloat(p.receitas.custo_eqp || 0);
+                const un = p.receitas.unidades > 0 ? p.receitas.unidades : 1;
+                custoFinal = sumSemMob / un;
+                console.log('🏷️ PRODUTO:', p.nome, '| custo DB:', p.custo, '| custo CORRIGIDO (sem mão de obra):', custoFinal.toFixed(4));
+                console.log('   📋 RECEITA:', 'ing:', p.receitas.custo_ing, '+ emb:', p.receitas.custo_emb, '+ eqp:', p.receitas.custo_eqp, '=', sumSemMob, '/', un, 'un =', custoFinal.toFixed(4));
+            } else {
+                console.log('🏷️ PRODUTO:', p.nome, '| custo:', custoFinal, '| sem receita vinculada');
             }
-            catalogo.push({ tipo: 'produto', id: p.id, nome: p.nome, preco: p.preco || 0, custo: p.custo || 0 });
+            catalogo.push({ tipo: 'produto', id: p.id, nome: p.nome, preco: p.preco || 0, custo: custoFinal });
             optionsHTML += `<option value="prod-${p.id}">${p.nome} (R$ ${(p.preco||0).toFixed(2)})</option>`;
         });
     }
