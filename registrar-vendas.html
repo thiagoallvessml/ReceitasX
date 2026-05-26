@@ -283,7 +283,7 @@ async function checkAuth() {
 // Carrega as receitas e produtos para montar o combo-box
 async function carregarCatalogos() {
     const [resProd, resRec] = await Promise.all([
-        sb.from('produtos').select('id, nome, preco, custo').eq('user_id', userId).eq('ativo', true).order('nome'),
+        sb.from('produtos').select('id, nome, preco, custo, receita_id, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades)').eq('user_id', userId).eq('ativo', true).order('nome'),
         sb.from('receitas').select('id, nome, preco_sugerido, custo_total, unidades').eq('user_id', userId).order('nome'),
     ]);
 
@@ -292,6 +292,11 @@ async function carregarCatalogos() {
     
     if (resProd.data && resProd.data.length > 0) {
         resProd.data.forEach(p => {
+            console.log('🏷️ PRODUTO:', p.nome, '| custo (tabela produtos):', p.custo, '| receita_id:', p.receita_id);
+            if (p.receitas) {
+                console.log('   📋 RECEITA VINCULADA:', '| custo_ing:', p.receitas.custo_ing, '| custo_emb:', p.receitas.custo_emb, '| custo_eqp:', p.receitas.custo_eqp, '| custo_total:', p.receitas.custo_total, '| unidades:', p.receitas.unidades);
+                console.log('   🧮 CÁLCULO: (', p.receitas.custo_ing, '+', p.receitas.custo_emb, '+', p.receitas.custo_eqp, ') /', p.receitas.unidades, '=', ((parseFloat(p.receitas.custo_ing||0) + parseFloat(p.receitas.custo_emb||0) + parseFloat(p.receitas.custo_eqp||0)) / (p.receitas.unidades||1)).toFixed(4));
+            }
             catalogo.push({ tipo: 'produto', id: p.id, nome: p.nome, preco: p.preco || 0, custo: p.custo || 0 });
             optionsHTML += `<option value="prod-${p.id}">${p.nome} (R$ ${(p.preco||0).toFixed(2)})</option>`;
         });
