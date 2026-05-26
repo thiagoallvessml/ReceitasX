@@ -284,7 +284,7 @@ async function checkAuth() {
 async function carregarCatalogos() {
     const [resProd, resRec] = await Promise.all([
         sb.from('produtos').select('id, nome, preco, custo').eq('user_id', userId).eq('ativo', true).order('nome'),
-        sb.from('receitas').select('id, nome, preco_sugerido, custo_total').eq('user_id', userId).order('nome'),
+        sb.from('receitas').select('id, nome, preco_sugerido, custo_total, unidades').eq('user_id', userId).order('nome'),
     ]);
 
     let optionsHTML = '<option value="">Selecione para adicionar...</option>';
@@ -301,7 +301,9 @@ async function carregarCatalogos() {
     if (resRec.data && resRec.data.length > 0) {
         resRec.data.forEach(r => {
             const preco = r.preco_sugerido || 0;
-            catalogo.push({ tipo: 'receita', id: r.id, nome: r.nome, preco: preco, custo: r.custo_total || 0 });
+            const yieldUn = parseInt(r.unidades) || 1;
+            const custoUnitario = yieldUn > 0 ? (r.custo_total / yieldUn) : (r.custo_total || 0);
+            catalogo.push({ tipo: 'receita', id: r.id, nome: r.nome, preco: preco, custo: custoUnitario || 0 });
             optionsHTML += `<option value="rec-${r.id}">${r.nome} (R$ ${preco.toFixed(2)})</option>`;
         });
     }
