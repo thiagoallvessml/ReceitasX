@@ -380,76 +380,7 @@
         </div><!-- /col direita -->
     </div><!-- /two-col -->
 
-    <!-- ════ SEÇÃO CUSTOS FIXOS (largura total) ════ -->
-    <section style="margin-top:1.5rem">
-        <h2 class="sec-title">
-            <span class="material-symbols-outlined" style="color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">home_work</span>
-            Custo Fixo (Mensal)
-        </h2>
-        <div class="cfg-card">
-            <!-- Local de Preparo -->
-            <div style="margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: .75rem; border: 1px solid #2A2A2A;">
-                <label class="field-label" style="font-size:.7rem;">Em qual Local Você Costuma Preparar seus Produtos?</label>
-                <div style="display:flex; gap:1.5rem; margin-top:.75rem;">
-                    <label style="display:flex; align-items:center; gap:.4rem; cursor:pointer; font-size:.9rem; color:#f1f5f9; font-weight:500;">
-                        <input type="radio" name="local-preparo" value="casa" checked onchange="toggleAvisoLocal()" style="accent-color:#25f4f4; width:1.15rem; height:1.15rem;" /> Minha Casa
-                    </label>
-                    <label style="display:flex; align-items:center; gap:.4rem; cursor:pointer; font-size:.9rem; color:#f1f5f9; font-weight:500;">
-                        <input type="radio" name="local-preparo" value="estabelecimento" onchange="toggleAvisoLocal()" style="accent-color:#25f4f4; width:1.15rem; height:1.15rem;" /> Estabelecimento
-                    </label>
-                </div>
-                <div id="aviso-casa" style="display:flex; gap:.6rem; margin-top:1rem; padding:.8rem; background:rgba(239, 68, 68, 0.1); border-left:3px solid #ef4444; border-radius:.25rem; font-size:.75rem; color:#f1f5f9; line-height:1.4;">
-                    <span class="material-symbols-outlined" style="color:#ef4444; font-size:1.2rem; flex-shrink:0;">warning</span>
-                    <span><strong>Atenção:</strong> Como selecionou "Minha Casa", <strong>NÃO</strong> coloque o valor total das contas da sua casa (ex: 100% da luz, água ou aluguel) caso sejam de uso misto. Calcule e insira apenas a porcentagem correspondente ao uso do seu negócio, pois despesas pessoais não devem entrar no custo do produto.</span>
-                </div>
-            </div>
-            
-            <p class="divider-label" style="text-align:left; margin-bottom:1rem; color:#f1f5f9; font-size:.75rem;">Despesas Fixas</p>
-            
-            <!-- Grid for standard fixed costs -->
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:1.2rem; margin-bottom: 1.5rem;">
-                <div><label class="field-label" for="cf-aluguel">Aluguel</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-aluguel" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-agua">Água</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-agua" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-luz">Luz</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-luz" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-telefone">Telefone</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-telefone" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-internet">Internet</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-internet" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-limpeza">Limpeza</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-limpeza" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-maquininha">Aluguel Maquininha</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-maquininha" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-mei">MEI</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-mei" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-gasolina">Gasolina / Transporte</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-gasolina" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-                <div><label class="field-label" for="cf-salario">Pró-Labore / Salário</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-salario" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
-            </div>
 
-            <!-- Dynamic custom fixed costs -->
-            <p class="divider-label" style="text-align:left; margin-bottom:.75rem; color:#f1f5f9; font-size:.75rem;">Outros Custos Fixos</p>
-            <div id="cf-custom-list" style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem"></div>
-
-            <div class="mkt-form" id="cf-form">
-                <p style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4">Novo Custo Fixo</p>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-bottom:.5rem;">
-                    <div>
-                        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Nome (Ex: Contador)</p>
-                        <input id="cf-new-nome" type="text" class="fc" placeholder="Nome..." autocomplete="off" style="padding:.6rem .8rem;font-size:.85rem" />
-                    </div>
-                    <div>
-                        <p style="font-size:.65rem;color:#64748b;margin-bottom:.3rem">Valor Mensal</p>
-                        <div class="fc-prefix">
-                            <span class="prefix">R$</span>
-                            <input id="cf-new-valor" type="number" min="0" step="0.01" class="fc" placeholder="0,00" />
-                        </div>
-                    </div>
-                </div>
-                <div style="display:flex;gap:.5rem;">
-                    <button class="btn-mkt-cancel" onclick="closeCfForm()">Cancelar</button>
-                    <button class="btn-mkt-add-confirm" onclick="addCf()">Adicionar</button>
-                </div>
-            </div>
-
-            <button class="btn-add-mkt" id="btn-add-cf" onclick="openCfForm()">
-                <span class="material-symbols-outlined">add</span> Adicionar Outro Custo
-            </button>
-        </div>
-    </section>
 
     <!-- Botão salvar bottom mobile -->
     <div class="mt-6 flex justify-end md:hidden">
@@ -470,7 +401,6 @@
 <script>
 const KEY = 'receitasx_config';
 const MKT_KEY = 'receitasx_marketplaces';
-const CF_KEY = 'receitasx_custosfixos';
 
 const MKT_DEFAULTS = [
     { id:'casa',  nome:'Porta de Casa', taxa:0   },
@@ -478,7 +408,6 @@ const MKT_DEFAULTS = [
 ];
 
 let marketplaces = JSON.parse(localStorage.getItem(MKT_KEY) || 'null') || MKT_DEFAULTS;
-let custosFixos = JSON.parse(localStorage.getItem(CF_KEY) || 'null') || [];
 
 const DEFAULTS = {
     gasPeso:    13,
@@ -495,16 +424,6 @@ const DEFAULTS = {
     taxaCartao: 3,
     taxaImposto: 0,
     taxaComissao: 0,
-    localPreparo: 'casa',
-    cfAluguel: 0,
-    cfAgua: 0,
-    cfLuz: 0,
-    cfTelefone: 0,
-    cfInternet: 0,
-    cfLimpeza: 0,
-    cfMaquininha: 0,
-    cfMei: 0,
-    cfGasolina: 0,
 };
 
 /* ─── MARKETPLACES ───────────────────────────────────────────── */
@@ -553,52 +472,6 @@ function delMkt(i) {
     showToast('Marketplace removido.');
 }
 
-/* ─── CUSTOS FIXOS (DINÂMICOS) ───────────────────────────────── */
-function renderCf() {
-    const el = document.getElementById('cf-custom-list');
-    if (!custosFixos.length) {
-        el.innerHTML = '<p class="text-xs text-slate-500" style="padding:.35rem 0">Nenhum custo fixo extra configurado.</p>';
-        return;
-    }
-    el.innerHTML = custosFixos.map((c, i) => `
-    <div class="mkt-row">
-      <div class="mkt-ico" style="color:#f59e0b;background:rgba(245,158,11,0.1);"><span class="material-symbols-outlined">payments</span></div>
-      <span class="mkt-name">${c.nome}</span>
-      <span class="mkt-taxa-badge">R$ ${c.valor.toFixed(2).replace('.',',')}</span>
-      <button class="mkt-del" onclick="delCf(${i})" title="Remover">
-        <span class="material-symbols-outlined">delete</span>
-      </button>
-    </div>`).join('');
-}
-
-function openCfForm() {
-    document.getElementById('cf-form').classList.add('open');
-    document.getElementById('btn-add-cf').style.display = 'none';
-    document.getElementById('cf-new-nome').focus();
-}
-function closeCfForm() {
-    document.getElementById('cf-form').classList.remove('open');
-    document.getElementById('btn-add-cf').style.display = '';
-    document.getElementById('cf-new-nome').value = '';
-    document.getElementById('cf-new-valor').value = '';
-}
-function addCf() {
-    const nome = document.getElementById('cf-new-nome').value.trim();
-    const valor = parseFloat(document.getElementById('cf-new-valor').value) || 0;
-    if (!nome) { document.getElementById('cf-new-nome').focus(); return; }
-    custosFixos.push({ id: 'cf_'+Date.now(), nome, valor });
-    localStorage.setItem(CF_KEY, JSON.stringify(custosFixos));
-    renderCf();
-    closeCfForm();
-    showToast('Custo Fixo adicionado!');
-}
-function delCf(i) {
-    custosFixos.splice(i, 1);
-    localStorage.setItem(CF_KEY, JSON.stringify(custosFixos));
-    renderCf();
-    showToast('Custo Fixo removido.');
-}
-
 /* ─── LOAD ───────────────────────────────────────────────────── */
 async function load() {
     try {
@@ -609,14 +482,12 @@ async function load() {
             if (cachedUid && cachedUid !== user.id) {
                 localStorage.removeItem(KEY);
                 localStorage.removeItem(MKT_KEY);
-                localStorage.removeItem(CF_KEY);
                 marketplaces = MKT_DEFAULTS;
-                custosFixos = [];
             }
             localStorage.setItem('receitasx_uid', user.id);
 
             const { data, error } = await sb.from('configuracoes')
-                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem, taxa_cartao, taxa_imposto, taxa_comissao, local_preparo, cf_aluguel, cf_agua, cf_luz, cf_telefone, cf_internet, cf_limpeza, cf_maquininha, cf_mei, cf_gasolina, marketplaces, cf_outros')
+                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem, taxa_cartao, taxa_imposto, taxa_comissao, marketplaces')
                 .eq('user_id', user.id).maybeSingle();
 
             if (!error && data) {
@@ -624,10 +495,6 @@ async function load() {
                 if (data.marketplaces) {
                     marketplaces = Array.isArray(data.marketplaces) ? data.marketplaces : JSON.parse(data.marketplaces);
                     localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
-                }
-                if (data.cf_outros) {
-                    custosFixos = Array.isArray(data.cf_outros) ? data.cf_outros : JSON.parse(data.cf_outros);
-                    localStorage.setItem(CF_KEY, JSON.stringify(custosFixos));
                 }
 
                 // Usuário tem dados salvos — carrega normalmente
@@ -648,16 +515,6 @@ async function load() {
                     taxaCartao: parseFloat(data.taxa_cartao ?? DEFAULTS.taxaCartao),
                     taxaImposto: parseFloat(data.taxa_imposto ?? DEFAULTS.taxaImposto),
                     taxaComissao: parseFloat(data.taxa_comissao ?? DEFAULTS.taxaComissao),
-                    localPreparo: data.local_preparo || DEFAULTS.localPreparo,
-                    cfAluguel: parseFloat(data.cf_aluguel ?? DEFAULTS.cfAluguel),
-                    cfAgua: parseFloat(data.cf_agua ?? DEFAULTS.cfAgua),
-                    cfLuz: parseFloat(data.cf_luz ?? DEFAULTS.cfLuz),
-                    cfTelefone: parseFloat(data.cf_telefone ?? DEFAULTS.cfTelefone),
-                    cfInternet: parseFloat(data.cf_internet ?? DEFAULTS.cfInternet),
-                    cfLimpeza: parseFloat(data.cf_limpeza ?? DEFAULTS.cfLimpeza),
-                    cfMaquininha: parseFloat(data.cf_maquininha ?? DEFAULTS.cfMaquininha),
-                    cfMei: parseFloat(data.cf_mei ?? DEFAULTS.cfMei),
-                    cfGasolina: parseFloat(data.cf_gasolina ?? DEFAULTS.cfGasolina),
                 };
                 applyConfig(cfg);
                 localStorage.setItem(KEY, JSON.stringify(cfg));
@@ -693,36 +550,8 @@ function applyConfig(cfg) {
     document.getElementById('taxa-imposto').value = v(cfg?.taxaImposto);
     document.getElementById('taxa-comissao').value = v(cfg?.taxaComissao);
 
-    // Custos Fixos
-    const local = v(cfg?.localPreparo, DEFAULTS.localPreparo);
-    if(local === 'estabelecimento') {
-        document.querySelector('input[name="local-preparo"][value="estabelecimento"]').checked = true;
-    } else {
-        document.querySelector('input[name="local-preparo"][value="casa"]').checked = true;
-    }
-    document.getElementById('cf-aluguel').value = v(cfg?.cfAluguel);
-    document.getElementById('cf-agua').value = v(cfg?.cfAgua);
-    document.getElementById('cf-luz').value = v(cfg?.cfLuz);
-    document.getElementById('cf-telefone').value = v(cfg?.cfTelefone);
-    document.getElementById('cf-internet').value = v(cfg?.cfInternet);
-    document.getElementById('cf-limpeza').value = v(cfg?.cfLimpeza);
-    document.getElementById('cf-maquininha').value = v(cfg?.cfMaquininha);
-    document.getElementById('cf-mei').value = v(cfg?.cfMei);
-    document.getElementById('cf-gasolina').value = v(cfg?.cfGasolina);
-    document.getElementById('cf-salario').value = v(cfg?.cfSalario);
-
     updateGasKg();
     renderMkts();
-    renderCf();
-    toggleAvisoLocal();
-}
-
-function toggleAvisoLocal() {
-    const val = document.querySelector('input[name="local-preparo"]:checked')?.value;
-    const aviso = document.getElementById('aviso-casa');
-    if(aviso) {
-        aviso.style.display = val === 'casa' ? 'flex' : 'none';
-    }
 }
 
 /* ─── SALVAR ─────────────────────────────────────────────────────── */
@@ -742,17 +571,6 @@ async function salvar() {
         taxaCartao: parseFloat(document.getElementById('taxa-cartao').value) || DEFAULTS.taxaCartao,
         taxaImposto: parseFloat(document.getElementById('taxa-imposto').value) || DEFAULTS.taxaImposto,
         taxaComissao: parseFloat(document.getElementById('taxa-comissao').value) || DEFAULTS.taxaComissao,
-        localPreparo: document.querySelector('input[name="local-preparo"]:checked')?.value || DEFAULTS.localPreparo,
-        cfAluguel: parseFloat(document.getElementById('cf-aluguel').value) || DEFAULTS.cfAluguel,
-        cfAgua: parseFloat(document.getElementById('cf-agua').value) || DEFAULTS.cfAgua,
-        cfLuz: parseFloat(document.getElementById('cf-luz').value) || DEFAULTS.cfLuz,
-        cfTelefone: parseFloat(document.getElementById('cf-telefone').value) || DEFAULTS.cfTelefone,
-        cfInternet: parseFloat(document.getElementById('cf-internet').value) || DEFAULTS.cfInternet,
-        cfLimpeza: parseFloat(document.getElementById('cf-limpeza').value) || DEFAULTS.cfLimpeza,
-        cfMaquininha: parseFloat(document.getElementById('cf-maquininha').value) || DEFAULTS.cfMaquininha,
-        cfMei: parseFloat(document.getElementById('cf-mei').value) || DEFAULTS.cfMei,
-        cfGasolina: parseFloat(document.getElementById('cf-gasolina').value) || DEFAULTS.cfGasolina,
-        cfSalario: parseFloat(document.getElementById('cf-salario').value) || 0,
     };
 
     // 1. Salva no localStorage (leitura rápida offline / fallback)
@@ -772,19 +590,7 @@ async function salvar() {
                 taxa_cartao:   cfg.taxaCartao,
                 taxa_imposto:  cfg.taxaImposto,
                 taxa_comissao: cfg.taxaComissao,
-                local_preparo: cfg.localPreparo,
-                cf_aluguel:    cfg.cfAluguel,
-                cf_agua:       cfg.cfAgua,
-                cf_luz:        cfg.cfLuz,
-                cf_telefone:   cfg.cfTelefone,
-                cf_internet:   cfg.cfInternet,
-                cf_limpeza:    cfg.cfLimpeza,
-                cf_maquininha: cfg.cfMaquininha,
-                cf_mei:        cfg.cfMei,
-                cf_gasolina:   cfg.cfGasolina,
-                cf_salario:    cfg.cfSalario,
                 marketplaces:  marketplaces,
-                cf_outros:     custosFixos,
                 updated_at:    new Date().toISOString(),
             };
             const { error } = await sb.from('configuracoes')
