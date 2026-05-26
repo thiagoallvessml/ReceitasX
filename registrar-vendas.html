@@ -303,6 +303,7 @@ async function carregarCatalogos() {
             const preco = r.preco_sugerido || 0;
             const yieldUn = parseInt(r.unidades) || 1;
             const custoUnitario = yieldUn > 0 ? (r.custo_total / yieldUn) : (r.custo_total || 0);
+            console.log('📦 RECEITA:', r.nome, '| custo_total:', r.custo_total, '| unidades:', r.unidades, '| yieldUn:', yieldUn, '| custoUnitario:', custoUnitario);
             catalogo.push({ tipo: 'receita', id: r.id, nome: r.nome, preco: preco, custo: custoUnitario || 0 });
             optionsHTML += `<option value="rec-${r.id}">${r.nome} (R$ ${preco.toFixed(2)})</option>`;
         });
@@ -546,16 +547,21 @@ async function salvar() {
     }
     
     // Preparar itens para o JSON
-    const jsonItens = carrinho.map(c => ({
-        id: c.id,
-        tipo: c.tipo,
-        nome: c.nome,
-        preco_unitario: c.preco,
-        quantidade: c.quantidade,
-        total: c.preco * c.quantidade,
-        custo_unitario: c.custo || 0,
-        custo_total_item: (c.custo || 0) * c.quantidade
-    }));
+    const jsonItens = carrinho.map(c => {
+        console.log('🛒 ITEM NO CARRINHO:', c.nome, '| c.custo:', c.custo, '| c.preco:', c.preco, '| c.quantidade:', c.quantidade);
+        const item = {
+            id: c.id,
+            tipo: c.tipo,
+            nome: c.nome,
+            preco_unitario: c.preco,
+            quantidade: c.quantidade,
+            total: c.preco * c.quantidade,
+            custo_unitario: c.custo || 0,
+            custo_total_item: (c.custo || 0) * c.quantidade
+        };
+        console.log('💾 PAYLOAD DO ITEM:', JSON.stringify(item));
+        return item;
+    });
     
     document.getElementById('btn-save').textContent = 'Salvando...';
 

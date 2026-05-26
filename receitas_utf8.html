@@ -1,0 +1,1740 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Receitas - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="plano-guard.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1A1A1A",
+                        "border-dark": "#2A2A2A",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+        /* ── Inputs ── */
+        input, select { background-color: #1E1E1E !important; color: #f1f5f9 !important; border-color: #2A2A2A !important; }
+        input::placeholder { color: #475569 !important; }
+        input:focus, select:focus { border-color: rgba(37,244,244,0.5) !important; box-shadow: 0 0 0 3px rgba(37,244,244,0.07) !important; outline: none !important; }
+
+        /* ── Header back ── */
+        .btn-back { display:flex; align-items:center; gap:.3rem; color:#94a3b8; cursor:pointer; transition:color .15s; background:none; border:none; padding:0; font-size:.85rem; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* ── Search ── */
+        .search-box { width:100%; padding:.65rem 1rem .65rem 2.55rem; border-radius:.65rem; border:1px solid #2A2A2A; background:#1E1E1E; color:#f1f5f9; font-size:.875rem; outline:none; transition:border-color .2s; }
+        .search-box:focus { border-color:rgba(37,244,244,.5); }
+
+        /* ── Chip ── */
+        .chip { padding:.3rem .85rem; border-radius:9999px; font-size:.72rem; font-weight:600; border:1px solid #2A2A2A; background:transparent; color:#64748b; cursor:pointer; transition:all .15s; white-space:nowrap; }
+        .chip:hover { border-color:rgba(37,244,244,.4); color:#25f4f4; }
+        .chip.active { background:rgba(37,244,244,.12); border-color:rgba(37,244,244,.5); color:#25f4f4; }
+
+        /* ── Recipe card ── */
+        .recipe-card {
+            background: #1A1A1A;
+            border: 1px solid #2A2A2A;
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: border-color .2s, box-shadow .2s, transform .15s;
+        }
+        .recipe-card:hover {
+            border-color: rgba(37,244,244,.25);
+            box-shadow: 0 8px 32px rgba(0,0,0,.5);
+            transform: translateY(-2px);
+        }
+
+        /* gradient covers */
+        .card-cover {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-cover .cover-icon {
+            font-size: 3rem;
+            color: rgba(255,255,255,.35);
+            font-variation-settings: 'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48;
+        }
+
+        /* gradient presets */
+        .grad-1 { background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%); }
+        .grad-2 { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+        .grad-3 { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
+        .grad-4 { background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%); }
+        .grad-5 { background: linear-gradient(135deg, #84cc16 0%, #22d3ee 100%); }
+        .grad-6 { background: linear-gradient(135deg, #f97316 0%, #facc15 100%); }
+
+        /* ── Card body ── */
+        .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: .75rem; }
+
+        .card-meta { display:flex; gap:.75rem; font-size:.75rem; color:#94a3b8; }
+        .card-meta span { display:flex; align-items:center; gap:.25rem; }
+        .card-meta .material-symbols-outlined { font-size:.9rem; color:#64748b; }
+
+        /* ── Stat grid ── */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+        .stat-cell {
+            background: #111;
+            border-radius: .5rem;
+            padding: .5rem .65rem;
+        }
+        .stat-cell .lbl {
+            font-size: .55rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            margin-bottom: .2rem;
+        }
+        .stat-cell .val { font-size: .85rem; font-weight: 700; }
+
+        /* stat colors */
+        .stat-preco  .lbl { color: #25f4f4; } .stat-preco  .val { color: #f1f5f9; }
+        .stat-custo  .lbl { color: #94a3b8; } .stat-custo  .val { color: #f1f5f9; }
+        .stat-lucro  .lbl { color: #4ade80; } .stat-lucro  .val { color: #4ade80; }
+        .stat-margem .lbl { color: #fbbf24; } .stat-margem .val { color: #fbbf24; }
+        .stat-markup .lbl { color: #a78bfa; } .stat-markup .val { color: #a78bfa; }
+
+        /* ── Card actions ── */
+        .card-actions { display:flex; gap:.5rem; padding:.75rem 1rem; border-top:1px solid #222; }
+        .btn-detail {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:.35rem;
+            padding:.6rem .5rem; border-radius:.65rem; border:1px solid #2A2A2A;
+            background:transparent; color:#94a3b8; font-size:.78rem; font-weight:600;
+            cursor:pointer; transition:all .15s;
+        }
+        .btn-detail:hover { border-color:rgba(37,244,244,.4); color:#25f4f4; background:rgba(37,244,244,.05); }
+        .btn-detail .material-symbols-outlined { font-size:.95rem; }
+
+        .btn-edit {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:.35rem;
+            padding:.6rem .5rem; border-radius:.65rem; border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-size:.78rem; font-weight:700; cursor:pointer;
+            transition:opacity .15s, box-shadow .2s;
+            box-shadow: 0 2px 12px rgba(37,244,244,.2);
+        }
+        .btn-edit:hover { opacity:.9; box-shadow:0 4px 20px rgba(37,244,244,.35); }
+        .btn-edit .material-symbols-outlined { font-size:.95rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── Btn cadastrar (header) ── */
+        .btn-new {
+            display:flex; align-items:center; gap:.45rem;
+            padding:.6rem 1rem; border-radius:.65rem; border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-size:.82rem; font-weight:700; cursor:pointer; white-space:nowrap;
+            transition:opacity .2s, box-shadow .2s;
+            box-shadow: 0 3px 16px rgba(37,244,244,.25);
+        }
+        .btn-new:hover { opacity:.9; box-shadow:0 5px 24px rgba(37,244,244,.4); }
+        .btn-new .material-symbols-outlined { font-size:1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── FAB mobile ── */
+        .fab {
+            position:fixed; bottom:1.5rem; right:1.5rem;
+            display:flex; align-items:center; gap:.45rem;
+            padding:.72rem 1.15rem; border-radius:9999px;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-weight:700; font-size:.85rem; border:none; cursor:pointer;
+            box-shadow:0 4px 24px rgba(37,244,244,.35);
+            transition:box-shadow .2s, transform .15s;
+            z-index:30;
+        }
+        .fab:hover { box-shadow:0 6px 32px rgba(37,244,244,.5); }
+        .fab:active { transform:scale(.96); }
+        .fab .material-symbols-outlined { font-size:1.1rem; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── Empty ── */
+        .empty-state { display:flex; flex-direction:column; align-items:center; padding:4rem 1rem; color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3.5rem; margin-bottom:1rem; color:#2A2A2A; }
+
+        /* ── Toast ── */
+        #toast {
+            position:fixed; bottom:1.5rem; left:50%;
+            transform:translateX(-50%) translateY(80px);
+            background:#1E1E1E; border:1px solid rgba(37,244,244,.35);
+            color:#f1f5f9; padding:.65rem 1.2rem; border-radius:.75rem;
+            font-size:.85rem; font-weight:500;
+            display:flex; align-items:center; gap:.5rem;
+            z-index:50; opacity:0;
+            transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+            box-shadow:0 8px 32px rgba(0,0,0,.5); white-space:nowrap;
+        }
+        #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+        /* ── Page anim ── */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        .page-enter { animation:fadeUp .35s ease both; }
+
+        /* ── Grid: 1 coluna no mobile, até 3 no desktop ── */
+        @media (max-width: 639px) {
+            #recipe-grid { grid-template-columns: 1fr !important; gap: .75rem !important; }
+        }
+        @media (min-width: 1024px) {
+            #recipe-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
+        /* ── Stat separador ── */
+        .stat-divider { grid-column:1/-1; border:none; border-top:1px solid #222; margin:.15rem 0; }
+
+        /* ── Médias cards ── */
+        .mcard {
+            background: #111; border: 1px solid #1E1E1E;
+            border-radius: .75rem; padding: .75rem .9rem;
+        }
+        .mlbl {
+            font-size: .58rem; font-weight: 700; letter-spacing: .07em;
+            text-transform: uppercase; color: #94a3b8; margin-bottom: .25rem;
+        }
+        .mval { font-size: 1rem; font-weight: 800; color: #f1f5f9; line-height: 1.2; }
+        @media (max-width: 639px) {
+            #medias-wrap > div:last-child { grid-template-columns: repeat(2, 1fr) !important; }
+            .mval { font-size: .9rem; }
+        }
+
+        /* ══════════════════════════════════════
+           MODAL SHEET — Cadastrar Receita
+        ══════════════════════════════════════ */
+        .msheet-bg {
+            position:fixed; inset:0; background:rgba(0,0,0,.65);
+            display:flex; align-items:stretch; justify-content:flex-end;
+            z-index:110; opacity:0; pointer-events:none;
+            transition:opacity .3s;
+        }
+        .msheet-bg.open { opacity:1; pointer-events:auto; }
+        .msheet {
+            background:#141414; border-left:1px solid #2A2A2A;
+            width:100%; max-width:560px;
+            display:flex; flex-direction:column;
+            transform:translateX(100%);
+            transition:transform .38s cubic-bezier(.4,0,.2,1);
+            overflow:hidden;
+        }
+        .msheet-bg.open .msheet { transform:translateX(0); }
+        @media(max-width:600px) {
+            .msheet { max-width:100%; border-left:none; border-radius:1.1rem 1.1rem 0 0;
+                border-top:1px solid #2A2A2A; height:96%; align-self:flex-end; }
+            .msheet-bg { align-items:flex-end; }
+        }
+        .msheet-head {
+            display:flex; align-items:center; gap:.75rem;
+            padding:1rem 1.25rem; border-bottom:1px solid #2A2A2A; flex-shrink:0;
+            background:#141414;
+        }
+        .msheet-body { flex:1; overflow-y:auto; padding:1.25rem; scroll-behavior:smooth; }
+        .msheet-foot {
+            padding:.85rem 1.25rem; border-top:1px solid #2A2A2A; flex-shrink:0;
+            background:#141414; display:flex; gap:.65rem;
+        }
+
+        /* form field */
+        .fl { font-size:.64rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#25f4f4; margin-bottom:.35rem; display:block; }
+        .fi { width:100%; padding:.65rem .9rem; border-radius:.65rem; border:1px solid #2A2A2A !important; background:#1E1E1E !important; color:#f1f5f9 !important; font-size:.875rem; outline:none; transition:border-color .2s,box-shadow .2s; }
+        .fi::placeholder { color:#475569 !important; }
+        .fi:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+        .fi.err { border-color:rgba(248,113,113,.5) !important; }
+        textarea.fi { resize:none; min-height:72px; }
+
+        /* section header */
+        .section-hd {
+            display:flex; align-items:center; gap:.6rem;
+            margin-bottom:.85rem;
+        }
+        .section-hd .ico {
+            width:2rem; height:2rem; border-radius:.5rem;
+            background:rgba(37,244,244,.1);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .section-hd .ico .material-symbols-outlined { font-size:1.05rem; color:#25f4f4; }
+        .section-hd h3 { font-size:.85rem; font-weight:700; }
+        .btn-add-row {
+            display:flex; align-items:center; gap:.35rem;
+            padding:.35rem .75rem; border-radius:.55rem; border:1px dashed rgba(37,244,244,.35);
+            background:transparent; color:#25f4f4; font-size:.75rem; font-weight:600;
+            cursor:pointer; transition:all .15s; margin-left:auto;
+        }
+        .btn-add-row:hover { background:rgba(37,244,244,.07); border-color:rgba(37,244,244,.6); }
+        .btn-add-row .material-symbols-outlined { font-size:.95rem; }
+
+        /* ingredient row */
+        .ing-row {
+            background:#1A1A1A; border:1px solid #2A2A2A; border-radius:.75rem;
+            padding:.85rem; margin-bottom:.5rem;
+            display:flex; flex-direction:column; gap:.65rem;
+            animation:fadeUp .22s ease both;
+        }
+        /* header: select ingrediente + botão delete */
+        .ing-row-head { display:flex; align-items:center; gap:.5rem; }
+        .ing-row-head .fi-sel { flex:1; }
+        .ing-row-head .btn-del {
+            width:2rem; height:2rem; border-radius:.45rem; border:1px solid #2A2A2A;
+            background:transparent; color:#64748b; display:flex; align-items:center;
+            justify-content:center; cursor:pointer; flex-shrink:0; transition:all .15s;
+        }
+        .ing-row-head .btn-del:hover { color:#f87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.06); }
+        .ing-row-head .btn-del .material-symbols-outlined { font-size:.9rem; }
+        /* grid: peso | unidade */
+        .ing-fields { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+        .ing-field { display:flex; flex-direction:column; gap:.28rem; }
+        .ing-lbl { font-size:.62rem; font-weight:600; color:#64748b; letter-spacing:.03em; }
+        /* custo */
+        .ing-custo { font-size:.72rem; color:#64748b; }
+        .ing-custo span { color:#25f4f4; font-weight:600; }
+
+        /* embal/equip row simples */
+        .simple-row {
+            display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;
+            animation:fadeUp .22s ease both;
+        }
+        .simple-row .fi { flex:1; }
+        .simple-row .fi-qty { width:80px; flex-shrink:0; }
+        .simple-row .fi-price { width:100px; flex-shrink:0; }
+        .simple-row .btn-del {
+            width:2rem; height:2rem; border-radius:.45rem; border:1px solid #2A2A2A;
+            background:transparent; color:#64748b; display:flex; align-items:center;
+            justify-content:center; cursor:pointer; flex-shrink:0; transition:all .15s;
+        }
+        .simple-row .btn-del:hover { color:#f87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.06); }
+        .simple-row .btn-del .material-symbols-outlined { font-size:.9rem; }
+
+        /* warning */
+        .warn-row { display:flex; align-items:center; gap:.4rem; color:#64748b; font-size:.78rem; padding:.5rem .7rem; border-radius:.6rem; background:rgba(255,255,255,.03); border:1px dashed #2A2A2A; }
+        .warn-row .material-symbols-outlined { font-size:1rem; }
+
+        /* prévia de custos */
+        .preview-box { background:#111; border:1px solid #2A2A2A; border-radius:.875rem; overflow:hidden; }
+        .preview-head { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem; border-bottom:1px solid #1E1E1E; }
+        .preview-head p { font-size:.75rem; font-weight:700; color:#f1f5f9; }
+        .preview-refresh { background:transparent; border:none; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:.25rem; font-size:.72rem; transition:color .15s; }
+        .preview-refresh:hover { color:#25f4f4; }
+        .preview-refresh .material-symbols-outlined { font-size:.95rem; }
+        .preview-body { padding:.75rem 1rem; display:flex; flex-direction:column; gap:.4rem; }
+        .cost-row { display:flex; justify-content:space-between; font-size:.8rem; }
+        .cost-row .lbl { color:#64748b; }
+        .cost-row .val { font-weight:600; color:#f1f5f9; }
+        .cost-row.total { padding-top:.5rem; border-top:1px solid #222; }
+        .cost-row.total .lbl { color:#f1f5f9; font-weight:700; font-size:.85rem; }
+        .cost-row.total .val { color:#25f4f4; font-size:.85rem; }
+        .unit-box { background:#1A1A1A; border-top:1px solid #222; padding:.65rem 1rem; display:flex; justify-content:space-between; align-items:center; }
+        .unit-box p { font-size:.78rem; }
+        .unit-box .lbl { color:#64748b; }
+        .unit-box .val { color:#4ade80; font-weight:700; }
+
+        /* footer buttons */
+        .btn-save {
+            flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem;
+            padding:.8rem; border-radius:.75rem; border:none;
+            background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a;
+            font-weight:700; font-size:.9rem; cursor:pointer;
+            box-shadow:0 3px 16px rgba(37,244,244,.22);
+            transition:opacity .2s,box-shadow .2s;
+        }
+        .btn-save:hover { opacity:.9; box-shadow:0 5px 24px rgba(37,244,244,.38); }
+        .btn-cancel {
+            padding:.8rem 1.25rem; border-radius:.75rem;
+            border:1px solid #2A2A2A; background:transparent;
+            color:#94a3b8; font-weight:600; font-size:.9rem; cursor:pointer;
+            transition:all .15s;
+        }
+        .btn-cancel:hover { border-color:rgba(37,244,244,.35); color:#25f4f4; }
+        .iconbox { width:2.25rem; height:2.25rem; border-radius:.55rem; background:rgba(37,244,244,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .iconbox .material-symbols-outlined { font-size:1.1rem; color:#25f4f4; }
+
+        /* ── Toggle produto ── */
+        .prod-toggle { position:relative;width:2.4rem;height:1.35rem;flex-shrink:0;display:inline-block; }
+        .prod-toggle input { opacity:0;width:0;height:0;position:absolute; }
+        .prod-toggle .pt-track { position:absolute;inset:0;border-radius:9999px;background:#2A2A2A;transition:background .2s;cursor:pointer; }
+        .prod-toggle input:checked + .pt-track { background:#25f4f4; }
+        .prod-toggle .pt-thumb { position:absolute;top:.175rem;left:.175rem;width:.95rem;height:.95rem;border-radius:9999px;background:#fff;transition:transform .2s;pointer-events:none; }
+        .prod-toggle input:checked ~ .pt-thumb { transform:translateX(1.1rem); }
+
+        /* ── Img upload produto ── */
+        .prod-img-upload { border:2px dashed #2A2A2A;border-radius:.75rem;padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;cursor:pointer;transition:border-color .2s;background:#1A1A1A;position:relative;overflow:hidden; }
+        .prod-img-upload:hover { border-color:rgba(37,244,244,.4); }
+        .prod-img-upload img { width:100%;max-height:120px;object-fit:cover;border-radius:.55rem; }
+
+        /* ── Seção produto destaque ── */
+        .prod-section-box { background:rgba(37,244,244,.03);border:1px solid rgba(37,244,244,.15);border-radius:1rem;padding:1.1rem;display:flex;flex-direction:column;gap:.85rem; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
+
+<!-- ══ Header ═══════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="history.back()">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Receitas</h1>
+
+        <!-- search desktop -->
+        <div class="hidden md:flex" style="position:relative;width:240px">
+            <span class="material-symbols-outlined" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-size:1rem;color:#475569;pointer-events:none">search</span>
+            <input id="search-desktop" type="search" class="search-box" style="padding-left:2.3rem;border-radius:.6rem" placeholder="Buscar receita..." oninput="syncSearch(this.value)" />
+        </div>
+
+        <button class="btn-new hidden md:flex" onclick="openCadastrar()">
+            <span class="material-symbols-outlined">add</span>
+            Cadastrar Receita
+        </button>
+    </div>
+</header>
+
+<!-- ══ Main ═════════════════════════════════════════════════════════ -->
+<main class="max-w-7xl mx-auto px-4 py-5 space-y-4 page-enter">
+
+
+    <!-- Search mobile -->
+    <div class="md:hidden" style="position:relative">
+        <span class="material-symbols-outlined" style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);font-size:1.05rem;color:#475569;pointer-events:none">search</span>
+        <input id="search-mobile" type="search" class="search-box" style="padding-left:2.55rem" placeholder="Buscar receita..." oninput="syncSearch(this.value)" />
+    </div>
+
+    <!-- Filter chips -->
+    <div style="display:flex;gap:.5rem;overflow-x:auto;padding-bottom:2px">
+        <button class="chip active" data-filter="todas" onclick="setFilter('todas',this)">Todas</button>
+        <button class="chip" data-filter="gourmet"  onclick="setFilter('gourmet',this)">Gourmet</button>
+        <button class="chip" data-filter="classica"  onclick="setFilter('classica',this)">Clássica</button>
+        <button class="chip" data-filter="fitness"   onclick="setFilter('fitness',this)">Fitness</button>
+        <button class="chip" data-filter="vegana"    onclick="setFilter('vegana',this)">Vegana</button>
+    </div>
+
+    <!-- Médias das Receitas -->
+    <div id="medias-wrap" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <span class="material-symbols-outlined" style="font-size:.95rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">bar_chart</span>
+                <span style="font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8">Médias das Receitas</span>
+            </div>
+            <span id="medias-count" style="font-size:.68rem;font-weight:600;color:#64748b;background:rgba(255,255,255,.04);border:1px solid #2A2A2A;padding:.2rem .6rem;border-radius:9999px"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.25rem">
+            <div class="mcard" style="border-color:rgba(37,244,244,.2)">
+                <p class="mlbl">Preço Total Médio</p>
+                <p class="mval" id="m-preco-total" style="color:#25f4f4">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(37,244,244,.15)">
+                <p class="mlbl">Preço Unit. Médio</p>
+                <p class="mval" id="m-preco-un" style="color:#25f4f4">—</p>
+            </div>
+            <div class="mcard">
+                <p class="mlbl">Custo Total Médio</p>
+                <p class="mval" id="m-custo-total">—</p>
+            </div>
+            <div class="mcard">
+                <p class="mlbl">Custo Unit. Médio</p>
+                <p class="mval" id="m-custo-un">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(52,211,153,.2)">
+                <p class="mlbl">Lucro Total Médio</p>
+                <p class="mval" id="m-lucro-total" style="color:#34d399">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(52,211,153,.15)">
+                <p class="mlbl">Lucro Unit. Médio</p>
+                <p class="mval" id="m-lucro-un" style="color:#34d399">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(251,191,36,.2)">
+                <p class="mlbl">Margem Média</p>
+                <p class="mval" id="m-margem" style="color:#fbbf24">—</p>
+            </div>
+            <div class="mcard" style="border-color:rgba(167,139,250,.2)">
+                <p class="mlbl">Markup Médio</p>
+                <p class="mval" id="m-markup" style="color:#a78bfa">—</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards grid -->
+    <div id="recipe-grid" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))"></div>
+
+    <!-- Empty -->
+    <div id="empty-state" class="empty-state hidden">
+        <span class="material-symbols-outlined">menu_book</span>
+        <p class="font-semibold text-slate-400 text-lg">Nenhuma receita encontrada</p>
+        <p class="text-sm mt-1">Use o botão acima para cadastrar sua primeira receita.</p>
+    </div>
+
+</main>
+
+<!-- ══ FAB mobile ════════════════════════════════════════════════════ -->
+<button class="fab md:hidden" onclick="openCadastrar()">
+    <span class="material-symbols-outlined">add</span>
+    Cadastrar Receita
+</button>
+
+<!-- ══ Modal Cadastrar Receita ══════════════════════════════════════ -->
+<div id="msheet-bg" class="msheet-bg" role="dialog" aria-modal="true">
+  <div class="msheet">
+
+    <!-- Cabeçalho -->
+    <div class="msheet-head">
+      <div class="iconbox">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">menu_book</span>
+      </div>
+      <div style="flex:1">
+        <p id="msheet-title" class="font-bold text-sm">Cadastrar Receita</p>
+        <p class="text-xs text-slate-400">Preencha as informações da receita</p>
+      </div>
+      <button onclick="closeModal()" style="background:transparent;border:none;color:#64748b;cursor:pointer;display:flex;align-items:center;" aria-label="Fechar">
+        <span class="material-symbols-outlined" style="font-size:1.3rem">close</span>
+      </button>
+    </div>
+
+    <!-- Corpo -->
+    <div class="msheet-body">
+      <form id="form-receita" novalidate onsubmit="salvarReceita(event)" style="display:flex;flex-direction:column;gap:1.4rem">
+
+        <!-- ─ Informações Básicas ─ -->
+        <section>
+          <p class="fl" style="font-size:.7rem;margin-bottom:.75rem">Informações Básicas</p>
+          <div style="display:flex;flex-direction:column;gap:.85rem">
+            <div>
+              <label class="fl" for="r-nome">Nome da receita</label>
+              <input id="r-nome" type="text" class="fi" placeholder="Ex: Ninho com Nutella" autocomplete="off" />
+              <p id="r-nome-err" class="text-red-400 text-xs mt-1" style="display:none">Informe o nome da receita.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+              <div>
+                <label class="fl" for="r-rend">Rendimento (un)</label>
+                <input id="r-rend" type="number" min="1" class="fi" placeholder="Ex: 10" oninput="calcPrevia()" />
+              </div>
+              <div>
+                <label class="fl" for="r-tempo">Preparo (min)</label>
+                <input id="r-tempo" type="number" min="1" class="fi" placeholder="Ex: 45" oninput="calcPrevia()" />
+              </div>
+            </div>
+
+            <div>
+              <label class="fl" for="r-desc">Descrição <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+              <textarea id="r-desc" class="fi" placeholder="Descreva a receita..."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Ingredientes ─ -->
+        <section>
+          <div class="section-hd">
+            <div class="ico"><span class="material-symbols-outlined">inventory_2</span></div>
+            <h3>Ingredientes</h3>
+            <button type="button" class="btn-add-row" onclick="addIngrediente()">
+              <span class="material-symbols-outlined">add_circle</span> Adicionar
+            </button>
+          </div>
+          <div id="ing-list"></div>
+          <div id="ing-warn" class="warn-row">
+            <span class="material-symbols-outlined">info</span>
+            Adicione pelo menos um ingrediente
+          </div>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Embalagens ─ -->
+        <section>
+          <div class="section-hd">
+            <div class="ico"><span class="material-symbols-outlined">package_2</span></div>
+            <h3>Embalagens</h3>
+            <button type="button" class="btn-add-row" onclick="addEmbalagem()">
+              <span class="material-symbols-outlined">add_circle</span> Adicionar
+            </button>
+          </div>
+          
+          <!-- Aviso sobre Rendimento vs Embalagens -->
+          <div class="warn-row mb-3" style="color:#fbbf24; border-color:rgba(251,191,36,.3); background:rgba(251,191,36,.05); display:flex; align-items:flex-start; gap:.5rem">
+            <span class="material-symbols-outlined" style="font-size:1.1rem; margin-top:1px">lightbulb</span>
+            <div style="font-size:.75rem; line-height:1.4">
+              <strong>Atenção:</strong> A quantidade da embalagem deve ser <strong>igual ao rendimento</strong> da sua receita.<br>
+              <span style="color:#fcd34d; opacity:0.9">Ex: Se a receita rende 10 bolos, adicione 10 unidades de embalagem. Se você gasta 1 laço por bolo, adicione 10 laços.</span>
+            </div>
+          </div>
+
+          <div id="embal-list"></div>
+          <p id="embal-empty" class="text-xs text-slate-600" style="padding:.25rem .1rem">Nenhuma embalagem adicionada</p>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Equipamentos ─ -->
+        <section>
+          <div class="section-hd">
+            <div class="ico"><span class="material-symbols-outlined">kitchen</span></div>
+            <h3>Equipamentos</h3>
+            <button type="button" class="btn-add-row" onclick="addEquipamento()">
+              <span class="material-symbols-outlined">add_circle</span> Adicionar
+            </button>
+          </div>
+          <div id="equip-list"></div>
+          <p id="equip-empty" class="text-xs text-slate-600" style="padding:.25rem .1rem">Nenhum equipamento adicionado</p>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Prévia de Custos ─ -->
+        <section>
+          <div class="section-hd" style="margin-bottom:.65rem">
+            <div class="ico"><span class="material-symbols-outlined">assessment</span></div>
+            <h3>Prévia de Custos</h3>
+          </div>
+          <div class="preview-box">
+            <div class="preview-head">
+              <p>Composição de Custos</p>
+              <button type="button" class="preview-refresh" onclick="calcPrevia()">
+                <span class="material-symbols-outlined">refresh</span> Atualizar
+              </button>
+            </div>
+            <div class="preview-body">
+              <div class="cost-row"><span class="lbl">Custo Ingredientes:</span><span class="val" id="cv-ing">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Embalagens:</span><span class="val" id="cv-emb">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Equipamentos:</span><span class="val" id="cv-eqp">R$ 0,00</span></div>
+              <div class="cost-row"><span class="lbl">Custo Mão de Obra:<span id="cv-mob-taxa" style="font-size:.65rem;color:#475569;margin-left:.3rem"></span></span><span class="val" id="cv-mob">R$ 0,00</span></div>
+              <div class="cost-row total"><span class="lbl">Custo Total da Receita:</span><span class="val" id="cv-tot">R$ 0,00</span></div>
+            </div>
+            <div class="unit-box">
+              <div style="display:flex;flex-direction:column;gap:.15rem">
+                <p class="font-bold text-sm">Custo Unitário</p>
+                <p class="text-xs text-slate-500">Custo por Unidade: <span class="val" id="cv-unit">R$ 0,00</span></p>
+              </div>
+              <div style="text-align:right">
+                <p class="text-xs text-slate-500">Rendimento</p>
+                <p class="font-bold" id="cv-rend">1 un</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr style="border:none;border-top:1px solid #2A2A2A" />
+
+        <!-- ─ Produto para Venda ─ -->
+        <section>
+          <div class="section-hd" style="margin-bottom:.5rem">
+            <div class="ico" style="background:rgba(52,211,153,.1)"><span class="material-symbols-outlined" style="color:#34d399">sell</span></div>
+            <h3>Produto para Venda</h3>
+          </div>
+          <p style="font-size:.72rem;color:#64748b;margin-bottom:.85rem;line-height:1.5">
+            Ao salvar, um produto será criado automaticamente em <strong style="color:#25f4f4">Gestão de Produtos</strong>.
+          </p>
+
+          <div class="prod-section-box">
+            <input type="hidden" id="prod-edit-id" />
+
+            <!-- Foto -->
+            <div>
+              <label class="fl">Foto do Produto <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+              <div class="prod-img-upload" onclick="document.getElementById('prod-img-file').click()">
+                <img id="prod-img-preview" style="display:none" alt="preview" />
+                <span class="material-symbols-outlined" id="prod-img-ico" style="font-size:2rem;color:#475569;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24">add_photo_alternate</span>
+                <p id="prod-img-txt" style="font-size:.72rem;color:#64748b">Clique para adicionar foto</p>
+              </div>
+              <input type="file" id="prod-img-file" accept="image/*" style="display:none" onchange="handleProdImgUpload(event)" />
+              <input type="hidden" id="prod-img-val" />
+            </div>
+
+            <!-- Nome do Produto -->
+            <div>
+              <label class="fl" for="prod-nome">Nome do Produto</label>
+              <input id="prod-nome" type="text" class="fi" placeholder="Ex: Ninho com Nutella" autocomplete="off" />
+            </div>
+
+            <!-- Preço de Venda -->
+            <div>
+              <label class="fl" for="prod-preco">Preço de Venda (R$)</label>
+              <div style="position:relative">
+                <span style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">R$</span>
+                <input id="prod-preco" type="number" min="0" step="0.01" class="fi" placeholder="0,00" style="padding-left:2.2rem" />
+              </div>
+            </div>
+
+            <!-- Observações -->
+            <div>
+              <label class="fl" for="prod-obs">Observações <span style="color:#475569;text-transform:none;font-weight:400">(Opcional)</span></label>
+              <textarea id="prod-obs" class="fi" placeholder="Ingredientes, alérgenos, informações extras..."></textarea>
+            </div>
+
+            <!-- Disponível para venda -->
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem .9rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A">
+              <label class="prod-toggle" for="prod-disp">
+                <input type="checkbox" id="prod-disp" checked />
+                <span class="pt-track"></span>
+                <span class="pt-thumb"></span>
+              </label>
+              <div>
+                <p style="font-size:.82rem;font-weight:600;color:#f1f5f9">Disponível para venda</p>
+                <p style="font-size:.7rem;color:#64748b">Aparece no cardápio e relatórios</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </form>
+    </div><!-- /msheet-body -->
+
+    <!-- Rodapé -->
+    <div class="msheet-foot">
+      <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button type="submit" form="form-receita" class="btn-save">
+        <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
+        Salvar Receita
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Toast ═════════════════════════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite">
+    <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
+    <span id="toast-msg">Ação realizada!</span>
+</div>
+
+<!-- ══ Script ════════════════════════════════════════════════════════ -->
+<script>
+/* ─── DADOS ──────────────────────────────────────────────────────── */
+const GRADIENTS = ['grad-1','grad-2','grad-3','grad-4','grad-5','grad-6'];
+
+// receitas em memória — carregadas do Supabase + localStorage como fallback
+let receitas = [];
+
+let searchQuery = '';
+let currentFilter = 'todas';
+
+// localStorage (compatibilidade p/ dados antigos)
+function save() { localStorage.setItem('receitasx_receitas', JSON.stringify(receitas)); }
+
+// Escape especial de HTML
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* Mapeia linha do Supabase para o formato usado pelos cards */
+function sbRowToLocal(r) {
+    return {
+        id:         r.id,          // UUID do Supabase
+        nome:       r.nome,
+        categoria:  r.categoria  || 'gourmet',
+        unidades:   r.unidades   || 1,
+        tempo:      r.tempo      || 0,
+        precoTotal: parseFloat(r.preco_total || 0),
+        custoTotal: parseFloat(r.custo_total || 0),
+        custoIng:   parseFloat(r.custo_ing   || 0),
+        custoEmb:   parseFloat(r.custo_emb   || 0),
+        custoEqp:   parseFloat(r.custo_eqp   || 0),
+        custoMob:   parseFloat(r.custo_mob   || 0),
+        ingredientes:  r.ingredientes  || [],
+        embalagens:    r.embalagens    || [],
+        equipamentos:  r.equipamentos  || [],
+        maoDeObra:     r.mao_de_obra   || [],
+        grad:       r.grad || GRADIENTS[0],
+        created_at: r.created_at,
+    };
+}
+
+/* Carrega receitas do Supabase e cruza preço com produtos vinculados */
+async function carregarReceitas() {
+    try {
+        const user = await getUser();
+        if (!user) {
+            receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [];
+            renderCards();
+            return;
+        }
+        const [resRec, resProd] = await Promise.all([
+            sb.from('receitas').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+            sb.from('produtos').select('id, nome, preco, receita_id').eq('user_id', user.id),
+        ]);
+        if (resRec.error) throw resRec.error;
+
+        // Mapeia receita_id → produto.preco
+        const precoPorReceita = {};
+        (resProd.data || []).forEach(p => {
+            if (p.receita_id) precoPorReceita[p.receita_id] = { preco: parseFloat(p.preco || 0), nome: p.nome };
+        });
+
+        receitas = (resRec.data || []).map(r => {
+            const local = sbRowToLocal(r);
+            const prodInfo = precoPorReceita[r.id];
+            if (prodInfo) local.precoTotal = prodInfo.preco * local.unidades; // preço unit × rendimento = preço total
+            return local;
+        });
+        save();
+    } catch(err) {
+        console.warn('Supabase indisponível, usando localStorage:', err);
+        receitas = JSON.parse(localStorage.getItem('receitasx_receitas') || 'null') || [];
+    }
+    renderCards();
+}
+
+/* ─── CÁLCULOS ───────────────────────────────────────────────────── */
+function calc(r) {
+    const precoUnit  = r.precoTotal / r.unidades;
+    const custoUnit  = r.custoTotal / r.unidades;
+    const lucroTotal = r.precoTotal - r.custoTotal;
+    const lucroUnit  = lucroTotal   / r.unidades;
+    const margem     = (lucroTotal  / r.precoTotal) * 100;
+    const markup     = r.precoTotal / r.custoTotal;
+    return { precoUnit, custoUnit, lucroTotal, lucroUnit, margem, markup };
+}
+
+function fmt(v, prefix='R$ ') {
+    return prefix + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+/* ─── STATS removido — médias agora em renderMedias() ── */
+function updateStats() {}
+
+/* ─── RENDER ─────────────────────────────────────────────────────── */
+function getFiltered() {
+    return receitas.filter(r => {
+        const mF = currentFilter === 'todas' || r.categoria === currentFilter;
+        const mS = r.nome.toLowerCase().includes(searchQuery.toLowerCase());
+        return mF && mS;
+    });
+}
+
+/* ── MÉDIAS ─────────────────────────────────────────────────────── */
+function renderMedias(list) {
+    const wrap = document.getElementById('medias-wrap');
+    // Filtra apenas receitas com preço cadastrado
+    const com = list.filter(r => parseFloat(r.precoTotal) > 0);
+    if (!com.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    document.getElementById('medias-count').textContent = com.length + ' receita' + (com.length > 1 ? 's' : '') + ' com produto';
+
+    const avg = arr => arr.reduce((s, v) => s + v, 0) / arr.length;
+
+    const preTotais = com.map(r => parseFloat(r.precoTotal) || 0);
+    const preUnits  = com.map(r => { const c = calc(r); return c.precoUnit || 0; });
+    const custoTots = com.map(r => parseFloat(r.custoTotal) || 0);
+    const custoUns  = com.map(r => { const c = calc(r); return c.custoUnit || 0; });
+    const lucroTots = com.map(r => { const c = calc(r); return c.lucroTotal || 0; });
+    const lucroUns  = com.map(r => { const c = calc(r); return c.lucroUnit || 0; });
+    const margens   = com.map(r => { const c = calc(r); return c.margem || 0; });
+    const markups   = com.map(r => { const c = calc(r); return c.markup || 0; });
+
+    document.getElementById('m-preco-total').textContent = 'R$ ' + fmt(avg(preTotais));
+    document.getElementById('m-preco-un').textContent    = 'R$ ' + fmt(avg(preUnits));
+    document.getElementById('m-custo-total').textContent = 'R$ ' + fmt(avg(custoTots));
+    document.getElementById('m-custo-un').textContent    = 'R$ ' + fmt(avg(custoUns));
+    document.getElementById('m-lucro-total').textContent = 'R$ ' + fmt(avg(lucroTots));
+    document.getElementById('m-lucro-un').textContent    = 'R$ ' + fmt(avg(lucroUns));
+    document.getElementById('m-margem').textContent      = avg(margens).toFixed(1) + '%';
+    document.getElementById('m-markup').textContent      = avg(markups).toFixed(2) + 'x';
+}
+
+function catLabel(c) {
+    return {gourmet:'Receita Gourmet',classica:'Receita Clássica',fitness:'Receita Fitness',vegana:'Receita Vegana'}[c] || c;
+}
+
+function renderCards() {
+    const list  = getFiltered();
+    const grid  = document.getElementById('recipe-grid');
+    const empty = document.getElementById('empty-state');
+    updateStats(list);
+
+    if (!list.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); renderMedias([]); return; }
+    empty.classList.add('hidden');
+    renderMedias(list);
+
+    grid.innerHTML = list.map(r => {
+        const c = calc(r);
+        const margemOk = c.margem >= 30;
+        return `
+        <div class="recipe-card">
+            <div class="card-cover ${r.grad}">
+                <span class="material-symbols-outlined cover-icon" style="font-variation-settings:'FILL' 1,'wght' 200,'GRAD' 0,'opsz' 48">restaurant</span>
+            </div>
+            <div class="card-body">
+                <div>
+                    <h2 class="font-bold text-base leading-snug">${esc(r.nome)}</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">${catLabel(r.categoria)}</p>
+                </div>
+                <div class="card-meta">
+                    <span><span class="material-symbols-outlined">grid_view</span>${r.unidades} un</span>
+                    <span><span class="material-symbols-outlined">schedule</span>${r.tempo} min</span>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-cell stat-preco">
+                        <p class="lbl">Preço Total</p>
+                        <p class="val">${fmt(r.precoTotal)}</p>
+                    </div>
+                    <div class="stat-cell stat-preco">
+                        <p class="lbl">Preço Unit.</p>
+                        <p class="val">${fmt(c.precoUnit)}</p>
+                    </div>
+                    <div class="stat-cell stat-custo">
+                        <p class="lbl">Custo Total</p>
+                        <p class="val">${fmt(r.custoTotal)}</p>
+                    </div>
+                    <div class="stat-cell stat-custo">
+                        <p class="lbl">Custo Unit.</p>
+                        <p class="val">${fmt(c.custoUnit)}</p>
+                    </div>
+                    <div class="stat-cell stat-lucro">
+                        <p class="lbl">Lucro Total</p>
+                        <p class="val">${fmt(c.lucroTotal)}</p>
+                    </div>
+                    <div class="stat-cell stat-lucro">
+                        <p class="lbl">Lucro Unit.</p>
+                        <p class="val">${fmt(c.lucroUnit)}</p>
+                    </div>
+                    <div class="stat-cell stat-margem">
+                        <p class="lbl">Margem</p>
+                        <p class="val">${c.margem.toFixed(0)}%</p>
+                    </div>
+                    <div class="stat-cell stat-markup">
+                        <p class="lbl">Markup</p>
+                        <p class="val">${c.markup.toFixed(1)}x</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="btn-detail" onclick="verDetalhes(${r.id})">
+                    <span class="material-symbols-outlined">visibility</span> Ver Detalhes
+                </button>
+                <button class="btn-edit" onclick="editarReceita(${r.id})">
+                    <span class="material-symbols-outlined">edit</span> Editar
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ─── AÇÕES ──────────────────────────────────────────────────────── */
+function setFilter(val, btn) {
+    currentFilter = val;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards();
+}
+
+function syncSearch(val) {
+    searchQuery = val;
+    document.getElementById('search-mobile').value  = val;
+    document.getElementById('search-desktop').value = val;
+    renderCards();
+}
+
+function verDetalhes(id) {
+    location.href = `receita-detalhe.html?id=${id}`;
+}
+
+function editarReceita(id) {
+    showToast('Em breve: edição de receita!');
+}
+
+/* ══════════════════════════════════════════════
+   MODAL CADASTRAR RECEITA
+══════════════════════════════════════════════ */
+let insumos     = [];
+let embCatalogo = [];
+let eqpCatalogo = [];
+let ingRows   = [];
+let embalRows = [];
+let equipRows = [];
+let ingIdSeq  = 0;
+let embalIdSeq = 0;
+let equipIdSeq = 0;
+let maoObraHora = 0; // carregado das configurações ao abrir modal
+let _editandoId = null; // UUID da receita sendo editada (null = nova)
+let _editandoProdId = null; // ID do produto vinculado (para update)
+
+/* Carrega insumos, embalagens e equipamentos do Supabase */
+async function carregarCatalogos() {
+    try {
+        const user = await getUser();
+        if (!user) return;
+        const [resIns, resEmb, resEqp] = await Promise.all([
+            sb.from('insumos').select('id, nome, unidade, preco, peso_emb').eq('user_id', user.id).order('nome'),
+            sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
+            sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
+        ]);
+        // Mão de obra: tenta localStorage primeiro, depois busca do Supabase
+        const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
+        maoObraHora = parseFloat(_cfg.horaFinal || _cfg.mao_obra_hora || 0);
+
+        // Fallback: busca do Supabase se não tiver no localStorage
+        if (!maoObraHora && user) {
+            try {
+                const { data: cfgSb } = await sb
+                    .from('configuracoes')
+                    .select('mao_obra_hora')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (cfgSb?.mao_obra_hora) {
+                    maoObraHora = parseFloat(cfgSb.mao_obra_hora);
+                    // Atualiza o localStorage para próximas vezes
+                    _cfg.horaFinal = maoObraHora;
+                    localStorage.setItem('receitasx_config', JSON.stringify(_cfg));
+                }
+            } catch(_) {}
+        }
+
+        console.log('[ReceitasX] maoObraHora:', maoObraHora);
+        const taxaEl = document.getElementById('cv-mob-taxa');
+        if (taxaEl) taxaEl.textContent = maoObraHora > 0 ? `(R$${maoObraHora}/h)` : '(não configurado)';
+        // Normaliza insumos
+        insumos = (resIns.data || []).map(i => ({
+            id:      i.id,
+            nome:    i.nome,
+            unidade: i.unidade || 'g',
+            custo:   parseFloat(i.preco    || 0),
+            peso:    parseFloat(i.peso_emb || 0),
+        }));
+        // Normaliza embalagens: custo unitário = preco / quantidade
+        embCatalogo = (resEmb.data || []).map(e => ({
+            id:    e.id,
+            nome:  e.nome,
+            custo: parseFloat(e.preco || 0),
+            qtd:   parseInt(e.quantidade || 1),
+        }));
+        // Normaliza equipamentos: custo_hora direto
+        eqpCatalogo = (resEqp.data || []).map(e => ({
+            id:     e.id,
+            nome:   e.nome,
+            custoH: parseFloat(e.custo_hora || 0),
+        }));
+    } catch(err) {
+        console.warn('Erro ao carregar catálogos:', err);
+    }
+}
+
+async function openCadastrar() {
+    const ok = await podecriar('receitas');
+    if (!ok) return;
+    _editandoId = null;
+    _editandoProdId = null;
+    document.getElementById('msheet-title').textContent = 'Cadastrar Receita';
+    document.querySelector('.btn-save').textContent = 'Salvar Receita';
+    await carregarCatalogos();
+    ingRows = []; embalRows = []; equipRows = [];
+    ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
+    document.getElementById('form-receita').reset();
+    document.getElementById('ing-list').innerHTML   = '';
+    document.getElementById('embal-list').innerHTML = '';
+    document.getElementById('equip-list').innerHTML = '';
+    document.getElementById('ing-warn').style.display    = 'flex';
+    document.getElementById('embal-empty').style.display = 'block';
+    document.getElementById('equip-empty').style.display = 'block';
+    // Reset campos de produto
+    resetProdFields();
+    calcPrevia();
+    document.getElementById('msheet-bg').classList.add('open');
+    setTimeout(() => document.getElementById('r-nome').focus(), 80);
+}
+
+async function editarReceita(id) {
+    const r = receitas.find(x => x.id === id);
+    if (!r) { showToast('Receita não encontrada', 'error'); return; }
+
+    await carregarCatalogos();
+    _editandoId = id;
+    ingRows = []; embalRows = []; equipRows = [];
+    ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
+
+    // Título e botão
+    document.getElementById('msheet-title').textContent = 'Editar Receita';
+    document.querySelector('.btn-save').textContent = 'Atualizar Receita';
+
+    // Campos básicos
+    document.getElementById('r-nome').value  = r.nome  || '';
+    document.getElementById('r-rend').value  = r.unidades || 1;
+    document.getElementById('r-tempo').value = r.tempo || '';
+    document.getElementById('r-desc').value  = '';
+
+    // Limpa listas
+    document.getElementById('ing-list').innerHTML   = '';
+    document.getElementById('embal-list').innerHTML = '';
+    document.getElementById('equip-list').innerHTML = '';
+    document.getElementById('ing-warn').style.display    = 'flex';
+    document.getElementById('embal-empty').style.display = 'block';
+    document.getElementById('equip-empty').style.display = 'block';
+
+    // Preenche ingredientes salvos
+    (r.ingredientes || []).forEach(ing => {
+        addIngrediente();
+        const rowId = ingRows[ingRows.length - 1];
+        // Seleciona o insumo pelo nome
+        const sel = document.querySelector(`[data-ingid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().startsWith(ing.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; onIngSelect(rowId); }
+        }
+        // Preenche quantidade e unidade
+        const qtyParts = (ing.qty || '').split(' ');
+        const qtyVal   = qtyParts[0] || '';
+        const qtyUn    = qtyParts[1] || 'g';
+        const qtyInput = document.querySelector(`[data-qty="${rowId}"]`);
+        if (qtyInput) { qtyInput.value = qtyVal; }
+        const unSel = document.getElementById(`ing-un-${rowId}`);
+        if (unSel && qtyUn) { unSel.value = qtyUn; unSel.style.color = '#f1f5f9'; }
+        updateIngCusto(rowId);
+    });
+
+    // Preenche embalagens salvas
+    (r.embalagens || []).forEach(emb => {
+        addEmbalagem();
+        const rowId = embalRows[embalRows.length - 1];
+        const sel = document.querySelector(`[data-embid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().startsWith(emb.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const qtyParts = (emb.qty || '').split(' ');
+        const qtyInput = document.querySelector(`[data-emb-qty="${rowId}"]`);
+        if (qtyInput) qtyInput.value = qtyParts[0] || 1;
+        updateEmbCusto(rowId);
+    });
+
+    // Preenche equipamentos salvos
+    (r.equipamentos || []).forEach(eqp => {
+        addEquipamento();
+        const rowId = equipRows[equipRows.length - 1];
+        const sel = document.querySelector(`[data-eqpid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().includes(eqp.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const minsParts = (eqp.qty || '').split(' ');
+        const minsInput = document.querySelector(`[data-eqp-min="${rowId}"]`);
+        if (minsInput) minsInput.value = minsParts[0] || 0;
+        updateEqpCusto(rowId);
+    });
+
+    // Carrega produto vinculado (se existir)
+    _editandoProdId = null;
+    try {
+        const user = await getUser();
+        if (user) {
+            const { data: prod } = await sb.from('produtos')
+                .select('*')
+                .eq('receita_id', id)
+                .eq('user_id', user.id)
+                .maybeSingle();
+            if (prod) {
+                _editandoProdId = prod.id;
+                document.getElementById('prod-edit-id').value = prod.id;
+                document.getElementById('prod-nome').value = prod.nome || '';
+                document.getElementById('prod-preco').value = prod.preco || '';
+                document.getElementById('prod-obs').value = prod.obs || '';
+                document.getElementById('prod-disp').checked = prod.ativo !== false;
+                if (prod.imagem_url) {
+                    document.getElementById('prod-img-val').value = prod.imagem_url;
+                    document.getElementById('prod-img-preview').src = prod.imagem_url;
+                    document.getElementById('prod-img-preview').style.display = 'block';
+                    document.getElementById('prod-img-ico').style.display = 'none';
+                    document.getElementById('prod-img-txt').style.display = 'none';
+                } else {
+                    resetProdImgUI();
+                }
+                document.getElementById('prod-nome')._userEdited = true;
+            } else {
+                resetProdFields();
+                document.getElementById('prod-nome').value = r.nome || '';
+            }
+        }
+    } catch(e) {
+        console.warn('Erro ao carregar produto vinculado:', e);
+        resetProdFields();
+    }
+
+    calcPrevia();
+    document.getElementById('msheet-bg').classList.add('open');
+    setTimeout(() => document.getElementById('r-nome').focus(), 80);
+}
+
+function closeModal() {
+    document.getElementById('msheet-bg').classList.remove('open');
+}
+
+/* ─── INGREDIENTES ─ */
+function addIngrediente() {
+    const id    = ++ingIdSeq;
+    const opts  = insumos.length
+        ? insumos.map(i => `<option value="${i.id}" data-custo="${i.custo||0}" data-peso="${i.peso||0}" data-unidade="${i.unidade}">${i.nome} (${i.peso||'?'} ${i.unidade})</option>`).join('')
+        : '<option value="" disabled>Nenhum insumo cadastrado</option>';
+    const html = `
+    <div class="ing-row" id="ing-${id}">
+      <div class="ing-row-head">
+        <select class="fi fi-sel" data-ingid="${id}" onchange="onIngSelect(${id})" style="-webkit-appearance:none;appearance:none;flex:1">
+          <option value="" disabled selected style="color:#475569">Selecione o ingrediente...</option>
+          ${opts}
+        </select>
+        <button type="button" class="btn-del" onclick="removeIng(${id})">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="ing-fields">
+        <div class="ing-field">
+          <label class="ing-lbl">Peso usada na Receita</label>
+          <input type="number" min="0" step="0.001" class="fi" placeholder="Ex: 250" data-qty="${id}" oninput="updateIngCusto(${id})" />
+        </div>
+        <div class="ing-field">
+          <label class="ing-lbl">Un. Medida usada na Receita</label>
+          <select class="fi ing-unit-sel" id="ing-un-${id}" data-unsel="${id}" onchange="updateIngCusto(${id})" style="-webkit-appearance:none;appearance:none;color:#475569">
+            <option value="" disabled selected>Selecione...</option>
+            <option value="g">g (grama)</option>
+            <option value="kg">kg (quilograma)</option>
+            <option value="ml">ml (mililitro)</option>
+            <option value="l">l (litro)</option>
+            <option value="un">un (unidade)</option>
+          </select>
+        </div>
+      </div>
+      <p class="ing-custo" id="ing-custo-${id}">Custo: <span>R$ 0,00</span></p>
+    </div>`;
+    const list = document.getElementById('ing-list');
+    list.insertAdjacentHTML('beforeend', html);
+    document.getElementById('ing-warn').style.display = 'none';
+    ingRows.push(id);
+    calcPrevia();
+}
+
+function removeIng(id) {
+    document.getElementById(`ing-${id}`)?.remove();
+    ingRows = ingRows.filter(x => x !== id);
+    if (!ingRows.length) document.getElementById('ing-warn').style.display = 'flex';
+    calcPrevia();
+}
+
+/* Chamado ao selecionar o ingrediente: preenche unidade padrão */
+function onIngSelect(id) {
+    const sel = document.querySelector(`[data-ingid="${id}"]`);
+    const opt = sel?.selectedOptions[0];
+    const unInsumo = opt?.dataset.unidade || '';
+    const unSel = document.getElementById(`ing-un-${id}`);
+    if (unSel && unInsumo) {
+        unSel.value = unInsumo;
+        unSel.style.color = '#f1f5f9'; // ativa cor normal
+    }
+    updateIngCusto(id);
+}
+
+/* Tabela de conversão para gramas/ml base */
+function toBase(qty, unit) {
+    // retorna valor em unidade base (g → g, kg → g; ml → ml, l → ml; un → un)
+    const map = { g:1, kg:1000, ml:1, l:1000, un:1 };
+    return qty * (map[unit] ?? 1);
+}
+function toBaseUnit(unit) {
+    return { g:'g', kg:'g', ml:'ml', l:'ml', un:'un' }[unit] ?? unit;
+}
+
+function updateIngCusto(id) {
+    const sel      = document.querySelector(`[data-ingid="${id}"]`);
+    const qty      = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+    const unSel    = document.getElementById(`ing-un-${id}`);
+    const unUsada  = unSel?.value || '';
+    const opt      = sel?.selectedOptions[0];
+    const custoPkg = parseFloat(opt?.dataset.custo  || 0);  // custo da embalagem
+    const pesoInsumo  = parseFloat(opt?.dataset.peso    || 0);  // peso da embalagem
+    const unInsumo    = opt?.dataset.unidade || '';           // unidade da embalagem
+
+    let custo = 0;
+    if (custoPkg > 0 && pesoInsumo > 0 && unUsada) {
+        // Converte tudo para a unidade base do insumo
+        const baseInsumo = toBase(pesoInsumo, unInsumo);  // embalagem em base
+        const baseUsado  = toBase(qty, unUsada);           // quantidade usada em base
+        // só faz sentido se mesma família (g/kg ou ml/l ou un)
+        if (toBaseUnit(unUsada) === toBaseUnit(unInsumo) || unInsumo === 'un') {
+            custo = (baseUsado / baseInsumo) * custoPkg;
+        } else {
+            custo = 0; // conversão impossível (ex: g ↔ ml)
+        }
+    } else if (custoPkg > 0 && unUsada === 'un') {
+        custo = custoPkg * qty;
+    }
+
+    const el = document.getElementById(`ing-custo-${id}`);
+    if (el) el.innerHTML = `Custo: <span>${fmtR(custo)}</span>`;
+    calcPrevia();
+}
+
+/* ─── EMBALAGENS ─ */
+function addEmbalagem() {
+    const id   = ++embalIdSeq;
+    const opts = embCatalogo.length
+        ? embCatalogo.map(e => {
+            const custoUn = e.qtd > 0 ? (e.custo / e.qtd) : 0;
+            return `<option value="${e.id}" data-custo-un="${custoUn.toFixed(4)}" data-nome="${esc(e.nome)}">${esc(e.nome)} (R$ ${custoUn.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}/un)</option>`;
+          }).join('')
+        : '<option value="" disabled>Nenhuma embalagem cadastrada</option>';
+
+    const html = `
+    <div class="ing-row" id="emb-${id}">
+      <div class="ing-row-head">
+        <select class="fi fi-sel" data-embid="${id}" onchange="updateEmbCusto(${id})" style="-webkit-appearance:none;appearance:none;flex:1">
+          <option value="" disabled selected style="color:#475569">Selecione a embalagem...</option>
+          ${opts}
+        </select>
+        <button type="button" class="btn-del" onclick="removeEmb(${id})">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="ing-fields">
+        <div class="ing-field">
+          <label class="ing-lbl">Quantidade usada</label>
+          <input type="number" min="0" step="1" class="fi" placeholder="Ex: 1" data-emb-qty="${id}" oninput="updateEmbCusto(${id})" />
+          <div id="emb-warn-${id}" style="display:none; color: #fbbf24; font-size: 0.75rem; margin-top: 6px; line-height: 1.3; font-weight: 500;">
+            <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: text-bottom; margin-right: 2px;">info</span>
+            Diferente do rendimento
+          </div>
+        </div>
+        <div class="ing-field">
+          <label class="ing-lbl">Custo</label>
+          <div class="fi" style="background:#111 !important;display:flex;align-items:center;color:#25f4f4;font-weight:700;font-size:.82rem" id="emb-custo-dsp-${id}">R$ 0,00</div>
+        </div>
+      </div>
+      <p class="ing-custo" id="emb-custo-${id}">Custo: <span>R$ 0,00</span></p>
+    </div>`;
+    document.getElementById('embal-list').insertAdjacentHTML('beforeend', html);
+    document.getElementById('embal-empty').style.display = 'none';
+    embalRows.push(id);
+    calcPrevia();
+}
+
+function updateEmbCusto(id) {
+    const sel      = document.querySelector(`[data-embid="${id}"]`);
+    const qty      = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
+    const opt      = sel?.selectedOptions[0];
+    const custoUn  = parseFloat(opt?.dataset.custoUn || 0);
+    const total    = custoUn * qty;
+    const dsp      = document.getElementById(`emb-custo-dsp-${id}`);
+    if (dsp) dsp.textContent = fmtR(total);
+    const el = document.getElementById(`emb-custo-${id}`);
+    if (el) el.innerHTML = `Custo: <span>${fmtR(total)}</span>`;
+    calcPrevia();
+}
+
+function removeEmb(id) {
+    document.getElementById(`emb-${id}`)?.remove();
+    embalRows = embalRows.filter(x => x !== id);
+    if (!embalRows.length) document.getElementById('embal-empty').style.display = 'block';
+    calcPrevia();
+}
+
+/* ─── EQUIPAMENTOS ─ */
+function addEquipamento() {
+    const id   = ++equipIdSeq;
+    const opts = eqpCatalogo.length
+        ? eqpCatalogo.map(e => {
+            const ch = e.custoH ?? calcEqpCustoH(e);
+            const tipo = e.tipo === 'eletrico' ? '⚡' : '🔥';
+            return `<option value="${e.id}" data-custo-h="${ch.toFixed(4)}">${tipo} ${esc(e.nome)} (${fmtR(ch)}/h)</option>`;
+          }).join('')
+        : '<option value="" disabled>Nenhum equipamento cadastrado</option>';
+
+    const html = `
+    <div class="ing-row" id="eqp-${id}">
+      <div class="ing-row-head">
+        <select class="fi fi-sel" data-eqpid="${id}" onchange="updateEqpCusto(${id})" style="-webkit-appearance:none;appearance:none;flex:1">
+          <option value="" disabled selected style="color:#475569">Selecione o equipamento...</option>
+          ${opts}
+        </select>
+        <button type="button" class="btn-del" onclick="removeEqp(${id})">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="ing-fields">
+        <div class="ing-field">
+          <label class="ing-lbl">Tempo de uso (min)</label>
+          <input type="number" min="0" step="1" class="fi" placeholder="Ex: 30" data-eqp-min="${id}" oninput="updateEqpCusto(${id})" />
+        </div>
+        <div class="ing-field">
+          <label class="ing-lbl">Custo</label>
+          <div class="fi" style="background:#111 !important;display:flex;align-items:center;color:#25f4f4;font-weight:700;font-size:.82rem" id="eqp-custo-dsp-${id}">R$ 0,00</div>
+        </div>
+      </div>
+      <p class="ing-custo" id="eqp-custo-${id}">Custo: <span>R$ 0,00</span></p>
+    </div>`;
+    document.getElementById('equip-list').insertAdjacentHTML('beforeend', html);
+    document.getElementById('equip-empty').style.display = 'none';
+    equipRows.push(id);
+    calcPrevia();
+}
+
+function calcEqpCustoH(e) {
+    if (e.tipo === 'eletrico') return ((e.watts||0)/1000) * (e.kwh||0.92);
+    return ((e.consumo||0) / (e.bocas||1)) * (e.precoGas||0);
+}
+
+function updateEqpCusto(id) {
+    const sel    = document.querySelector(`[data-eqpid="${id}"]`);
+    const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
+    const opt    = sel?.selectedOptions[0];
+    const custoH = parseFloat(opt?.dataset.custoH || 0);
+    const total  = (mins / 60) * custoH;
+    const dsp    = document.getElementById(`eqp-custo-dsp-${id}`);
+    if (dsp) dsp.textContent = fmtR(total);
+    const el = document.getElementById(`eqp-custo-${id}`);
+    if (el) el.innerHTML = `Custo: <span>${fmtR(total)}</span>`;
+    calcPrevia();
+}
+
+function removeEqp(id) {
+    document.getElementById(`eqp-${id}`)?.remove();
+    equipRows = equipRows.filter(x => x !== id);
+    if (!equipRows.length) document.getElementById('equip-empty').style.display = 'block';
+    calcPrevia();
+}
+
+/* ─── PRÉVIA ─ */
+function fmtR(v) {
+    return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function calcPrevia() {
+    // ── ingredientes com conversão de unidade ──
+    let costIng = 0;
+    document.querySelectorAll('[data-ingid]').forEach(sel => {
+        const id       = sel.dataset.ingid;
+        const qty      = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+        const unSel    = document.getElementById(`ing-un-${id}`);
+        const unUsada  = unSel?.value || '';
+        const opt      = sel.selectedOptions[0];
+        const custoPkg = parseFloat(opt?.dataset.custo   || 0);
+        const pesoPkg  = parseFloat(opt?.dataset.peso    || 0);
+        const unInsumo = opt?.dataset.unidade || '';
+
+        if (custoPkg > 0 && pesoPkg > 0 && unUsada) {
+            const basePkg  = toBase(pesoPkg, unInsumo);
+            const baseUsed = toBase(qty, unUsada);
+            if (toBaseUnit(unUsada) === toBaseUnit(unInsumo)) {
+                costIng += (baseUsed / basePkg) * custoPkg;
+            }
+            // unidades incompatíveis (ex: g ↔ ml) → não soma
+        } else if (custoPkg > 0 && unUsada === 'un') {
+            costIng += custoPkg * qty;
+        }
+    });
+
+    // ── embalagens: custo unitário × quantidade ──
+    let costEmb = 0;
+    const rend = parseInt(document.getElementById('r-rend')?.value) || 1;
+    document.querySelectorAll('[data-embid]').forEach(sel => {
+        const id      = sel.dataset.embid;
+        const qty     = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
+        const opt     = sel.selectedOptions[0];
+        const custoUn = parseFloat(opt?.dataset.custoUn || 0);
+        costEmb += custoUn * qty;
+        
+        // Exibe lembrete se a quantidade de embalagens for maior que 0 e diferente do rendimento
+        const warn = document.getElementById(`emb-warn-${id}`);
+        if (warn) {
+            warn.style.display = (qty > 0 && qty !== rend) ? 'block' : 'none';
+        }
+    });
+
+    // ── equipamentos: (min/60) × custo/h ──
+    let costEqp = 0;
+    document.querySelectorAll('[data-eqpid]').forEach(sel => {
+        const id     = sel.dataset.eqpid;
+        const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
+        const opt    = sel.selectedOptions[0];
+        const custoH = parseFloat(opt?.dataset.custoH || 0);
+        costEqp += (mins / 60) * custoH;
+    });
+
+    // ── mão de obra: (tempo/60) × maoObraHora ──
+    const tempo   = parseFloat(document.getElementById('r-tempo')?.value) || 0;
+    const costMob = maoObraHora > 0 ? (tempo / 60) * maoObraHora : 0;
+    console.log('[ReceitasX] calcPrevia | tempo:', tempo, 'maoObraHora:', maoObraHora, 'costMob:', costMob);
+
+    const total = costIng + costEmb + costEqp + costMob;
+    const unit  = total / rend;
+
+    document.getElementById('cv-ing').textContent  = fmtR(costIng);
+    document.getElementById('cv-emb').textContent  = fmtR(costEmb);
+    document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
+    document.getElementById('cv-mob').textContent  = fmtR(costMob);
+    document.getElementById('cv-tot').textContent  = fmtR(total);
+    document.getElementById('cv-unit').textContent = fmtR(unit);
+    document.getElementById('cv-rend').textContent = rend + ' un';
+}
+
+
+/* ─── PRODUTO: helpers ────────────────────────────────────────────── */
+function resetProdImgUI() {
+    document.getElementById('prod-img-val').value = '';
+    document.getElementById('prod-img-preview').style.display = 'none';
+    document.getElementById('prod-img-preview').src = '';
+    document.getElementById('prod-img-ico').style.display = '';
+    document.getElementById('prod-img-txt').style.display = '';
+}
+function resetProdFields() {
+    document.getElementById('prod-edit-id').value = '';
+    document.getElementById('prod-nome').value = '';
+    document.getElementById('prod-preco').value = '';
+    document.getElementById('prod-obs').value = '';
+    document.getElementById('prod-disp').checked = true;
+    document.getElementById('prod-nome')._userEdited = false;
+    document.getElementById('prod-img-file').value = '';
+    resetProdImgUI();
+}
+function handleProdImgUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        document.getElementById('prod-img-val').value = ev.target.result;
+        document.getElementById('prod-img-preview').src = ev.target.result;
+        document.getElementById('prod-img-preview').style.display = 'block';
+        document.getElementById('prod-img-ico').style.display = 'none';
+        document.getElementById('prod-img-txt').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+// Auto-preenche nome do produto ao digitar nome da receita
+document.addEventListener('DOMContentLoaded', () => {
+    const rNome = document.getElementById('r-nome');
+    const pNome = document.getElementById('prod-nome');
+    if (rNome && pNome) {
+        rNome.addEventListener('input', () => {
+            if (!pNome._userEdited) pNome.value = rNome.value;
+        });
+        pNome.addEventListener('input', () => { pNome._userEdited = true; });
+    }
+});
+
+/* ─── SALVAR ──────────────────────────────────────────────────────── */
+async function salvarReceita(e) {
+    e.preventDefault();
+    const nome = document.getElementById('r-nome').value.trim();
+    if (!nome) {
+        document.getElementById('r-nome').classList.add('err');
+        document.getElementById('r-nome-err').style.display = 'block';
+        document.getElementById('r-nome').focus();
+        return;
+    }
+    const rend  = parseInt(document.getElementById('r-rend').value)  || 1;
+    const tempo = parseInt(document.getElementById('r-tempo').value) || 0;
+    const grad = _editandoId
+        ? (receitas.find(x => x.id === _editandoId)?.grad || GRADIENTS[receitas.length % GRADIENTS.length])
+        : GRADIENTS[receitas.length % GRADIENTS.length];
+
+    // ─ custo de ingredientes ─
+    let custoIng = 0, ingList = [];
+    const ingElements = document.querySelectorAll('[data-ingid]');
+    
+    for (const sel of ingElements) {
+        const id      = sel.dataset.ingid;
+        const qty     = parseFloat(document.querySelector(`[data-qty="${id}"]`)?.value) || 0;
+        const opt     = sel.selectedOptions[0];
+        const custoPkg = parseFloat(opt?.dataset.custo  || 0);
+        const pesoPkg  = parseFloat(opt?.dataset.peso   || 0);
+        const unIns    = opt?.dataset.unidade || '';
+        const unSel    = document.getElementById(`ing-un-${id}`);
+        const unUsada  = unSel?.value || '';
+        let custo = 0;
+        
+        if (custoPkg > 0 && pesoPkg > 0 && unUsada) {
+            const baseIns  = toBase(pesoPkg, unIns);
+            const baseUsed = toBase(qty, unUsada);
+            if (toBaseUnit(unUsada) === toBaseUnit(unIns)) custo = (baseUsed / baseIns) * custoPkg;
+        } else if (custoPkg > 0 && unUsada === 'un') {
+            custo = custoPkg * qty;
+        }
+
+        // BLOQUEIO: Não aceita custo menor que 0.01 (que aparece como 0,00)
+        if (custo < 0.01) {
+            const nomeIng = opt?.text.split('(')[0].trim() || 'Ingrediente';
+            alert(`Erro no ingrediente "${nomeIng}":\n\nO custo calculado é R$ 0,00. Isso geralmente acontece quando o peso do ingrediente foi cadastrado errado no estoque (ex: 1000kg em vez de 1kg).\n\nCorrija o estoque para que o ingrediente tenha um custo real antes de salvar a receita.`);
+            const btnSave = document.querySelector('.btn-save');
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+
+        custoIng += custo;
+        if (opt?.text) ingList.push({ nome: opt.text.split('(')[0].trim(), qty: `${qty} ${unUsada}`, valor: custo });
+    }
+
+    // ─ custo de embalagens ─
+    let custoEmb = 0, embList = [];
+    document.querySelectorAll('[data-embid]').forEach(sel => {
+        const id      = sel.dataset.embid;
+        const qty     = parseFloat(document.querySelector(`[data-emb-qty="${id}"]`)?.value) || 0;
+        const opt     = sel.selectedOptions[0];
+        const custoUn = parseFloat(opt?.dataset.custoUn || 0);
+        const total   = custoUn * qty;
+        custoEmb += total;
+        if (opt?.text) embList.push({ nome: opt.text.split('(')[0].trim(), qty: `${qty} un`, valor: total });
+    });
+
+    // ─ custo de equipamentos ─
+    let custoEqp = 0, eqpList = [];
+    document.querySelectorAll('[data-eqpid]').forEach(sel => {
+        const id     = sel.dataset.eqpid;
+        const mins   = parseFloat(document.querySelector(`[data-eqp-min="${id}"]`)?.value) || 0;
+        const opt    = sel.selectedOptions[0];
+        const custoH = parseFloat(opt?.dataset.custoH || 0);
+        const total  = (mins / 60) * custoH;
+        custoEqp += total;
+        if (opt?.text) eqpList.push({ nome: opt.text.split('(')[0].trim(), qty: `${mins} min`, valor: total });
+    });
+
+    const custoTotal = custoIng + custoEmb + custoEqp;
+
+    // ─ tenta salvar no Supabase ─
+    const btnSave = document.querySelector('.btn-save');
+    if (btnSave) btnSave.disabled = true;
+    try {
+        const user = await getUser();
+        if (user) {
+            const tempoVal   = parseInt(document.getElementById('r-tempo').value) || 0;
+            const custoMobVal = maoObraHora > 0 ? (tempoVal / 60) * maoObraHora : 0;
+            const mobItem     = custoMobVal > 0
+                ? [{ nome: 'Mão de obra', qty: `${tempoVal} min`, valor: custoMobVal }]
+                : [];
+            const payload = {
+                user_id:      user.id,
+                nome,
+                categoria:    'gourmet',
+                unidades:     rend,
+                tempo,
+                preco_total:  0,
+                custo_total:  custoTotal + custoMobVal,
+                custo_ing:    custoIng,
+                custo_emb:    custoEmb,
+                custo_eqp:    custoEqp,
+                custo_mob:    custoMobVal,
+                grad,
+                ingredientes: ingList,
+                embalagens:   embList,
+                equipamentos: eqpList,
+                mao_de_obra:  mobItem,
+            };
+            let savedReceitaId = null;
+            if (_editandoId) {
+                // EDITAR: UPDATE
+                const { data: atualizada, error } = await sb
+                    .from('receitas')
+                    .update(payload)
+                    .eq('id', _editandoId)
+                    .select()
+                    .single();
+                if (error) throw error;
+                savedReceitaId = _editandoId;
+                const idx = receitas.findIndex(x => x.id === _editandoId);
+                if (idx >= 0) receitas[idx] = sbRowToLocal(atualizada);
+            } else {
+                // CADASTRAR: INSERT
+                const { data: nova, error } = await sb.from('receitas').insert(payload).select().single();
+                if (error) throw error;
+                savedReceitaId = nova.id;
+                receitas.unshift(sbRowToLocal(nova));
+                registrarCriacao('receitas');
+            }
+
+            // ─ Salva produto vinculado automaticamente ─
+            if (savedReceitaId) {
+                const custoTotalFinal = custoTotal + custoMobVal;
+                const custoUnit = rend > 0 ? custoTotalFinal / rend : 0;
+                const prodPreco = parseFloat(document.getElementById('prod-preco').value) || 0;
+                const prodPayload = {
+                    user_id:    user.id,
+                    nome:       document.getElementById('prod-nome').value.trim() || nome,
+                    preco:      prodPreco,
+                    custo:      custoUnit,
+                    obs:        document.getElementById('prod-obs').value.trim() || null,
+                    imagem_url: document.getElementById('prod-img-val').value || null,
+                    ativo:      document.getElementById('prod-disp').checked,
+                    receita_id: savedReceitaId,
+                    categoria:  'Gourmet',
+                };
+                try {
+                    if (_editandoProdId) {
+                        await sb.from('produtos').update(prodPayload)
+                            .eq('id', _editandoProdId).eq('user_id', user.id);
+                    } else {
+                        const { data: novoProd } = await sb.from('produtos')
+                            .insert(prodPayload).select().single();
+                        if (novoProd) _editandoProdId = novoProd.id;
+                    }
+                    // Atualiza preco_total da receita com o preço total da fornada
+                    if (prodPreco > 0) {
+                        const precoFornada = prodPreco * rend;
+                        await sb.from('receitas').update({ preco_total: precoFornada })
+                            .eq('id', savedReceitaId);
+                        
+                        // Atualiza estado local para refletir na UI imediatamente
+                        const idxLocal = receitas.findIndex(x => x.id === savedReceitaId);
+                        if (idxLocal >= 0) {
+                            receitas[idxLocal].precoTotal = precoFornada;
+                        }
+                    }
+                } catch(pe) {
+                    console.warn('Erro ao salvar produto:', pe);
+                }
+            }
+        } else {
+            throw new Error('não logado');
+        }
+    } catch(err) {
+        // fallback localStorage
+        console.warn('Supabase indisponível, salvando local:', err);
+        const newId = Date.now();
+        receitas.unshift({ id:newId, nome, categoria:'gourmet', unidades:rend, tempo, precoTotal:0, custoTotal, grad });
+    } finally {
+        if (btnSave) btnSave.disabled = false;
+    }
+
+    save();
+    if (!_editandoId) registrarCriacao('receitas');
+    renderCards();
+    closeModal();
+    showToast(_editandoId ? `"${nome}" atualizada! ✓` : `"${nome}" cadastrada!`);
+    _editandoId = null;
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success') {
+    const t    = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const text = document.getElementById('toast-msg');
+    icon.textContent = type === 'error' ? 'error' : 'check_circle';
+    icon.style.color = type === 'error' ? '#f87171' : '#25f4f4';
+    text.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────── */
+carregarReceitas().then(() => {
+    // Verifica se veio da tela de detalhe para editar uma receita específica
+    const editarId = sessionStorage.getItem('receitasx_editar_id');
+    if (editarId) {
+        sessionStorage.removeItem('receitasx_editar_id');
+        const r = receitas.find(x => String(x.id) === String(editarId));
+        if (r) editarReceita(r.id);
+    }
+});
+injetarAviso('receitas');
+</script>
+<script src="guia-banner.js"></script>
+</body>
+</html>
