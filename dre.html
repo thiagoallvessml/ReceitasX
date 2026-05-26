@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>DRE (Resultados) - ReceitasX</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { primary: "#25f4f4", "background-dark": "#121212", "card-dark": "#1E1E1E", "border-dark": "#2A2A2A" },
+                    fontFamily: { display: ["Inter", "sans-serif"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background-color: #121212; color: #f1f5f9; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        
+        input, select { background-color: #1E1E1E !important; color: #f1f5f9 !important; border-color: #2A2A2A !important; }
+        input:focus, select:focus { border-color: rgba(37,244,244,0.5) !important; box-shadow: 0 0 0 3px rgba(37,244,244,0.07) !important; outline: none !important; }
+        
+        /* Header */
+        .btn-back { display: flex; align-items: center; gap: .3rem; color: #94a3b8; font-size: .85rem; cursor: pointer; transition: color .15s; background: none; border: none; padding: 0; }
+        .btn-back:hover { color: #25f4f4; }
+        
+        /* Layout Grid */
+        .dre-container { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+        
+        /* Main Cards */
+        .dre-card { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 1rem; padding: 1.25rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .dre-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+        
+        .c-receita::before { background: #34d399; }
+        .c-custos::before { background: #f87171; }
+        .c-margem::before { background: #38bdf8; }
+        .c-fixas::before { background: #fbbf24; }
+        
+        .c-lucro { background: linear-gradient(145deg, rgba(37,244,244,0.1) 0%, rgba(37,244,244,0) 100%); border-color: rgba(37,244,244,0.2); }
+        .c-lucro::before { background: #25f4f4; }
+        .c-prejuizo { background: linear-gradient(145deg, rgba(248,113,113,0.1) 0%, rgba(248,113,113,0) 100%); border-color: rgba(248,113,113,0.2); }
+        .c-prejuizo::before { background: #f87171; }
+        
+        .dre-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #94a3b8; margin-bottom: 0.25rem; }
+        .dre-val { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
+        
+        /* Breakdown */
+        .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px dashed #2A2A2A; }
+        .breakdown-row:last-child { border-bottom: none; }
+        .b-label { font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem; }
+        .b-val { font-size: 0.95rem; font-weight: 600; }
+        .b-val.neg { color: #f87171; }
+        .b-val.pos { color: #34d399; }
+        .b-pct { font-size: 0.75rem; color: #64748b; margin-left: 0.5rem; font-weight: 500; }
+        
+        /* Loading Overlay */
+        #loading { position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(18,18,18,0.8); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { border: 3px solid rgba(37,244,244,0.1); border-left-color: #25f4f4; border-radius: 50%; width: 2.5rem; height: 2.5rem; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-20">
+
+<div id="loading">
+    <div class="spinner"></div>
+    <p class="mt-4 text-sm text-slate-400 font-medium">Calculando Resultados...</p>
+</div>
+
+<div class="dre-container">
+    <!-- Header & Filter -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <button onclick="window.history.back()" class="btn-back mb-2">
+                <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_back</span> Voltar
+            </button>
+            <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">monitoring</span>
+                DRE - Resultados
+            </h1>
+            <p class="text-sm text-slate-400 mt-1">Demonstração do Resultado do Exercício</p>
+        </div>
+        
+        <div class="flex gap-2 bg-[#1A1A1A] p-1.5 rounded-xl border border-[#2A2A2A]">
+            <select id="filtro-mes" class="rounded-lg border-none bg-transparent text-sm font-medium py-1.5 focus:ring-0 cursor-pointer" onchange="carregarDRE()">
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+            <div class="w-px bg-[#2A2A2A] my-1"></div>
+            <select id="filtro-ano" class="rounded-lg border-none bg-transparent text-sm font-medium py-1.5 focus:ring-0 cursor-pointer" onchange="carregarDRE()">
+                <!-- Populated by JS -->
+            </select>
+        </div>
+    </div>
+
+    <!-- MAIN DRE STRUCTURE -->
+    <div class="space-y-4">
+        
+        <!-- 1. RECEITA BRUTA -->
+        <div class="dre-card c-receita">
+            <p class="dre-label flex justify-between">
+                <span>1. Receita Bruta</span>
+                <span class="text-emerald-400">100%</span>
+            </p>
+            <p class="dre-val text-emerald-400" id="val-receita">R$ 0,00</p>
+            <p class="text-xs text-slate-500 mt-1">Total de vendas no período (sem devoluções ou descontos)</p>
+        </div>
+        
+        <!-- 2. CUSTOS VARIÁVEIS (Deduções) -->
+        <div class="dre-card c-custos">
+            <p class="dre-label flex justify-between">
+                <span>2. Custos Variáveis (Deduções)</span>
+                <span id="pct-custos" class="text-red-400">0%</span>
+            </p>
+            <p class="dre-val text-red-400" id="val-custos">- R$ 0,00</p>
+            
+            <div class="mt-4 pt-4 border-t border-[#2A2A2A] space-y-1">
+                <div class="breakdown-row">
+                    <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">shopping_basket</span> CMV (Custo das Mercadorias)</span>
+                    <div><span class="b-val neg" id="val-cmv">- R$ 0,00</span><span class="b-pct" id="pct-cmv">0%</span></div>
+                </div>
+                <div class="breakdown-row">
+                    <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">monetization_on</span> Comissões (Apps, Cartão)</span>
+                    <div><span class="b-val neg" id="val-comissoes">- R$ 0,00</span><span class="b-pct" id="pct-comissoes">0%</span></div>
+                </div>
+                <div class="breakdown-row">
+                    <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">account_balance</span> Impostos</span>
+                    <div><span class="b-val neg" id="val-impostos">- R$ 0,00</span><span class="b-pct" id="pct-impostos">0%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. MARGEM DE CONTRIBUIÇÃO -->
+        <div class="dre-card c-margem">
+            <p class="dre-label flex justify-between">
+                <span>3. Margem de Contribuição (1 - 2)</span>
+                <span id="pct-margem" class="text-sky-400">0%</span>
+            </p>
+            <p class="dre-val text-sky-400" id="val-margem">R$ 0,00</p>
+            <p class="text-xs text-slate-500 mt-1">Valor que sobra para pagar as despesas fixas e gerar lucro.</p>
+        </div>
+        
+        <!-- 4. DESPESAS FIXAS -->
+        <div class="dre-card c-fixas">
+            <p class="dre-label flex justify-between">
+                <span>4. Despesas Fixas Operacionais</span>
+                <span id="pct-fixas" class="text-amber-400">0%</span>
+            </p>
+            <p class="dre-val text-amber-400" id="val-fixas">- R$ 0,00</p>
+            <div class="mt-4 pt-4 border-t border-[#2A2A2A]">
+                <div class="breakdown-row">
+                    <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">business</span> Total de Despesas Fixas</span>
+                    <span class="b-val neg" id="val-fixas-detail">- R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. RESULTADO LÍQUIDO -->
+        <div class="dre-card c-lucro mt-6" id="card-resultado">
+            <p class="dre-label flex justify-between text-white" style="color: #cbd5e1;">
+                <span>5. Resultado Líquido Operacional (3 - 4)</span>
+                <span id="pct-resultado" class="text-white">0%</span>
+            </p>
+            <p class="dre-val text-white" id="val-resultado">R$ 0,00</p>
+            <p class="text-xs mt-1" id="label-resultado" style="color: rgba(255,255,255,0.7);">Lucro no período selecionado!</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let userId = null;
+
+async function checkAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+        window.location.href = 'login.html';
+        return;
+    }
+    userId = session.user.id;
+    
+    // Init Filters
+    const hoje = new Date();
+    const selAno = document.getElementById('filtro-ano');
+    for (let ano = hoje.getFullYear(); ano >= hoje.getFullYear() - 5; ano--) {
+        const op = document.createElement('option');
+        op.value = ano; op.textContent = ano;
+        selAno.appendChild(op);
+    }
+    document.getElementById('filtro-mes').value = hoje.getMonth() + 1;
+    document.getElementById('filtro-ano').value = hoje.getFullYear();
+    
+    await carregarDRE();
+}
+
+function fmt(val) {
+    return Number(val || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function pct(val, total) {
+    if (!total || total === 0) return '0%';
+    return ((val / total) * 100).toFixed(1) + '%';
+}
+
+async function carregarDRE() {
+    document.getElementById('loading').style.display = 'flex';
+    
+    const mesStr = document.getElementById('filtro-mes').value.padStart(2, '0');
+    const anoStr = document.getElementById('filtro-ano').value;
+    
+    const startObj = new Date(`${anoStr}-${mesStr}-01T00:00:00`);
+    const endObj = new Date(startObj);
+    endObj.setMonth(endObj.getMonth() + 1);
+    
+    const startISO = startObj.toISOString();
+    const endISO = endObj.toISOString();
+
+    try {
+        // 1. Fetch Sales (Receita Bruta e CMV)
+        const { data: vendas, error: errVendas } = await sb
+            .from('vendas_clientes')
+            .select('valor_total, itens')
+            .eq('user_id', userId)
+            .gte('data_venda', startISO)
+            .lt('data_venda', endISO);
+
+        if (errVendas) throw errVendas;
+
+        let receitaBruta = 0;
+        let cmv = 0;
+
+        if (vendas) {
+            vendas.forEach(v => {
+                receitaBruta += parseFloat(v.valor_total || 0);
+                if (v.itens && Array.isArray(v.itens)) {
+                    v.itens.forEach(item => {
+                        // Se houver custo salvo no momento da venda (implementado agora)
+                        if (item.custo_total_item !== undefined) {
+                            cmv += parseFloat(item.custo_total_item || 0);
+                        } else {
+                            // Legado ou sem custo - fallback (poderíamos buscar na base, mas seria assíncrono por item ou in map)
+                            // Por enquanto ignoramos ou assumimos 0
+                        }
+                    });
+                }
+            });
+        }
+
+        // 2. Fetch Despesas (Impostos, Comissões, Fixas)
+        // Despesas freq=mensal aplicam todos os meses, ou despesas do mes especifico?
+        // Vamos simplificar: pegamos despesas criadas no mês, e também as mensais ativas?
+        // Para uma DRE precisa, o ideal é o usuário registrar "Pagamento de Aluguel" no mês.
+        // Como o app tem frequencia="mensal", assumimos que TODA despesa "fixa" ou "mensal" cadastrada 
+        // conta como despesa do mês atual para a DRE.
+        const { data: despesas, error: errDespesas } = await sb
+            .from('despesas')
+            .select('valor, tipo, categoria')
+            .eq('user_id', userId);
+
+        if (errDespesas) throw errDespesas;
+
+        let impostos = 0;
+        let comissoes = 0;
+        let fixas = 0;
+
+        if (despesas) {
+            despesas.forEach(d => {
+                const val = parseFloat(d.valor || 0);
+                if (d.tipo === 'fixa') {
+                    fixas += val;
+                }
+                
+                // Variáveis (como Impostos e Comissões)
+                if (d.tipo === 'variavel') {
+                    if (d.categoria === 'Impostos') impostos += val;
+                    if (d.categoria === 'Comissões') comissoes += val;
+                }
+            });
+        }
+
+        // CALCULATE
+        const deducoes = cmv + impostos + comissoes;
+        const margem = receitaBruta - deducoes;
+        const resultado = margem - fixas;
+
+        // UPDATE UI
+        const rb = receitaBruta === 0 ? 1 : receitaBruta; // previne div/0 no %
+
+        document.getElementById('val-receita').textContent = fmt(receitaBruta);
+        
+        document.getElementById('val-custos').textContent = '- ' + fmt(deducoes);
+        document.getElementById('pct-custos').textContent = pct(deducoes, rb);
+        
+        document.getElementById('val-cmv').textContent = '- ' + fmt(cmv);
+        document.getElementById('pct-cmv').textContent = pct(cmv, rb);
+        
+        document.getElementById('val-comissoes').textContent = '- ' + fmt(comissoes);
+        document.getElementById('pct-comissoes').textContent = pct(comissoes, rb);
+        
+        document.getElementById('val-impostos').textContent = '- ' + fmt(impostos);
+        document.getElementById('pct-impostos').textContent = pct(impostos, rb);
+
+        document.getElementById('val-margem').textContent = fmt(margem);
+        document.getElementById('pct-margem').textContent = pct(margem, rb);
+
+        document.getElementById('val-fixas').textContent = '- ' + fmt(fixas);
+        document.getElementById('val-fixas-detail').textContent = '- ' + fmt(fixas);
+        document.getElementById('pct-fixas').textContent = pct(fixas, rb);
+
+        const cardRes = document.getElementById('card-resultado');
+        document.getElementById('val-resultado').textContent = fmt(Math.abs(resultado));
+        document.getElementById('pct-resultado').textContent = pct(resultado, rb);
+        
+        if (resultado >= 0) {
+            cardRes.className = 'dre-card c-lucro mt-6';
+            document.getElementById('val-resultado').textContent = fmt(resultado);
+            document.getElementById('label-resultado').textContent = 'Lucro no período selecionado!';
+        } else {
+            cardRes.className = 'dre-card c-prejuizo mt-6';
+            document.getElementById('val-resultado').textContent = '- ' + fmt(Math.abs(resultado));
+            document.getElementById('label-resultado').textContent = 'Prejuízo no período selecionado.';
+        }
+
+    } catch (e) {
+        console.error(e);
+        alert('Erro ao carregar resultados da DRE.');
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', checkAuth);
+</script>
+
+<!-- Bottom Nav (Simplified, adapt to your needs) -->
+<div class="fixed bottom-0 left-0 right-0 h-16 bg-[#1A1A1A] border-t border-[#2A2A2A] z-40">
+    <div class="max-w-md mx-auto h-full grid grid-cols-5 items-center">
+        <!-- Add standard nav items if needed -->
+    </div>
+</div>
+
+<script src="guia-banner.js"></script>
+</body>
+</html>

@@ -206,6 +206,13 @@
         <!-- sub-info do usuário -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-wrap:wrap;flex-shrink:0" id="drawer-tags"></div>
 
+        <!-- ações admin -->
+        <div style="padding:.5rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-shrink:0">
+             <button class="pill" style="color:#25f4f4; border-color:#25f4f4; display:flex; align-items:center; gap:4px;" onclick="impersonateDrawerUser()">
+                 <span class="material-symbols-outlined" style="font-size:14px">login</span> Acessar como este cliente
+             </button>
+        </div>
+
         <!-- busca receitas -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0">
             <div class="search-wrap">
@@ -276,7 +283,7 @@ async function carregarDados() {
         const recMap = {};
         (receitas || []).forEach(r => {
             if (!recMap[r.user_id]) recMap[r.user_id] = [];
-            const custoTotal = parseFloat(r.custo_total || 0);
+            const custoTotal = parseFloat(r.custo_ing || 0) + parseFloat(r.custo_emb || 0) + parseFloat(r.custo_eqp || 0);
             const unidades   = parseInt(r.unidades || 1);
             const precoUnit  = precoPorReceita[r.id] || parseFloat(r.preco_total || r.preco_venda || 0);
             const precoTotal = precoUnit * unidades;
@@ -463,12 +470,21 @@ function renderLista(list) {
 }
 
 // ── Drawer ─────────────────────────────────────────────────────────
+
+let impersonateUserId = null;
+function impersonateDrawerUser() {
+    if(!impersonateUserId) return;
+    localStorage.setItem('impersonate_id', impersonateUserId);
+    window.location.href = 'receitas.html';
+}
+
 function abrirDrawer(userId) {
     const found = todosUsuarios.find(u => u.perfil.id === userId);
     if (!found) return;
 
     const p = found.perfil;
     currentUserReceitas = found.receitas;
+    impersonateUserId = p.id;
 
     // Header do drawer
     const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
@@ -629,14 +645,13 @@ function renderReceitas(lista) {
           </div>
 
           <!-- Composição de custos -->
-          ${(r.custo_ing || r.custo_emb || r.custo_eqp || r.custo_mob) ? `
+          ${(r.custo_ing || r.custo_emb || r.custo_eqp) ? `
           <div style="padding:.5rem 1rem .3rem;border-bottom:1px solid #2A2A2A">
             <div class="ing-list-title"><span class="material-symbols-outlined">receipt_long</span>Composição de Custo</div>
             <div style="display:flex;flex-wrap:wrap;gap:.35rem">
               ${r.custo_ing ? `<span class="rec-tag"><span class="material-symbols-outlined">inventory_2</span>Ing: ${fmtR(r.custo_ing)}</span>` : ''}
               ${r.custo_emb ? `<span class="rec-tag"><span class="material-symbols-outlined">package_2</span>Emb: ${fmtR(r.custo_emb)}</span>` : ''}
               ${r.custo_eqp ? `<span class="rec-tag"><span class="material-symbols-outlined">kitchen</span>Eqp: ${fmtR(r.custo_eqp)}</span>` : ''}
-              ${r.custo_mob ? `<span class="rec-tag"><span class="material-symbols-outlined">person</span>M.O: ${fmtR(r.custo_mob)}</span>` : ''}
             </div>
           </div>`: ''}
 

@@ -249,6 +249,13 @@
         <!-- sub-info do usuário -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-wrap:wrap;flex-shrink:0" id="drawer-tags"></div>
 
+        <!-- ações admin -->
+        <div style="padding:.5rem 1.25rem;border-bottom:1px solid #2A2A2A;display:flex;gap:.5rem;flex-shrink:0">
+             <button class="pill" style="color:#25f4f4; border-color:#25f4f4; display:flex; align-items:center; gap:4px;" onclick="impersonateDrawerUser()">
+                 <span class="material-symbols-outlined" style="font-size:14px">login</span> Acessar como este cliente
+             </button>
+        </div>
+
         <!-- resumo de insumos -->
         <div style="padding:.75rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0;overflow-y:auto;max-height:180px" id="drawer-summary"></div>
 
@@ -461,6 +468,14 @@ function renderLista(list) {
     }).join('');
 }
 
+// ── Impersonate ────────────────────────────────────────────────────
+let impersonateUserId = null;
+function impersonateDrawerUser() {
+    if(!impersonateUserId) return;
+    localStorage.setItem('impersonate_id', impersonateUserId);
+    window.location.href = 'gerenciar-insumos.html';
+}
+
 // ── Drawer ─────────────────────────────────────────────────────────
 function abrirDrawer(userId) {
     const found = todosUsuarios.find(u => u.perfil.id === userId);
@@ -468,6 +483,7 @@ function abrirDrawer(userId) {
 
     const p = found.perfil;
     currentUserInsumos = found.insumos;
+    impersonateUserId = p.id;
 
     // Header do drawer
     const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';

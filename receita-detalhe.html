@@ -248,27 +248,16 @@ async function carregarReceita() {
             console.warn('[Detalhe] Erro ao buscar produto vinculado:', pe);
         }
 
-        // Mão de obra: lida do localStorage
-        const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
-        const maoObraHoraLocal = parseFloat(_cfg.horaFinal || 0);
-
         const prodPrecoUnit = parseFloat(data.preco_total || 0);
         const precoUnit = prodVinculado > 0 ? prodVinculado : prodPrecoUnit;
         const unidades  = data.unidades || 1;
         const tempo     = data.tempo || 0;
 
-        // Mão de obra: maoObraHora (R$/h) × tempo em horas
-        const maoObraHora = maoObraHoraLocal;
-        const custoMobCalc = maoObraHora > 0 ? (tempo / 60) * maoObraHora : parseFloat(data.custo_mob || 0);
-        const maoDeObraItens = maoObraHora > 0 && tempo > 0
-            ? [{ nome: 'Mão de obra', qty: `${tempo} min`, valor: custoMobCalc }]
-            : (data.mao_de_obra || []);
-
-        // Custo total recalculado incluindo mão de obra
+        // Custo total recalculado
         const custoIngVal = parseFloat(data.custo_ing || 0);
         const custoEmbVal = parseFloat(data.custo_emb || 0);
         const custoEqpVal = parseFloat(data.custo_eqp || 0);
-        const custoTotalCalc = custoIngVal + custoEmbVal + custoEqpVal + custoMobCalc;
+        const custoTotalCalc = custoIngVal + custoEmbVal + custoEqpVal;
 
         receitaAtual = {
             id:          data.id,
@@ -282,12 +271,11 @@ async function carregarReceita() {
             custoIng:    custoIngVal,
             custoEmb:    custoEmbVal,
             custoEqp:    custoEqpVal,
-            custoMob:    custoMobCalc,
-            maoObraHora,
+            custoMob:    0,
             ingredientes: data.ingredientes  || [],
             embalagens:   data.embalagens    || [],
             equipamentos: data.equipamentos  || [],
-            maoDeObra:    maoDeObraItens,
+            maoDeObra:    [],
             grad:         data.grad || GRADIENTS[0],
             produtoVinculado: prodNome || null,
         };
@@ -377,17 +365,15 @@ function render() {
     const c = calc(r);
     const grad = r.grad || GRADIENTS[0];
 
-    // ingredientes, embalagens, equipamentos, mão de obra
+    // ingredientes, embalagens, equipamentos
     const ings  = r.ingredientes  || [];
     const embs  = r.embalagens    || [];
     const eqps  = r.equipamentos  || [];
-    const mobs  = r.maoDeObra     || [];
 
     // custo de cada categoria
     const custoIng = r.custoIng  ?? ings.reduce((s,i) => s+(i.valor||0), 0);
     const custoEmb = r.custoEmb  ?? embs.reduce((s,i) => s+(i.valor||0), 0);
     const custoEqp = r.custoEqp  ?? eqps.reduce((s,i) => s+(i.valor||0), 0);
-    const custoMob = r.custoMob  ?? mobs.reduce((s,i) => s+(i.valor||0), 0);
 
     document.getElementById('page-content').innerHTML = `
         <!-- Hero card -->
@@ -434,10 +420,6 @@ function render() {
         ${makeSection('emoji_food_beverage', 'Ingredientes', custoIng, ings, true)}
         ${makeSection('inventory_2',         'Embalagens',   custoEmb, embs, false)}
         ${makeSection('blender',             'Equipamentos', custoEqp, eqps, false)}
-        ${makeSection('person',              r.maoObraHora > 0
-            ? `Mão de Obra (R$ ${r.maoObraHora.toLocaleString('pt-BR',{minimumFractionDigits:2})}/h)`
-            : 'Mão de Obra',
-            custoMob, mobs, false)}
 
         <!-- Resumo Financeiro -->
         <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#475569;margin:.85rem 0 .65rem;display:flex;align-items:center;gap:.4rem">

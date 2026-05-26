@@ -165,9 +165,9 @@ serve(async (req) => {
     }
 
     // ── Comissão do afiliado ─────────────────────────────────────────
-    // Usa ref do metadata, mas se veio vazio, tenta pegar do pedido pendente
-    const refFinal = ref || (pedido as Record<string, unknown>)?.ref_afiliado as string || '';
-    console.log(`Ref para comissão: metadata="${ref}" | pedido="${(pedido as Record<string, unknown>)?.ref_afiliado || ''}" | final="${refFinal}"`);
+    // Usa ref do metadata, mas se veio vazio, tenta pegar do pedido pendente ou do cupom
+    const refFinal = ref || (pedido as Record<string, unknown>)?.ref_afiliado as string || cupom || (pedido as Record<string, unknown>)?.cupom_usado as string || '';
+    console.log(`Ref para comissão: metadata="${ref}" | pedido="${(pedido as Record<string, unknown>)?.ref_afiliado || ''}" | cupom="${cupom}" | final="${refFinal}"`);
 
     if (refFinal && pedido) {
       try {

@@ -282,59 +282,7 @@
         <!-- ════ COLUNA DIREITA ════ -->
         <div style="display:flex;flex-direction:column;gap:1.25rem">
 
-            <!-- ── Preço e Mão de Obra ── -->
-            <section>
-                <h2 class="sec-title">
-                    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">engineering</span>
-                    Preço e Mão de Obra
-                </h2>
-                <div class="cfg-card">
 
-                    <!-- Calculadora -->
-                    <div class="card-sub">
-                        <span class="material-symbols-outlined">calculate</span>
-                        Calculadora de Custo/Hora
-                    </div>
-
-                    <label class="field-label" for="salario">Salário Mensal (R$)</label>
-                    <div class="fc-prefix">
-                        <span class="prefix">R$</span>
-                        <input id="salario" type="number" min="0" step="0.01" class="fc" placeholder="2800" oninput="calcHora()" />
-                    </div>
-
-                    <!-- Resultado calculado -->
-                    <div class="calc-box" style="margin-top:.85rem">
-                        <div style="font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.5rem">Valor Calculado da Hora</div>
-                        <div class="calc-result">
-                            <div>
-                                <span style="color:#64748b;font-size:.85rem;font-weight:600;margin-right:.25rem">R$</span>
-                                <span id="hora-calc" class="calc-val">0,00</span>
-                            </div>
-                            <div class="calc-base">
-                                BASE DE CÁLCULO<br>220 horas/mês
-                            </div>
-                        </div>
-                        <button class="btn-usar" onclick="usarValorCalculado()">
-                            <span class="material-symbols-outlined">arrow_downward</span>
-                            Usar este valor como Hora Trabalhada
-                        </button>
-                    </div>
-
-                    <!-- Info fórmula -->
-                    <div class="hint" style="margin-top:.75rem">
-                        <span class="material-symbols-outlined">info</span>
-                        <span>Fórmula: Salário ÷ <strong style="color:#f1f5f9">220 horas mensais</strong> <em>(padrão CLT: 44h/semana)</em>.</span>
-                    </div>
-
-                    <!-- Hora trabalhada manual -->
-                    <label class="field-label" for="hora-final">Valor da Hora Trabalhada (R$/hora)</label>
-                    <div class="fc-prefix">
-                        <span class="prefix">R$</span>
-                        <input id="hora-final" type="number" min="0" step="0.01" class="fc" placeholder="0,00" />
-                    </div>
-                    <p class="text-xs text-slate-500 mt-2">Este valor é usado na composição de custos das receitas (Custo Mão de Obra).</p>
-                </div>
-            </section>
 
             <!-- ── Taxas de Pagamento ── -->
             <section>
@@ -469,6 +417,7 @@
                 <div><label class="field-label" for="cf-maquininha">Aluguel Maquininha</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-maquininha" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
                 <div><label class="field-label" for="cf-mei">MEI</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-mei" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
                 <div><label class="field-label" for="cf-gasolina">Gasolina / Transporte</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-gasolina" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
+                <div><label class="field-label" for="cf-salario">Pró-Labore / Salário</label><div class="fc-prefix"><span class="prefix">R$</span><input id="cf-salario" type="number" min="0" step="0.01" class="fc" placeholder="0,00" /></div></div>
             </div>
 
             <!-- Dynamic custom fixed costs -->
@@ -760,8 +709,8 @@ function applyConfig(cfg) {
     document.getElementById('cf-maquininha').value = v(cfg?.cfMaquininha);
     document.getElementById('cf-mei').value = v(cfg?.cfMei);
     document.getElementById('cf-gasolina').value = v(cfg?.cfGasolina);
+    document.getElementById('cf-salario').value = v(cfg?.cfSalario);
 
-    calcHora();
     updateGasKg();
     renderMkts();
     renderCf();
@@ -790,8 +739,6 @@ async function salvar() {
         combBaixa: parseFloat(document.getElementById('comb-baixa').value) || DEFAULTS.combBaixa,
         combRazo:  parseFloat(document.getElementById('comb-razo').value)  || DEFAULTS.combRazo,
         combExcel: parseFloat(document.getElementById('comb-excel').value) || DEFAULTS.combExcel,
-        salario:   parseFloat(document.getElementById('salario').value)    || DEFAULTS.salario,
-        horaFinal: parseFloat(document.getElementById('hora-final').value) || DEFAULTS.horaFinal,
         taxaCartao: parseFloat(document.getElementById('taxa-cartao').value) || DEFAULTS.taxaCartao,
         taxaImposto: parseFloat(document.getElementById('taxa-imposto').value) || DEFAULTS.taxaImposto,
         taxaComissao: parseFloat(document.getElementById('taxa-comissao').value) || DEFAULTS.taxaComissao,
@@ -805,6 +752,7 @@ async function salvar() {
         cfMaquininha: parseFloat(document.getElementById('cf-maquininha').value) || DEFAULTS.cfMaquininha,
         cfMei: parseFloat(document.getElementById('cf-mei').value) || DEFAULTS.cfMei,
         cfGasolina: parseFloat(document.getElementById('cf-gasolina').value) || DEFAULTS.cfGasolina,
+        cfSalario: parseFloat(document.getElementById('cf-salario').value) || 0,
     };
 
     // 1. Salva no localStorage (leitura rápida offline / fallback)
@@ -820,7 +768,6 @@ async function salvar() {
                 gas_custo:     custoKg,            // custo por kg
                 gas_rendimento: gasPeso,           // peso do botiajão
                 energia_kwh:   cfg.kwh,
-                mao_obra_hora: cfg.horaFinal,
                 meta_margem:   cfg.precExcel,
                 taxa_cartao:   cfg.taxaCartao,
                 taxa_imposto:  cfg.taxaImposto,
@@ -835,6 +782,7 @@ async function salvar() {
                 cf_maquininha: cfg.cfMaquininha,
                 cf_mei:        cfg.cfMei,
                 cf_gasolina:   cfg.cfGasolina,
+                cf_salario:    cfg.cfSalario,
                 marketplaces:  marketplaces,
                 cf_outros:     custosFixos,
                 updated_at:    new Date().toISOString(),
@@ -852,26 +800,9 @@ async function salvar() {
     }
 }
 
-/* ─── CALCULADORA HORA ───────────────────────────────────────────── */
+/* ─── AUXILIARES ───────────────────────────────────────────── */
 function fmtR(v) {
     return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-function calcHora() {
-    const sal  = parseFloat(document.getElementById('salario').value) || 0;
-    const hora = sal / 220;
-    document.getElementById('hora-calc').textContent = fmtR(hora);
-}
-
-function usarValorCalculado() {
-    const sal  = parseFloat(document.getElementById('salario').value) || 0;
-    const hora = sal / 220;
-    document.getElementById('hora-final').value = hora.toFixed(2);
-    // feedback visual
-    const el = document.getElementById('hora-final');
-    el.style.borderColor = 'rgba(37,244,244,.7)';
-    setTimeout(() => { el.style.borderColor = ''; }, 1500);
-    showToast('Valor aplicado!');
 }
 
 /* ─── GÁS KG ─────────────────────────────────────────────────────── */

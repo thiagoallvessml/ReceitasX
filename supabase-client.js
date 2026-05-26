@@ -32,8 +32,34 @@ async function getSession(forceRefresh) {
     _sessionPromise = sb.auth.getSession()
         .then(({ data: { session } }) => {
             _sessionCache = session;
+
+            // --- IMPERSONATE LOGIC ---
+            if (session && localStorage.getItem('impersonate_id')) {
+                try {
+                    _sessionCache = JSON.parse(JSON.stringify(session));
+                    _sessionCache.user.id = localStorage.getItem('impersonate_id');
+                    
+                    if (typeof window !== 'undefined') {
+                        const injectBanner = () => {
+                            if (document.getElementById('impersonate-banner')) return;
+                            const b = document.createElement('div');
+                            b.id = 'impersonate-banner';
+                            b.style.cssText = 'position:fixed;top:6px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;z-index:999999;text-align:center;padding:6px 12px;font-weight:bold;font-size:12px;display:flex;justify-content:center;align-items:center;gap:10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.5);width:max-content;max-width:90%;';
+                            b.innerHTML = `⚠️ Acessando como Cliente <button onclick="localStorage.removeItem('impersonate_id'); window.location.href='admin-receitas-usuarios.html';" style="background:#fff;color:#ef4444;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:11px;">Sair</button>`;
+                            document.body.appendChild(b);
+                        };
+                        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                            injectBanner();
+                        } else {
+                            document.addEventListener('DOMContentLoaded', injectBanner);
+                        }
+                    }
+                } catch(e){}
+            }
+            // -------------------------
+
             _sessionPromise = null;
-            return session;
+            return _sessionCache;
         })
         .catch(e => {
             console.warn('[getSession] erro:', e.message);
@@ -53,13 +79,20 @@ async function signOut() {
     _sessionCache = null;
     _sessionPromise = null;
     sessionStorage.removeItem('receitasx_session_id');
+    localStorage.removeItem('impersonate_id');
     await sb.auth.signOut();
     window.location.href = 'login.html';
 }
 
-// Atualiza cache quando sessão muda (refresh, login, logout)
 sb.auth.onAuthStateChange((event, session) => {
-    _sessionCache = session;
+    if (session) {
+        _sessionCache = JSON.parse(JSON.stringify(session));
+        if (localStorage.getItem('impersonate_id')) {
+            _sessionCache.user.id = localStorage.getItem('impersonate_id');
+        }
+    } else {
+        _sessionCache = session;
+    }
     if (event === 'SIGNED_OUT') {
         sessionStorage.removeItem('receitasx_session_id');
     }

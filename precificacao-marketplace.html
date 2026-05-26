@@ -273,22 +273,30 @@ async function carregarDados() {
         const user = session.user;
         const { data, error } = await sb
             .from('produtos')
-            .select('*')
+            .select('*, receitas(custo_ing, custo_emb, custo_eqp, unidades)')
             .eq('user_id', user.id)
             .order('nome');
         if (!error && data) {
-            produtos = data.map(p => ({
-                id:        p.id,
-                nome:      p.nome,
-                preco:     parseFloat(p.preco || 0),
-                custo:     parseFloat(p.custo || 0),
-                obs:       p.obs || '',
-                img:       p.imagem_url || '',
-                disp:      p.ativo !== false,
-                receitaId: p.receita_id || null,
-                cat:       p.categoria || 'Gourmet',
-                _supabase: true,
-            }));
+            produtos = data.map(p => {
+                let finalCusto = parseFloat(p.custo || 0);
+                if (p.receitas) {
+                    const sum = parseFloat(p.receitas.custo_ing || 0) + parseFloat(p.receitas.custo_emb || 0) + parseFloat(p.receitas.custo_eqp || 0);
+                    const un = p.receitas.unidades > 0 ? p.receitas.unidades : 1;
+                    finalCusto = sum / un;
+                }
+                return {
+                    id:        p.id,
+                    nome:      p.nome,
+                    preco:     parseFloat(p.preco || 0),
+                    custo:     finalCusto,
+                    obs:       p.obs || '',
+                    img:       p.imagem_url || '',
+                    disp:      p.ativo !== false,
+                    receitaId: p.receita_id || null,
+                    cat:       p.categoria || 'Gourmet',
+                    _supabase: true,
+                };
+            });
             // Sincroniza localStorage para manter compatibilidade
             localStorage.setItem('receitasx_produtos', JSON.stringify(produtos));
         } else {

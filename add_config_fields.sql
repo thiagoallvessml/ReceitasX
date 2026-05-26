@@ -12,5 +12,6 @@ ADD COLUMN IF NOT EXISTS cf_limpeza numeric DEFAULT 0,
 ADD COLUMN IF NOT EXISTS cf_maquininha numeric DEFAULT 0,
 ADD COLUMN IF NOT EXISTS cf_mei numeric DEFAULT 0,
 ADD COLUMN IF NOT EXISTS cf_gasolina numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cf_salario numeric DEFAULT 0,
 ADD COLUMN IF NOT EXISTS cf_outros jsonb DEFAULT '[]'::jsonb,
 ADD COLUMN IF NOT EXISTS marketplaces jsonb DEFAULT '[]'::jsonb;

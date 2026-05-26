@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Despesas - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
     <link rel="stylesheet" href="critical.css" />
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -210,6 +212,8 @@
             <button class="chip" data-filter="Energia"           onclick="setFilter('Energia',this)">Energia</button>
             <button class="chip" data-filter="Marketing"         onclick="setFilter('Marketing',this)">Marketing</button>
             <button class="chip" data-filter="Fornecedores"      onclick="setFilter('Fornecedores',this)">Fornecedores</button>
+            <button class="chip" data-filter="Comissões"         onclick="setFilter('Comissões',this)">Comissões</button>
+            <button class="chip" data-filter="Impostos"          onclick="setFilter('Impostos',this)">Impostos</button>
             <button class="chip" data-filter="Outros"            onclick="setFilter('Outros',this)">Outros</button>
         </div>
         <!-- Botão excluir categoria selecionada -->
@@ -285,6 +289,7 @@
             <option value="Transporte">Transporte</option>
             <option value="Equipamentos">Equipamentos</option>
             <option value="Impostos">Impostos</option>
+            <option value="Comissões">Comissões</option>
             <option value="Outros">Outros</option>
           </select>
           <span class="chev material-symbols-outlined">expand_more</span>
@@ -400,15 +405,32 @@
 
 <script>
 /* ─── DADOS ──────────────────────────────────────────────────────── */
-const KEY = 'receitasx_despesas';
-
-let despesas = JSON.parse(localStorage.getItem(KEY) || 'null') || [];
-
+let despesas = [];
+let userId = null;
 let currentFilter = 'todas';
 let pendingDelId  = null;
 
-function save() { localStorage.setItem(KEY, JSON.stringify(despesas)); }
-if (!localStorage.getItem(KEY)) save();
+async function checkAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+        window.location.href = 'login.html';
+        return;
+    }
+    userId = session.user.id;
+    await loadDespesas();
+}
+
+async function loadDespesas() {
+    const { data, error } = await sb.from('despesas').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    if (!error && data) {
+        // Map from DB structure to frontend structure
+        despesas = data.map(d => ({
+            ...d,
+            cat: d.categoria // Frontend expects 'cat'
+        }));
+        render();
+    }
+}
 
 /* ─── HELPERS ────────────────────────────────────────────────────── */
 function fmtR(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -417,13 +439,13 @@ const CAT_ICONS = {
     'Aluguel':'home','Energia':'bolt','Água':'water_drop','Internet':'wifi',
     'Marketing':'campaign','Fornecedores':'local_shipping','Embalagens':'inventory',
     'Mão de Obra':'engineering','Transporte':'local_taxi','Equipamentos':'kitchen',
-    'Impostos':'account_balance','Outros':'more_horiz'
+    'Comissões':'monetization_on','Impostos':'account_balance','Outros':'more_horiz'
 };
 const CAT_COLORS = {
     'Aluguel':'#f59e0b','Energia':'#fbbf24','Água':'#38bdf8','Internet':'#60a5fa',
     'Marketing':'#a78bfa','Fornecedores':'#f97316','Embalagens':'#34d399',
     'Mão de Obra':'#25f4f4','Transporte':'#fb7185','Equipamentos':'#94a3b8',
-    'Impostos':'#f87171','Outros':'#64748b'
+    'Comissões':'#ec4899','Impostos':'#f87171','Outros':'#64748b'
 };
 
 function catIcon(cat) { return CAT_ICONS[cat] || 'receipt_long'; }
@@ -434,14 +456,12 @@ function freqLabel(f) {
 }
 
 /* ─── FILTER / RENDER ────────────────────────────────────────────── */
-// Filtros que representam categorias excluíveis (não são tipos)
 const CATS_TIPO = ['todas', 'fixa', 'variavel'];
 
 function setFilter(f, btn) {
     currentFilter = f;
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
-    // Mostra botão X apenas ao selecionar uma categoria real
     const delBtn = document.getElementById('btn-del-cat');
     const isCat = !CATS_TIPO.includes(f);
     delBtn.style.display = isCat ? 'flex' : 'none';
@@ -499,8 +519,8 @@ function render() {
             <div class="desp-meta">
               <span class="desp-cat">${d.cat}</span>
               <span class="badge-tipo ${d.tipo==='fixa'?'badge-fixa':'badge-var'}">${d.tipo==='fixa'?'Fixa':'Variável'}</span>
-              <span class="desp-cat">${freqLabel(d.freq)}</span>
-              ${d.venc ? `<span class="desp-venc"><span class="material-symbols-outlined">event</span> Venc. dia ${d.venc}</span>` : ''}
+              <span class="desp-cat">${freqLabel(d.frequencia || d.freq)}</span>
+              ${d.vencimento || d.venc ? `<span class="desp-venc"><span class="material-symbols-outlined">event</span> Venc. dia ${d.vencimento || d.venc}</span>` : ''}
             </div>
           </div>
           <div class="desp-right">
@@ -549,8 +569,8 @@ function openModal(id) {
         document.getElementById('f-nome').value  = d.nome;
         document.getElementById('f-cat').value   = d.cat;
         document.getElementById('f-valor').value = d.valor;
-        document.getElementById('f-freq').value  = d.freq;
-        document.getElementById('f-venc').value  = d.venc || '';
+        document.getElementById('f-freq').value  = d.frequencia || d.freq || 'mensal';
+        document.getElementById('f-venc').value  = d.vencimento || d.venc || '';
         document.getElementById('f-obs').value   = d.obs  || '';
         selectTipo(d.tipo);
         document.getElementById('modal-title').textContent    = 'Editar Despesa';
@@ -565,7 +585,7 @@ function openModal(id) {
 
 function closeModal() { document.getElementById('modal-desp').classList.remove('open'); }
 
-function salvar() {
+async function salvar() {
     const nome  = document.getElementById('f-nome').value.trim();
     const valor = parseFloat(document.getElementById('f-valor').value);
     let valid = true;
@@ -575,27 +595,31 @@ function salvar() {
     else        { document.getElementById('f-valor').classList.remove('error'); document.getElementById('f-valor-err').style.display='none'; }
     if (!valid) return;
 
+    document.getElementById('btn-salvar-txt').textContent = 'Salvando...';
+
     const data = {
+        user_id: userId,
         nome,
-        cat:   document.getElementById('f-cat').value,
+        categoria: document.getElementById('f-cat').value,
         tipo:  document.getElementById('f-tipo').value,
         valor,
-        freq:  document.getElementById('f-freq').value,
-        venc:  parseInt(document.getElementById('f-venc').value) || null,
-        obs:   document.getElementById('f-obs').value.trim(),
+        frequencia:  document.getElementById('f-freq').value,
+        vencimento:  parseInt(document.getElementById('f-venc').value) || null,
+        obs:   document.getElementById('f-obs').value.trim()
     };
 
     const idVal = document.getElementById('f-id').value;
     if (idVal) {
-        const idx = despesas.findIndex(x => x.id === parseInt(idVal));
-        if (idx !== -1) despesas[idx] = { ...despesas[idx], ...data };
-        showToast(`"${nome}" atualizada!`);
+        const { error } = await sb.from('despesas').update(data).eq('id', idVal);
+        if(!error) showToast(`"${nome}" atualizada!`);
+        else showToast(error.message, 'error');
     } else {
-        const newId = Math.max(0, ...despesas.map(x => x.id)) + 1;
-        despesas.push({ id:newId, ...data });
-        showToast(`"${nome}" adicionada!`);
+        const { error } = await sb.from('despesas').insert(data);
+        if(!error) showToast(`"${nome}" adicionada!`);
+        else showToast(error.message, 'error');
     }
-    save(); render(); closeModal();
+    await loadDespesas();
+    closeModal();
 }
 
 /* ─── DELETE ─────────────────────────────────────────────────────── */
@@ -607,11 +631,12 @@ function openDel(id) {
     document.getElementById('modal-del').classList.add('open');
 }
 function closeDel() { document.getElementById('modal-del').classList.remove('open'); pendingDelId = null; }
-function confirmarDel() {
+async function confirmarDel() {
     if (!pendingDelId) return;
     const d = despesas.find(x => x.id === pendingDelId);
-    despesas = despesas.filter(x => x.id !== pendingDelId);
-    save(); render(); closeDel();
+    await sb.from('despesas').delete().eq('id', pendingDelId);
+    await loadDespesas(); 
+    closeDel();
     showToast(`"${d?.nome}" excluída!`, 'error');
 }
 
@@ -622,17 +647,18 @@ function openDelCat() {
     document.getElementById('modal-del-cat').classList.add('open');
 }
 function closeDelCat() { document.getElementById('modal-del-cat').classList.remove('open'); }
-function confirmarDelCat() {
+async function confirmarDelCat() {
     const cat = currentFilter;
     const qtd = despesas.filter(d => d.cat === cat).length;
-    despesas = despesas.filter(d => d.cat !== cat);
-    save();
-    // Volta filtro para Todas
+    
+    await sb.from('despesas').delete().eq('user_id', userId).eq('categoria', cat);
+
     currentFilter = 'todas';
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     document.querySelector('[data-filter="todas"]').classList.add('active');
     document.getElementById('btn-del-cat').style.display = 'none';
-    render();
+    
+    await loadDespesas();
     closeDelCat();
     showToast(`${qtd} despesa${qtd!==1?'s':''} de "${cat}" excluída${qtd!==1?'s':''}!`, 'error');
 }
@@ -641,7 +667,7 @@ function confirmarDelCat() {
 function exportarCSV() {
     const head = 'Nome,Categoria,Tipo,Valor,Frequência,Vencimento,Observações';
     const rows = despesas.map(d =>
-        `"${d.nome}","${d.cat}","${d.tipo==='fixa'?'Fixa':'Variável'}","${d.valor}","${freqLabel(d.freq)}","${d.venc||''}","${d.obs||''}"`
+        `"${d.nome}","${d.cat}","${d.tipo==='fixa'?'Fixa':'Variável'}","${d.valor}","${freqLabel(d.frequencia || d.freq)}","${d.vencimento || d.venc||''}","${d.obs||''}"`
     );
     const csv = [head, ...rows].join('\n');
     const a   = document.createElement('a');
@@ -674,7 +700,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
-render();
+checkAuth();
 </script>
 <script src="guia-banner.js"></script>
 </body>

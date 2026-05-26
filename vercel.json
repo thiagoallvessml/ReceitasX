@@ -10,7 +10,8 @@
     { "source": "/produtos",     "destination": "/gestao-produtos.html" },
     { "source": "/configuracoes","destination": "/configuracoes.html" },
     { "source": "/login",        "destination": "/login.html" },
-    { "source": "/perfil",       "destination": "/perfil.html" }
+    { "source": "/perfil",       "destination": "/perfil.html" },
+    { "source": "/dre",          "destination": "/dre.html" }
   ],
   "redirects": [
     { "source": "/OFERTA", "destination": "/oferta", "permanent": true },

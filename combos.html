@@ -279,7 +279,7 @@
         .m-val { font-size:.95rem;font-weight:800;color:#f1f5f9; }
 
         /* lucro box destaque */
-        .lucro-box { background:linear-gradient(135deg,rgba(37,244,244,.08),rgba(37,244,244,.04));border:1px solid rgba(37,244,244,.2);border-radius:.9rem;padding:.9rem 1rem;position:relative;overflow:hidden; }
+        .lucro-box { background:linear-gradient(135deg,rgba(37,244,244,.08),rgba(37,244,244,.04));border:1px solid rgba(37,244,244,.2);border-radius:.9rem;padding:.9rem 1rem;position:relative; }
         .lucro-box-top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem; }
         .lucro-label { font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#25f4f4; }
         .margem-badge { font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#25f4f4; }
@@ -1058,6 +1058,10 @@ function salvar() {
     document.getElementById('f-nome').classList.remove('error');
     document.getElementById('f-nome-err').style.display = 'none';
 
+    const itens = Object.entries(selectedItems).map(([prodId, qty]) => ({
+        prodId: parseInt(prodId),
+        qty: qty || 1,
+    }));
 
     const data = {
         nome,

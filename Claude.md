@@ -78,7 +78,7 @@ O painel administrativo é isolado e só pode ser acessado por contas com `role 
 | `admin-vitrine-tiktok.html` | Gestão de produtos afiliados TikTok. |
 | `admin-insumos-usuarios.html` | Visualização de insumos por usuário. |
 | `admin-embalagens-usuarios.html` | Visualização de embalagens por usuário. |
-| `admin-receitas-usuarios.html` | Visualização de receitas por usuário. |
+| `admin-receitas-usuarios.html` | Visualização de receitas por usuário, com cálculo automático de médias (custo, preço, lucro e margem) no card do usuário. |
 | `admin-produtos-vinculados.html` | Produtos vinculados a receitas. |
 
 ### 3. Landing Pages e Marketing

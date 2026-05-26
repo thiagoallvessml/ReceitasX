@@ -512,25 +512,33 @@ async function carregarDados() {
             return;
         }
         const [resProd, resRec] = await Promise.all([
-            sb.from('produtos').select('*').eq('user_id', user.id).order('nome'),
+            sb.from('produtos').select('*, receitas(custo_ing, custo_emb, custo_eqp, unidades)').eq('user_id', user.id).order('nome'),
             sb.from('receitas').select('id, nome, unidades, custo_total').eq('user_id', user.id).order('nome'),
         ]);
         if (resProd.error) {
             console.warn('Erro ao carregar produtos do Supabase:', resProd.error);
         }
         if (!resProd.error) {
-            produtos = (resProd.data || []).map(p => ({
-                id:        p.id,
-                nome:      p.nome,
-                preco:     parseFloat(p.preco || 0),
-                custo:     parseFloat(p.custo || 0),
-                obs:       p.obs || '',
-                img:       p.imagem_url || '',
-                disp:      p.ativo !== false,
-                receitaId: p.receita_id || null,
-                cat:       p.categoria || 'Gourmet',
-                _supabase: true,
-            }));
+            produtos = (resProd.data || []).map(p => {
+                let finalCusto = parseFloat(p.custo || 0);
+                if (p.receitas) {
+                    const sum = parseFloat(p.receitas.custo_ing || 0) + parseFloat(p.receitas.custo_emb || 0) + parseFloat(p.receitas.custo_eqp || 0);
+                    const un = p.receitas.unidades > 0 ? p.receitas.unidades : 1;
+                    finalCusto = sum / un;
+                }
+                return {
+                    id:        p.id,
+                    nome:      p.nome,
+                    preco:     parseFloat(p.preco || 0),
+                    custo:     finalCusto,
+                    obs:       p.obs || '',
+                    img:       p.imagem_url || '',
+                    disp:      p.ativo !== false,
+                    receitaId: p.receita_id || null,
+                    cat:       p.categoria || 'Gourmet',
+                    _supabase: true,
+                };
+            });
             save();
         } else {
             // Fallback localStorage se Supabase falhar

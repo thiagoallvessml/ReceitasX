@@ -408,7 +408,13 @@
 <!-- ══ Main ═════════════════════════════════════════════════════════ -->
 <main class="max-w-7xl mx-auto px-4 py-5 space-y-4 page-enter">
 
-
+    <div id="aviso-cmv" style="display:flex; gap:.6rem; padding:.8rem; background:rgba(37, 244, 244, 0.1); border-left:3px solid #25f4f4; border-radius:.4rem; font-size:.8rem; color:#f1f5f9; line-height:1.4; align-items:flex-start;">
+        <span class="material-symbols-outlined" style="color:#25f4f4; font-size:1.4rem; flex-shrink:0;">lightbulb</span>
+        <div>
+            <strong style="color:#25f4f4;">Atualização no Cálculo do CMV!</strong><br>
+            A Mão de Obra não é mais cobrada individualmente por receita. Para melhorar a precisão do seu lucro, o seu <strong>Pró-Labore (Salário)</strong> agora é uma Despesa Operacional fixa. Configure isso acessando <a href="configuracoes.html" style="color:#25f4f4; text-decoration:underline;">Configurações > Custos Fixos</a>.
+        </div>
+    </div>
     <!-- Search mobile -->
     <div class="md:hidden" style="position:relative">
         <span class="material-symbols-outlined" style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);font-size:1.05rem;color:#475569;pointer-events:none">search</span>
@@ -621,7 +627,6 @@
               <div class="cost-row"><span class="lbl">Custo Ingredientes:</span><span class="val" id="cv-ing">R$ 0,00</span></div>
               <div class="cost-row"><span class="lbl">Custo Embalagens:</span><span class="val" id="cv-emb">R$ 0,00</span></div>
               <div class="cost-row"><span class="lbl">Custo Equipamentos:</span><span class="val" id="cv-eqp">R$ 0,00</span></div>
-              <div class="cost-row"><span class="lbl">Custo Mão de Obra:<span id="cv-mob-taxa" style="font-size:.65rem;color:#475569;margin-left:.3rem"></span></span><span class="val" id="cv-mob">R$ 0,00</span></div>
               <div class="cost-row total"><span class="lbl">Custo Total da Receita:</span><span class="val" id="cv-tot">R$ 0,00</span></div>
             </div>
             <div class="unit-box">
@@ -764,15 +769,13 @@ function sbRowToLocal(r) {
         unidades:   r.unidades   || 1,
         tempo:      r.tempo      || 0,
         precoTotal: parseFloat(r.preco_total || 0),
-        custoTotal: parseFloat(r.custo_total || 0),
+        custoTotal: parseFloat(r.custo_ing || 0) + parseFloat(r.custo_emb || 0) + parseFloat(r.custo_eqp || 0),
         custoIng:   parseFloat(r.custo_ing   || 0),
         custoEmb:   parseFloat(r.custo_emb   || 0),
         custoEqp:   parseFloat(r.custo_eqp   || 0),
-        custoMob:   parseFloat(r.custo_mob   || 0),
         ingredientes:  r.ingredientes  || [],
         embalagens:    r.embalagens    || [],
         equipamentos:  r.equipamentos  || [],
-        maoDeObra:     r.mao_de_obra   || [],
         grad:       r.grad || GRADIENTS[0],
         created_at: r.created_at,
     };
@@ -983,7 +986,6 @@ let equipRows = [];
 let ingIdSeq  = 0;
 let embalIdSeq = 0;
 let equipIdSeq = 0;
-let maoObraHora = 0; // carregado das configurações ao abrir modal
 let _editandoId = null; // UUID da receita sendo editada (null = nova)
 let _editandoProdId = null; // ID do produto vinculado (para update)
 
@@ -997,30 +999,7 @@ async function carregarCatalogos() {
             sb.from('embalagens').select('id, nome, preco, quantidade').eq('user_id', user.id).order('nome'),
             sb.from('equipamentos').select('id, nome, custo_hora').eq('user_id', user.id).order('nome'),
         ]);
-        // Mão de obra: tenta localStorage primeiro, depois busca do Supabase
-        const _cfg = JSON.parse(localStorage.getItem('receitasx_config') || 'null') || {};
-        maoObraHora = parseFloat(_cfg.horaFinal || _cfg.mao_obra_hora || 0);
-
-        // Fallback: busca do Supabase se não tiver no localStorage
-        if (!maoObraHora && user) {
-            try {
-                const { data: cfgSb } = await sb
-                    .from('configuracoes')
-                    .select('mao_obra_hora')
-                    .eq('user_id', user.id)
-                    .maybeSingle();
-                if (cfgSb?.mao_obra_hora) {
-                    maoObraHora = parseFloat(cfgSb.mao_obra_hora);
-                    // Atualiza o localStorage para próximas vezes
-                    _cfg.horaFinal = maoObraHora;
-                    localStorage.setItem('receitasx_config', JSON.stringify(_cfg));
-                }
-            } catch(_) {}
-        }
-
-        console.log('[ReceitasX] maoObraHora:', maoObraHora);
-        const taxaEl = document.getElementById('cv-mob-taxa');
-        if (taxaEl) taxaEl.textContent = maoObraHora > 0 ? `(R$${maoObraHora}/h)` : '(não configurado)';
+        
         // Normaliza insumos
         insumos = (resIns.data || []).map(i => ({
             id:      i.id,
@@ -1483,18 +1462,15 @@ function calcPrevia() {
         costEqp += (mins / 60) * custoH;
     });
 
-    // ── mão de obra: (tempo/60) × maoObraHora ──
-    const tempo   = parseFloat(document.getElementById('r-tempo')?.value) || 0;
-    const costMob = maoObraHora > 0 ? (tempo / 60) * maoObraHora : 0;
-    console.log('[ReceitasX] calcPrevia | tempo:', tempo, 'maoObraHora:', maoObraHora, 'costMob:', costMob);
+    // ── mão de obra foi removida das receitas e movida para despesas operacionais ──
+    const tempo = parseFloat(document.getElementById('r-tempo')?.value) || 0;
 
-    const total = costIng + costEmb + costEqp + costMob;
+    const total = costIng + costEmb + costEqp;
     const unit  = total / rend;
 
     document.getElementById('cv-ing').textContent  = fmtR(costIng);
     document.getElementById('cv-emb').textContent  = fmtR(costEmb);
     document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
-    document.getElementById('cv-mob').textContent  = fmtR(costMob);
     document.getElementById('cv-tot').textContent  = fmtR(total);
     document.getElementById('cv-unit').textContent = fmtR(unit);
     document.getElementById('cv-rend').textContent = rend + ' un';
@@ -1690,10 +1666,6 @@ async function salvarReceita(e) {
         const user = await getUser();
         if (user) {
             const tempoVal   = parseInt(document.getElementById('r-tempo').value) || 0;
-            const custoMobVal = maoObraHora > 0 ? (tempoVal / 60) * maoObraHora : 0;
-            const mobItem     = custoMobVal > 0
-                ? [{ nome: 'Mão de obra', qty: `${tempoVal} min`, valor: custoMobVal }]
-                : [];
             const payload = {
                 user_id:      user.id,
                 nome,
@@ -1701,16 +1673,16 @@ async function salvarReceita(e) {
                 unidades:     rend,
                 tempo,
                 preco_total:  0,
-                custo_total:  custoTotal + custoMobVal,
+                custo_total:  custoTotal,
                 custo_ing:    custoIng,
                 custo_emb:    custoEmb,
                 custo_eqp:    custoEqp,
-                custo_mob:    custoMobVal,
+                custo_mob:    0,
                 grad,
                 ingredientes: ingList,
                 embalagens:   embList,
                 equipamentos: eqpList,
-                mao_de_obra:  mobItem,
+                mao_de_obra:  [],
             };
             let savedReceitaId = null;
             if (_editandoId) {
@@ -1736,7 +1708,7 @@ async function salvarReceita(e) {
 
             // ─ Salva produto vinculado automaticamente ─
             if (savedReceitaId) {
-                const custoTotalFinal = custoTotal + custoMobVal;
+                const custoTotalFinal = custoTotal;
                 const custoUnit = rend > 0 ? custoTotalFinal / rend : 0;
                 const prodPreco = parseFloat(document.getElementById('prod-preco').value) || 0;
                 const prodPayload = {

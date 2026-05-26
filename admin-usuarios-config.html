@@ -193,6 +193,64 @@ function renderList(list) {
             </div>
             
             <div class="cfg-grid">
+                
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">payments</span> Salário / Mão de Obra</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_salario)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">home</span> Aluguel</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_aluguel)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">water_drop</span> Água</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_agua)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">lightbulb</span> Luz</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_luz)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">phone_iphone</span> Telefone</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_telefone)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">wifi</span> Internet</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_internet)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">cleaning_services</span> Limpeza</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_limpeza)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">point_of_sale</span> Maquininha</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_maquininha)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">receipt_long</span> MEI</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_mei)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">local_gas_station</span> Gasolina</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_gasolina)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">more_horiz</span> Outros</div>
+                    <div class="cfg-metric-val">R$ ${fmtR(c.cf_outros)}</div>
+                </div>
+
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">request_quote</span> Impostos</div>
+                    <div class="cfg-metric-val">${fmtPct(c.taxa_imposto)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">percent</span> Comissões</div>
+                    <div class="cfg-metric-val">${fmtPct(c.taxa_comissao)}</div>
+                </div>
+                <div class="cfg-metric">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">trending_up</span> Margem Padrão</div>
+                    <div class="cfg-metric-val">${fmtPct(c.meta_margem)}</div>
+                </div>
                 <div class="cfg-metric">
                     <div class="cfg-metric-label"><span class="material-symbols-outlined">local_fire_department</span> Gás / Kg</div>
                     <div class="cfg-metric-val">R$ ${fmtR(c.gas_custo)}</div>
@@ -201,13 +259,9 @@ function renderList(list) {
                     <div class="cfg-metric-label"><span class="material-symbols-outlined">bolt</span> Energia kWh</div>
                     <div class="cfg-metric-val">R$ ${fmtR(c.energia_kwh)}</div>
                 </div>
-                <div class="cfg-metric">
-                    <div class="cfg-metric-label"><span class="material-symbols-outlined">engineering</span> Mão de Obra/h</div>
+                <div class="cfg-metric" style="opacity: 0.5">
+                    <div class="cfg-metric-label"><span class="material-symbols-outlined">engineering</span> Mão de Obra/h (Antigo)</div>
                     <div class="cfg-metric-val">R$ ${fmtR(c.mao_obra_hora)}</div>
-                </div>
-                <div class="cfg-metric">
-                    <div class="cfg-metric-label"><span class="material-symbols-outlined">trending_up</span> Margem Padrão</div>
-                    <div class="cfg-metric-val">${fmtPct(c.meta_margem)}</div>
                 </div>
             </div>
         </div>`;
