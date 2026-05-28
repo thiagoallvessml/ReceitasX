@@ -1222,6 +1222,12 @@
 
             const vistosSet = new Set((vistos || []).map(v => v.aviso_id));
 
+            // Adicionar vistos do localStorage (fallback)
+            try {
+                const localVistos = JSON.parse(localStorage.getItem('receitasx_avisos_vistos') || '[]');
+                localVistos.forEach(id => vistosSet.add(id));
+            } catch (err) {}
+
             // Filtrar não vistos
             avisosQueue = avisos.filter(a => !vistosSet.has(a.id));
 
@@ -1295,7 +1301,18 @@
                             .eq('id', avisoAtualId);
                     }
                 }
-            } catch (_) {}
+            } catch (err) {
+                console.error('[ReceitasX] Erro ao salvar aviso_visto no DB:', err);
+            }
+
+            // Fallback: salvar no localStorage
+            try {
+                const localVistos = JSON.parse(localStorage.getItem('receitasx_avisos_vistos') || '[]');
+                if (!localVistos.includes(avisoAtualId)) {
+                    localVistos.push(avisoAtualId);
+                    localStorage.setItem('receitasx_avisos_vistos', JSON.stringify(localVistos));
+                }
+            } catch (err) {}
         }
 
         document.getElementById('aviso-overlay').classList.remove('show');
