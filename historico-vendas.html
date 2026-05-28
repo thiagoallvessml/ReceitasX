@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Histórico de Vendas · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="config-loader.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: { extend: { colors: { primary: "#25f4f4", "background-dark": "#0a0a0a", "card-dark": "#141414", "border-dark": "#1E1E1E" }, fontFamily: { display: ["Inter", "sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background: #0a0a0a; color: #f1f5f9; margin: 0; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+        .glass-header {
+            background: rgba(10,10,10,.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(37,244,244,.1);
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: linear-gradient(135deg, #0f1a1a, #111f1f);
+            border: 1px solid rgba(37,244,244,.18);
+            border-radius: 1.1rem;
+            padding: 1.4rem;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -40px;
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,244,244,.12), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Activity Item */
+        .activity-item {
+            background: #141414;
+            border: 1px solid #1E1E1E;
+            border-radius: .9rem;
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: border-color .2s, transform .15s;
+            animation: fadeUp .35s ease both;
+            min-width: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .activity-item:hover { border-color: rgba(37,244,244,.2); transform: translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+        .ico-wrap {
+            width: 2.8rem; height: 2.8rem;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            background: rgba(37,244,244,.1);
+        }
+        
+        .badge-pgto {
+            display: inline-block;
+            padding: .2rem .5rem;
+            border-radius: 9999px;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+        
+        /* Skeleton loader */
+        .skeleton {
+            background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: .5rem;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 4rem 1rem; color: #475569; }
+        .empty-state .material-symbols-outlined { font-size: 3rem; margin-bottom: .75rem; display: block; }
+        
+        .btn-del {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            background: none; border: none;
+            color: #475569; cursor: pointer;
+            transition: color .2s;
+            padding: .2rem;
+            display: flex;
+            align-items: center; justify-content: center;
+        }
+        .btn-del:hover { color: #f87171; }
+
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+            overflow: hidden;
+        }
+        
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            white-space: nowrap;
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ Header ═══════════════════════════════════════════════════════ -->
+<header class="glass-header sticky top-0 z-40" style="padding: .85rem 1.15rem; display: flex; align-items: center; gap: 1rem;">
+    <button onclick="history.back()" style="background:none;border:none;color:#25f4f4;cursor:pointer;display:flex;align-items:center;padding:0;flex-shrink:0;">
+        <span class="material-symbols-outlined" style="font-size:1.5rem">chevron_left</span>
+    </button>
+    <h1 style="flex:1; font-size:.95rem; font-weight:700;">Histórico de Vendas</h1>
+</header>
+
+<main class="page-wrapper">
+
+    <!-- ── Resumo ─────────────────────────────────────────────── -->
+    <div class="summary-card" style="position:relative;z-index:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
+            <p style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b">Visão Geral das Vendas</p>
+            <span class="material-symbols-outlined" style="font-size:1.3rem;color:rgba(37,244,244,.4);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">receipt_long</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div>
+                <p style="font-size:.72rem;color:#64748b;margin-bottom:.25rem">Faturamento Total</p>
+                <p id="total-faturado" style="font-size:1.75rem;font-weight:900;background:linear-gradient(135deg,#25f4f4,#0dc8c8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">—</p>
+            </div>
+            <div style="border-left:1px solid rgba(255,255,255,.07);padding-left:1rem;">
+                <p style="font-size:.72rem;color:#64748b;margin-bottom:.25rem">Total de Vendas</p>
+                <p id="total-qtd" style="font-size:1.75rem;font-weight:900;color:#f1f5f9;line-height:1">—</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Lista de vendas ────────────────────────────────── -->
+    <section>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;padding:0 .1rem;">
+            <h3 style="font-size:.88rem;font-weight:700;color:#cbd5e1;">Últimas Vendas</h3>
+        </div>
+        <div id="lista-vendas" style="display:flex;flex-direction:column;gap:.65rem;">
+            <!-- Skeletons -->
+            <div class="skeleton" style="height:90px;"></div>
+            <div class="skeleton" style="height:90px;"></div>
+            <div class="skeleton" style="height:90px;"></div>
+        </div>
+    </section>
+
+</main>
+
+<div id="toast">
+    <span class="material-symbols-outlined" style="color:#25f4f4; margin-right: 8px;">check_circle</span>
+    <span id="toast-msg">Mensagem</span>
+</div>
+
+<script>
+let userId = null;
+
+async function checkAuth() {
+    const session = await getSession();
+    if (!session) {
+        window.location.href = 'login.html';
+        return;
+    }
+    userId = session.user.id;
+    carregarHistorico();
+}
+
+async function carregarHistorico() {
+    const lista = document.getElementById('lista-vendas');
+    
+    try {
+        const { data, error } = await sb
+            .from('vendas_clientes')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        let totalFaturado = 0;
+        let qtdVendas = data.length;
+
+        lista.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            lista.innerHTML = `
+                <div class="empty-state">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    <h3 style="font-size:.95rem;font-weight:700;color:#e2e8f0;margin-bottom:.5rem;">Nenhuma venda registrada</h3>
+                    <p style="font-size:.82rem;">Você ainda não registrou nenhuma venda no Ponto de Venda.</p>
+                </div>
+            `;
+            document.getElementById('total-faturado').textContent = 'R$ 0,00';
+            document.getElementById('total-qtd').textContent = '0';
+            return;
+        }
+
+        data.forEach(venda => {
+            totalFaturado += (venda.valor_total || 0);
+            
+            // Format data
+            const dateObj = new Date(venda.created_at);
+            const dateStr = dateObj.toLocaleDateString('pt-BR');
+            const timeStr = dateObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            
+            // Format Itens text
+            let itemsText = 'Itens não especificados';
+            if (venda.itens && Array.isArray(venda.itens)) {
+                itemsText = venda.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
+            }
+            
+            const div = document.createElement('div');
+            div.className = 'activity-item';
+            div.innerHTML = `
+                <div class="ico-wrap">
+                    <span class="material-symbols-outlined" style="color:#25f4f4;font-size:1.3rem;">shopping_bag</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.3rem;padding-right:1.5rem;">
+                        <p style="font-size:.85rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            ${venda.cliente_nome ? venda.cliente_nome : 'Cliente não informado'}
+                        </p>
+                        <p style="font-size:.95rem;font-weight:800;color:#fbbf24;">R$ ${venda.valor_total.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <p style="font-size:.75rem;color:#94a3b8;margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${itemsText}
+                    </p>
+                    <div style="display:flex;align-items:center;gap:.6rem;">
+                        <span class="badge-pgto">${venda.forma_pagamento || 'Não informada'}</span>
+                        <span style="font-size:.65rem;color:#64748b;">${dateStr} às ${timeStr}</span>
+                    </div>
+                </div>
+                <button class="btn-del" onclick="deletarVenda(${venda.id})" title="Excluir Venda">
+                    <span class="material-symbols-outlined" style="font-size:1.1rem;">delete</span>
+                </button>
+            `;
+            lista.appendChild(div);
+        });
+
+        document.getElementById('total-faturado').textContent = `R$ ${totalFaturado.toFixed(2).replace('.', ',')}`;
+        document.getElementById('total-qtd').textContent = qtdVendas;
+
+    } catch (err) {
+        console.error('Erro ao carregar vendas:', err);
+        lista.innerHTML = '<p style="color:#f87171;font-size:.85rem;padding:1rem;">Erro ao carregar o histórico.</p>';
+    }
+}
+
+async function deletarVenda(id) {
+    if (!confirm('Tem certeza que deseja excluir esta venda? Essa ação não pode ser desfeita.')) return;
+    
+    try {
+        const { error } = await sb.from('vendas_clientes').delete().eq('id', id).eq('user_id', userId);
+        if (error) throw error;
+        showToast('Venda excluída com sucesso!');
+        carregarHistorico();
+    } catch (err) {
+        console.error('Erro ao excluir venda:', err);
+        alert('Erro ao excluir venda. Tente novamente.');
+    }
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', checkAuth);
+</script>
+</body>
+</html>
