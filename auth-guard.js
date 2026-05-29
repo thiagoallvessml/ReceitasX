@@ -16,7 +16,7 @@
     try {
         const { data: profile, error } = await sb
             .from('perfis')
-            .select('id, role, plano, nome, sobrenome, email')
+            .select('id, role, plano, nome, sobrenome')
             .eq('id', session.user.id)
             .single();
 
