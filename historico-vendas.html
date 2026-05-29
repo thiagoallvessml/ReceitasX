@@ -251,7 +251,7 @@ async function carregarHistorico() {
             // Format Itens text
             let itemsText = 'Itens não especificados';
             if (venda.itens && Array.isArray(venda.itens)) {
-                itemsText = venda.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
+                itemsText = venda.itens.map(i => `${i.quantidade || i.qtd}x ${i.nome}`).join(', ');
             }
             
             const div = document.createElement('div');
