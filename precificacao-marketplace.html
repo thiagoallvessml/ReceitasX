@@ -347,6 +347,31 @@ async function carregarDados() {
         console.warn('Supabase indisponível, usando localStorage:', e);
         produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
     }
+
+    const combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+    combos.forEach(c => {
+        let custoCombo = 0;
+        if (c.itens && Array.isArray(c.itens)) {
+            c.itens.forEach(item => {
+                const prod = produtos.find(x => x.id == item.prodId && x.tipo !== 'combo');
+                if (prod) {
+                    custoCombo += (prod.custo || 0) * (item.qty || 1);
+                }
+            });
+        }
+        produtos.push({
+            tipo: 'combo',
+            id: c.id,
+            nome: `(Combo) ${c.nome}`,
+            preco: parseFloat(c.preco || 0),
+            custo: custoCombo,
+            obs: '',
+            img: '',
+            disp: true,
+            _supabase: false
+        });
+    });
+
     renderTabs(); renderBanner(); renderGrid();
 }
 
@@ -579,6 +604,13 @@ async function salvar() {
             if (inp) p.preco = parseFloat(inp.value) || p.preco;
         });
         if (stored.length) localStorage.setItem('receitasx_produtos', JSON.stringify(stored));
+
+        const storedCombos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+        storedCombos.forEach(c => {
+            const inp = document.getElementById(`inp-${m.id}-${c.id}`);
+            if (inp) c.preco = parseFloat(inp.value) || c.preco;
+        });
+        if (storedCombos.length) localStorage.setItem('receitasx_combos', JSON.stringify(storedCombos));
     }
 
     showToast('Precificação salva!');

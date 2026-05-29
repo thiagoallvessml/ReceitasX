@@ -269,7 +269,7 @@ function initMktSelect() {
 }
 
 function getMktPreco(catItem, mktId) {
-    if (catItem.tipo !== 'produto') return catItem.basePreco || catItem.preco;
+    if (catItem.tipo !== 'produto' && catItem.tipo !== 'combo') return catItem.basePreco || catItem.preco;
     const p = precificacao[mktId]?.[catItem.id];
     if (p !== undefined && p !== null) return parseFloat(p);
     return catItem.basePreco || catItem.preco;
@@ -278,8 +278,8 @@ function getMktPreco(catItem, mktId) {
 function changeMkt() {
     currentMktId = document.getElementById('f-mkt').value;
     carrinho.forEach(c => {
-        if (c.tipo === 'produto') {
-            const catItem = catalogo.find(x => x.id == c.id && x.tipo === 'produto');
+        if (c.tipo === 'produto' || c.tipo === 'combo') {
+            const catItem = catalogo.find(x => x.id == c.id && x.tipo === c.tipo);
             if (catItem) c.preco = getMktPreco(catItem, currentMktId);
         }
     });
@@ -380,7 +380,7 @@ function filtrarCatalogo() {
     
     grid.innerHTML = filtrados.map(item => {
         let displayPreco = item.basePreco || item.preco;
-        if (item.tipo === 'produto') {
+        if (item.tipo === 'produto' || item.tipo === 'combo') {
             displayPreco = getMktPreco(item, currentMktId);
         }
         return `
@@ -401,7 +401,7 @@ function addToCartFromCatalog(idStr, tipo) {
     if(!itemCat) return;
     
     let precoReal = itemCat.basePreco || itemCat.preco;
-    if (tipo === 'produto') {
+    if (tipo === 'produto' || tipo === 'combo') {
         precoReal = getMktPreco(itemCat, currentMktId);
     }
     
