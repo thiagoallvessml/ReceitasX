@@ -133,8 +133,8 @@
     
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; gap:1rem; flex-wrap:wrap;">
         <input type="text" id="search-input" class="search-bar" placeholder="Buscar produto ou receita..." oninput="filtrarCatalogo()" style="max-width:400px; flex:1;" />
-        <a href="extrato-vendas.html" class="md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 border border-border-dark hover:bg-border-dark/50 transition whitespace-nowrap">
-            <span class="material-symbols-outlined" style="font-size:.9rem">history</span> Extrato
+        <a href="historico-vendas.html" class="md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 border border-border-dark hover:bg-border-dark/50 transition whitespace-nowrap">
+            <span class="material-symbols-outlined" style="font-size:.9rem">history</span> Histórico
         </a>
     </div>
 
@@ -309,11 +309,7 @@ function filtrarCatalogo() {
     empty.classList.add('hidden');
     
     grid.innerHTML = filtrados.map(item => `
-        <div class="cat-card">
-            <div class="cat-img-box">
-                <span class="cat-badge-tipo">${item.tipo}</span>
-                <span class="material-symbols-outlined">${item.tipo === 'produto' ? 'inventory_2' : 'restaurant_menu'}</span>
-            </div>
+        <div class="cat-card" style="padding-top: 1.5rem; min-height: 100px;">
             <div class="cat-title">${item.nome}</div>
             <div class="cat-price">${fmtR(item.preco)}</div>
             <button class="cat-btn" onclick="addToCartFromCatalog('${item.id}', '${item.tipo}')" title="Adicionar ao Carrinho">
