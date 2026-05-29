@@ -503,6 +503,7 @@ function fecharModal() {
 async function confirmarExclusao() {
     try {
         // tenta deletar no Supabase
+        await sb.from('produtos').delete().eq('receita_id', receitaId);
         await sb.from('receitas').delete().eq('id', receitaId);
     } catch(e) {
         console.warn('Deletar Supabase falhou, removendo local:', e);

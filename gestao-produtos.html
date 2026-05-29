@@ -830,6 +830,7 @@ async function confirmarDel() {
     try {
         const user = await getUser();
         if (user) {
+            if (p && p.receitaId) { await sb.from('receitas').delete().eq('id', p.receitaId).eq('user_id', user.id); }
             await sb.from('produtos').delete().eq('id', pendingDelId).eq('user_id', user.id);
             await carregarDados();
             closeDel();
