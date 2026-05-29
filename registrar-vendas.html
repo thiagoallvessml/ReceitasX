@@ -55,13 +55,7 @@
         .empty { display:flex;flex-direction:column;align-items:center;padding:5rem 1rem;color:#475569;gap:.5rem; }
         .empty .material-symbols-outlined { font-size:3.5rem;color:#2A2A2A; }
 
-        /* FAB Cart */
-        .cart-fab { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; border:none; border-radius:9999px; padding:.6rem 1.25rem; display:flex; align-items:center; gap:.75rem; font-weight:700; cursor:pointer; box-shadow:0 8px 32px rgba(37,244,244,.3); z-index:100; transition:all .3s cubic-bezier(.4,0,.2,1); width:90%; max-width:400px; justify-content:space-between; }
-        .cart-fab:hover { box-shadow:0 12px 40px rgba(37,244,244,.4); transform:translateX(-50%) translateY(-2px); }
-        .cart-fab:active { transform:translateX(-50%) translateY(2px); }
-        .cart-fab-left { display:flex; align-items:center; gap:.5rem; }
-        .cart-badge { background:#0a0a0a; color:#25f4f4; border-radius:50%; font-size:.75rem; width:1.5rem; height:1.5rem; display:flex; align-items:center; justify-content:center; font-weight:800; }
-        .cart-total-badge { font-size:1.1rem; }
+
 
         /* modal sheet */
         .modal-sheet-bg { position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:stretch;justify-content:flex-end;z-index:110;opacity:0;pointer-events:none;transition:opacity .3s; backdrop-filter:blur(2px); }
@@ -116,14 +110,24 @@
 
 <!-- Header -->
 <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
-    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-2 overflow-x-auto no-scrollbar">
         <button class="btn-back" onclick="history.back()">
             <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
         </button>
-        <h1 class="text-base font-semibold flex-1">Ponto de Venda</h1>
-        <a href="historico-vendas.html" style="background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.2);border-radius:.55rem;padding:.4rem .85rem;font-size:.78rem;font-weight:700;color:#25f4f4;text-decoration:none;display:flex;align-items:center;gap:.4rem;cursor:pointer;transition:all .2s">
-            <span class="material-symbols-outlined" style="font-size:1.1rem">history</span>
-            Histórico
+        <h1 class="text-base font-semibold flex-1 whitespace-nowrap">Ponto de Venda</h1>
+        
+        <button id="nav-cart-btn" onclick="openModal()" style="display:none; background:linear-gradient(135deg,#25f4f4,#0dc8c8); color:#0a0a0a; border:none; border-radius:999px; padding:.3rem .5rem; font-size:.75rem; font-weight:700; align-items:center; gap:.4rem; cursor:pointer; flex-shrink:0; box-shadow:0 2px 8px rgba(37,244,244,.2);">
+            <div style="display:flex; align-items:center; gap:.25rem;">
+                <span id="nav-cart-count" style="background:#0a0a0a; color:#25f4f4; border-radius:50%; width:1.1rem; height:1.1rem; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:800;">0</span>
+                <span class="hidden sm:inline">Carrinho</span>
+            </div>
+            <span id="nav-cart-total" style="margin-left:2px;">R$ 0,00</span>
+            <span class="material-symbols-outlined" style="font-size:1rem;">chevron_right</span>
+        </button>
+
+        <a href="historico-vendas.html" style="background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.2);border-radius:.55rem;padding:.3rem .5rem;font-size:.75rem;font-weight:700;color:#25f4f4;text-decoration:none;display:flex;align-items:center;gap:.3rem;cursor:pointer; flex-shrink:0;">
+            <span class="material-symbols-outlined" style="font-size:1rem">history</span>
+            <span class="hidden sm:inline">Histórico</span>
         </a>
     </div>
 </header>
@@ -151,18 +155,6 @@
     </div>
 
 </main>
-
-<!-- Floating Cart Button -->
-<button class="cart-fab" id="cart-fab" onclick="openModal()" style="display:none; transform:translateX(-50%) translateY(100px);">
-    <div class="cart-fab-left">
-        <span class="cart-badge" id="fab-count">0</span>
-        <span>Carrinho</span>
-    </div>
-    <div style="display:flex; align-items:center; gap:.5rem;">
-        <span class="cart-total-badge" id="fab-total">R$ 0,00</span>
-        <span class="material-symbols-outlined">chevron_right</span>
-    </div>
-</button>
 
 <!-- Modal Checkout -->
 <div id="modal-desp" class="modal-sheet-bg">
@@ -384,22 +376,15 @@ function renderCart() {
     document.getElementById('cart-total').textContent = fmtR(total);
     calcTroco(); // Update troco if changing cart
     
-    // Atualiza o FAB flutuante
-    const fab = document.getElementById('cart-fab');
+    // Atualiza botão nav
+    const navBtn = document.getElementById('nav-cart-btn');
     const q = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
     if (q > 0) {
-        fab.style.display = 'flex';
-        // Pequeno delay para a transição do translateX/Y (css)
-        setTimeout(() => { fab.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
-        document.getElementById('fab-count').textContent = q;
-        document.getElementById('fab-total').textContent = fmtR(total);
+        navBtn.style.display = 'flex';
+        document.getElementById('nav-cart-count').textContent = q;
+        document.getElementById('nav-cart-total').textContent = fmtR(total);
     } else {
-        fab.style.transform = 'translateX(-50%) translateY(100px)';
-        setTimeout(() => { 
-            if(carrinho.length === 0) fab.style.display = 'none'; 
-        }, 300);
-        // Se esvaziar pelo modal, pode fechar automaticamente se quiser (opcional)
-        // Se a tela for grande e esvaziar, talvez feche:
+        navBtn.style.display = 'none';
         if (document.getElementById('modal-desp').classList.contains('open')) {
             // closeModal();
         }
