@@ -257,33 +257,38 @@
 
     pedirPermissaoSilenciosa();
 
-    /* ── Inscrição no Realtime ── */
-    try {
-        sb.channel(`comissoes-${afiliadoId}`)
-            .on(
-                'postgres_changes',
-                {
-                    event:  'UPDATE',
-                    schema: 'public',
-                    table:  'indicacoes',
-                    filter: `afiliado_id=eq.${afiliadoId}`,
-                },
-                (payload) => {
-                    const nova    = payload.new;
-                    const antiga  = payload.old;
-                    // Só dispara quando converteu muda de false → true
-                    if (nova.converteu === true && antiga.converteu === false) {
-                        const comissao = parseFloat(nova.comissao || 0);
-                        mostrarCelebracao(comissao);
-                        notificarBrowser(comissao);
-                    }
-                }
-            )
-            .subscribe((status) => {
-                console.log('[ReceitasX] Notificações comissão:', status);
-            });
-    } catch (e) {
-        console.warn('[ReceitasX] Realtime indisponível:', e);
+    /* ── Polling a cada 30 min (substitui Realtime para economizar IO) ── */
+    let ultimaVerificacao = new Date().toISOString();
+
+    async function verificarNovasComissoes() {
+        try {
+            const { data, error } = await sb
+                .from('indicacoes')
+                .select('comissao, converteu, updated_at')
+                .eq('afiliado_id', afiliadoId)
+                .eq('converteu', true)
+                .gt('updated_at', ultimaVerificacao)
+                .order('updated_at', { ascending: false })
+                .limit(5);
+
+            if (error || !data || data.length === 0) return;
+
+            // Atualiza o timestamp para a próxima verificação
+            ultimaVerificacao = new Date().toISOString();
+
+            // Notifica apenas a mais recente para não spammar
+            const comissao = parseFloat(data[0].comissao || 0);
+            if (comissao > 0) {
+                mostrarCelebracao(comissao);
+                notificarBrowser(comissao);
+            }
+        } catch (e) {
+            console.warn('[ReceitasX] Erro ao verificar comissões:', e);
+        }
     }
+
+    // Verifica imediatamente e depois a cada 30 minutos
+    verificarNovasComissoes();
+    setInterval(verificarNovasComissoes, 1800000); // 30 min
 
 })();

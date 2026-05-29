@@ -768,7 +768,7 @@
 
             const { data: perfil } = await sb
                 .from('perfis')
-                .select('role')
+                .select('role, plano')
                 .eq('id', session.user.id)
                 .single();
 
@@ -816,13 +816,8 @@
 
             // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
             try {
-                const { data: perfilPlano } = await sb
-                    .from('perfis')
-                    .select('plano')
-                    .eq('id', session.user.id)
-                    .maybeSingle();
-
-                if (perfilPlano?.plano === 'vitalicio') {
+                // Usa o perfil já carregado acima (evita query duplicada)
+                if (perfil?.plano === 'vitalicio') {
                     // Usuário já é vitalício — mantém card oculto
                     // (o card já começa com display:none no HTML)
                 } else {
@@ -899,19 +894,21 @@
             try {
                 const uid = session.user.id;
                 const countTable = async (table) => {
-                    const { count } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                    const { count } = await sb.from(table).select('id', { count: 'exact', head: true }).eq('user_id', uid);
                     return count || 0;
                 };
 
-                const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
+                const { count: cfgCount } = await sb.from('configuracoes').select('id', { count: 'exact', head: true }).eq('user_id', uid);
                 
-                const countEquip = await countTable('equipamentos');
-                const countInsum = await countTable('insumos');
-                const countEmbal = await countTable('embalagens');
-                const countRecei = await countTable('receitas');
-                const countProdu = await countTable('produtos');
-                const countCombo = await countTable('combos');
-                const countDespe = await countTable('despesas');
+                const [countEquip, countInsum, countEmbal, countRecei, countProdu, countCombo, countDespe] = await Promise.all([
+                    countTable('equipamentos'),
+                    countTable('insumos'),
+                    countTable('embalagens'),
+                    countTable('receitas'),
+                    countTable('produtos'),
+                    countTable('combos'),
+                    countTable('despesas'),
+                ]);
 
                 // Mostrar alertas se = 0
                 if (countEquip === 0 && document.getElementById('alert-equipamentos')) document.getElementById('alert-equipamentos').style.display = 'block';

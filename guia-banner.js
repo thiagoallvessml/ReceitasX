@@ -232,29 +232,39 @@
       const uid = session.user.id;
 
       const countTable = async (table) => {
-        const { count } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
+        const { count } = await sb.from(table).select('id', { count: 'exact', head: true }).eq('user_id', uid);
         return count || 0;
       };
 
       const progress = {};
 
-      // 1. Configurações
-      const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
-      progress[1] = cfgCount > 0;
+      // Paraleliza as contagens para economizar IO e tempo
+      const [
+        cfgCount, countEquip, countInsum, countEmbal, countRecei, countProdu, countCombo, countDespe
+      ] = await Promise.all([
+        sb.from('configuracoes').select('id', { count: 'exact', head: true }).eq('user_id', uid).then(r => r.count || 0),
+        countTable('equipamentos'),
+        countTable('insumos'),
+        countTable('embalagens'),
+        countTable('receitas'),
+        countTable('produtos'),
+        countTable('combos'),
+        countTable('despesas')
+      ]);
 
-      // 2-6: tabelas simples
-      progress[2] = await countTable('equipamentos') > 0;
-      progress[3] = await countTable('insumos') > 0;
-      progress[4] = await countTable('embalagens') > 0;
-      progress[5] = await countTable('receitas') > 0;
-      progress[6] = await countTable('produtos') > 0;
+      progress[1] = cfgCount > 0;
+      progress[2] = countEquip > 0;
+      progress[3] = countInsum > 0;
+      progress[4] = countEmbal > 0;
+      progress[5] = countRecei > 0;
+      progress[6] = countProdu > 0;
 
       // 7. Precificação (localStorage flag)
       progress[7] = localStorage.getItem('receitasx_precificacao_hit') === 'true';
 
       // 8-9: tabelas opcionais (NÃO contam para o progresso)
-      progress[8] = await countTable('combos') > 0;
-      progress[9] = await countTable('despesas') > 0;
+      progress[8] = countCombo > 0;
+      progress[9] = countDespe > 0;
 
       // 10. Ponto de Equilíbrio (localStorage)
       progress[10] = localStorage.getItem('receitasx_peq_hit') === 'true';

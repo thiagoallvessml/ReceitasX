@@ -183,9 +183,9 @@ async function dbUpsert(table, payload, onConflict) {
             }
         };
 
-        // Ping imediato + a cada 3 minutos (180000 ms) para economizar I/O de disco
+        // Ping imediato + a cada 10 minutos (600000 ms) para economizar I/O de disco
         await ping();
-        setInterval(ping, 180000);
+        setInterval(ping, 600000);
     } catch(e) {
         console.error('[Heartbeat] Erro init:', e);
     }
@@ -258,23 +258,6 @@ async function dbUpsert(table, payload, onConflict) {
     }
 })();
 
-/* ─── PAGE VIEW TRACKING ──────────────────────────────────────── */
-(async function _trackPageView() {
-    try {
-        await new Promise(r => setTimeout(r, 1200));
-        const session = await getSession();
-        if (!session) return;
-
-        const pagina = window.location.pathname.split('/').pop() || 'index.html';
-        // Não rastreia páginas admin
-        if (pagina.startsWith('admin')) return;
-
-        await sb.from('page_views').insert({
-            user_id: session.user.id,
-            pagina: pagina,
-            referrer: document.referrer || null
-        });
-    } catch(e) {
-        // Silencia — não deve quebrar a UX
-    }
-})();
+/* ─── PAGE VIEW TRACKING (DESATIVADO para economizar Disk IO) ── */
+// Tracking de page views foi desativado.
+// Use o Google Analytics (GA4) para acompanhar visualizações.

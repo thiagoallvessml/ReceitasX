@@ -384,12 +384,12 @@ async function loadUsuarios() {
         updateStats();
         filterUsuarios();
 
-        // Auto-refresh presença a cada 30s
+        // Auto-refresh presença a cada 120s
         setInterval(async () => {
             await refreshPresenca();
             updateStats();
             filterUsuarios();
-        }, 30000);
+        }, 120000);
     } catch (e) {
         console.error('Erro ao carregar usuários', e);
         document.getElementById('user-list').innerHTML = `
