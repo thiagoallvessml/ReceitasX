@@ -248,6 +248,7 @@ async function carregarDRE() {
 
         let receitaBruta = 0;
         let cmv = 0;
+        let comissoes = 0; // Inicializa aqui para acumular taxas de marketplace
 
         if (vendas) {
             vendas.forEach(v => {
@@ -257,9 +258,10 @@ async function carregarDRE() {
                         // Se houver custo salvo no momento da venda (implementado agora)
                         if (item.custo_total_item !== undefined) {
                             cmv += parseFloat(item.custo_total_item || 0);
-                        } else {
-                            // Legado ou sem custo - fallback (poderíamos buscar na base, mas seria assíncrono por item ou in map)
-                            // Por enquanto ignoramos ou assumimos 0
+                        }
+                        // Taxa de Marketplace salva no momento da venda
+                        if (item.marketplace_fee !== undefined) {
+                            comissoes += parseFloat(item.marketplace_fee || 0);
                         }
                     });
                 }
@@ -280,7 +282,7 @@ async function carregarDRE() {
         if (errDespesas) throw errDespesas;
 
         let impostos = 0;
-        let comissoes = 0;
+        // comissoes já pode ter valor vindo das taxas de marketplace das vendas
         let fixas = 0;
 
         if (despesas) {

@@ -557,16 +557,24 @@ async function salvar() {
     }
     
     // Preparar itens para o JSON
-    const jsonItens = carrinho.map(c => ({
-        id: c.id,
-        tipo: c.tipo,
-        nome: c.nome,
-        preco_unitario: c.preco,
-        quantidade: c.quantidade,
-        total: c.preco * c.quantidade,
-        custo_unitario: c.custo || 0,
-        custo_total_item: (c.custo || 0) * c.quantidade
-    }));
+    const m = marketplaces.find(x => x.id === currentMktId);
+    const taxaPct = m ? parseFloat(m.taxa || 0) : 0;
+
+    const jsonItens = carrinho.map(c => {
+        const itemTotal = c.preco * c.quantidade;
+        const fee = itemTotal * (taxaPct / 100);
+        return {
+            id: c.id,
+            tipo: c.tipo,
+            nome: c.nome,
+            preco_unitario: c.preco,
+            quantidade: c.quantidade,
+            total: itemTotal,
+            custo_unitario: c.custo || 0,
+            custo_total_item: (c.custo || 0) * c.quantidade,
+            marketplace_fee: fee
+        };
+    });
     
     document.getElementById('btn-save').textContent = 'Salvando...';
 
