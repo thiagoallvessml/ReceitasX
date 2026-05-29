@@ -900,10 +900,11 @@ function openPicker() {
     pickerSel = {};
     updatePickerCount();
     const body = document.getElementById('picker-items');
-    if (!produtos.length) {
+    const activeProdutos = produtos.filter(p => p.ativo !== false);
+    if (!activeProdutos.length) {
         body.innerHTML = '<p class="text-xs text-slate-500" style="padding:.75rem">Nenhum produto cadastrado ainda.</p>';
     } else {
-        body.innerHTML = produtos.map(p => `
+        body.innerHTML = activeProdutos.map(p => `
         <div class="picker-item" id="pi-${p.id}" onclick="togglePickerItem(${p.id})">
           <div class="picker-chk"><span class="material-symbols-outlined">check</span></div>
           <div class="picker-item-thumb">
