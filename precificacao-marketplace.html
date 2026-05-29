@@ -311,13 +311,14 @@ async function carregarDados() {
             return;
         }
         const user = session.user;
-        const { data, error } = await sb
-            .from('produtos')
-            .select('*, receitas(custo_ing, custo_emb, custo_eqp, unidades)')
-            .eq('user_id', user.id)
-            .order('nome');
-        if (!error && data) {
-            produtos = data.map(p => {
+        const [prodRes, comboRes, precRes] = await Promise.all([
+            sb.from('produtos').select('*, receitas(custo_ing, custo_emb, custo_eqp, unidades)').eq('user_id', user.id).order('nome'),
+            sb.from('combos').select('*').eq('user_id', user.id),
+            sb.from('precificacao').select('*').eq('user_id', user.id)
+        ]);
+
+        if (!prodRes.error && prodRes.data) {
+            produtos = prodRes.data.map(p => {
                 let finalCusto = parseFloat(p.custo || 0);
                 if (p.receitas) {
                     const sum = parseFloat(p.receitas.custo_ing || 0) + parseFloat(p.receitas.custo_emb || 0) + parseFloat(p.receitas.custo_eqp || 0);
@@ -337,40 +338,80 @@ async function carregarDados() {
                     _supabase: true,
                 };
             });
-            // Sincroniza localStorage para manter compatibilidade
             localStorage.setItem('receitasx_produtos', JSON.stringify(produtos));
         } else {
-            // Se erro no Supabase, fallback localStorage
             produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
         }
+
+        // Combos
+        let combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+        if (!comboRes.error && comboRes.data && comboRes.data.length > 0) {
+            combos = comboRes.data;
+        }
+        
+        combos.forEach(c => {
+            let custoCombo = 0;
+            if (c.itens && Array.isArray(c.itens)) {
+                c.itens.forEach(item => {
+                    const prod = produtos.find(x => x.id == item.prodId && x.tipo !== 'combo');
+                    if (prod) {
+                        custoCombo += (prod.custo || 0) * (item.qty || 1);
+                    }
+                });
+            }
+            produtos.push({
+                tipo: 'combo',
+                id: c.id,
+                nome: `(Combo) ${c.nome}`,
+                preco: parseFloat(c.preco || 0),
+                custo: custoCombo,
+                obs: '',
+                img: '',
+                disp: true,
+                _supabase: false
+            });
+        });
+
+        // Precificacao
+        if (!precRes.error && precRes.data && precRes.data.length > 0) {
+            precificacao = {};
+            precRes.data.forEach(pr => {
+                if (!precificacao[pr.marketplace_id]) precificacao[pr.marketplace_id] = {};
+                // The item might be a product or combo. Since IDs could theoretically collide if both use integers,
+                // but currently combo uses Date.now() and prod uses smallint. We just map it.
+                const itemId = pr.produto_id || pr.combo_id;
+                precificacao[pr.marketplace_id][itemId] = parseFloat(pr.preco);
+            });
+            localStorage.setItem(PREC_KEY, JSON.stringify(precificacao));
+        }
+
     } catch(e) {
         console.warn('Supabase indisponível, usando localStorage:', e);
         produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
-    }
-
-    const combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
-    combos.forEach(c => {
-        let custoCombo = 0;
-        if (c.itens && Array.isArray(c.itens)) {
-            c.itens.forEach(item => {
-                const prod = produtos.find(x => x.id == item.prodId && x.tipo !== 'combo');
-                if (prod) {
-                    custoCombo += (prod.custo || 0) * (item.qty || 1);
-                }
+        const combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+        combos.forEach(c => {
+            let custoCombo = 0;
+            if (c.itens && Array.isArray(c.itens)) {
+                c.itens.forEach(item => {
+                    const prod = produtos.find(x => x.id == item.prodId && x.tipo !== 'combo');
+                    if (prod) {
+                        custoCombo += (prod.custo || 0) * (item.qty || 1);
+                    }
+                });
+            }
+            produtos.push({
+                tipo: 'combo',
+                id: c.id,
+                nome: `(Combo) ${c.nome}`,
+                preco: parseFloat(c.preco || 0),
+                custo: custoCombo,
+                obs: '',
+                img: '',
+                disp: true,
+                _supabase: false
             });
-        }
-        produtos.push({
-            tipo: 'combo',
-            id: c.id,
-            nome: `(Combo) ${c.nome}`,
-            preco: parseFloat(c.preco || 0),
-            custo: custoCombo,
-            obs: '',
-            img: '',
-            disp: true,
-            _supabase: false
         });
-    });
+    }
 
     renderTabs(); renderBanner(); renderGrid();
 }
@@ -613,20 +654,62 @@ async function salvar() {
         if (storedCombos.length) localStorage.setItem('receitasx_combos', JSON.stringify(storedCombos));
     }
 
-    showToast('Precificação salva!');
-
-    // Sincroniza no banco para o Admin Progresso puxar a métrica
     try {
         const uid = (await sb.auth.getSession()).data?.session?.user?.id;
         if (uid) {
+            // Se for "Porta de Casa" (taxa 0), sincroniza com produtos/combos base no Supabase
+            if (m.taxa === 0) {
+                const pUpdates = produtos.filter(p => p.tipo !== 'combo').map(p => {
+                    const inp = document.getElementById(`inp-${m.id}-${p.id}`);
+                    if (inp) return sb.from('produtos').update({ preco: parseFloat(inp.value) || p.preco }).eq('id', p.id);
+                    return null;
+                }).filter(Boolean);
+                
+                const cUpdates = produtos.filter(p => p.tipo === 'combo').map(c => {
+                    const inp = document.getElementById(`inp-${m.id}-${c.id}`);
+                    if (inp) return sb.from('combos').update({ preco: parseFloat(inp.value) || c.preco }).eq('id', c.id);
+                    return null;
+                }).filter(Boolean);
+
+                await Promise.all([...pUpdates, ...cUpdates]);
+            }
+
+            // Sincroniza Precificacao no Supabase
+            await sb.from('precificacao').delete().eq('user_id', uid).eq('marketplace_id', m.id);
+            
+            const precData = [];
+            produtos.forEach(p => {
+                const inp = document.getElementById(`inp-${m.id}-${p.id}`);
+                if (inp) {
+                    const preco = parseFloat(inp.value);
+                    if (preco > 0) {
+                        const entry = {
+                            user_id: uid,
+                            marketplace_id: m.id,
+                            preco: preco
+                        };
+                        if (p.tipo === 'combo') entry.combo_id = p.id;
+                        else entry.produto_id = p.id;
+                        precData.push(entry);
+                    }
+                }
+            });
+            
+            if (precData.length > 0) {
+                await sb.from('precificacao').insert(precData);
+            }
+
+            // Sincroniza Marketplaces no Supabase
             await sb.from('marketplaces').delete().eq('user_id', uid);
             const insertData = marketplaces.map(mk => ({ user_id: uid, nome: mk.nome, taxa: mk.taxa || 0 }));
             if (insertData.length > 0) {
                 await sb.from('marketplaces').insert(insertData);
             }
         }
+        showToast('Precificação salva!');
     } catch(e) {
-        console.warn('Erro sync progresso precificacao:', e);
+        console.warn('Erro ao salvar no Supabase:', e);
+        showToast('Precificação salva localmente.', 'success');
     }
 }
 

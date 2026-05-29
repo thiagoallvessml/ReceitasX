@@ -676,6 +676,53 @@ async function checkAuth() {
     }
     userId = session.user.id;
     carregarProdutos();
+    carregarCombos();
+}
+
+async function carregarCombos() {
+    try {
+        const { data, error } = await sb.from('combos').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+        if (error) throw error;
+        
+        let localCombos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+        
+        if (data && data.length > 0) {
+            // Supabase is the source of truth
+            combos = data.map(c => ({
+                id: c.id,
+                nome: c.nome,
+                preco: parseFloat(c.preco || 0),
+                img: c.imagem_url || '',
+                itens: c.itens || [],
+                obs: c.obs || ''
+            }));
+            localStorage.setItem('receitasx_combos', JSON.stringify(combos));
+        } else if (localCombos.length > 0) {
+            // Migrate local to Supabase
+            combos = localCombos;
+            for (let c of combos) {
+                const { data: inserted, error: insErr } = await sb.from('combos').insert({
+                    user_id: userId,
+                    nome: c.nome,
+                    preco: c.preco || 0,
+                    imagem_url: c.img || '',
+                    itens: c.itens || [],
+                    obs: c.obs || ''
+                }).select().single();
+                if (!insErr && inserted) {
+                    c.id = inserted.id; // update local ID to Supabase ID
+                }
+            }
+            localStorage.setItem('receitasx_combos', JSON.stringify(combos));
+        } else {
+            combos = [];
+        }
+        render();
+    } catch (err) {
+        console.error('Erro ao carregar combos:', err);
+        combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+        render();
+    }
 }
 
 async function carregarProdutos() {
@@ -704,12 +751,13 @@ async function carregarProdutos() {
 /* ─── DADOS ──────────────────────────────────────────────────────── */
 let produtos = [];
 
-let combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
-
+let combos = [];
 let pendingDelId = null;
 let selectedItems = {}; // { prodId: qty }
 
-function save() { localStorage.setItem('receitasx_combos', JSON.stringify(combos)); }
+async function save() { 
+    localStorage.setItem('receitasx_combos', JSON.stringify(combos)); 
+}
 
 /* ─── HELPERS ────────────────────────────────────────────────────── */
 function fmtR(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -1083,7 +1131,7 @@ function handleImgUpload(e) {
     reader.readAsDataURL(file);
 }
 
-function salvar() {
+async function salvar() {
     const nome = document.getElementById('f-nome').value.trim();
     if (!nome) {
         document.getElementById('f-nome').classList.add('error');
@@ -1099,26 +1147,44 @@ function salvar() {
         qty: qty || 1,
     }));
 
-    const data = {
+    const preco = parseFloat(document.getElementById('f-preco').value) || 0;
+    const img = document.getElementById('f-img').value;
+
+    const dataObj = {
         nome,
-        preco: parseFloat(document.getElementById('f-preco').value) || 0,
-        obs:   '',
-        img:   document.getElementById('f-img').value,
+        preco,
+        obs: '',
+        imagem_url: img,
         itens,
     };
 
     const idVal = document.getElementById('f-id').value;
-    if (idVal) {
-        const idx = combos.findIndex(x => x.id === parseInt(idVal));
-        if (idx !== -1) combos[idx] = { ...combos[idx], ...data };
-        showToast(`"${nome}" atualizado!`);
-    } else {
-        const newId = Math.max(0, ...combos.map(x => x.id)) + 1;
-        combos.push({ id: newId, ...data });
-        registrarCriacao('combos');
-        showToast(`"${nome}" cadastrado!`);
+    try {
+        if (idVal) {
+            const numId = parseInt(idVal);
+            const { error } = await sb.from('combos').update(dataObj).eq('id', numId);
+            if (error) throw error;
+            const idx = combos.findIndex(x => x.id === numId);
+            if (idx !== -1) {
+                combos[idx] = { ...combos[idx], ...dataObj, img };
+            }
+            showToast(`"${nome}" atualizado!`);
+        } else {
+            const { data, error } = await sb.from('combos').insert({
+                user_id: userId,
+                ...dataObj
+            }).select().single();
+            if (error) throw error;
+            
+            combos.push({ id: data.id, nome, preco, img, itens, obs: '' });
+            registrarCriacao('combos');
+            showToast(`"${nome}" cadastrado!`);
+        }
+        await save(); render(); closeModal();
+    } catch(e) {
+        console.error('Erro salvar combo:', e);
+        showToast('Erro ao salvar combo', 'error');
     }
-    save(); render(); closeModal();
 }
 
 /* ─── DELETE ─────────────────────────────────────────────────────── */
@@ -1130,12 +1196,20 @@ function openDel(id) {
     document.getElementById('modal-del').classList.add('open');
 }
 function closeDel() { document.getElementById('modal-del').classList.remove('open'); pendingDelId = null; }
-function confirmarDel() {
+async function confirmarDel() {
     if (!pendingDelId) return;
-    const c = combos.find(x => x.id === pendingDelId);
-    combos = combos.filter(x => x.id !== pendingDelId);
-    save(); render(); closeDel();
-    showToast(`"${c?.nome}" excluído!`, 'error');
+    try {
+        const c = combos.find(x => x.id === pendingDelId);
+        const { error } = await sb.from('combos').delete().eq('id', pendingDelId);
+        if (error) throw error;
+        
+        combos = combos.filter(x => x.id !== pendingDelId);
+        await save(); render(); closeDel();
+        showToast(`"${c?.nome}" excluído!`, 'error');
+    } catch(e) {
+        console.error('Erro deletar combo:', e);
+        showToast('Erro ao excluir combo', 'error');
+    }
 }
 
 /* ─── DETAIL ─────────────────────────────────────────────────────── */
