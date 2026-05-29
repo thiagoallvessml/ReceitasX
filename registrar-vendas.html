@@ -137,6 +137,14 @@
     
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; gap:1rem; flex-wrap:wrap;">
         <input type="text" id="search-input" class="search-bar" placeholder="Buscar produto ou receita..." oninput="filtrarCatalogo()" style="max-width:400px; flex:1;" />
+        <div style="display:flex; align-items:center; gap:.5rem;">
+            <label class="text-xs text-slate-400 font-bold uppercase tracking-wider">Canal:</label>
+            <div class="select-wrap" style="width:150px;">
+                <select id="f-mkt" class="fc" onchange="changeMkt()" style="padding:.5rem; font-size:.85rem; border-color:rgba(37,244,244,.2) !important;">
+                </select>
+                <span class="chev material-symbols-outlined" style="right:10px;">expand_more</span>
+            </div>
+        </div>
         <a href="historico-vendas.html" class="md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 border border-border-dark hover:bg-border-dark/50 transition whitespace-nowrap">
             <span class="material-symbols-outlined" style="font-size:.9rem">history</span> Histórico
         </a>
@@ -173,16 +181,6 @@
     </div>
     
     <div class="ms-body">
-      
-      <!-- Canal / Marketplace -->
-      <div style="margin-bottom:1.25rem;">
-          <label class="field-label">Marketplace / Canal</label>
-          <div class="select-wrap">
-            <select id="f-mkt" class="fc" onchange="changeMkt()">
-            </select>
-            <span class="chev material-symbols-outlined">expand_more</span>
-          </div>
-      </div>
       
       <!-- Carrinho -->
       <div class="cart-box">
