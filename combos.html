@@ -666,8 +666,32 @@
 </div>
 
 <script>
+let userId = null;
+
+async function checkAuth() {
+    const session = await getSession();
+    if (!session) {
+        window.location.href = 'login.html';
+        return;
+    }
+    userId = session.user.id;
+    carregarProdutos();
+}
+
+async function carregarProdutos() {
+    try {
+        const { data, error } = await sb.from('produtos').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+        if (error) throw error;
+        produtos = data || [];
+        render(); 
+    } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
+        showToast('Erro ao carregar produtos', 'error');
+    }
+}
+
 /* ─── DADOS ──────────────────────────────────────────────────────── */
-let produtos = JSON.parse(localStorage.getItem('receitasx_produtos') || '[]');
+let produtos = [];
 
 let combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
 
@@ -1188,7 +1212,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
-render();
+checkAuth();
 injetarAviso('combos');
 </script>
 <script src="guia-banner.js"></script>
