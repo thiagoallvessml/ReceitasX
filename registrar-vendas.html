@@ -174,6 +174,16 @@
     
     <div class="ms-body">
       
+      <!-- Canal / Marketplace -->
+      <div style="margin-bottom:1.25rem;">
+          <label class="field-label">Marketplace / Canal</label>
+          <div class="select-wrap">
+            <select id="f-mkt" class="fc" onchange="changeMkt()">
+            </select>
+            <span class="chev material-symbols-outlined">expand_more</span>
+          </div>
+      </div>
+      
       <!-- Carrinho -->
       <div class="cart-box">
           <div id="cart-items" class="cart-items">
@@ -243,7 +253,46 @@ let userId = null;
 let catalogo = []; // Receitas + Produtos
 let carrinho = []; 
 
+let marketplaces = JSON.parse(localStorage.getItem('receitasx_marketplaces') || 'null');
+if (!marketplaces || !marketplaces.length) {
+    marketplaces = [
+        { id:'casa', nome:'Porta de Casa', taxa:0 },
+        { id:'ifood', nome:'iFood', taxa:28 }
+    ];
+}
+let precificacao = JSON.parse(localStorage.getItem('receitasx_precificacao') || '{}');
+let currentMktId = marketplaces[0].id;
+
+function initMktSelect() {
+    const sel = document.getElementById('f-mkt');
+    if (!sel) return;
+    sel.innerHTML = marketplaces.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+    sel.value = currentMktId;
+}
+
+function getMktPreco(catItem, mktId) {
+    if (catItem.tipo !== 'produto') return catItem.basePreco || catItem.preco;
+    const p = precificacao[mktId]?.[catItem.id];
+    if (p !== undefined && p !== null) return parseFloat(p);
+    return catItem.basePreco || catItem.preco;
+}
+
+function changeMkt() {
+    currentMktId = document.getElementById('f-mkt').value;
+    carrinho.forEach(c => {
+        if (c.tipo === 'produto') {
+            const catItem = catalogo.find(x => x.id == c.id && x.tipo === 'produto');
+            if (catItem) c.preco = getMktPreco(catItem, currentMktId);
+        }
+    });
+    filtrarCatalogo();
+    if (document.getElementById('modal-desp').classList.contains('open')) {
+        renderCart();
+    }
+}
+
 async function checkAuth() {
+    initMktSelect();
     const session = await getSession();
     if (!session) {
         window.location.href = 'login.html';
@@ -276,6 +325,7 @@ async function carregarCatalogos() {
                     id: p.id,
                     nome: p.nome,
                     preco: p.preco || 0,
+                    basePreco: p.preco || 0,
                     custo: custoFinal
                 });
             }
@@ -305,6 +355,7 @@ async function carregarCatalogos() {
             id: c.id,
             nome: `(Combo) ${c.nome}`,
             preco: c.preco || 0,
+            basePreco: c.preco || 0,
             custo: custoCombo
         });
     });
@@ -329,33 +380,51 @@ function filtrarCatalogo() {
     }
     empty.classList.add('hidden');
     
-    grid.innerHTML = filtrados.map(item => `
+    grid.innerHTML = filtrados.map(item => {
+        let displayPreco = item.basePreco || item.preco;
+        if (item.tipo === 'produto') {
+            displayPreco = getMktPreco(item, currentMktId);
+        }
+        return `
         <div class="cat-card" style="padding-top: 1.5rem; min-height: 100px;">
             <div class="cat-title">${item.nome}</div>
-            <div class="cat-price">${fmtR(item.preco)}</div>
+            <div class="cat-price">${fmtR(displayPreco)}</div>
             <button class="cat-btn" onclick="addToCartFromCatalog('${item.id}', '${item.tipo}')" title="Adicionar ao Carrinho">
                 <span class="material-symbols-outlined" style="font-size:1.0rem;">add_shopping_cart</span>
             </button>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function addToCartFromCatalog(idStr, tipo) {
-    const id = parseInt(idStr);
-    const itemCat = catalogo.find(c => c.id === id && c.tipo === tipo);
+    const id = parseInt(idStr) || idStr;
+    const itemCat = catalogo.find(c => c.id == id && c.tipo === tipo);
     if(!itemCat) return;
     
-    const ex = carrinho.find(c => c.tipo === itemCat.tipo && c.id === itemCat.id);
-    if (ex) {
-        ex.quantidade++;
-    } else {
-        carrinho.push({ ...itemCat, quantidade: 1, tempId: Date.now() });
+    let precoReal = itemCat.basePreco || itemCat.preco;
+    if (tipo === 'produto') {
+        precoReal = getMktPreco(itemCat, currentMktId);
     }
     
-    renderCart();
+    const ex = carrinho.find(c => c.tipo === itemCat.tipo && c.id == itemCat.id);
+    if (ex) {
+        ex.quantidade++;
+        ex.preco = precoReal;
+    } else {
+        carrinho.push({
+            tipo: itemCat.tipo,
+            id: itemCat.id,
+            nome: itemCat.nome,
+            preco: precoReal,
+            custo: itemCat.custo,
+            quantidade: 1,
+            tempId: Date.now()
+        });
+    }
     
-    // Pequeno feedback visual no card
-    showToast(`Adicionado: ${itemCat.nome}`);
+    showToast('Adicionado ao carrinho');
+    renderCart();
 }
 
 function updateQty(tempId, delta) {
