@@ -258,7 +258,7 @@ async function carregarCatalogos() {
     const grid = document.getElementById('catalog-grid');
     grid.innerHTML = '<p class="text-slate-400 text-sm">Carregando catálogo...</p>';
 
-    const resProd = await sb.from('produtos').select('id, nome, preco, custo, receita_id, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades)').eq('user_id', userId).eq('ativo', true).order('nome');
+    const resProd = await sb.from('produtos').select('id, nome, preco, custo, receita_id, ativo, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades)').eq('user_id', userId).order('nome');
 
     catalogo = [];
 
@@ -270,13 +270,15 @@ async function carregarCatalogos() {
                 const un = p.receitas.unidades > 0 ? p.receitas.unidades : 1;
                 custoFinal = sumSemMob / un;
             }
-            catalogo.push({
-                tipo: 'produto',
-                id: p.id,
-                nome: p.nome,
-                preco: p.preco || 0,
-                custo: custoFinal
-            });
+            if (p.ativo === true) {
+                catalogo.push({
+                    tipo: 'produto',
+                    id: p.id,
+                    nome: p.nome,
+                    preco: p.preco || 0,
+                    custo: custoFinal
+                });
+            }
         });
     }
 
