@@ -112,6 +112,12 @@
         .tab-del-btn:hover { background:rgba(248,113,113,.5); }
         .tab-del-btn .material-symbols-outlined { font-size:.65rem;color:inherit;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
         .mkt-tab.active .tab-del-btn { background:rgba(0,0,0,.2); }
+
+        /* ── Médias cards ── */
+        .mcard { background: #111; border: 1px solid #1E1E1E; border-radius: .75rem; padding: .75rem .9rem; }
+        .mlbl { font-size: .58rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #94a3b8; margin-bottom: .25rem; }
+        .mval { font-size: 1rem; font-weight: 800; color: #f1f5f9; line-height: 1.2; }
+        @media (max-width: 639px) { #medias-wrap > div:last-child { grid-template-columns: repeat(2, 1fr) !important; } .mval { font-size: .9rem; } }
     </style>
 </head>
 <body class="bg-background-dark text-slate-100 min-h-screen pb-24">
@@ -168,6 +174,40 @@
             </h2>
             <span class="text-xs text-slate-500" id="prod-count"></span>
         </div>
+
+        <!-- Médias dos Produtos no Marketplace -->
+        <div id="medias-wrap" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+                <div style="display:flex;align-items:center;gap:.5rem">
+                    <span class="material-symbols-outlined" style="font-size:.95rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">bar_chart</span>
+                    <span style="font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8">Médias dos Produtos</span>
+                </div>
+                <span id="medias-count" style="font-size:.68rem;font-weight:600;color:#64748b;background:rgba(255,255,255,.04);border:1px solid #2A2A2A;padding:.2rem .6rem;border-radius:9999px"></span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;margin-bottom:1.25rem">
+                <div class="mcard" style="border-color:rgba(37,244,244,.2)">
+                    <p class="mlbl">Preço Médio</p>
+                    <p class="mval" id="m-preco" style="color:#25f4f4">—</p>
+                </div>
+                <div class="mcard">
+                    <p class="mlbl">Custo Médio</p>
+                    <p class="mval" id="m-custo">—</p>
+                </div>
+                <div class="mcard" style="border-color:rgba(52,211,153,.2)">
+                    <p class="mlbl">Lucro Médio</p>
+                    <p class="mval" id="m-lucro" style="color:#34d399">—</p>
+                </div>
+                <div class="mcard" style="border-color:rgba(251,191,36,.2)">
+                    <p class="mlbl">Margem Média</p>
+                    <p class="mval" id="m-margem" style="color:#fbbf24">—</p>
+                </div>
+                <div class="mcard" style="border-color:rgba(167,139,250,.2)">
+                    <p class="mlbl">Markup Médio</p>
+                    <p class="mval" id="m-markup" style="color:#a78bfa">—</p>
+                </div>
+            </div>
+        </div>
+
         <div class="prod-grid" id="prod-grid"></div>
         <div id="empty-state" style="display:none;flex-direction:column;align-items:center;padding:4rem 1rem;color:#475569;gap:.5rem">
             <span class="material-symbols-outlined" style="font-size:3rem;color:#2A2A2A">inventory_2</span>
@@ -366,9 +406,13 @@ function renderGrid() {
     document.getElementById('prod-count').textContent = `${produtos.length} ite${produtos.length!==1?'ns':'m'}`;
 
     if (!produtos.length) {
-        grid.innerHTML = ''; empty.style.display = 'flex'; return;
+        grid.innerHTML = ''; empty.style.display = 'flex'; 
+        renderMedias();
+        return;
     }
     empty.style.display = 'none';
+
+    renderMedias();
 
     grid.innerHTML = produtos.map(p => {
         const custo      = p.custo || 0;
@@ -461,6 +505,60 @@ function onPrecoChange(mktId, prodId, val) {
     // guardar em memória
     if (!precificacao[mktId]) precificacao[mktId] = {};
     precificacao[mktId][prodId] = preco;
+    
+    renderMedias();
+}
+
+/* ─── MÉDIAS ─────────────────────────────────────────────────────── */
+function renderMedias() {
+    const wrap = document.getElementById('medias-wrap');
+    if (!produtos.length) { wrap.style.display = 'none'; return; }
+    
+    const m = getMkt();
+    const taxaDec = getTaxaDec(m);
+    
+    // Filtra produtos que têm preço definido
+    const comPreco = produtos.filter(p => {
+        const savedPreco = getPrecoProd(m.id, p.id);
+        const preco      = savedPreco !== null ? savedPreco : (p.preco || 0);
+        return preco > 0;
+    });
+
+    if (!comPreco.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    
+    document.getElementById('medias-count').textContent = comPreco.length + ' produto' + (comPreco.length > 1 ? 's' : '') + ' com preço';
+
+    const avg = arr => arr.reduce((s, v) => s + v, 0) / arr.length;
+
+    const precos  = [];
+    const custos  = [];
+    const lucros  = [];
+    const margens = [];
+    const markups = [];
+
+    comPreco.forEach(p => {
+        const custo      = p.custo || 0;
+        const savedPreco = getPrecoProd(m.id, p.id);
+        const preco      = savedPreco !== null ? savedPreco : (p.preco || 0);
+        
+        const taxa       = taxaDec * preco;
+        const lucro      = preco - custo - taxa;
+        const margem     = preco > 0 ? (lucro / preco) * 100 : 0;
+        const markup     = custo > 0 ? preco / custo : 0;
+        
+        precos.push(preco);
+        custos.push(custo);
+        lucros.push(lucro);
+        margens.push(margem);
+        markups.push(markup);
+    });
+
+    document.getElementById('m-preco').textContent  = 'R$ ' + avg(precos).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('m-custo').textContent  = 'R$ ' + avg(custos).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('m-lucro').textContent  = 'R$ ' + avg(lucros).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('m-margem').textContent = avg(margens).toFixed(1) + '%';
+    document.getElementById('m-markup').textContent = avg(markups).toFixed(2) + 'x';
 }
 
 /* ─── SALVAR ─────────────────────────────────────────────────────── */
