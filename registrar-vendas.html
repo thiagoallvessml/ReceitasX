@@ -280,6 +280,33 @@ async function carregarCatalogos() {
         });
     }
 
+    // Combos
+    let combos = JSON.parse(localStorage.getItem('receitasx_combos') || '[]');
+    combos.forEach(c => {
+        let custoCombo = 0;
+        if (c.itens && resProd.data) {
+            c.itens.forEach(item => {
+                const prod = resProd.data.find(x => x.id === item.prodId);
+                if (prod) {
+                    let pCusto = prod.custo || 0;
+                    if (prod.receitas) {
+                        const sumSemMob = parseFloat(prod.receitas.custo_ing || 0) + parseFloat(prod.receitas.custo_emb || 0) + parseFloat(prod.receitas.custo_eqp || 0);
+                        const un = prod.receitas.unidades > 0 ? prod.receitas.unidades : 1;
+                        pCusto = sumSemMob / un;
+                    }
+                    custoCombo += pCusto * (item.qty || 1);
+                }
+            });
+        }
+        catalogo.push({
+            tipo: 'combo',
+            id: c.id,
+            nome: `(Combo) ${c.nome}`,
+            preco: c.preco || 0,
+            custo: custoCombo
+        });
+    });
+
     // Sort by name
     catalogo.sort((a,b) => a.nome.localeCompare(b.nome));
 
