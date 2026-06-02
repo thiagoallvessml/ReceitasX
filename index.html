@@ -701,7 +701,7 @@
 
             const { data: perfil } = await sb
                 .from('perfis')
-                .select('role, plano')
+                .select('role, plano, origem_cadastro')
                 .eq('id', session.user.id)
                 .single();
 
@@ -770,7 +770,8 @@
                     }
 
                     // Oferta do Afiliado (Lead via indicação)
-                    if (localStorage.getItem('has_afiliado_offer') === 'true') {
+                    const isIndicacao = perfil?.origem_cadastro && perfil.origem_cadastro.startsWith('Afiliado:');
+                    if (isIndicacao && localStorage.getItem('has_afiliado_offer') === 'true') {
                         const refCode = localStorage.getItem('afiliado_ref_code') || '';
                         const checkoutUrl = 'checkout.html?ref=' + encodeURIComponent(refCode);
 
