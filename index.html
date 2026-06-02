@@ -241,75 +241,7 @@
         </div>
     </a>
 
-    <!-- ── Onboarding / Wizard ── -->
-    <section id="onboarding-wizard" style="display:none; margin-top:1.5rem">
-        <div class="flex items-center gap-2 mb-3 px-1">
-            <span class="material-symbols-outlined text-primary text-sm">school</span>
-            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Primeiros Passos</h2>
-        </div>
-        <div class="nav-card block p-4 rounded-xl border bg-white dark:bg-card-dark border-slate-200 dark:border-border-dark">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-slate-800 dark:text-f1f5f9">Sua primeira receita em 5 min</h3>
-                <span id="wizard-prog-text" class="text-xs font-bold text-primary">0%</span>
-            </div>
-            
-            <!-- Barra de Progresso -->
-            <div class="w-full bg-slate-100 dark:bg-[#111] rounded-full h-2.5 mb-6 border border-slate-200 dark:border-[#2A2A2A] overflow-hidden">
-                <div id="wizard-prog-bar" class="bg-primary h-2.5 rounded-full" style="width: 0%; transition: width 0.5s ease-out"></div>
-            </div>
 
-            <!-- Steps -->
-            <div class="space-y-3">
-                <!-- Step 1 -->
-                <a href="cadastrar-insumo.html" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
-                    <div id="wizard-step-1-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
-                        <span class="material-symbols-outlined text-sm">looks_one</span>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-1-title">Cadastre 1 Insumo</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Ex: Farinha, Leite condensado...</p>
-                    </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
-                </a>
-                
-                <!-- Step 2 -->
-                <a href="receitas.html?action=new" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
-                    <div id="wizard-step-2-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
-                        <span class="material-symbols-outlined text-sm">looks_two</span>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-2-title">Crie uma Receita</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Junte insumos e descubra o custo real</p>
-                    </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
-                </a>
-
-                <!-- Step 3 -->
-                <a href="gestao-produtos.html" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
-                    <div id="wizard-step-3-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
-                        <span class="material-symbols-outlined text-sm">looks_3</span>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-3-title">Gere um Produto</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Ative o produto vinculado à sua receita</p>
-                    </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
-                </a>
-
-                <!-- Step 4 -->
-                <a href="gestao-produtos.html" class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-[#2A2A2A] hover:bg-slate-50 dark:hover:bg-[#141414] transition-colors group">
-                    <div id="wizard-step-4-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-[#111] text-slate-400 border border-slate-200 dark:border-[#2A2A2A]">
-                        <span class="material-symbols-outlined text-sm">looks_4</span>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200" id="wizard-step-4-title">Defina o Preço</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Descubra seu lucro e margem exatos</p>
-                    </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-sm">chevron_right</span>
-                </a>
-            </div>
-        </div>
-    </section>
 
     <!-- ── Receitas Bônus ─────────────────────────────── -->
     <section style="display:none">
