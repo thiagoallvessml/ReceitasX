@@ -1051,6 +1051,9 @@ document.addEventListener('keydown', e => {
     userId = user.id;
     await loadInsumos();
     injetarAviso('insumos');
+    if (new URLSearchParams(window.location.search).get('action') === 'new') {
+        openCadastrar();
+    }
 })();
 </script>
 <script src="guia-banner.js"></script>
