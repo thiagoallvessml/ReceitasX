@@ -476,7 +476,7 @@
                     <label class="field-label" id="label-peso">Peso da Embalagem <span style="color:#475569;text-transform:none;font-weight:400">(Compra)</span></label>
                     <div style="display:flex;gap:.5rem">
                         <input id="f-peso" type="number" step="0.001" min="0" class="fc" placeholder="Ex: 1000" style="flex:1" oninput="atualizarPreview()" />
-                        <select id="f-unidade" class="fc select-placeholder" onchange="updateSelectColor(this); onUnidadeChange(this.value)"
+                        <select id="f-unidade" class="fc" onchange="onUnidadeChange(this.value)"
                             style="width:120px;flex-shrink:0;padding-right:2rem;-webkit-appearance:none;appearance:none;cursor:pointer">
                             <option value="" disabled selected>Unidade</option>
                             <option value="g">g (grama)</option>
@@ -821,7 +821,6 @@ async function openCadastrar(id = null) {
             document.getElementById('f-unidade').value   = item.unidade || '';
             document.getElementById('f-custo').value     = item.preco ?? '';
             document.getElementById('f-fornecedor').value= '';
-            updateSelectColor(document.getElementById('f-unidade'));
             onUnidadeChange(item.unidade || '');
         }
         title.textContent = 'Editar Insumo';
