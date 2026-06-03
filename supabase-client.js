@@ -176,10 +176,10 @@ async function dbUpsert(table, payload, onConflict) {
                 }, { onConflict: 'user_id' });
                 
                 if (error) {
-                    console.error('[Heartbeat] Erro no upsert:', error.message);
+                    // console.error('[Heartbeat] Erro no upsert:', error.message);
                 }
             } catch(e) {
-                console.error('[Heartbeat] Exceção:', e);
+                // console.error('[Heartbeat] Exceção:', e);
             }
         };
 
@@ -215,7 +215,7 @@ async function dbUpsert(table, payload, onConflict) {
         }).select('id').single();
 
         if (error) {
-            console.error('[Sessão] Erro ao registrar:', error.message);
+            // console.error('[Sessão] Erro ao registrar:', error.message);
             return;
         }
 

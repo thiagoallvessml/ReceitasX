@@ -868,46 +868,8 @@
                     if (bannerGuia) bannerGuia.style.display = 'none';
                 }
 
-                // --- 4-Step Wizard ---
-                try {
-                    let wizProg = 0;
-                    const wizSteps = [false, false, false, false];
-                    
-                    if (countInsum > 0) { wizSteps[0] = true; wizProg += 25; }
-                    if (countRecei > 0) { wizSteps[1] = true; wizProg += 25; }
-                    if (countProdu > 0) {
-                        wizSteps[2] = true; wizProg += 25;
-                        const { data: prods } = await sb.from('produtos').select('preco').eq('user_id', uid).limit(50);
-                        if (prods && prods.some(p => p.preco > 0)) {
-                            wizSteps[3] = true; wizProg += 25;
-                        }
-                    }
-
-                    if (wizProg < 100) {
-                        document.getElementById('onboarding-wizard').style.display = 'block';
-                        setTimeout(() => {
-                            document.getElementById('wizard-prog-bar').style.width = wizProg + '%';
-                        }, 100);
-                        document.getElementById('wizard-prog-text').textContent = wizProg + '%';
-
-                        for (let i = 0; i < 4; i++) {
-                            const idx = i + 1;
-                            if (wizSteps[i]) {
-                                const iconEl = document.getElementById(`wizard-step-${idx}-icon`);
-                                const titleEl = document.getElementById(`wizard-step-${idx}-title`);
-                                if (iconEl) {
-                                    iconEl.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>';
-                                    iconEl.className = "w-8 h-8 rounded-full flex items-center justify-center bg-[#22c55e] text-white border border-[#22c55e]";
-                                }
-                                if (titleEl) {
-                                    titleEl.style.textDecoration = 'line-through';
-                                    titleEl.style.opacity = '0.5';
-                                }
-                            }
-                        }
-                    }
                 } catch(we) {
-                    console.warn('[ReceitasX] Erro no wizard:', we);
+                    // silently ignore wizard error
                 }
             } catch(_) {}
         } catch (e) {
