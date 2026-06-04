@@ -1497,21 +1497,23 @@ function calcPrevia() {
     });
 
     // Renderiza subtotais por etapa se houver mais de uma
+    const getPct = (val) => total > 0 ? ` <span style="font-size:0.75rem;font-weight:400;opacity:0.65;color:#94a3b8;margin-left:4px">(${((val / total) * 100).toFixed(1)}%)</span>` : '';
+
     const etapaKeys = Object.keys(etapaCosts).filter(k => etapaCosts[k] > 0);
     const etapaHtml = etapaKeys.length > 1
         ? etapaKeys.map(k => {
             const icons = { 'Massa':'🎂', 'Calda':'💧', 'Recheio':'🍫', 'Cobertura':'✨', 'Decoração':'🌸', 'Geral':'📦' };
-            return `<div class="cost-row"><span class="lbl">${icons[k]||'📦'} ${k}:</span><span class="val">${fmtR(etapaCosts[k])}</span></div>`;
+            return `<div class="cost-row"><span class="lbl">${icons[k]||'📦'} ${k}:</span><span class="val">${fmtR(etapaCosts[k])}${getPct(etapaCosts[k])}</span></div>`;
           }).join('')
         : '';
 
-    document.getElementById('cv-ing').textContent  = fmtR(costIng);
+    document.getElementById('cv-ing').innerHTML  = fmtR(costIng) + getPct(costIng);
     // Insert etapa breakdown after ing row
     const etapaContainer = document.getElementById('cv-etapas');
     if (etapaContainer) etapaContainer.innerHTML = etapaHtml;
 
-    document.getElementById('cv-emb').textContent  = fmtR(costEmb);
-    document.getElementById('cv-eqp').textContent  = fmtR(costEqp);
+    document.getElementById('cv-emb').innerHTML  = fmtR(costEmb) + getPct(costEmb);
+    document.getElementById('cv-eqp').innerHTML  = fmtR(costEqp) + getPct(costEqp);
     document.getElementById('cv-tot').textContent  = fmtR(total);
     document.getElementById('cv-unit').textContent = fmtR(unit);
     document.getElementById('cv-rend').textContent = rend + ' un';

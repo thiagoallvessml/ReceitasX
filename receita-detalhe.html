@@ -326,7 +326,7 @@ function calc(r) {
 }
 
 /* ── montar seção de custo (accordion) ── */
-function makeSection(icon, label, valor, itens, aberto, iconColor) {
+function makeSection(icon, label, valor, itens, aberto, iconColor, percentValue) {
     const id = 'sec-' + label.replace(/\s/g,'-').toLowerCase();
     const cls = aberto ? 'cost-section open' : 'cost-section';
     const icoColor = iconColor || '#25f4f4';
@@ -340,6 +340,8 @@ function makeSection(icon, label, valor, itens, aberto, iconColor) {
             </div>`).join('')
         : `<p class="empty-items">Nenhum item registrado</p>`;
 
+    const pctHtml = percentValue !== undefined && percentValue !== null ? `<span style="font-size:0.75rem;font-weight:600;opacity:0.65;margin-left:6px;color:#94a3b8">(${percentValue}%)</span>` : '';
+
     return `
     <div class="${cls}" id="${id}">
         <div class="cost-head" onclick="toggleSection('${id}')">
@@ -348,7 +350,7 @@ function makeSection(icon, label, valor, itens, aberto, iconColor) {
                 ${esc(label.toUpperCase())}
             </div>
             <div class="cost-head-right">
-                <span class="cost-valor" style="color:${icoColor}">${fmtR(valor)}</span>
+                <span class="cost-valor" style="color:${icoColor}">${fmtR(valor)}${pctHtml}</span>
                 <span class="material-symbols-outlined chev">expand_more</span>
             </div>
         </div>
@@ -425,7 +427,8 @@ function render() {
             const etapaColors = { 'Massa':'#fb923c', 'Calda':'#38bdf8', 'Recheio':'#a78bfa', 'Cobertura':'#34d399', 'Decoração':'#f472b6' };
             const hasEtapas = ings.some(i => i.etapa);
             if (!hasEtapas) {
-                return makeSection('emoji_food_beverage', 'Ingredientes', custoIng, ings, true);
+                const pct = custoTotal > 0 ? (custoIng / custoTotal * 100).toFixed(1) : 0;
+                return makeSection('emoji_food_beverage', 'Ingredientes', custoIng, ings, true, null, pct);
             }
             const grouped = {};
             ings.forEach(i => { const k = i.etapa || 'Geral'; if (!grouped[k]) grouped[k] = []; grouped[k].push(i); });
@@ -433,11 +436,12 @@ function render() {
             return order.filter(k => grouped[k]).map((key, idx) => {
                 const items = grouped[key];
                 const subtotal = items.reduce((s, i) => s + (i.valor || 0), 0);
-                return makeSection(etapaIcons[key] || 'emoji_food_beverage', key, subtotal, items, idx === 0, etapaColors[key]);
+                const pct = custoTotal > 0 ? (subtotal / custoTotal * 100).toFixed(1) : 0;
+                return makeSection(etapaIcons[key] || 'emoji_food_beverage', key, subtotal, items, idx === 0, etapaColors[key], pct);
             }).join('');
         })()}
-        ${makeSection('inventory_2',         'Embalagens',   custoEmb, embs, false)}
-        ${makeSection('blender',             'Equipamentos', custoEqp, eqps, false)}
+        ${makeSection('inventory_2',         'Embalagens',   custoEmb, embs, false, null, custoTotal > 0 ? (custoEmb / custoTotal * 100).toFixed(1) : 0)}
+        ${makeSection('blender',             'Equipamentos', custoEqp, eqps, false, null, custoTotal > 0 ? (custoEqp / custoTotal * 100).toFixed(1) : 0)}
 
         <!-- Resumo Financeiro -->
         <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#475569;margin:.85rem 0 .65rem;display:flex;align-items:center;gap:.4rem">
