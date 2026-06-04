@@ -565,13 +565,28 @@ function renderReceitas(lista) {
         const embs = Array.isArray(r.embalagens)   ? r.embalagens   : [];
         const eqps = Array.isArray(r.equipamentos) ? r.equipamentos : [];
 
-        const ingRows = ings.map(i => `
+        const etapaIcons = { 'Massa':'cake', 'Calda':'water_drop', 'Recheio':'cookie', 'Cobertura':'palette', 'Decoração':'eco' };
+        const etapaColors = { 'Massa':'#fb923c', 'Calda':'#38bdf8', 'Recheio':'#a78bfa', 'Cobertura':'#34d399', 'Decoração':'#f472b6', 'Geral':'#25f4f4' };
+        const groupedIngs = {};
+        ings.forEach(i => { const k = i.etapa || 'Geral'; if (!groupedIngs[k]) groupedIngs[k] = []; groupedIngs[k].push(i); });
+        const order = ['Massa', 'Calda', 'Recheio', 'Cobertura', 'Decoração', 'Geral'];
+        const ingSections = order.filter(k => groupedIngs[k]).map((k, idx) => {
+            const items = groupedIngs[k];
+            const icon = etapaIcons[k] || 'inventory_2';
+            const color = etapaColors[k];
+            const rows = items.map(i => `
             <div class="ing-item">
                 <span class="name">${esc(i.nome || '—')}</span>
                 <span class="val">${i.qty ? esc(i.qty) : '—'}
                     ${i.valor ? `<span style="color:#64748b;font-weight:400;margin-left:.35rem">${fmtR(i.valor)}</span>` : ''}
                 </span>
             </div>`).join('');
+            return `
+          <div class="ing-list" ${idx > 0 ? 'style="border-top:1px solid #2A2A2A"' : ''}>
+            <div class="ing-list-title"><span class="material-symbols-outlined" style="color:${color}">${icon}</span>${k === 'Geral' ? 'Ingredientes' : k} (${items.length})</div>
+            ${rows}
+          </div>`;
+        }).join('');
 
         const embRows = embs.map(e => `
             <div class="ing-item">
@@ -656,11 +671,7 @@ function renderReceitas(lista) {
           </div>`: ''}
 
           <!-- Ingredientes -->
-          ${ings.length ? `
-          <div class="ing-list">
-            <div class="ing-list-title"><span class="material-symbols-outlined">inventory_2</span>Ingredientes (${ings.length})</div>
-            ${ingRows}
-          </div>` : ''}
+          ${ingSections}
 
           <!-- Embalagens -->
           ${embs.length ? `
