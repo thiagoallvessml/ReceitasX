@@ -706,8 +706,7 @@ async function carregarCombos() {
                     nome: c.nome,
                     preco: c.preco || 0,
                     imagem_url: c.img || '',
-                    itens: c.itens || [],
-                    obs: c.obs || ''
+                    itens: c.itens || []
                 }).select().single();
                 if (!insErr && inserted) {
                     c.id = inserted.id; // update local ID to Supabase ID
@@ -1153,7 +1152,6 @@ async function salvar() {
     const dataObj = {
         nome,
         preco,
-        obs: '',
         imagem_url: img,
         itens,
     };
