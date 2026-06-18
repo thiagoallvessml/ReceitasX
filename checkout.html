@@ -145,6 +145,18 @@
         @keyframes spin { to{transform:rotate(360deg)} }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
 
+        /* QR Code PIX */
+        .pix-wrap { display:none;flex-direction:column;align-items:center;text-align:center;padding:2rem 1.5rem;gap:1.25rem;animation:fadeIn .4s ease; }
+        .pix-qr-box { background:#fff;border-radius:1rem;padding:1rem;box-shadow:0 4px 24px rgba(37,244,244,.15);border:2px solid rgba(37,244,244,.25); }
+        .pix-qr-box img { width:220px;height:220px;display:block; }
+        .pix-copiacola { display:flex;align-items:center;gap:.5rem;background:#141414;border:1px solid rgba(37,244,244,.2);border-radius:.85rem;padding:.75rem 1rem;max-width:400px;width:100%;cursor:pointer;transition:border-color .2s; }
+        .pix-copiacola:hover { border-color:rgba(37,244,244,.5); }
+        .pix-copiacola code { flex:1;font-size:.7rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left; }
+        .pix-copiacola .material-symbols-outlined { font-size:1rem;color:#25f4f4;flex-shrink:0; }
+        .pix-status { display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:#64748b;font-weight:600; }
+        .pix-status .spinner-pix { width:1rem;height:1rem;border:2px solid rgba(37,244,244,.2);border-top-color:#25f4f4;border-radius:50%;animation:spin .8s linear infinite; }
+        .pix-timer { font-size:.75rem;color:#475569; }
+
         /* toast */
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#141414;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:200;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.7);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
@@ -384,6 +396,27 @@
         </div>
     </div>
 
+</div>
+
+<!-- ══ Tela PIX QR Code ══════════════════════════════════════════════ -->
+<div id="pix-wrap" class="pix-wrap">
+    <div style="display:flex;align-items:center;gap:.5rem">
+        <span class="material-symbols-outlined" style="font-size:1.5rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">qr_code_2</span>
+        <p style="font-size:1.2rem;font-weight:800">Pague com PIX</p>
+    </div>
+    <p style="color:#64748b;font-size:.82rem;line-height:1.5;max-width:360px">Escaneie o QR Code abaixo com o app do seu banco ou copie o código.</p>
+    <div class="pix-qr-box">
+        <img id="pix-qr-img" src="" alt="QR Code PIX" />
+    </div>
+    <div class="pix-copiacola" id="pix-copiacola" onclick="copiarPix()">
+        <code id="pix-brcode">—</code>
+        <span class="material-symbols-outlined">content_copy</span>
+    </div>
+    <div class="pix-status" id="pix-status">
+        <div class="spinner-pix"></div>
+        Aguardando pagamento...
+    </div>
+    <div class="pix-timer" id="pix-timer"></div>
 </div>
 
 <!-- ══ Tela de Sucesso ═══════════════════════════════════════════════ -->
@@ -704,7 +737,9 @@ function validar() {
 const EDGE_URL           = 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/criar-cobranca';
 const EDGE_CONFIRMAR_URL = 'https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/confirmar-pagamento';
 
-/* ── FINALIZAR (AbacatePay) ── */
+/* ── FINALIZAR (AbacatePay v2 — Checkout Transparente) ── */
+let pixPollingInterval = null;
+
 async function finalizarCompra() {
     if (!validar()) return;
 
@@ -750,22 +785,22 @@ async function finalizarCompra() {
             throw new Error(`Resposta inválida (status ${resp.status}): ${rawText.slice(0,200)}`);
         }
 
-        if (!resp.ok || !data.url) {
+        if (!resp.ok || !data.brCode) {
             const msg = data.error || data.message
                 || (data.debug ? JSON.stringify(data.debug).slice(0,300) : null)
-                || `Erro ${resp.status}: sem URL de pagamento`;
+                || `Erro ${resp.status}: QR Code não gerado`;
             console.error('[Checkout] Erro da Edge Function:', data);
             throw new Error(msg);
         }
 
-        // Salva billingId no localStorage (persistente em redirects cross-site)
+        // Salva billingId
         if (data.id) {
             localStorage.setItem('rx_billing_id', data.id);
-            localStorage.setItem('rx_billing_email', document.getElementById('f-email').value.trim());
+            localStorage.setItem('rx_billing_email', email);
         }
 
-        // Redireciona para página de pagamento do AbacatePay
-        window.location.href = data.url;
+        // Exibe QR Code na página
+        mostrarPixQRCode(data.brCodeBase64, data.brCode, data.id);
 
     } catch (err) {
         showToast('Erro: ' + (err.message || 'Tente novamente'), 'error');
@@ -775,6 +810,82 @@ async function finalizarCompra() {
         bico.style.display    = '';
         btxt.textContent      = 'Gerar Pix';
     }
+}
+
+function mostrarPixQRCode(qrBase64, brCode, billingId) {
+    // Oculta formulário
+    document.querySelector('.checkout-grid').style.display = 'none';
+
+    // Mostra tela do QR Code
+    const pixWrap = document.getElementById('pix-wrap');
+    pixWrap.style.display = 'flex';
+
+    // Define imagem e código
+    document.getElementById('pix-qr-img').src = qrBase64;
+    document.getElementById('pix-brcode').textContent = brCode;
+
+    // Inicia polling para verificar pagamento
+    iniciarPollingPagamento(billingId);
+}
+
+function copiarPix() {
+    const brCode = document.getElementById('pix-brcode').textContent;
+    navigator.clipboard.writeText(brCode).then(() => {
+        showToast('Código PIX copiado!', 'success');
+    }).catch(() => {
+        // Fallback para navegadores antigos
+        const ta = document.createElement('textarea');
+        ta.value = brCode;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Código PIX copiado!', 'success');
+    });
+}
+
+function iniciarPollingPagamento(billingId) {
+    if (pixPollingInterval) clearInterval(pixPollingInterval);
+
+    let tentativas = 0;
+    const MAX_TENTATIVAS = 120; // 10 min (a cada 5s)
+
+    pixPollingInterval = setInterval(async () => {
+        tentativas++;
+        if (tentativas > MAX_TENTATIVAS) {
+            clearInterval(pixPollingInterval);
+            document.getElementById('pix-status').innerHTML = `
+                <span class="material-symbols-outlined" style="font-size:1rem;color:#f87171">error</span>
+                QR Code expirado. <a href="javascript:location.reload()" style="color:#25f4f4;text-decoration:underline">Gerar novo</a>
+            `;
+            return;
+        }
+
+        try {
+            const r = await fetch(EDGE_CONFIRMAR_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ billingId }),
+            });
+            const result = await r.json();
+            console.log('[Checkout] Polling tentativa', tentativas, ':', result);
+
+            if (result.ok && result.status === 'pago') {
+                clearInterval(pixPollingInterval);
+                localStorage.removeItem('rx_billing_id');
+                localStorage.removeItem('rx_billing_email');
+
+                // Transição suave para tela de sucesso
+                document.getElementById('pix-status').innerHTML = `
+                    <span class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4;font-variation-settings:'FILL' 1">check_circle</span>
+                    Pagamento confirmado!
+                `;
+                setTimeout(() => mostrarSucesso(result.cod || ''), 1500);
+            }
+        } catch(e) {
+            console.warn('[Checkout] Polling erro:', e);
+        }
+    }, 5000); // a cada 5 segundos
 }
 
 /* ── TOAST ──────────────────────────────────────────── */
@@ -792,10 +903,9 @@ function showToast(msg, type='success') {
 /* ── INIT: Auth + preencher campos ──────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // ── Verificar se voltou de pagamento com sucesso ──
+    // ── Verificar se voltou de pagamento com sucesso (compat v1 / fallback) ──
     const params = new URLSearchParams(location.search);
     if (params.get('sucesso') === '1') {
-        // Oculta formulário e mostra loading
         document.querySelector('.checkout-grid').style.display = 'none';
         document.getElementById('sucesso-wrap').style.cssText  = 'display:flex';
         document.getElementById('sucesso-wrap').innerHTML = `
@@ -805,36 +915,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
 
         const billingId = localStorage.getItem('rx_billing_id');
-        console.log('[Checkout] Voltou com sucesso=1, billingId:', billingId);
-
         if (billingId) {
             try {
-                // Aguarda 2s para o webhook/AbacatePay processar
                 await new Promise(r => setTimeout(r, 2000));
-
                 const r = await fetch(EDGE_CONFIRMAR_URL, {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body:    JSON.stringify({ billingId }),
                 });
                 const result = await r.json();
-                console.log('[Checkout] Resultado confirmação:', result);
-
                 localStorage.removeItem('rx_billing_id');
                 localStorage.removeItem('rx_billing_email');
-
-                if (result.ok) {
-                    mostrarSucesso(result.cod || '');
-                } else {
-                    // Webhook pode ter processado mas confirmar-pagamento falhou — mostra sucesso mesmo assim
-                    mostrarSucesso('');
-                }
+                mostrarSucesso(result.ok ? (result.cod || '') : '');
             } catch(e) {
                 console.error('[Checkout] Erro ao confirmar:', e);
                 mostrarSucesso('');
             }
         } else {
-            // Sem billingId no localStorage — mostra sucesso (webhook provavelmente já processou)
             mostrarSucesso('');
         }
         return;
@@ -862,6 +959,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function mostrarSucesso(cod) {
     document.querySelector('.checkout-grid').style.display = 'none';
+    document.getElementById('pix-wrap').style.display = 'none';
+    if (pixPollingInterval) clearInterval(pixPollingInterval);
     const sw = document.getElementById('sucesso-wrap');
     sw.style.cssText = 'display:flex';
     sw.innerHTML = `

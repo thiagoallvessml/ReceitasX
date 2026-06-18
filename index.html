@@ -703,7 +703,7 @@
                 .from('perfis')
                 .select('role, plano, origem_cadastro')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
 
             const role = perfil?.role ?? 'afiliado';
             console.log('[ReceitasX] Role:', role);
@@ -1582,6 +1582,15 @@
                     card.style.display = 'none';
                     customGrid.appendChild(card);
                 }
+            }
+        });
+        
+        // Preservar cards essenciais que ficam dentro de <section> e seriam ocultados
+        ['receitas-geladinho', 'acesso-vitalicio'].forEach(id => {
+            const card = document.querySelector(`a.nav-card[data-card-id="${id}"]`);
+            if (card) {
+                card.classList.add('custom-wide');
+                customGrid.appendChild(card);
             }
         });
     }

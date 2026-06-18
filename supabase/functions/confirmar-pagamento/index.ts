@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const ABACATE_API  = 'https://api.abacatepay.com/v1';
+const ABACATE_API  = 'https://api.abacatepay.com/v2';
 const ABACATE_KEY  = Deno.env.get('ABACATEPAY_KEY') ?? '';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')  ?? '';
 const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -34,7 +34,7 @@ serve(async (req) => {
     // 1. Verifica se já está pago no banco
     const { data: pedidoExistente } = await sb
       .from('pedidos')
-      .select('id, status, email')
+      .select('id, status, email, valor_pago, ref_afiliado, cupom_usado')
       .eq('billing_id', billingId)
       .maybeSingle();
 
@@ -46,7 +46,7 @@ serve(async (req) => {
     }
 
     // 2. Consulta o AbacatePay para verificar o status do billing
-    const resp = await fetch(`${ABACATE_API}/billing/get?id=${billingId}`, {
+    const resp = await fetch(`${ABACATE_API}/transparents/check?id=${billingId}`, {
       headers: {
         'Authorization': `Bearer ${ABACATE_KEY}`,
         'Content-Type':  'application/json',
@@ -66,27 +66,23 @@ serve(async (req) => {
     let billing: Record<string, unknown>;
     try { billing = JSON.parse(text); } catch { billing = {}; }
 
-    // Suporte a { data: {...} } ou direto
+    // v2: { data: { id, status, expiresAt }, success, error }
     const inner  = (billing?.data as Record<string, unknown>) ?? billing;
-    const status = (inner?.status ?? billing?.status) as string || '';
+    const status = (inner?.status as string) || '';
 
     console.log('Status do billing:', status);
 
-    // AbacatePay usa: PAID, PENDING, EXPIRED, etc.
-    if (status !== 'PAID' && status !== 'paid' && status !== 'billing.paid') {
+    // AbacatePay v2 usa: PAID, PENDING, EXPIRED, CANCELLED
+    if (status !== 'PAID') {
       return new Response(JSON.stringify({ ok: false, status, msg: 'Pagamento ainda não confirmado pelo AbacatePay' }), {
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
-    // 3. Pagamento confirmado — processa igual ao webhook
-    const metadata = (inner?.metadata ?? {}) as Record<string, string>;
-    const customer = (inner?.customer ?? {}) as Record<string, string>;
-
-    const email     = metadata?.email || customer?.email || pedidoExistente?.email || '';
-    const ref       = metadata?.ref   || '';
-    const valorCents = (inner?.amount ?? inner?.value) as number || 0;
-    const valorReal  = valorCents / 100;
+    // 3. Pagamento confirmado — dados vêm do pedido existente (v2 check não retorna metadata/customer)
+    const email      = pedidoExistente?.email || '';
+    const ref        = pedidoExistente?.ref_afiliado || '';
+    const valorReal  = (pedidoExistente?.valor_pago as number) || 0;
 
     const cod = 'RX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 

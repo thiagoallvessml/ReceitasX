@@ -18,7 +18,7 @@
             .from('perfis')
             .select('id, role, plano, nome, sobrenome')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
 

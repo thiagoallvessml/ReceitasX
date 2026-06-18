@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const ABACATE_API   = 'https://api.abacatepay.com/v1';
+const ABACATE_API   = 'https://api.abacatepay.com/v2';
 const ABACATE_KEY   = Deno.env.get('ABACATEPAY_KEY') ?? '';
 const SUPABASE_URL  = Deno.env.get('SUPABASE_URL')  ?? '';
 const SUPABASE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -38,34 +38,28 @@ serve(async (req) => {
     };
     if (telefone && String(telefone).trim()) {
       const tel = String(telefone).replace(/\D/g, '');
-      customer.cellphone = tel.startsWith('55') ? `+${tel}` : `+55${tel}`;
+      // v2 transparent: telefone sem prefixo +55, apenas dígitos ou formatado
+      customer.cellphone = tel;
     }
 
     const body = {
-      frequency: 'ONE_TIME',
-      methods:   ['PIX'],
-      products: [
-        {
-          externalId: `RX-${Date.now()}`,
-          name:       'ReceitasX - Acesso Vitalicio',
-          quantity:   1,
-          price:      Math.round(Number(valor) * 100),
+      method: 'PIX',
+      data: {
+        amount:      Math.round(Number(valor) * 100),
+        description: 'ReceitasX - Acesso Vitalicio',
+        customer,
+        metadata: {
+          email,
+          ref:   ref || '',
+          valor: String(valor),
+          cupom: cupom || '',
         },
-      ],
-      returnUrl:     `${origin}/acesso-vitalicio.html`,
-      completionUrl: `${origin}/checkout.html?sucesso=1${ref ? `&ref=${ref}` : ''}`,
-      customer,
-      metadata: {
-        email,
-        ref:   ref || '',
-        valor: String(valor),
-        cupom: cupom || '',
       },
     };
 
     console.log('Key ok:', !!ABACATE_KEY, '| body:', JSON.stringify(body));
 
-    const resp = await fetch(`${ABACATE_API}/billing/create`, {
+    const resp = await fetch(`${ABACATE_API}/transparents/create`, {
       method:  'POST',
       headers: {
         'Authorization': `Bearer ${ABACATE_KEY}`,
@@ -75,34 +69,31 @@ serve(async (req) => {
     });
 
     const text = await resp.text();
-    console.log('AbacatePay', resp.status, text);
+    console.log('AbacatePay v2', resp.status, text);
 
     let data: Record<string, unknown>;
     try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
-    if (!resp.ok) {
+    if (!resp.ok || data?.success === false) {
       const errMsg = (data?.error as string) || (data?.message as string) || text;
       return new Response(JSON.stringify({ error: errMsg, debug: data }), {
-        status: resp.status,
+        status: resp.ok ? 400 : resp.status,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
-    // v1 pode retornar { url } direto OU { data: { url } }
-    const inner     = (data?.data as Record<string, unknown>) ?? {};
-    const url       = (data?.url ?? inner?.url) as string | undefined;
-    const billingId = (data?.id  ?? inner?.id)  as string | undefined;
+    // v2 transparent retorna { data: { id, brCode, brCodeBase64, ... }, success, error }
+    const inner       = (data?.data as Record<string, unknown>) ?? {};
+    const chargeId    = inner?.id as string | undefined;
+    const brCode      = inner?.brCode as string | undefined;
+    const brCodeBase64 = inner?.brCodeBase64 as string | undefined;
 
-    if (!url) {
-      return new Response(JSON.stringify({ error: 'URL não retornada', debug: data }), {
+    if (!chargeId || !brCode) {
+      return new Response(JSON.stringify({ error: 'Dados PIX não retornados', debug: data }), {
         status: 500,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
-
-    // Atualiza completionUrl para incluir o billingId (usado como fallback se webhook falhar)
-    // Nota: o body já foi enviado para AbacatePay — o billingId é incluído na resposta ao frontend
-    // O frontend usará billing=ID na URL de retorno via completionUrl já configurada abaixo:
 
 
     // ── Se veio com código de afiliado, registra indicação pendente ──
@@ -144,7 +135,7 @@ serve(async (req) => {
     // ── Registra pedido pendente no Supabase ─────────────────────────
     try {
       const sbAdmin = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
-      const billingId = (data?.id ?? inner?.id) as string || '';
+      const billingId = chargeId || '';
 
       // Tenta achar user_id pelo email
       let userId: string | null = null;
@@ -192,7 +183,7 @@ serve(async (req) => {
       // Não bloqueia o retorno
     }
 
-    return new Response(JSON.stringify({ url, id: data?.id ?? inner?.id }), {
+    return new Response(JSON.stringify({ id: chargeId, brCode, brCodeBase64 }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });

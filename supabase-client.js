@@ -80,6 +80,17 @@ async function signOut() {
     _sessionPromise = null;
     sessionStorage.removeItem('receitasx_session_id');
     localStorage.removeItem('impersonate_id');
+    
+    // Limpar contadores de limites locais ao deslogar
+    localStorage.removeItem('receitasx_uso_plano');
+    localStorage.removeItem('receitasx_pg_receitas');
+    localStorage.removeItem('receitasx_pg_produtos');
+    localStorage.removeItem('receitasx_pg_insumos');
+    localStorage.removeItem('receitasx_pg_embalagens');
+    localStorage.removeItem('receitasx_pg_equipamentos');
+    localStorage.removeItem('receitasx_pg_combos');
+    localStorage.removeItem('receitasx_pg_precificacoes');
+
     await sb.auth.signOut();
     window.location.href = 'login.html';
 }

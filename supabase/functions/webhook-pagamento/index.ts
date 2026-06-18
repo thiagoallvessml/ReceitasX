@@ -24,40 +24,46 @@ serve(async (req) => {
     const event = payload?.event as string;
     console.log('Evento recebido:', event);
 
-    // Aceita billing.paid (v1)
-    if (event !== 'billing.paid') {
+    // Aceita billing.paid (v1), transparent.completed (v2), checkout.completed (v2)
+    const acceptedEvents = ['billing.paid', 'transparent.completed', 'checkout.completed'];
+    if (!acceptedEvents.includes(event)) {
       console.log('Evento ignorado:', event);
       return new Response(JSON.stringify({ ok: true, ignored: event }), {
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
 
-    // ── Extrair dados do billing ─────────────────────────────────────
-    // AbacatePay pode enviar em estruturas diferentes — cobrimos todas
-    const billing  = (payload?.data?.billing ?? payload?.data ?? payload ?? {}) as Record<string, unknown>;
+    // ── Extrair dados do billing (v1 + v2) ────────────────────────────
+    // v2 format: dados em data.transparent ou data.checkout
+    const transparent = payload?.data?.transparent as Record<string, unknown> | undefined;
+    const checkout = payload?.data?.checkout as Record<string, unknown> | undefined;
+    const v2Customer = payload?.data?.customer as Record<string, unknown> | undefined;
+
+    // v1 fallback
+    const v1Billing = (payload?.data?.billing ?? payload?.data ?? {}) as Record<string, unknown>;
+    const v1CustomerMeta = ((v1Billing?.customer as Record<string, unknown>)?.metadata ?? {}) as Record<string, string>;
+
+    // Unified: prefer v2, fallback v1
+    const billing = transparent ?? checkout ?? v1Billing;
     const metadata = (billing?.metadata ?? payload?.metadata ?? {}) as Record<string, string>;
-    const customer = (billing?.customer ?? payload?.customer ?? {}) as Record<string, unknown>;
-    // O AbacatePay coloca o email dentro de customer.metadata (não customer.email direto!)
-    const customerMeta = (customer?.metadata ?? {}) as Record<string, string>;
 
     console.log('billing keys:', Object.keys(billing));
     console.log('metadata:', JSON.stringify(metadata));
-    console.log('customer:', JSON.stringify(customer));
-    console.log('customerMeta:', JSON.stringify(customerMeta));
+    console.log('v2Customer:', JSON.stringify(v2Customer));
+    console.log('v1CustomerMeta:', JSON.stringify(v1CustomerMeta));
 
-    // Tenta extrair email de todos os locais possíveis
+    // Email: v2 tem em data.customer.email direto; v1 em customer.metadata.email
     const email =
-      customerMeta?.email           ||  // ← estrutura real do AbacatePay
+      (v2Customer?.email as string) ||  // ← v2: data.customer.email
       metadata?.email               ||
-      (customer?.email as string)   ||
+      v1CustomerMeta?.email         ||  // ← v1: customer.metadata.email
       (billing?.email as string)    ||
-      (payload?.email as string)    ||
       '';
 
-    const ref        = metadata?.ref    || customerMeta?.ref || (billing?.ref as string) || '';
+    const ref        = metadata?.ref    || v1CustomerMeta?.ref || (billing?.ref as string) || '';
     const cupom      = metadata?.cupom  || '';
     const billingId  = (billing?.id ?? payload?.id) as string || '';
-    const valorCents = (billing?.amount ?? billing?.value ?? payload?.amount) as number || 0;
+    const valorCents = (billing?.paidAmount ?? billing?.amount ?? billing?.value ?? payload?.amount) as number || 0;
     const valorReal  = valorCents / 100;
 
 
