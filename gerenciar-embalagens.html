@@ -168,6 +168,9 @@
             <span class="material-symbols-outlined" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-size:1rem;color:#475569;pointer-events:none">search</span>
             <input id="search-desktop" type="search" class="search-box" style="padding-left:2.3rem;border-radius:.6rem" placeholder="Buscar embalagem..." oninput="syncSearch(this.value)" />
         </div>
+        <button class="hidden md:flex items-center justify-center" onclick="exportarCSV()" style="width:36px;height:36px;border-radius:8px;background:#2A2A2A;color:#f1f5f9;border:1px solid #333;cursor:pointer" title="Exportar CSV">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">download</span>
+        </button>
         <button class="btn-new hidden md:flex" onclick="openCadastrar()">
             <span class="material-symbols-outlined">add</span>
             Nova Embalagem
@@ -576,6 +579,19 @@ function showToast(msg, type = 'success') {
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function exportarCSV() {
+    if (!embalagens.length) { showToast('Nenhuma embalagem para exportar','error'); return; }
+    let csv = 'ID,Nome,Quantidade,Custo,Fornecedor\n';
+    embalagens.forEach(e => {
+        csv += `${e.id},"${(e.nome||'').replace(/"/g,'""')}",${e.qtd||0},${e.custo||0},"${(e.fornecedor||'').replace(/"/g,'""')}"\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'embalagens_receitasx.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCadastrar(); closeExcluir(); } });

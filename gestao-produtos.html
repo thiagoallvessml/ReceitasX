@@ -707,6 +707,39 @@ async function openModal(id) {
     setTimeout(() => { document.getElementById('f-nome').focus(); calcPreview(); }, 80);
 }
 
+async function duplicarProduto(id) {
+    resetModal();
+    const ok = await podecriar('produtos');
+    if (!ok) return;
+
+    const p = produtos.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('f-id').value    = ''; // Clear ID so it creates a new one
+    document.getElementById('f-nome').value  = (p.nome || '') + ' (Cópia)';
+    document.getElementById('f-preco').value = p.preco || '';
+    document.getElementById('f-custo').value = p.custo || '';
+    document.getElementById('f-obs').value   = p.obs   || '';
+    document.getElementById('f-disp').checked = p.disp !== false;
+    if (p.img) {
+        document.getElementById('f-img').value = p.img;
+        document.getElementById('img-preview').src = p.img;
+        document.getElementById('img-preview').style.display = 'block';
+        document.getElementById('img-placeholder-icon').style.display = 'none';
+        document.getElementById('img-placeholder-txt').style.display  = 'none';
+    }
+    if (p.receitaId) {
+        const sel = document.getElementById('f-receita');
+        if (sel) sel.value = p.receitaId;
+        onReceitaChange();
+    }
+    
+    document.getElementById('modal-title').textContent    = 'Duplicar Produto';
+    document.getElementById('btn-salvar-txt').innerHTML   = '<span class="material-symbols-outlined" style="font-size:1.1rem;margin-right:4px;">content_copy</span> Salvar Cópia';
+    
+    document.getElementById('modal-prod').classList.add('open');
+    setTimeout(() => { document.getElementById('f-nome').focus(); calcPreview(); }, 80);
+}
+
 function closeModal() { document.getElementById('modal-prod').classList.remove('open'); }
 
 /* ─── CUSTO AUTOMÁTICO AO SELECIONAR RECEITA ─────────────────────── */

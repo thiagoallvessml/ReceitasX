@@ -663,6 +663,7 @@ function renderList() {
             </div>
             <div style="display:flex;gap:.35rem">
                 <button class="action-btn" onclick="editarInsumo(${item.id})"><span class="material-symbols-outlined">edit</span></button>
+                <button class="action-btn" onclick="duplicarInsumo(${item.id})" style="color:#25f4f4"><span class="material-symbols-outlined">content_copy</span></button>
                 <button class="action-btn delete" onclick="openDel(${item.id},'${esc(item.nome).replace(/'/g,"\\'")}')"><span class="material-symbols-outlined">delete</span></button>
             </div>
         </div>`;
@@ -688,6 +689,7 @@ function renderList() {
             <td class="td-right">
                 <div class="td-actions">
                     <button class="action-btn" title="Editar" onclick="editarInsumo(${item.id})"><span class="material-symbols-outlined">edit</span></button>
+                    <button class="action-btn" title="Duplicar" onclick="duplicarInsumo(${item.id})" style="color:#25f4f4"><span class="material-symbols-outlined">content_copy</span></button>
                     <button class="action-btn delete" title="Excluir" onclick="openDel(${item.id},'${esc(item.nome).replace(/'/g,"\\'")}')"><span class="material-symbols-outlined">delete</span></button>
                 </div>
             </td>
@@ -909,6 +911,23 @@ async function salvarInsumo(e) {
 
 function editarInsumo(id) { openCadastrar(id); }
 
+function duplicarInsumo(id) {
+    const item = insumos.find(i => i.id === id);
+    if (!item) return;
+    openCadastrar(); // Opens empty form
+    setTimeout(() => {
+        // Pre-fill form
+        document.getElementById('f-nome').value = item.nome + ' (Cópia)';
+        document.getElementById('f-peso').value = item.peso_emb || '';
+        document.getElementById('f-un').value   = item.unidade || 'g';
+        document.getElementById('f-preco').value = item.preco || '';
+        document.getElementById('f-forn').value  = item.fornecedor || '';
+        document.getElementById('f-un').classList.add('filled');
+        document.getElementById('f-un').style.color = '#f1f5f9';
+        document.getElementById('modal-title').textContent = 'Duplicar Insumo';
+        document.getElementById('btn-salvar-txt').innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem;margin-right:4px;">content_copy</span> Salvar Cópia';
+    }, 100);
+}
 function openDel(id, nome) {
     pendingDeleteId = id;
     document.getElementById('delete-msg').textContent = `Excluir "${nome}" permanentemente?`;

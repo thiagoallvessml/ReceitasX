@@ -398,6 +398,9 @@
             <input id="search-desktop" type="search" class="search-box" style="padding-left:2.3rem;border-radius:.6rem" placeholder="Buscar receita..." oninput="syncSearch(this.value)" />
         </div>
 
+        <button class="hidden md:flex items-center justify-center" onclick="exportarCSV()" style="width:36px;height:36px;border-radius:8px;background:#2A2A2A;color:#f1f5f9;border:1px solid #333;cursor:pointer;margin-right:0.25rem" title="Exportar CSV">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">download</span>
+        </button>
         <button class="btn-new hidden md:flex" onclick="openCadastrar()">
             <span class="material-symbols-outlined">add</span>
             Cadastrar Receita
@@ -947,6 +950,9 @@ function renderCards() {
                 <button class="btn-edit" onclick="editarReceita(${r.id})">
                     <span class="material-symbols-outlined">edit</span> Editar
                 </button>
+                <button class="btn-edit" style="background:#25f4f415;color:#25f4f4" onclick="duplicarReceita(${r.id})">
+                    <span class="material-symbols-outlined">content_copy</span> Duplicar
+                </button>
             </div>
         </div>`;
     }).join('');
@@ -1170,6 +1176,95 @@ async function editarReceita(id) {
         console.warn('Erro ao carregar produto vinculado:', e);
         resetProdFields();
     }
+
+    calcPrevia();
+    document.getElementById('msheet-bg').classList.add('open');
+    setTimeout(() => document.getElementById('r-nome').focus(), 80);
+}
+
+async function duplicarReceita(id) {
+    const r = receitas.find(x => x.id === id);
+    if (!r) { showToast('Receita não encontrada', 'error'); return; }
+
+    await carregarCatalogos();
+    _editandoId = null; 
+    ingRows = []; embalRows = []; equipRows = [];
+    ingIdSeq = 0; embalIdSeq = 0; equipIdSeq = 0;
+
+    // Título e botão
+    document.getElementById('msheet-title').textContent = 'Duplicar Receita';
+    document.querySelector('.btn-save').innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem;margin-right:4px;">content_copy</span> Salvar Cópia';
+
+    // Campos básicos
+    document.getElementById('r-nome').value  = (r.nome || '') + ' (Cópia)';
+    document.getElementById('r-rend').value  = r.unidades || 1;
+    document.getElementById('r-tempo').value = r.tempo || '';
+    document.getElementById('r-desc').value  = '';
+
+    // Limpa listas
+    document.getElementById('ing-list').innerHTML   = '';
+    document.getElementById('embal-list').innerHTML = '';
+    document.getElementById('equip-list').innerHTML = '';
+    document.getElementById('ing-warn').style.display    = 'flex';
+    document.getElementById('embal-empty').style.display = 'block';
+    document.getElementById('equip-empty').style.display = 'block';
+
+    // Preenche ingredientes salvos
+    (r.ingredientes || []).forEach(ing => {
+        addIngrediente();
+        const rowId = ingRows[ingRows.length - 1];
+        const sel = document.querySelector(`[data-ingid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().startsWith(ing.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const qtyParts = (ing.qty || '').split(' ');
+        const qtyVal = parseFloat(qtyParts[0]);
+        const qtyUn  = qtyParts.slice(1).join(' ');
+        const qtInput = document.querySelector(`[data-ing-qty="${rowId}"]`);
+        if (qtInput && !isNaN(qtyVal)) qtInput.value = qtyVal;
+        const unSel = document.getElementById(`ing-un-${rowId}`);
+        if (unSel && qtyUn) { unSel.value = qtyUn; unSel.style.color = '#f1f5f9'; }
+        updateIngCusto(rowId);
+        if (ing.etapa) {
+            const etapaSel = document.querySelector(`[data-etapa="${rowId}"]`);
+            if (etapaSel) etapaSel.value = ing.etapa;
+        }
+    });
+
+    // Preenche embalagens salvas
+    (r.embalagens || []).forEach(emb => {
+        addEmbalagem();
+        const rowId = embalRows[embalRows.length - 1];
+        const sel = document.querySelector(`[data-embid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().startsWith(emb.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const qtyParts = (emb.qty || '').split(' ');
+        const qtyInput = document.querySelector(`[data-emb-qty="${rowId}"]`);
+        if (qtyInput) qtyInput.value = qtyParts[0] || 1;
+        updateEmbCusto(rowId);
+    });
+
+    // Preenche equipamentos salvos
+    (r.equipamentos || []).forEach(eqp => {
+        addEquipamento();
+        const rowId = equipRows[equipRows.length - 1];
+        const sel = document.querySelector(`[data-eqpid="${rowId}"]`);
+        if (sel) {
+            const opt = [...sel.options].find(o => o.text.toLowerCase().includes(eqp.nome?.toLowerCase()));
+            if (opt) { sel.value = opt.value; }
+        }
+        const minsParts = (eqp.qty || '').split(' ');
+        const minsInput = document.querySelector(`[data-eqp-min="${rowId}"]`);
+        if (minsInput) minsInput.value = minsParts[0] || 0;
+        updateEqpCusto(rowId);
+    });
+
+    _editandoProdId = null;
+    resetProdFields();
+    document.getElementById('prod-nome').value = (r.nome || '') + ' (Cópia)';
 
     calcPrevia();
     document.getElementById('msheet-bg').classList.add('open');
@@ -1828,6 +1923,23 @@ function showToast(msg, type='success') {
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function exportarCSV() {
+    if (!receitas.length) { showToast('Nenhuma receita para exportar','error'); return; }
+    let csv = 'ID,Nome,Categoria,Rendimento,Tempo,Custo Total,Preço Venda,Lucro Líquido,Margem (%)\n';
+    receitas.forEach(r => {
+        const pTotal = r.precoTotal || 0;
+        const cTotal = r.custoTotal || 0;
+        const lucro  = pTotal > 0 ? (pTotal - cTotal) : 0;
+        const margem = pTotal > 0 ? ((lucro / pTotal) * 100).toFixed(2) : '0.00';
+        csv += `${r.id},"${(r.nome||'').replace(/"/g,'""')}",${r.categoria||''},${r.unidades||1},"${(r.tempo||'').replace(/"/g,'""')}",${cTotal},${pTotal},${lucro},${margem}\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'receitas_receitasx.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 /* ─── INIT ───────────────────────────────────────────────────────── */
