@@ -81,16 +81,7 @@ async function signOut() {
     sessionStorage.removeItem('receitasx_session_id');
     localStorage.removeItem('impersonate_id');
     
-    // Limpar contadores de limites locais ao deslogar
-    localStorage.removeItem('receitasx_uso_plano');
-    localStorage.removeItem('receitasx_pg_receitas');
-    localStorage.removeItem('receitasx_pg_produtos');
-    localStorage.removeItem('receitasx_pg_insumos');
-    localStorage.removeItem('receitasx_pg_embalagens');
-    localStorage.removeItem('receitasx_pg_equipamentos');
-    localStorage.removeItem('receitasx_pg_combos');
-    localStorage.removeItem('receitasx_pg_precificacoes');
-
+    // O evento SIGNED_OUT do onAuthStateChange lidará com a limpeza completa
     await sb.auth.signOut();
     window.location.href = 'login.html';
 }
@@ -101,11 +92,31 @@ sb.auth.onAuthStateChange((event, session) => {
         if (localStorage.getItem('impersonate_id')) {
             _sessionCache.user.id = localStorage.getItem('impersonate_id');
         }
+        
+        const currentUid = _sessionCache.user.id;
+        const cachedUid = localStorage.getItem('receitasx_uid');
+        if (cachedUid && cachedUid !== currentUid) {
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.startsWith('receitasx_') && k !== 'receitasx_utm' && k !== 'receitasx_uid') keys.push(k);
+            }
+            keys.forEach(k => localStorage.removeItem(k));
+        }
+        localStorage.setItem('receitasx_uid', currentUid);
+        
     } else {
         _sessionCache = session;
     }
+    
     if (event === 'SIGNED_OUT') {
         sessionStorage.removeItem('receitasx_session_id');
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('receitasx_') && k !== 'receitasx_utm') keys.push(k);
+        }
+        keys.forEach(k => localStorage.removeItem(k));
     }
 });
 

@@ -315,9 +315,11 @@ async function loadUsuarios() {
         const { data, error } = await sb
             .from('perfis')
             .select('id, nome, sobrenome, telefone, negocio, plano, plano_ativo_em, role, created_at, origem_cadastro, utm_dados')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .range(0, 4999);
         if (error) throw error;
         allUsuarios = data || [];
+        const existingIds = new Set(allUsuarios.map(u => u.id));
 
         try {
             const { data: { session: listSession } } = await sb.auth.getSession();
@@ -336,6 +338,35 @@ async function loadUsuarios() {
                 (body.users || []).forEach(u => { 
                     emailsMap[u.id] = u.email; 
                     if (u.last_sign_in_at) lastLoginMap[u.id] = u.last_sign_in_at;
+
+                    // Se o usuário está no auth.users mas NÃO existia na tabela perfis, inclui na lista
+                    if (!existingIds.has(u.id)) {
+                        const emailName = u.email ? u.email.split('@')[0] : 'Usuário';
+                        const formattedName = emailName.replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const novoUser = {
+                            id: u.id,
+                            nome: formattedName,
+                            sobrenome: '',
+                            telefone: '',
+                            negocio: '',
+                            plano: 'gratuito',
+                            plano_ativo_em: null,
+                            role: 'afiliado',
+                            created_at: u.created_at || new Date().toISOString(),
+                            origem_cadastro: 'Direto',
+                            utm_dados: null
+                        };
+                        allUsuarios.push(novoUser);
+                        existingIds.add(u.id);
+
+                        // Auto-cria o perfil no Supabase para sincronizar a tabela perfis
+                        sb.from('perfis').upsert({
+                            id: u.id,
+                            nome: formattedName,
+                            plano: 'gratuito',
+                            role: 'afiliado'
+                        }, { onConflict: 'id', ignoreDuplicates: true }).then(() => {}).catch(() => {});
+                    }
                 });
             } else {
                 const errText = await resp.text();
@@ -345,8 +376,7 @@ async function loadUsuarios() {
             console.error("Falha ao fazer request list-users:", errFetch);
         }
 
-        // 3. Pagantes via tabela pedidos (complemento — pode ser bloqueado por RLS se policy admin não existir)
-        //    SOLUÇÃO PRINCIPAL: usar plano='vitalicio' direto da tabela perfis (sempre funciona para admin)
+        // 3. Pagantes via tabela pedidos (complemento)
         try {
             const { data: peds, error: pedErr } = await sb
                 .from('pedidos')
@@ -357,20 +387,58 @@ async function loadUsuarios() {
                     peds.flatMap(p => [p.email?.toLowerCase(), p.user_id].filter(Boolean))
                 );
                 peds.forEach(p => {
-                    if (p.user_id) {
-                        if (p.cupom_usado) cupomMap[p.user_id] = p.cupom_usado;
-                        if (p.valor_pago) valorPagoMap[p.user_id] = p.valor_pago;
-                        if (p.ref_afiliado) refAfiliadoMap[p.user_id] = p.ref_afiliado;
+                    const pEmail = (p.email || '').toLowerCase();
+                    let uid = p.user_id;
+                    if (!uid && pEmail) {
+                        const found = allUsuarios.find(u => (emailsMap[u.id] || '').toLowerCase() === pEmail);
+                        if (found) uid = found.id;
+                    }
+                    if (uid) {
+                        if (p.cupom_usado) cupomMap[uid] = p.cupom_usado;
+                        if (p.valor_pago) valorPagoMap[uid] = p.valor_pago;
+                        if (p.ref_afiliado) refAfiliadoMap[uid] = p.ref_afiliado;
+                    }
+
+                    // Se o pedido pago tem user_id não encontrado nos perfis
+                    if (p.user_id && !existingIds.has(p.user_id)) {
+                        const email = p.email || '';
+                        if (email) emailsMap[p.user_id] = email;
+                        const emailName = email ? email.split('@')[0] : 'Cliente';
+                        const formattedName = emailName.replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        allUsuarios.push({
+                            id: p.user_id,
+                            nome: formattedName,
+                            sobrenome: '',
+                            telefone: '',
+                            negocio: '',
+                            plano: 'vitalicio',
+                            plano_ativo_em: new Date().toISOString(),
+                            role: 'afiliado',
+                            created_at: new Date().toISOString(),
+                            origem_cadastro: p.ref_afiliado ? `Afiliado: ${p.ref_afiliado}` : 'Direto',
+                            utm_dados: null,
+                            _pagante: true
+                        });
+                        existingIds.add(p.user_id);
                     }
                 });
             }
         } catch(_) {}
 
-        // Marca _pagante usando AMBAS as fontes:
-        // • plano = 'vitalicio' na tabela perfis  ← fonte primária (sempre disponível para admin)
-        // • email ou user_id encontrado em pedidos ← complemento
+        // Marca _pagante e cupons usando todas as fontes (perfis, pedidos, origem)
         allUsuarios.forEach(u => {
             const email = (emailsMap[u.id] || '').toLowerCase();
+            const oc = u.origem_cadastro || '';
+
+            // Se o usuário veio de afiliado ou tem refAfiliado e ainda não tem cupom no map:
+            if (!cupomMap[u.id]) {
+                if (refAfiliadoMap[u.id]) {
+                    cupomMap[u.id] = refAfiliadoMap[u.id];
+                } else if (oc.startsWith('Afiliado:')) {
+                    cupomMap[u.id] = oc.replace('Afiliado: ', '').trim();
+                }
+            }
+
             if (u.plano === 'vitalicio' ||
                 pagantesSet.has(email) ||
                 pagantesSet.has(u.id)) {
@@ -597,8 +665,12 @@ function renderUsuarios(list) {
             origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(100, 116, 139, 0.1);color:#94a3b8;border:1px solid rgba(100, 116, 139, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">link</span>Acesso Direto</span>`;
         }
 
-        const cupomBadge = cupomMap[u.id] && cupomMap[u.id] !== 'RECEITASX60'
-            ? `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)"><span class="material-symbols-outlined" style="font-size:.7rem">confirmation_number</span>${esc(cupomMap[u.id])}</span>`
+        let cupomFinal = cupomMap[u.id] || refAfiliadoMap[u.id] || '';
+        if (!cupomFinal && oc && /afiliados?:/i.test(oc)) {
+            cupomFinal = oc.replace(/^afiliados?:\s*/i, '').trim();
+        }
+        const cupomBadge = cupomFinal && cupomFinal !== 'RECEITASX60'
+            ? `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)"><span class="material-symbols-outlined" style="font-size:.7rem">confirmation_number</span>${esc(cupomFinal)}</span>`
             : '';
 
         // Badge de palavra-chave (utm_term) do Google Ads

@@ -333,13 +333,15 @@ async function loadData() {
 
         // 2. Emails via edge function
         let emailsMap = {};
+        let authUsersList = [];
         try {
             const resp = await fetch('https://pipknmwjpblitqlxxdcw.supabase.co/functions/v1/list-users', {
                 headers: { 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token}` }
             });
             if (resp.ok) {
                 const body = await resp.json();
-                (body.users || []).forEach(u => { emailsMap[u.id] = u.email; });
+                authUsersList = body.users || [];
+                authUsersList.forEach(u => { emailsMap[u.id] = u.email; });
             }
         } catch(_) {}
 
@@ -354,6 +356,7 @@ async function loadData() {
         } catch(_) {}
 
         // 4. Monta lista
+        const existingIds = new Set((perfis || []).map(p => p.id));
         allUsers = (perfis || []).map(p => {
             const email = emailsMap[p.id] || '';
             const isPagante = p.plano === 'vitalicio' || pagantesSet.has(p.id) || pagantesSet.has(email.toLowerCase());
@@ -366,6 +369,22 @@ async function loadData() {
                 _pagante: isPagante
             };
         }).filter(u => u.email); // só quem tem email
+
+        // Inclui usuários de auth.users que não tinham registro em perfis
+        authUsersList.forEach(u => {
+            if (!existingIds.has(u.id) && u.email) {
+                const emailName = u.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                allUsers.push({
+                    id: u.id,
+                    nome: emailName,
+                    sobrenome: '',
+                    plano: 'gratuito',
+                    email: u.email,
+                    _pagante: pagantesSet.has(u.id) || pagantesSet.has(u.email.toLowerCase())
+                });
+                existingIds.add(u.id);
+            }
+        });
 
         updateStats();
         setSegmento('gratuitos', document.querySelector('.seg-tab.active'));

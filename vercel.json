@@ -11,7 +11,8 @@
     { "source": "/configuracoes","destination": "/configuracoes.html" },
     { "source": "/login",        "destination": "/login.html" },
     { "source": "/perfil",       "destination": "/perfil.html" },
-    { "source": "/dre",          "destination": "/dre.html" }
+    { "source": "/dre",          "destination": "/dre.html" },
+    { "source": "/reset-senha",  "destination": "/reset-senha.html" }
   ],
   "redirects": [
     { "source": "/OFERTA", "destination": "/oferta", "permanent": true },

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Redefinir Senha - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <!-- SEM auth-guard.js — página pública para reset de senha -->
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#0a0a0a" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#0a0a0a; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        input { background-color:#111 !important; color:#f1f5f9 !important; border-color:#1E1E1E !important; }
+        input::placeholder { color:#334155 !important; }
+        input:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        /* Glow BG */
+        .bg-glow { position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0; }
+        .bg-glow::before { content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(37,244,244,.09) 0%,transparent 65%); }
+        .bg-glow::after  { content:'';position:absolute;bottom:-30%;right:-10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(37,244,244,.05) 0%,transparent 65%); }
+
+        /* Card */
+        .reset-card { background:#111;border:1px solid #1E1E1E;border-radius:1.25rem;padding:2.25rem 2rem;width:100%;max-width:400px;margin:0 auto;position:relative;z-index:1;box-shadow:0 24px 64px rgba(0,0,0,.7); }
+
+        /* Field */
+        .field-label { font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;margin-bottom:.3rem;display:block; }
+        .fc { width:100%;padding:.75rem 1rem;border-radius:.7rem;border:1px solid #1E1E1E !important;background:#111 !important;color:#f1f5f9 !important;font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s; }
+        .fc::placeholder { color:#334155 !important; }
+        .fc.error { border-color:rgba(248,113,113,.5) !important; }
+
+        /* Input icon wrap */
+        .input-wrap { position:relative; }
+        .input-wrap .iico { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#334155;font-size:1rem;pointer-events:none; }
+        .input-wrap input { padding-left:2.6rem !important; }
+        .input-wrap .eye  { position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:#334155;font-size:1rem;cursor:pointer;background:none;border:none;padding:0; }
+        .input-wrap .eye:hover { color:#64748b; }
+
+        /* Btn */
+        .btn-auth { width:100%;display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem;border-radius:.75rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 4px 24px rgba(37,244,244,.3);transition:opacity .15s,box-shadow .2s; }
+        .btn-auth:hover { opacity:.9; }
+        .btn-auth:disabled { opacity:.45;cursor:not-allowed; }
+        .btn-auth .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
+
+        /* Error msg */
+        .err-msg { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:.65rem;padding:.65rem .9rem;font-size:.78rem;color:#f87171;display:none;margin-bottom:.85rem; }
+        .err-msg.show { display:flex;align-items:center;gap:.4rem; }
+        .err-msg .material-symbols-outlined { font-size:.9rem;flex-shrink:0; }
+
+        /* Success msg */
+        .ok-msg { background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:.65rem;padding:.65rem .9rem;font-size:.78rem;color:#34d399;display:none;margin-bottom:.85rem; }
+        .ok-msg.show { display:flex;align-items:center;gap:.4rem; }
+
+        /* Loading state */
+        .loading-state { text-align:center;padding:2rem 0; }
+        .loading-state .material-symbols-outlined { font-size:2.5rem;color:#25f4f4;animation:pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:.4}50%{opacity:1} }
+
+        /* Spinner */
+        .spinner { width:1rem;height:1rem;border:2px solid rgba(10,10,10,.3);border-top-color:#0a0a0a;border-radius:50%;animation:spin .6s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+        .reset-card { animation:fadeUp .35s ease both; }
+
+        /* Validation hint */
+        .field-hint { font-size:.7rem;color:#475569;margin-top:.25rem; }
+        .field-err  { font-size:.7rem;color:#f87171;margin-top:.25rem;display:none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<div class="bg-glow"></div>
+
+<!-- Logo -->
+<div style="position:relative;z-index:1;text-align:center;margin-bottom:1.5rem">
+    <div style="display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.25rem;background:#111;border:1px solid #1E1E1E;border-radius:9999px;margin-bottom:.65rem">
+        <span class="material-symbols-outlined" style="color:#25f4f4;font-size:1.2rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24">kitchen</span>
+        <span style="font-size:.95rem;font-weight:800;color:#f1f5f9">ReceitasX</span>
+    </div>
+    <p style="font-size:.82rem;color:#475569">Redefinir sua senha</p>
+</div>
+
+<!-- Card -->
+<div class="reset-card">
+
+    <!-- Estado: Carregando (verificando token) -->
+    <div id="state-loading" class="loading-state">
+        <span class="material-symbols-outlined">lock_reset</span>
+        <p style="color:#94a3b8;font-size:.85rem;margin-top:.75rem">Verificando link de redefinição...</p>
+    </div>
+
+    <!-- Estado: Erro (token inválido/expirado) -->
+    <div id="state-error" style="display:none;text-align:center;padding:1.5rem 0">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;color:#f87171">error</span>
+        <p style="color:#f1f5f9;font-size:.95rem;font-weight:700;margin-top:.75rem">Link inválido ou expirado</p>
+        <p style="color:#64748b;font-size:.8rem;margin-top:.5rem;line-height:1.5">
+            O link de redefinição pode ter expirado ou já foi usado.<br>
+            Solicite um novo link na página de login.
+        </p>
+        <a href="login.html" style="display:inline-flex;align-items:center;gap:.3rem;margin-top:1.25rem;color:#25f4f4;font-size:.85rem;font-weight:600;text-decoration:none">
+            <span class="material-symbols-outlined" style="font-size:1rem">arrow_back</span>
+            Voltar ao Login
+        </a>
+    </div>
+
+    <!-- Estado: Formulário de nova senha -->
+    <div id="state-form" style="display:none">
+        <div style="text-align:center;margin-bottom:1.5rem">
+            <span class="material-symbols-outlined" style="font-size:2rem;color:#25f4f4">lock_reset</span>
+            <h2 style="color:#f1f5f9;font-size:1.1rem;font-weight:800;margin-top:.5rem">Nova Senha</h2>
+            <p style="color:#64748b;font-size:.78rem;margin-top:.25rem">Digite sua nova senha abaixo</p>
+        </div>
+
+        <!-- Errors / Success -->
+        <div id="err-msg" class="err-msg">
+            <span class="material-symbols-outlined">error</span>
+            <span id="err-txt"></span>
+        </div>
+
+        <form id="reset-form" onsubmit="salvarNovaSenha(event)" style="display:flex;flex-direction:column;gap:.75rem">
+            <!-- Nova senha -->
+            <div>
+                <label class="field-label" for="f-nova">Nova Senha</label>
+                <div class="input-wrap">
+                    <span class="iico material-symbols-outlined">lock</span>
+                    <input id="f-nova" type="password" class="fc" placeholder="••••••••" autocomplete="new-password" required minlength="6" />
+                    <button type="button" class="eye" onclick="toggleEye('f-nova','eye1')">
+                        <span class="material-symbols-outlined" id="eye1">visibility</span>
+                    </button>
+                </div>
+                <p class="field-hint">Mínimo de 6 caracteres</p>
+                <p class="field-err" id="err-nova">A senha precisa ter no mínimo 6 caracteres</p>
+            </div>
+
+            <!-- Confirmar senha -->
+            <div>
+                <label class="field-label" for="f-conf">Confirmar Nova Senha</label>
+                <div class="input-wrap">
+                    <span class="iico material-symbols-outlined">lock_reset</span>
+                    <input id="f-conf" type="password" class="fc" placeholder="••••••••" autocomplete="new-password" required minlength="6" />
+                    <button type="button" class="eye" onclick="toggleEye('f-conf','eye2')">
+                        <span class="material-symbols-outlined" id="eye2">visibility</span>
+                    </button>
+                </div>
+                <p class="field-err" id="err-conf">As senhas não coincidem</p>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-auth" id="btn-submit" style="margin-top:.25rem">
+                <span class="material-symbols-outlined" id="btn-ico">lock_reset</span>
+                <span id="btn-txt">Redefinir Senha</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Estado: Sucesso -->
+    <div id="state-success" style="display:none;text-align:center;padding:1.5rem 0">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;color:#34d399">check_circle</span>
+        <p style="color:#f1f5f9;font-size:.95rem;font-weight:700;margin-top:.75rem">Senha redefinida com sucesso! 🔒</p>
+        <p style="color:#64748b;font-size:.8rem;margin-top:.5rem">Você será redirecionada para a página inicial em instantes...</p>
+        <a href="index.html" style="display:inline-flex;align-items:center;gap:.3rem;margin-top:1.25rem;color:#25f4f4;font-size:.85rem;font-weight:600;text-decoration:none">
+            <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span>
+            Ir para o ReceitasX
+        </a>
+    </div>
+
+</div>
+
+<script>
+/* ─── Toggle senha visível ─────────────────────────────────────── */
+function toggleEye(inputId, eyeId) {
+    const inp = document.getElementById(inputId);
+    const ico = document.getElementById(eyeId);
+    if (inp.type === 'password') { inp.type = 'text'; ico.textContent = 'visibility_off'; }
+    else { inp.type = 'password'; ico.textContent = 'visibility'; }
+}
+
+/* ─── Mostrar estados ──────────────────────────────────────────── */
+function showState(state) {
+    ['state-loading','state-error','state-form','state-success'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('state-' + state).style.display = '';
+}
+
+function showErr(msg) {
+    document.getElementById('err-txt').textContent = msg;
+    document.getElementById('err-msg').className = 'err-msg show';
+}
+
+function clearErr() {
+    document.getElementById('err-msg').className = 'err-msg';
+}
+
+/* ─── Salvar nova senha ────────────────────────────────────────── */
+async function salvarNovaSenha(e) {
+    e.preventDefault();
+    clearErr();
+
+    const nova = document.getElementById('f-nova').value;
+    const conf = document.getElementById('f-conf').value;
+
+    // Validações
+    document.getElementById('err-nova').style.display = 'none';
+    document.getElementById('err-conf').style.display = 'none';
+
+    let ok = true;
+    if (nova.length < 6) {
+        document.getElementById('err-nova').style.display = 'block';
+        ok = false;
+    }
+    if (nova !== conf) {
+        document.getElementById('err-conf').style.display = 'block';
+        ok = false;
+    }
+    if (!ok) return;
+
+    // Loading
+    const btn = document.getElementById('btn-submit');
+    const ico = document.getElementById('btn-ico');
+    const txt = document.getElementById('btn-txt');
+    btn.disabled = true;
+    ico.style.display = 'none';
+    txt.insertAdjacentHTML('beforebegin','<div class="spinner" id="spin"></div>');
+    txt.textContent = 'Salvando...';
+
+    try {
+        const { error } = await sb.auth.updateUser({ password: nova });
+        if (error) throw error;
+
+        showState('success');
+
+        // Redirecionar após 3 segundos
+        setTimeout(() => {
+            window.location.replace('index.html');
+        }, 3000);
+
+    } catch(err) {
+        document.getElementById('spin')?.remove();
+        ico.style.display = '';
+        txt.textContent = 'Redefinir Senha';
+        btn.disabled = false;
+
+        const msgs = {
+            'New password should be different from the old password.': 'A nova senha deve ser diferente da senha atual.',
+            'Password should be at least 6 characters': 'A senha precisa ter no mínimo 6 caracteres.',
+        };
+        showErr(msgs[err.message] || 'Erro ao redefinir senha: ' + err.message);
+    }
+}
+
+/* ─── INIT: Detectar token de recovery ─────────────────────────── */
+(async () => {
+    // O Supabase v2 com detectSessionInUrl:true processa automaticamente
+    // o token da URL (#access_token=...&type=recovery).
+    // Precisamos escutar o evento PASSWORD_RECOVERY.
+
+    let recoveryDetected = false;
+
+    // Listener para o evento de recovery
+    const { data: { subscription } } = sb.auth.onAuthStateChange((event, session) => {
+        console.log('[Reset] Auth event:', event);
+
+        if (event === 'PASSWORD_RECOVERY') {
+            recoveryDetected = true;
+            showState('form');
+            setTimeout(() => document.getElementById('f-nova').focus(), 100);
+        }
+
+        if (event === 'SIGNED_IN' && !recoveryDetected) {
+            // Se logou mas não é recovery, talvez o token já foi processado
+            // Verifica se tem hash de recovery na URL
+            const hash = window.location.hash;
+            if (hash && hash.includes('type=recovery')) {
+                recoveryDetected = true;
+                showState('form');
+                setTimeout(() => document.getElementById('f-nova').focus(), 100);
+            }
+        }
+    });
+
+    // Fallback: se após 5 segundos nenhum evento foi disparado, mostrar erro
+    setTimeout(() => {
+        if (!recoveryDetected) {
+            // Última tentativa: verificar se existe sessão ativa (talvez o token
+            // já foi processado antes do listener ser registrado)
+            sb.auth.getSession().then(({ data: { session } }) => {
+                if (session && !recoveryDetected) {
+                    // Há sessão ativa — verificar se veio de recovery pelo hash
+                    const hash = window.location.hash;
+                    if (hash && (hash.includes('type=recovery') || hash.includes('recovery'))) {
+                        recoveryDetected = true;
+                        showState('form');
+                        setTimeout(() => document.getElementById('f-nova').focus(), 100);
+                    } else {
+                        // Tem sessão mas não é recovery — permite trocar mesmo assim
+                        // (pode ser que o evento já passou)
+                        recoveryDetected = true;
+                        showState('form');
+                        setTimeout(() => document.getElementById('f-nova').focus(), 100);
+                    }
+                } else if (!recoveryDetected) {
+                    showState('error');
+                }
+            });
+        }
+    }, 5000);
+})();
+</script>
+</body>
+</html>

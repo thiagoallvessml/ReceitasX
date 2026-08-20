@@ -385,7 +385,7 @@ async function enviarReset() {
     const email = document.getElementById('f-email').value.trim();
     if (!email) { showErr('Digite seu e-mail primeiro.'); return; }
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/perfil.html'
+        redirectTo: 'https://receitasx.com.br/reset-senha'
     });
     if (error) showErr(error.message);
     else showOk('Link de redefinição enviado! Verifique seu e-mail.');
