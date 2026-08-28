@@ -289,7 +289,7 @@
         </div>
         <div class="ms-foot">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-save" onclick="salvar()">
+      <button id="btn-salvar" class="btn-save" onclick="salvar()">
         <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">save</span>
         <span id="btn-salvar-txt">Salvar</span>
       </button>
@@ -305,7 +305,7 @@
         <span class="material-symbols-outlined" style="color:#f87171">delete</span>
       </div>
       <div>
-        <p class="font-bold">Excluir Despesa</p>
+        <p class="font-bold">Excluir Registro</p>
         <p class="text-xs text-slate-400 mt-0.5">Esta ação não pode ser desfeita.</p>
       </div>
     </div>
@@ -313,26 +313,6 @@
     <div style="display:flex;gap:.65rem">
       <button onclick="closeDel()" class="btn-cancel" style="flex:1">Cancelar</button>
       <button onclick="confirmarDel()" style="flex:1;padding:.75rem;border-radius:.7rem;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.15);color:#f87171;font-weight:700;font-size:.9rem;cursor:pointer">Excluir</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ Modal Excluir Categoria ══════════════════════════════════════ -->
-<div id="modal-del-cat" class="del-modal-bg">
-  <div class="del-modal">
-    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
-      <div style="width:2.5rem;height:2.5rem;border-radius:.6rem;background:rgba(248,113,113,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <span class="material-symbols-outlined" style="color:#f87171">delete</span>
-      </div>
-      <div>
-        <p class="font-bold">Excluir Categoria?</p>
-        <p class="text-xs text-slate-400 mt-0.5">Esta ação não pode ser desfeita.</p>
-      </div>
-    </div>
-    <p class="text-sm text-slate-300 mb-5">Deseja excluir <strong>todas</strong> as despesas da categoria <strong id="del-cat-nome" class="text-white"></strong>?</p>
-    <div style="display:flex;gap:.65rem">
-      <button onclick="closeDelCat()" class="btn-cancel" style="flex:1">Cancelar</button>
-      <button onclick="confirmarDelCat()" style="flex:1;padding:.75rem;border-radius:.7rem;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.15);color:#f87171;font-weight:700;font-size:.9rem;cursor:pointer">Excluir</button>
     </div>
   </div>
 </div>
@@ -346,7 +326,6 @@
 <script>
     let user = null;
     let records = [];
-    let state = 'list'; // list, form
     let editId = null;
     let currentTipo = 'insumo';
 
@@ -384,45 +363,44 @@
     }
 
     function renderList() {
-        const term = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
-        const filtered = records.filter(r => r.nome_item.toLowerCase().includes(term) || r.motivo.toLowerCase().includes(term));
-        
-        const c = document.getElementById('list-container');
+        const filtered = records;
+        const c = document.getElementById('desp-list');
         const e = document.getElementById('empty-state');
         
         if (filtered.length === 0) {
-            c.style.display = 'none';
-            e.style.display = 'flex';
-            document.getElementById('count-label').textContent = 'Nenhum registro';
+            c.innerHTML = '';
+            e.classList.remove('hidden');
+            document.getElementById('count-label').textContent = '';
             return;
         }
         
-        c.style.display = 'flex';
-        e.style.display = 'none';
+        e.classList.add('hidden');
         
         document.getElementById('count-label').textContent = `${filtered.length} registro${filtered.length !== 1 ? 's' : ''}`;
 
-        let listHtml = '';
+        let html = '';
         for (let r of filtered) {
             const dateStr = new Date(r.data_registro).toLocaleDateString('pt-BR');
             const icon = r.tipo_item === 'insumo' ? 'kitchen' : (r.tipo_item === 'receita' ? 'menu_book' : 'inventory_2');
             const color = r.tipo_item === 'insumo' ? '#fbbf24' : (r.tipo_item === 'receita' ? '#60a5fa' : '#a78bfa');
             
-            listHtml += `
-                <div class="list-item" onclick="openEdit('${r.id}')">
-                    <div class="li-icon" style="background:${color}20"><span class="material-symbols-outlined" style="color:${color}">${icon}</span></div>
-                    <div class="li-info">
-                        <div class="li-title">${r.nome_item}</div>
-                        <div class="li-sub">${r.quantidade} ${r.unidade || ''} • ${r.motivo}</div>
+            html += `
+                <div class="desp-card" style="cursor:pointer" onclick="openEdit(${r.id})">
+                    <div class="desp-ico" style="background:${color}20"><span class="material-symbols-outlined" style="color:${color}">${icon}</span></div>
+                    <div class="desp-info">
+                        <div class="desp-nome">${r.nome_item}</div>
+                        <div class="desp-meta">
+                            <span class="desp-cat">${r.quantidade} ${r.unidade || ''} • ${r.motivo}</span>
+                        </div>
                     </div>
-                    <div class="li-val" style="color:#f87171">
-                        - R$ ${parseFloat(r.custo_perdido).toFixed(2).replace('.', ',')}
-                        <div style="font-size:0.65rem; color:#64748b; margin-top:2px; text-align:right;">${dateStr}</div>
+                    <div class="desp-right">
+                        <span class="desp-val">- R$ ${parseFloat(r.custo_perdido).toFixed(2).replace('.', ',')}</span>
+                        <span style="font-size:0.65rem;color:#64748b">${dateStr}</span>
                     </div>
                 </div>
             `;
         }
-        c.innerHTML = listHtml;
+        c.innerHTML = html;
     }
 
     function updateStats() {
@@ -432,7 +410,7 @@
         let tProdutos = 0;
         let cProdutos = 0;
         let maxVal = 0;
-        let maxNome = '-';
+        let maxNome = '—';
         
         const now = new Date();
         const currentMonth = now.getMonth();
@@ -544,27 +522,23 @@
         return 0;
     }
 
+    /* ── MODAL: abrir / fechar ── */
     function openModal() {
-        state = 'form';
         editId = null;
         document.getElementById('modal-title').innerText = 'Novo Registro de Quebra';
-        document.getElementById('btn-del').style.display = 'none';
         
         setTipo('insumo');
         document.getElementById('quantidade').value = '';
         document.getElementById('motivo').value = '';
         document.getElementById('observacao').value = '';
+        document.getElementById('btn-salvar-txt').textContent = 'Salvar';
         
-        const m = document.getElementById('modal-sheet');
-        m.classList.add('open');
-        m.querySelector('.ms-content').classList.add('open');
+        document.getElementById('modal-desp').classList.add('open');
     }
 
     function openEdit(id) {
-        state = 'form';
         editId = id;
         document.getElementById('modal-title').innerText = 'Editar Registro';
-        document.getElementById('btn-del').style.display = 'flex';
         
         const r = records.find(x => x.id == id);
         if (!r) return;
@@ -589,31 +563,29 @@
         
         motivoSel.value = motivoVal;
         document.getElementById('observacao').value = obsVal;
+        document.getElementById('btn-salvar-txt').textContent = 'Atualizar';
         
-        const m = document.getElementById('modal-sheet');
-        m.classList.add('open');
-        m.querySelector('.ms-content').classList.add('open');
+        document.getElementById('modal-desp').classList.add('open');
     }
 
     function closeModal() {
-        state = 'list';
-        const m = document.getElementById('modal-sheet');
-        m.querySelector('.ms-content').classList.remove('open');
-        setTimeout(() => m.classList.remove('open'), 250);
+        document.getElementById('modal-desp').classList.remove('open');
     }
 
-    async function saveForm() {
+    /* ── SALVAR (chamada pelo onclick do botão) ── */
+    async function salvar() {
         const item_id = document.getElementById('item_id').value;
         const qtd = document.getElementById('quantidade').value;
         const motivoBase = document.getElementById('motivo').value;
         const obs = document.getElementById('observacao').value;
         
-        if (!item_id) return showToast('Selecione o item');
-        if (!qtd || qtd <= 0) return showToast('Quantidade inválida');
-        if (!motivoBase) return showToast('Selecione o motivo');
+        if (!item_id) return showToast('Selecione o item', 'error');
+        if (!qtd || qtd <= 0) return showToast('Quantidade inválida', 'error');
+        if (!motivoBase) return showToast('Selecione o motivo', 'error');
         
         const btn = document.getElementById('btn-salvar');
-        btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span>';
+        const btnTxt = document.getElementById('btn-salvar-txt');
+        btnTxt.textContent = 'Salvando...';
         btn.disabled = true;
         
         const cost = calculateCost();
@@ -631,11 +603,11 @@
         const payload = {
             user_id: user.id,
             tipo_item: currentTipo,
-            item_id: item_id,
+            item_id: parseInt(item_id),
             nome_item: nome_item,
             quantidade: parseFloat(qtd),
             unidade: document.getElementById('unidade').value,
-            custo_perdido: cost,
+            custo_perdido: parseFloat(cost.toFixed(2)),
             motivo: finalMotivo
         };
         
@@ -647,37 +619,39 @@
         }
         
         if (res.error) {
-            showToast('Erro ao salvar');
+            showToast('Erro ao salvar', 'error');
             console.error(res.error);
         } else {
-            showToast('Salvo com sucesso!');
+            showToast(`"${nome_item}" salvo!`);
             closeModal();
             await loadData();
         }
         
-        btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Salvar';
+        btnTxt.textContent = 'Salvar';
         btn.disabled = false;
     }
 
-    let delId = null;
-    function confirmDel() {
-        delId = editId;
-        document.getElementById('del-modal').classList.add('open');
+    /* ── EXCLUIR ── */
+    let pendingDelId = null;
+    function openDel(id) {
+        const r = records.find(x => x.id === id);
+        if (!r) return;
+        pendingDelId = id;
+        document.getElementById('del-nome').textContent = r.nome_item;
+        document.getElementById('modal-del').classList.add('open');
     }
-    function cancelDel() {
-        document.getElementById('del-modal').classList.remove('open');
-    }
-    async function execDel() {
-        const btn = document.getElementById('btn-exec-del');
-        btn.innerHTML = 'Excluindo...';
-        await sb.from('desperdicios').delete().eq('id', delId);
-        cancelDel();
-        closeModal();
-        showToast('Registro excluído');
+    function closeDel() { document.getElementById('modal-del').classList.remove('open'); pendingDelId = null; }
+    async function confirmarDel() {
+        if (!pendingDelId) return;
+        const r = records.find(x => x.id === pendingDelId);
+        await sb.from('desperdicios').delete().eq('id', pendingDelId);
         await loadData();
-        btn.innerHTML = 'Excluir';
+        closeDel();
+        closeModal();
+        showToast(`"${r?.nome_item}" excluído!`, 'error');
     }
 
+    /* ── CSV ── */
     function exportarCSV() {
         const head = 'Data,Item,Tipo,Motivo,Quantidade,Unidade,Custo_Perdido';
         const rows = records.map(r =>
@@ -691,17 +665,26 @@
         showToast('CSV exportado!');
     }
 
+    /* ── DROPDOWN ── */
     function toggleDd() { document.getElementById('dd-menu').classList.toggle('open'); }
     function closeDd()  { document.getElementById('dd-menu').classList.remove('open'); }
 
-    let toastTimeout;
-    function showToast(msg) {
+    /* ── TOAST ── */
+    let toastTimer;
+    function showToast(msg, type) {
         const t = document.getElementById('toast');
-        t.innerHTML = msg;
+        document.getElementById('toast-icon').textContent = type==='error'?'delete':'check_circle';
+        document.getElementById('toast-icon').style.color = type==='error'?'#f87171':'#25f4f4';
+        document.getElementById('toast-msg').textContent = msg;
         t.classList.add('show');
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
     }
+
+    /* ── KEYBOARD ── */
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeModal(); closeDel(); }
+    });
 </script>
 <script src="guia-banner.js"></script>
 </body>
