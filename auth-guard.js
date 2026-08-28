@@ -5,7 +5,7 @@
 // • Funções auxiliares: requireAdmin(), requireAfiliado()
 // ─────────────────────────────────────────────────────────────────
 
-(async () => {
+const authInitPromise = (async () => {
     const session = await getSession();
     if (!session) {
         window.location.replace('login.html');
@@ -70,16 +70,7 @@ async function applyRoleVisibility() {
     });
 }
 
-// ── Interno: aguarda o role estar disponível (max 3s) ─────────────
-function _waitForRole(timeout = 3000) {
-    if (window.__userRole !== undefined) return Promise.resolve();
-    return new Promise((resolve) => {
-        const start = Date.now();
-        const check = () => {
-            if (window.__userRole !== undefined) return resolve();
-            if (Date.now() - start > timeout) return resolve();
-            setTimeout(check, 50);
-        };
-        check();
-    });
+// ── Interno: aguarda o role estar disponível ─────────────
+function _waitForRole() {
+    return authInitPromise;
 }
