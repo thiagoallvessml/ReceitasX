@@ -148,6 +148,10 @@
                     <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">account_balance</span> Impostos</span>
                     <div><span class="b-val neg" id="val-impostos">- R$ 0,00</span><span class="b-pct" id="pct-impostos">0%</span></div>
                 </div>
+                <div class="breakdown-row">
+                    <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">delete_sweep</span> Quebras e Desperdícios</span>
+                    <div><span class="b-val neg" id="val-quebras">- R$ 0,00</span><span class="b-pct" id="pct-quebras">0%</span></div>
+                </div>
             </div>
         </div>
 
@@ -300,8 +304,25 @@ async function carregarDRE() {
             });
         }
 
+        // 3. Fetch Quebras/Desperdícios do período
+        const { data: quebras, error: errQuebras } = await sb
+            .from('desperdicios')
+            .select('custo_perdido')
+            .eq('user_id', userId)
+            .gte('data_registro', startISO)
+            .lt('data_registro', endISO);
+
+        if (errQuebras) throw errQuebras;
+
+        let totalQuebras = 0;
+        if (quebras) {
+            quebras.forEach(q => {
+                totalQuebras += parseFloat(q.custo_perdido || 0);
+            });
+        }
+
         // CALCULATE
-        const deducoes = cmv + impostos + comissoes;
+        const deducoes = cmv + impostos + comissoes + totalQuebras;
         const margem = receitaBruta - deducoes;
         const resultado = margem - fixas;
 
@@ -321,6 +342,9 @@ async function carregarDRE() {
         
         document.getElementById('val-impostos').textContent = '- ' + fmt(impostos);
         document.getElementById('pct-impostos').textContent = pct(impostos, rb);
+
+        document.getElementById('val-quebras').textContent = '- ' + fmt(totalQuebras);
+        document.getElementById('pct-quebras').textContent = pct(totalQuebras, rb);
 
         document.getElementById('val-margem').textContent = fmt(margem);
         document.getElementById('pct-margem').textContent = pct(margem, rb);
