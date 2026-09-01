@@ -181,6 +181,19 @@
         </div>
     </div>
 
+    <!-- ── Ranking de Produtos ────────────────────────────────── -->
+    <section style="margin-bottom: 2rem; display: none;" id="ranking-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;padding:0 .1rem;">
+            <h3 style="font-size:.88rem;font-weight:700;color:#cbd5e1; display:flex; align-items:center; gap: .4rem;">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#fbbf24">emoji_events</span>
+                Produtos Mais Vendidos
+            </h3>
+        </div>
+        <div id="lista-ranking" style="display:flex;flex-direction:column;gap:.5rem;">
+            <!-- Rendered by JS -->
+        </div>
+    </section>
+
     <!-- ── Lista de vendas ────────────────────────────────── -->
     <section>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;padding:0 .1rem;">
@@ -286,6 +299,54 @@ async function carregarHistorico() {
             `;
             lista.appendChild(div);
         });
+
+        // ── Render Ranking ──
+        const rankingMap = {};
+        data.forEach(venda => {
+            if (venda.itens && Array.isArray(venda.itens)) {
+                venda.itens.forEach(i => {
+                    const nome = i.nome || 'Produto Sem Nome';
+                    const qtd = parseInt(i.quantidade || i.qtd || 1, 10);
+                    if (!rankingMap[nome]) rankingMap[nome] = 0;
+                    rankingMap[nome] += qtd;
+                });
+            }
+        });
+        
+        const rankingArr = Object.entries(rankingMap).map(([nome, qtd]) => ({ nome, qtd }));
+        rankingArr.sort((a, b) => b.qtd - a.qtd);
+        
+        const rankingSection = document.getElementById('ranking-section');
+        const listaRanking = document.getElementById('lista-ranking');
+        listaRanking.innerHTML = '';
+        
+        if (rankingArr.length > 0) {
+            rankingSection.style.display = 'block';
+            const top5 = rankingArr.slice(0, 5); // Limit to top 5
+            
+            top5.forEach((item, index) => {
+                const isTop1 = index === 0;
+                const corBadge = isTop1 ? '#fbbf24' : '#64748b'; // Gold for 1st
+                const bgBadge = isTop1 ? 'rgba(251,191,36,.15)' : 'rgba(100,116,139,.15)';
+                
+                listaRanking.innerHTML += `
+                    <div style="background:#141414; border:1px solid #1E1E1E; border-radius:.7rem; padding:.8rem 1rem; display:flex; align-items:center; gap:.8rem;">
+                        <div style="background:${bgBadge}; color:${corBadge}; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:800; flex-shrink:0;">
+                            ${index + 1}
+                        </div>
+                        <div style="flex:1; min-width:0; font-size:.85rem; font-weight:600; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            ${item.nome}
+                        </div>
+                        <div style="font-size:.8rem; font-weight:700; color:#25f4f4;">
+                            ${item.qtd} un.
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            rankingSection.style.display = 'none';
+        }
+
 
         document.getElementById('total-faturado').textContent = `R$ ${totalFaturado.toFixed(2).replace('.', ',')}`;
         document.getElementById('total-qtd').textContent = qtdVendas;
