@@ -97,7 +97,8 @@
 
         <div class="border-b border-border-dark flex mb-4">
             <button class="tab-btn active" onclick="switchTab('estoque', this)">Estoque Atual</button>
-            <button class="tab-btn" onclick="switchTab('historico', this)">Histórico de Vendas</button>
+            <button class="tab-btn" onclick="switchTab('historico', this)">Vendas</button>
+            <button class="tab-btn" onclick="switchTab('recolhimentos', this)">Recolhimentos</button>
         </div>
 
         <div id="tab-estoque" class="card overflow-x-auto p-0">
@@ -136,6 +137,23 @@
             <div id="vendas-empty" class="text-center py-10 text-slate-500" style="display:none">
                 <span class="material-symbols-outlined" style="font-size:2rem;margin-bottom:.5rem">receipt_long</span>
                 <p>Nenhuma venda registrada ainda.</p>
+            </div>
+        </div>
+
+        <div id="tab-recolhimentos" class="card overflow-x-auto p-0" style="display:none">
+            <table class="min-w-full">
+                <thead>
+                    <tr>
+                        <th class="pl-5">Data</th>
+                        <th>Produto</th>
+                        <th>Qtd. Recolhida</th>
+                    </tr>
+                </thead>
+                <tbody id="recolhimentos-body"></tbody>
+            </table>
+            <div id="recolhimentos-empty" class="text-center py-10 text-slate-500" style="display:none">
+                <span class="material-symbols-outlined" style="font-size:2rem;margin-bottom:.5rem">assignment_return</span>
+                <p>Nenhum recolhimento registrado ainda.</p>
             </div>
         </div>
     </div>
@@ -251,6 +269,7 @@ const parceiroId = urlParams.get('id');
 let parceiro = null;
 let estoque = [];
 let vendas = [];
+let recolhimentos = [];
 let produtos = []; // user catalog
 let vendaTemp = null; // item being sold
 
@@ -288,6 +307,10 @@ async function loadDados() {
         // Load Vendas
         const { data: vData } = await sb.from('consignados_vendas').select('*').eq('parceiro_id', parceiroId).order('created_at', {ascending:false});
         vendas = vData || [];
+        
+        // Load Recolhimentos
+        const { data: rData } = await sb.from('consignados_recolhimentos').select('*').eq('parceiro_id', parceiroId).order('created_at', {ascending:false});
+        recolhimentos = rData || [];
         
         // Load User Catalog
         const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado').eq('user_id', user.id).eq('ativo', true).order('nome');
@@ -370,6 +393,22 @@ function render() {
             </tr>
         `).join('');
     }
+
+    // Recolhimentos
+    const tbodyR = document.getElementById('recolhimentos-body');
+    if(recolhimentos.length === 0) {
+        tbodyR.innerHTML = '';
+        document.getElementById('recolhimentos-empty').style.display = 'block';
+    } else {
+        document.getElementById('recolhimentos-empty').style.display = 'none';
+        tbodyR.innerHTML = recolhimentos.map(r => `
+            <tr>
+                <td class="pl-5 text-sm text-slate-400">${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
+                <td class="font-semibold text-slate-200">${r.nome_produto}</td>
+                <td><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-red-400 font-bold">-${r.quantidade}</span></td>
+            </tr>
+        `).join('');
+    }
 }
 
 function switchTab(tab, btn) {
@@ -377,6 +416,7 @@ function switchTab(tab, btn) {
     btn.classList.add('active');
     document.getElementById('tab-estoque').style.display = tab === 'estoque' ? 'block' : 'none';
     document.getElementById('tab-historico').style.display = tab === 'historico' ? 'block' : 'none';
+    document.getElementById('tab-recolhimentos').style.display = tab === 'recolhimentos' ? 'block' : 'none';
 }
 
 function openAddEstoque() {
@@ -537,9 +577,20 @@ async function confirmarRecolher() {
     if(q <= 0 || q > recolherTemp.quantidade_restante) return alert('Quantidade inválida');
     
     try {
+        const user = await getUser();
+        // 1. Abate estoque
         const newQtd = recolherTemp.quantidade_restante - q;
         await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', recolherTemp.id);
         
+        // 2. Registra histórico
+        await sb.from('consignados_recolhimentos').insert([{
+            user_id: user.id,
+            parceiro_id: parceiroId,
+            estoque_id: recolherTemp.id,
+            nome_produto: recolherTemp.nome_produto,
+            quantidade: q
+        }]);
+
         document.getElementById('modal-recolher').classList.remove('open');
         loadDados();
     } catch(e) {
