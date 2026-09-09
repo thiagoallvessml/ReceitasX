@@ -216,6 +216,34 @@
     </div>
 </div>
 
+<!-- Modal Recolher -->
+<div id="modal-recolher" class="modal-bg">
+    <div class="modal-card">
+        <h2 class="font-bold text-lg mb-1 text-slate-100">Recolher Estoque</h2>
+        <p id="recolher-produto-nome" class="text-sm text-amber-400 mb-5 font-semibold">...</p>
+        <div class="space-y-4">
+            <input type="hidden" id="r-id" />
+            <div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                <span class="text-slate-400 text-sm">Restante no local</span>
+                <span id="r-max" class="font-bold text-lg">0</span>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Quantidade Recolhida</label>
+                <div class="flex items-center gap-2">
+                    <button onclick="modRecolher(-1)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-bold border border-slate-700 hover:bg-slate-700">-</button>
+                    <input type="number" id="r-qtd" value="1" min="1" class="text-center font-bold text-lg" oninput="calcRecolher()" />
+                    <button onclick="modRecolher(1)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-bold border border-slate-700 hover:bg-slate-700">+</button>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Essa quantidade será baixada do estoque sem registrar lucro, ideal para produtos que você retirou ou venceram.</p>
+            </div>
+            <div class="flex gap-2 pt-4">
+                <button onclick="document.getElementById('modal-recolher').classList.remove('open')" class="btn-outline flex-1">Cancelar</button>
+                <button onclick="confirmarRecolher()" class="btn-primary flex-1 justify-center" style="background:linear-gradient(135deg, #fbbf24, #f59e0b);">Confirmar Recolhimento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const urlParams = new URLSearchParams(window.location.search);
 const parceiroId = urlParams.get('id');
@@ -313,7 +341,12 @@ function render() {
                 <td class="font-semibold">${fmtR(e.preco_venda)}</td>
                 <td><span class="text-purple bg-purple-subtle px-2 py-0.5 rounded font-bold">${e.taxa_comissao}%</span></td>
                 <td class="text-right pr-5">
-                    ${!isEmpty ? `<button onclick="openVenda(${e.id})" class="btn-green ml-auto"><span class="material-symbols-outlined" style="font-size:18px">point_of_sale</span> Vender</button>` : '<span class="text-xs font-bold text-red-400 bg-red-900/20 px-2 py-1 rounded">Esgotado</span>'}
+                    ${!isEmpty ? `
+                    <div class="flex items-center justify-end gap-2">
+                        <button onclick="openVenda(${e.id})" class="btn-green"><span class="material-symbols-outlined" style="font-size:18px">point_of_sale</span> Vender</button>
+                        <button onclick="openRecolher(${e.id})" class="btn-outline" style="padding:.4rem .8rem;font-size:.8rem"><span class="material-symbols-outlined" style="font-size:18px">assignment_return</span> Recolher</button>
+                    </div>
+                    ` : '<span class="text-xs font-bold text-red-400 bg-red-900/20 px-2 py-1 rounded">Esgotado</span>'}
                 </td>
             </tr>
             `;
@@ -464,6 +497,54 @@ async function confirmarVenda() {
     } catch(e) {
         console.error(e);
         alert('Erro ao registrar venda no Supabase');
+    }
+}
+
+let recolherTemp = null;
+
+function modRecolher(val) {
+    const inp = document.getElementById('r-qtd');
+    let nv = parseInt(inp.value) + val;
+    if(nv < 1) nv = 1;
+    if(nv > recolherTemp.quantidade_restante) nv = recolherTemp.quantidade_restante;
+    inp.value = nv;
+    calcRecolher();
+}
+
+function calcRecolher() {
+    if(!recolherTemp) return;
+    let q = parseInt(document.getElementById('r-qtd').value) || 1;
+    if (q > recolherTemp.quantidade_restante) { q = recolherTemp.quantidade_restante; document.getElementById('r-qtd').value = q; }
+    if (q < 1) { q = 1; document.getElementById('r-qtd').value = q; }
+}
+
+function openRecolher(id) {
+    const item = estoque.find(e => e.id === id);
+    if(!item) return;
+    recolherTemp = item;
+    document.getElementById('r-id').value = id;
+    document.getElementById('recolher-produto-nome').textContent = item.nome_produto;
+    document.getElementById('r-max').textContent = item.quantidade_restante;
+    document.getElementById('r-qtd').value = 1;
+    document.getElementById('r-qtd').max = item.quantidade_restante;
+    calcRecolher();
+    document.getElementById('modal-recolher').classList.add('open');
+}
+
+async function confirmarRecolher() {
+    if(!recolherTemp) return;
+    const q = parseInt(document.getElementById('r-qtd').value) || 1;
+    if(q <= 0 || q > recolherTemp.quantidade_restante) return alert('Quantidade inválida');
+    
+    try {
+        const newQtd = recolherTemp.quantidade_restante - q;
+        await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', recolherTemp.id);
+        
+        document.getElementById('modal-recolher').classList.remove('open');
+        loadDados();
+    } catch(e) {
+        console.error(e);
+        alert('Erro ao recolher no Supabase');
     }
 }
 
