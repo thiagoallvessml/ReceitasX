@@ -337,6 +337,15 @@
       <!-- Custo (hidden, preenchido automaticamente pela receita vinculada) -->
       <input type="hidden" id="f-custo" />
 
+      <!-- Consignado -->
+      <div>
+        <label class="field-label" for="f-consignado">Taxa Consignado (%) <span style="color:#475569;font-weight:400;text-transform:none">(Opcional)</span></label>
+        <div style="position:relative">
+          <input id="f-consignado" type="number" min="0" step="0.1" class="fc" placeholder="Ex: 30" style="padding-right:2.2rem" oninput="calcPreview()" />
+          <span style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:#64748b;font-size:.8rem;pointer-events:none">%</span>
+        </div>
+      </div>
+
       <!-- Observações -->
       <div>
         <label class="field-label" for="f-obs">Observações <span style="color:#475569;font-weight:400;text-transform:none">(Opcional)</span></label>
@@ -608,6 +617,7 @@ async function carregarDados() {
                     nome:      p.nome,
                     preco:     parseFloat(p.preco || 0),
                     custo:     finalCusto,
+                    consignado:parseFloat(p.consignado || 0),
                     obs:       p.obs || '',
                     img:       p.imagem_url || '',
                     disp:      p.ativo !== false,
@@ -657,6 +667,7 @@ function resetModal() {
     document.getElementById('f-preco').value = '';
     document.getElementById('f-custo').value = '';
     document.getElementById('f-obs').value   = '';
+    document.getElementById('f-consignado').value = '';
     document.getElementById('f-img').value   = '';
     document.getElementById('f-disp').checked  = true;
     document.getElementById('f-nome-err').style.display = 'none';
@@ -681,6 +692,7 @@ async function openModal(id) {
         document.getElementById('f-preco').value = p.preco || '';
         document.getElementById('f-custo').value = p.custo || '';
         document.getElementById('f-obs').value   = p.obs   || '';
+        document.getElementById('f-consignado').value = p.consignado || '';
         document.getElementById('f-disp').checked = p.disp !== false;
         if (p.img) {
             document.getElementById('f-img').value = p.img;
@@ -719,6 +731,7 @@ async function duplicarProduto(id) {
     document.getElementById('f-preco').value = p.preco || '';
     document.getElementById('f-custo').value = p.custo || '';
     document.getElementById('f-obs').value   = p.obs   || '';
+    document.getElementById('f-consignado').value = p.consignado || '';
     document.getElementById('f-disp').checked = p.disp !== false;
     if (p.img) {
         document.getElementById('f-img').value = p.img;
@@ -798,7 +811,7 @@ function calcPreview() {
 
     // marketplace rows
     const mkts = getMarketplacesLocal();
-    document.getElementById('mkt-prev-list').innerHTML = mkts.map(m => {
+    let mktHtml = mkts.map(m => {
         const taxaVal  = m.taxaDecimal * preco;
         const liqLucro = lucro - taxaVal;
         const liqMarg  = preco > 0 ? (liqLucro / preco) * 100 : 0;
@@ -819,6 +832,32 @@ function calcPreview() {
           </div>
         </div>`;
     }).join('');
+
+    const taxaConsignado = parseFloat(document.getElementById('f-consignado').value) || 0;
+    if (taxaConsignado > 0) {
+        const taxaDec = taxaConsignado / 100;
+        const taxaVal = taxaDec * preco;
+        const liqLucro = lucro - taxaVal;
+        const liqMarg  = preco > 0 ? (liqLucro / preco) * 100 : 0;
+        const minLucroZero = custo > 0 && taxaDec < 1 ? custo / (1 - taxaDec) : 0;
+        const badgeBg  = liqMarg >= 20 ? 'rgba(52,211,153,.15)'  : 'rgba(248,113,113,.15)';
+        const badgeTxt = liqMarg >= 20 ? '#34d399' : '#f87171';
+        mktHtml += `
+        <div class="mkt-prev-row" style="border:1px solid rgba(139,92,246,0.3); background:rgba(139,92,246,0.05)">
+          <div class="mkt-prev-ico" style="background:rgba(139,92,246,0.15)"><span class="material-symbols-outlined" style="color:#a78bfa">handshake</span></div>
+          <div class="mkt-prev-info">
+            <p class="mkt-prev-name" style="color:#a78bfa">Consignado</p>
+            <p class="mkt-prev-taxa">Taxa ${taxaConsignado.toFixed(1)}%</p>
+          </div>
+          <div class="mkt-prev-right">
+            <p class="mkt-prev-lucro">${fmtR2(liqLucro)}</p>
+            <span class="mkt-prev-margem" style="background:${badgeBg};color:${badgeTxt}">${liqMarg.toFixed(1)}%</span>
+            ${minLucroZero > 0 ? `<p class="mkt-prev-min">Mín. lucro zero: ${fmtR2(minLucroZero)}</p>` : ''}
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('mkt-prev-list').innerHTML = mktHtml;
 
     // indicador geral
     const ind = document.getElementById('prev-indicator');
@@ -865,6 +904,7 @@ async function salvar() {
 
     const preco = parseFloat(document.getElementById('f-preco').value) || 0;
     const custo = parseFloat(document.getElementById('f-custo').value) || 0;
+    const consignado = parseFloat(document.getElementById('f-consignado').value) || 0;
     const idVal = document.getElementById('f-id').value;
     // Preserva receita_id do produto existente
     const existingProd = idVal ? produtos.find(x => x.id === parseInt(idVal)) : null;
@@ -879,6 +919,7 @@ async function salvar() {
                 categoria:  'Gourmet',
                 preco,
                 custo,
+                consignado,
                 obs:        document.getElementById('f-obs').value.trim() || null,
                 imagem_url: document.getElementById('f-img').value || null,
                 ativo:      document.getElementById('f-disp').checked,
@@ -906,7 +947,7 @@ async function salvar() {
     }
 
     // Fallback localStorage
-    const data = { nome, cat:'Gourmet', preco, custo,
+    const data = { nome, cat:'Gourmet', preco, custo, consignado,
         obs: document.getElementById('f-obs').value.trim(),
         img: document.getElementById('f-img').value,
         disp: document.getElementById('f-disp').checked,

@@ -3,369 +3,2494 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Cliques de Afiliados - Admin · ReceitasX</title>
+    <title>Inteligência de Cliques de Afiliados · Supabase Admin · ReceitasX</title>
+    
+    <!-- Supabase & Auth Guard -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
+    
+    <!-- Chart.js para visualizações gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <link rel="stylesheet" href="critical.css" />
-
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
     <script>
         tailwind.config = {
             darkMode: "class",
-            theme: { extend: { colors: { primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#25f4f4",
+                        "background-dark": "#121212",
+                        "card-dark": "#1A1A1A",
+                        "border-dark": "#2A2A2A"
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"]
+                    }
+                }
+            }
         }
     </script>
     <style>
-        * { box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
-        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
-        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
-        .btn-back:hover { color:#25f4f4; }
-        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
-        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(37,244,244,.05);border:1px solid rgba(37,244,244,.2);border-radius:.75rem;font-size:.78rem;color:#25f4f4; }
-        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
-        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
-        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
-        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-top:.2rem; }
-
-        .click-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:1rem 1.15rem;transition:border-color .15s;display:flex;align-items:flex-start;gap:1rem; }
-        .click-card:hover { border-color:rgba(37,244,244,.2); }
-        .click-icon { width:2.4rem;height:2.4rem;border-radius:.55rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-        .click-icon .material-symbols-outlined { font-size:1.1rem;color:#25f4f4;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
-        .click-info { flex:1;min-width:0; }
-        .click-code { font-size:.9rem;font-weight:800;color:#25f4f4;font-family:'Courier New',monospace;letter-spacing:.04em; }
-        .click-meta { font-size:.7rem;color:#64748b;margin-top:.3rem;display:flex;flex-direction:column;gap:.2rem; }
-        .click-meta span { display:flex;align-items:center;gap:.25rem; }
-        .click-meta .material-symbols-outlined { font-size:.7rem;flex-shrink:0; }
-        .click-referrer { font-size:.68rem;color:#475569;background:#111;border:1px solid #1E1E1E;border-radius:.4rem;padding:.3rem .5rem;margin-top:.4rem;word-break:break-all;max-width:100%; }
-
-        .agg-card { background:#141414;border:1px solid #2A2A2A;border-radius:.85rem;padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem; }
-        .agg-card:hover { border-color:rgba(37,244,244,.15); }
-        .agg-rank { width:1.8rem;height:1.8rem;border-radius:.45rem;background:rgba(37,244,244,.1);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#25f4f4;flex-shrink:0; }
-        .agg-code { font-size:.88rem;font-weight:800;color:#f1f5f9;font-family:'Courier New',monospace; }
-        .agg-count { font-size:1.1rem;font-weight:900;color:#25f4f4;margin-left:auto; }
-        .agg-label { font-size:.6rem;color:#475569;text-transform:uppercase;letter-spacing:.06em; }
-
-        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
-        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;margin-bottom:.5rem; }
-        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4rem; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        
+        .btn-back { display:flex;align-items:center;gap:.35rem;color:#94a3b8;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; transform: translateX(-2px); }
+        
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:800;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25);letter-spacing:.03em;text-transform:uppercase; }
+        
+        /* KPI Cards */
+        .kpi-card { background:#1A1A1A; border:1px solid #2A2A2A; border-radius:1rem; padding:1.15rem; display:flex; flex-direction:column; position:relative; overflow:hidden; transition:border-color .2s, transform .2s; }
+        .kpi-card:hover { border-color:rgba(37,244,244,.3); transform: translateY(-2px); }
+        .kpi-title { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#64748b; display:flex; align-items:center; justify-content:space-between; }
+        .kpi-val { font-size:1.65rem; font-weight:900; color:#f1f5f9; line-height:1.1; margin-top:.4rem; }
+        .kpi-sub { font-size:.7rem; color:#475569; margin-top:.35rem; display:flex; align-items:center; gap:.25rem; }
+        
+        /* Tabs */
+        .tab-btn { padding:.6rem 1.1rem; border-radius:.65rem; border:1px solid #2A2A2A; background:transparent; color:#94a3b8; font-size:.82rem; font-weight:700; cursor:pointer; transition:all .18s; display:inline-flex; align-items:center; gap:.4rem; }
+        .tab-btn:hover { color:#f1f5f9; border-color:#475569; background:#1E1E1E; }
+        .tab-btn.active { background:rgba(37,244,244,.1); border-color:rgba(37,244,244,.4); color:#25f4f4; box-shadow:0 0 15px rgba(37,244,244,.1); }
+        
+        /* Filters */
+        .filter-select { background:#1A1A1A; border:1px solid #2A2A2A; border-radius:.65rem; color:#cbd5e1; font-size:.8rem; padding:.5rem .85rem; outline:none; cursor:pointer; transition:border-color .2s; font-weight:600; }
+        .filter-select:focus { border-color:rgba(37,244,244,.4); }
+        
+        /* Shimmer Loading */
         @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
-
-        .search-wrap { position:relative; }
-        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
-        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.9rem;outline:none;transition:border-color .2s; }
-        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
-
-        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s; }
-        .pill.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
-        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
-
-        .tab-bar { display:flex;gap:.5rem;margin-bottom:1rem; }
-        .tab-btn { padding:.5rem 1rem;border-radius:.6rem;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s; }
-        .tab-btn.active { background:rgba(37,244,244,.1);border-color:rgba(37,244,244,.4);color:#25f4f4; }
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#242424 50%,#1A1A1A 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:.75rem; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:#121212; }
+        ::-webkit-scrollbar-thumb { background:#2A2A2A; border-radius:4px; }
+        ::-webkit-scrollbar-thumb:hover { background:#3A3A3A; }
     </style>
 </head>
-<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
 
-<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
-    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
-        <button class="btn-back" onclick="history.back()">
-            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
-        </button>
-        <span class="material-symbols-outlined" style="color:#25f4f4;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">ads_click</span>
-        <h1 class="text-base font-semibold flex-1">Cliques de Afiliados</h1>
-        <span id="admin-badge" class="badge-admin" style="display:none">
-            <span class="material-symbols-outlined">verified</span>
-            Admin
-        </span>
+<!-- ═════════════════════════════════════════════════════════════
+     HEADER STICKY
+══════════════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-30 bg-[#121212]/95 backdrop-blur border-b border-[#2A2A2A]">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <button class="btn-back" onclick="window.location.href='admin.html'" title="Voltar ao Painel Admin">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">arrow_back</span>
+            </button>
+            <div class="w-9 h-9 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400">
+                <span class="material-symbols-outlined" style="font-size:1.25rem;font-variation-settings:'FILL' 1">ads_click</span>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-sm sm:text-base font-extrabold text-slate-100 tracking-tight">Cliques de Afiliados</h1>
+                    <span class="badge-admin" id="admin-badge">Admin</span>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium">Mapeamento de quem divulgou, quais links usou e quais clientes trouxe</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Status de Conexão Supabase -->
+            <div id="status-conexao" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Supabase Conectado</span>
+            </div>
+
+            <!-- Botão Atualizar -->
+            <button onclick="carregarDados(true)" title="Recarregar dados do Supabase" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] hover:border-cyan-400/40 text-slate-300 hover:text-cyan-400 text-xs font-bold transition-all">
+                <span class="material-symbols-outlined text-sm" id="reload-icon">sync</span>
+                <span class="hidden md:inline">Atualizar</span>
+            </button>
+
+            <!-- Botão Guia Didático -->
+            <button onclick="toggleGuiaSupabase()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 hover:bg-cyan-400/20 text-xs font-extrabold transition-all">
+                <span class="material-symbols-outlined text-sm">help</span>
+                <span>O que é isso?</span>
+            </button>
+        </div>
     </div>
 </header>
 
-<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
-    <div class="admin-banner">
-        <span class="material-symbols-outlined">ads_click</span>
-        <span>Veja de onde cada visitante está chegando via links de afiliados. Rode <strong>cliques_afiliados_schema.sql</strong> no Supabase.</span>
-    </div>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-    <!-- Stats -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="stat-card">
-            <div class="stat-val" id="stat-total">—</div>
-            <div class="stat-lbl">Total Cliques</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val" id="stat-hoje" style="color:#25f4f4">—</div>
-            <div class="stat-lbl">Hoje</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val" id="stat-afiliados" style="color:#fbbf24">—</div>
-            <div class="stat-lbl">Afiliados Únicos</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val" id="stat-referrers" style="color:#a78bfa">—</div>
-            <div class="stat-lbl">Origens Únicas</div>
-        </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('ranking', this)">
-            <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:text-bottom">leaderboard</span> Ranking
-        </button>
-        <button class="tab-btn" onclick="switchTab('historico', this)">
-            <span class="material-symbols-outlined" style="font-size:.9rem;vertical-align:text-bottom">history</span> Histórico
-        </button>
-    </div>
-
-    <!-- Busca -->
-    <div class="search-wrap">
-        <span class="material-symbols-outlined ico">search</span>
-        <input id="search-input" class="search-input" type="text" placeholder="Buscar por código do afiliado..." oninput="renderCurrent()" />
-    </div>
-
-    <!-- Conteúdo -->
-    <div id="content-area" class="space-y-2">
-        <div class="shimmer"></div>
-        <div class="shimmer"></div>
-        <div class="shimmer"></div>
-    </div>
-</main>
-
-<!-- Modal Usos / Conversões -->
-<div id="modal-usos" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl w-full max-w-lg overflow-hidden flex flex-col m-4 max-h-[85vh] shadow-[0_8px_32px_rgba(0,0,0,0.6)] transform scale-95 transition-transform duration-200" id="modal-usos-content">
-        <div class="flex items-center justify-between p-4 border-b border-[#2A2A2A] bg-[#1E1E1E]">
-            <h3 class="font-bold text-slate-100 flex items-center gap-2">
-                <span class="material-symbols-outlined text-[#a78bfa]">history</span>
-                Vendas vinculadas a <span id="modal-usos-codigo" class="text-[#a78bfa] font-mono tracking-wide px-1">---</span>
-            </h3>
-            <button onclick="fecharModalUsos()" class="text-slate-400 hover:text-white transition-colors">
+    <!-- ═════════════════════════════════════════════════════════════
+         GUIA DIDÁTICO: "ENTENDENDO A TABELA DO SUPABASE" (Toggle)
+    ══════════════════════════════════════════════════════════════ -->
+    <section id="guia-supabase-box" class="bg-gradient-to-br from-[#161f28] to-[#141414] border border-cyan-500/30 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden transition-all duration-300">
+        <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-cyan-400/15 border border-cyan-400/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <span class="material-symbols-outlined text-xl">menu_book</span>
+                </div>
+                <div>
+                    <h2 class="text-sm sm:text-base font-extrabold text-slate-100 flex items-center gap-2">
+                        Guia de Campo: Como ler os dados no Supabase
+                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">Dicionário Oficial</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        Quando você abre a tabela <strong class="text-cyan-300 font-mono">cliques_afiliados</strong> no painel do Supabase, aqui está a explicação de cada coluna técnica:
+                    </p>
+                </div>
+            </div>
+            <button onclick="toggleGuiaSupabase()" class="text-slate-500 hover:text-slate-300 text-sm p-1 rounded-lg hover:bg-slate-800 transition">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <div class="p-4 overflow-y-auto flex-1 space-y-3" id="modal-usos-list">
-            <!-- carregando ou lista -->
+
+        <!-- Grade de Dicionário de Colunas -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-[#2A2A2A]">
+            <div class="bg-[#121212]/70 border border-[#2A2A2A] rounded-xl p-3.5">
+                <div class="flex items-center gap-1.5 text-cyan-400 text-xs font-mono font-bold mb-1">
+                    <span class="material-symbols-outlined text-sm">badge</span>
+                    afiliado_codigo
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    É o código que o parceiro divulgou (ex: <code class="text-white font-mono bg-[#222] px-1 rounded">?ref=DOCECOLE10</code>). Nossa página cruza com a tabela de afiliados para mostrar o <strong>Nome Real</strong> e o <strong>Email</strong> da pessoa.
+                </p>
+            </div>
+
+            <div class="bg-[#121212]/70 border border-[#2A2A2A] rounded-xl p-3.5">
+                <div class="flex items-center gap-1.5 text-purple-400 text-xs font-mono font-bold mb-1">
+                    <span class="material-symbols-outlined text-sm">link</span>
+                    pagina_destino (Link)
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Qual link específico o lead abriu: <code class="text-purple-300 font-mono">/acesso-vitalicio</code> (oferta premium), <code class="text-purple-300 font-mono">/comecegratis</code> ou <code class="text-purple-300 font-mono">/checkout</code>.
+                </p>
+            </div>
+
+            <div class="bg-[#121212]/70 border border-[#2A2A2A] rounded-xl p-3.5">
+                <div class="flex items-center gap-1.5 text-emerald-400 text-xs font-mono font-bold mb-1">
+                    <span class="material-symbols-outlined text-sm">share</span>
+                    referrer (Origem)
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    O site ou aplicativo de onde o visitante veio (Instagram, TikTok, WhatsApp). Se estiver vazio (<em class="text-slate-400">null</em>), foi um acesso direto ou via app com bloqueador.
+                </p>
+            </div>
+
+            <div class="bg-[#121212]/70 border border-[#2A2A2A] rounded-xl p-3.5">
+                <div class="flex items-center gap-1.5 text-amber-400 text-xs font-mono font-bold mb-1">
+                    <span class="material-symbols-outlined text-sm">devices</span>
+                    user_agent (Aparelho)
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Identifica o dispositivo exato: se é <strong class="text-white">iPhone (iOS)</strong>, <strong class="text-white">Android</strong> ou Computador, e o navegador utilizado (Safari, Chrome, Instagram WebView).
+                </p>
+            </div>
+
+            <div class="bg-[#121212]/70 border border-[#2A2A2A] rounded-xl p-3.5">
+                <div class="flex items-center gap-1.5 text-rose-400 text-xs font-mono font-bold mb-1">
+                    <span class="material-symbols-outlined text-sm">schedule</span>
+                    created_at
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Carimbo de data e hora UTC do momento exato do clique. Nossa tela converte automaticamente para o horário de Brasília (UTC-3).
+                </p>
+            </div>
+
+            <div class="bg-[#121212]/70 border border-[#2A2A2A] rounded-xl p-3.5">
+                <div class="flex items-center gap-1.5 text-sky-400 text-xs font-mono font-bold mb-1">
+                    <span class="material-symbols-outlined text-sm">fingerprint</span>
+                    id (UUID)
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Identificador único universal daquele clique. Permite rastreamento pontual e previne duplicidades.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 bg-[#101010]/80 p-3 rounded-xl border border-[#222]">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-400 text-sm">lightbulb</span>
+                <span><strong>Dica:</strong> Para simular e ver um clique entrando no Supabase agora mesmo, clique em <strong>"Simular Clique de Teste"</strong>.</span>
+            </div>
+            <button onclick="abrirModalTeste()" class="px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-300 font-bold hover:bg-amber-400/20 transition flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">science</span>
+                Simulador de Teste
+            </button>
+        </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════════════════════
+         HERO KPIS (INDICADORES DE PERFORMANCE E CONVERSÃO)
+    ══════════════════════════════════════════════════════════════ -->
+    <section>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyan-400 text-base">monitoring</span>
+                Visão Consolidada de Cliques & Conversão
+            </h2>
+            <!-- Filtro Rápido de Período -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500 font-semibold">Período:</span>
+                <select id="filtro-periodo" onchange="aplicarFiltros()" class="filter-select">
+                    <option value="todos" selected>Todo o Histórico</option>
+                    <option value="hoje">Hoje</option>
+                    <option value="7dias">Últimos 7 dias</option>
+                    <option value="30dias">Últimos 30 dias</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- 1. Total de Cliques -->
+            <div class="kpi-card">
+                <div class="kpi-title">
+                    <span>Total de Cliques</span>
+                    <span class="material-symbols-outlined text-cyan-400 text-base">ads_click</span>
+                </div>
+                <div class="kpi-val text-cyan-400" id="kpi-total-cliques">—</div>
+                <div class="kpi-sub">
+                    <span class="material-symbols-outlined text-xs">database</span>
+                    <span id="kpi-total-sub">Carregando registros...</span>
+                </div>
+            </div>
+
+            <!-- 2. Cliques Hoje -->
+            <div class="kpi-card">
+                <div class="kpi-title">
+                    <span>Cliques Hoje</span>
+                    <span class="material-symbols-outlined text-emerald-400 text-base">today</span>
+                </div>
+                <div class="kpi-val text-emerald-400" id="kpi-cliques-hoje">—</div>
+                <div class="kpi-sub">
+                    <span class="material-symbols-outlined text-xs">timelapse</span>
+                    <span id="kpi-hoje-sub">Acessos nas últimas 24h</span>
+                </div>
+            </div>
+
+            <!-- 3. Afiliados Ativos -->
+            <div class="kpi-card">
+                <div class="kpi-title">
+                    <span>Afiliados Divulgando</span>
+                    <span class="material-symbols-outlined text-amber-400 text-base">group</span>
+                </div>
+                <div class="kpi-val text-amber-400" id="kpi-afiliados-ativos">—</div>
+                <div class="kpi-sub">
+                    <span class="material-symbols-outlined text-xs">verified</span>
+                    <span>Parceiros com tráfego</span>
+                </div>
+            </div>
+
+            <!-- 4. Conversão em Vendas -->
+            <div class="kpi-card" style="border-color:rgba(167,139,250,.25); background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(26,26,26,1))">
+                <div class="kpi-title">
+                    <span>Taxa de Conversão</span>
+                    <span class="material-symbols-outlined text-purple-400 text-base">trending_up</span>
+                </div>
+                <div class="kpi-val text-purple-400" id="kpi-conversao">—</div>
+                <div class="kpi-sub">
+                    <span class="material-symbols-outlined text-xs">shopping_bag</span>
+                    <span id="kpi-vendas-sub">Calculando compras...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faixa Secundária de Insights (4 CARDS) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 shrink-0">
+                    <span class="material-symbols-outlined text-base">share</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Top Canal / Origem</div>
+                    <div class="text-xs sm:text-sm font-extrabold text-slate-100 truncate" id="kpi-top-origem">—</div>
+                </div>
+            </div>
+
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+                    <span class="material-symbols-outlined text-base">smartphone</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Dispositivo Principal</div>
+                    <div class="text-xs sm:text-sm font-extrabold text-slate-100 truncate" id="kpi-top-dispositivo">—</div>
+                </div>
+            </div>
+
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+                    <span class="material-symbols-outlined text-base">link</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Link Mais Clicado</div>
+                    <div class="text-xs sm:text-sm font-extrabold text-cyan-400 truncate" id="kpi-top-link">—</div>
+                </div>
+            </div>
+
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                    <span class="material-symbols-outlined text-base">payments</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Faturamento Gerado</div>
+                    <div class="text-xs sm:text-sm font-extrabold text-emerald-400 truncate" id="kpi-faturamento-gerado">—</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════════════════════
+         GRÁFICOS ANALÍTICOS (CHART.JS)
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Gráfico 1: Cliques no Tempo (Barra / Linha) -->
+        <div class="lg:col-span-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-cyan-400 text-lg">calendar_today</span>
+                    <h3 class="text-xs sm:text-sm font-extrabold text-slate-100">Tendência Temporal de Cliques</h3>
+                </div>
+                <span class="text-[11px] text-slate-400 font-semibold" id="chart-timeline-label">Últimos 14 dias</span>
+            </div>
+            <div class="w-full h-56 relative">
+                <canvas id="chart-timeline"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Canais de Origem / Referrers (Doughnut) -->
+        <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-pink-400 text-lg">pie_chart</span>
+                    <h3 class="text-xs sm:text-sm font-extrabold text-slate-100">Canais de Tráfego</h3>
+                </div>
+                <span class="text-[11px] text-slate-400 font-semibold">Redes Sociais</span>
+            </div>
+            <div class="w-full h-56 relative flex items-center justify-center">
+                <canvas id="chart-origem"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════════════════════
+         FILTROS & PESQUISA EM TEMPO REAL
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="bg-[#161616] border border-[#2A2A2A] rounded-2xl p-4 flex flex-col md:flex-row items-center gap-3 shadow-md">
+        <!-- Campo de Pesquisa -->
+        <div class="relative flex-1 w-full">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-lg">search</span>
+            <input 
+                id="search-input" 
+                type="text" 
+                placeholder="Buscar por afiliado (ex: Daiana), cliente (email), código ou link..." 
+                oninput="aplicarFiltros()"
+                class="w-full pl-10 pr-4 py-2.5 bg-[#121212] border border-[#2A2A2A] rounded-xl text-slate-100 placeholder-slate-500 text-xs sm:text-sm focus:border-cyan-400/50 focus:outline-none transition-all font-medium"
+            />
+        </div>
+
+        <!-- Filtros em Dropdown -->
+        <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
+            <!-- Filtro por Link / Página -->
+            <select id="filtro-link" onchange="aplicarFiltros()" class="filter-select w-full sm:w-auto min-w-[170px]">
+                <option value="todos">Todos os Links</option>
+            </select>
+
+            <!-- Filtro por Canal -->
+            <select id="filtro-canal" onchange="aplicarFiltros()" class="filter-select w-full sm:w-auto min-w-[150px]">
+                <option value="todos">Todas as Redes</option>
+                <option value="Instagram">Instagram</option>
+                <option value="TikTok">TikTok</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Facebook">Facebook</option>
+                <option value="YouTube">YouTube</option>
+                <option value="Google">Google / Ads</option>
+                <option value="Direto">Direto / Outros</option>
+            </select>
+
+            <!-- Filtro por Aparelho -->
+            <select id="filtro-dispositivo" onchange="aplicarFiltros()" class="filter-select w-full sm:w-auto min-w-[130px]">
+                <option value="todos">Todos Aparelhos</option>
+                <option value="mobile">Celular (Mobile)</option>
+                <option value="desktop">Computador</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════════════════════
+         BARRA DE NAVEGAÇÃO DE ABAS
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#2A2A2A] pb-3">
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Aba 1: Ranking -->
+            <button class="tab-btn active" id="tab-btn-ranking" onclick="switchTab('ranking')">
+                <span class="material-symbols-outlined text-base">leaderboard</span>
+                <span>Ranking de Afiliados</span>
+                <span id="badge-total-afiliados" class="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-bold ml-1">0</span>
+            </button>
+
+            <!-- Aba 2: Jornada Afiliado ➔ Links ➔ Clientes (NOVO) -->
+            <button class="tab-btn" id="tab-btn-jornada" onclick="switchTab('jornada')">
+                <span class="material-symbols-outlined text-base">route</span>
+                <span>Afiliado ➔ Links ➔ Clientes</span>
+                <span id="badge-total-jornada" class="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold ml-1">0</span>
+            </button>
+
+            <!-- Aba 3: Cliques por Link -->
+            <button class="tab-btn" id="tab-btn-links" onclick="switchTab('links')">
+                <span class="material-symbols-outlined text-base">link</span>
+                <span>Cliques por Link</span>
+                <span id="badge-total-links" class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold ml-1">0</span>
+            </button>
+
+            <!-- Aba 4: Feed em Tempo Real -->
+            <button class="tab-btn" id="tab-btn-feed" onclick="switchTab('feed')">
+                <span class="material-symbols-outlined text-base">list_alt</span>
+                <span>Feed em Tempo Real</span>
+                <span id="badge-total-feed" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-300 font-bold ml-1">0</span>
+            </button>
+
+            <!-- Aba 5: SQL & Manutenção -->
+            <button class="tab-btn" id="tab-btn-diagnostico" onclick="switchTab('diagnostico')">
+                <span class="material-symbols-outlined text-base">terminal</span>
+                <span>SQL & Manutenção</span>
+            </button>
+        </div>
+
+        <div class="text-xs text-slate-500 font-medium">
+            Exibindo <span id="contador-exibindo" class="font-bold text-slate-300">0</span> resultados
+        </div>
+    </div>
+
+    <!-- ═════════════════════════════════════════════════════════════
+         CONTEÚDO DAS ABAS
+    ══════════════════════════════════════════════════════════════ -->
+
+    <!-- ABA 1: RANKING POR AFILIADO (PERFORMANCE) -->
+    <div id="tab-ranking" class="space-y-3">
+        <div id="ranking-list" class="space-y-3">
+            <div class="shimmer h-24"></div>
+            <div class="shimmer h-24"></div>
+            <div class="shimmer h-24"></div>
+        </div>
+    </div>
+
+    <!-- ABA 2: JORNADA AFILIADO ➔ LINKS ➔ CLIENTES -->
+    <div id="tab-jornada" class="space-y-4 hidden">
+        <div class="bg-gradient-to-r from-purple-950/20 to-cyan-950/20 border border-purple-500/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">route</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-extrabold text-white">Mapeamento Direto: Afiliado ➔ Links Divulgados ➔ Clientes Trazidos</h3>
+                    <p class="text-xs text-slate-400">Descubra com precisão quais páginas cada parceiro colocou no ar e a lista nominal de clientes que compraram.</p>
+                </div>
+            </div>
+        </div>
+        <div id="jornada-list" class="space-y-4">
+            <div class="shimmer h-40"></div>
+            <div class="shimmer h-40"></div>
+        </div>
+    </div>
+
+    <!-- ABA 3: CLIQUES POR LINK / PÁGINA DE DESTINO -->
+    <div id="tab-links" class="space-y-3 hidden">
+        <div id="links-list" class="space-y-3">
+            <div class="shimmer h-24"></div>
+            <div class="shimmer h-24"></div>
+            <div class="shimmer h-24"></div>
+        </div>
+    </div>
+
+    <!-- ABA 4: FEED REGISTRO A REGISTRO DO SUPABASE -->
+    <div id="tab-feed" class="space-y-3 hidden">
+        <div id="feed-list" class="space-y-3">
+            <div class="shimmer h-20"></div>
+            <div class="shimmer h-20"></div>
+            <div class="shimmer h-20"></div>
+        </div>
+    </div>
+
+    <!-- ABA 5: DIAGNÓSTICO & SQL HELPER -->
+    <div id="tab-diagnostico" class="space-y-4 hidden">
+        <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/25 text-purple-400 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-xl">security</span>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-100">Políticas de Segurança e Permissões (Supabase RLS)</h3>
+                    <p class="text-xs text-slate-400">Verifique se as permissões estão ativas para gravação de novos cliques e leitura do administrador.</p>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#121212] border border-[#2A2A2A] font-mono text-xs space-y-2 text-slate-300">
+                <div class="flex items-center justify-between text-slate-400 pb-2 border-b border-[#222]">
+                    <span>Script de Correção e Permissões (cliques_afiliados)</span>
+                    <button onclick="copiarSQL()" class="text-cyan-400 hover:text-cyan-300 font-sans font-bold flex items-center gap-1 text-[11px]">
+                        <span class="material-symbols-outlined text-xs">content_copy</span> Copiar SQL
+                    </button>
+                </div>
+                <pre id="sql-code" class="overflow-x-auto text-[11px] leading-relaxed text-cyan-300">
+-- Garante acesso de inserção anônima (visitante clicando no link)
+CREATE POLICY IF NOT EXISTS "cliques_anon_insert" ON cliques_afiliados FOR INSERT WITH CHECK (true);
+GRANT INSERT ON cliques_afiliados TO anon, authenticated;
+
+-- Garante que admin e autenticados consigam ler
+CREATE POLICY IF NOT EXISTS "cliques_admin_select" ON cliques_afiliados FOR SELECT
+  USING (EXISTS (SELECT 1 FROM perfis WHERE perfis.id = auth.uid() AND (perfis.role = 'admin' OR perfis.plano = 'admin')));
+GRANT SELECT ON cliques_afiliados TO authenticated;
+
+-- Índices de performance para relatórios ultra-rápidos
+CREATE INDEX IF NOT EXISTS idx_cliques_afiliados_codigo ON cliques_afiliados(afiliado_codigo);
+CREATE INDEX IF NOT EXISTS idx_cliques_afiliados_created_at ON cliques_afiliados(created_at DESC);</pre>
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+                <a href="https://supabase.com/dashboard" target="_blank" class="px-4 py-2 bg-[#222] hover:bg-[#2A2A2A] border border-[#333] text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">open_in_new</span>
+                    Abrir Painel do Supabase
+                </a>
+                <button onclick="abrirModalTeste()" class="px-4 py-2 bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">science</span>
+                    Testar Gravação de Clique
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ═════════════════════════════════════════════════════════════
+     MODAL 1: PERFIL COMPLETO DO AFILIADO (QUEM É O AFILIADO)
+══════════════════════════════════════════════════════════════ -->
+<div id="modal-perfil" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl w-full max-w-xl overflow-hidden flex flex-col m-4 max-h-[90vh] shadow-2xl transform scale-95 transition-transform duration-200" id="modal-perfil-content">
+        <!-- Cabeçalho com Avatar e Identificação -->
+        <div class="p-5 border-b border-[#2A2A2A] bg-gradient-to-r from-[#1E1E1E] to-[#161616] flex items-center justify-between">
+            <div class="flex items-center gap-3.5 min-w-0">
+                <div id="modal-perfil-avatar" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400/25 to-cyan-600/10 border border-cyan-400/30 text-cyan-300 font-black text-base flex items-center justify-center shrink-0 shadow-inner">
+                    --
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 id="modal-perfil-nome" class="font-black text-slate-100 text-base sm:text-lg truncate">Nome do Afiliado</h3>
+                        <span id="modal-perfil-codigo" class="px-2.5 py-0.5 rounded font-mono font-black text-xs bg-cyan-400/10 text-cyan-300 border border-cyan-400/30">?ref=---</span>
+                    </div>
+                    <p id="modal-perfil-tipo" class="text-xs text-slate-400 mt-0.5">Parceiro Afiliado do ReceitasX</p>
+                </div>
+            </div>
+            <button onclick="fecharModalPerfil()" class="text-slate-400 hover:text-white transition p-1">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Conteúdo do Perfil -->
+        <div class="p-5 overflow-y-auto space-y-4 text-xs">
+            <!-- Dados de Contato -->
+            <div class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-4 space-y-2.5">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-cyan-400">contact_mail</span>
+                    Identificação & Contato do Parceiro
+                </div>
+
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <span class="text-slate-400">E-mail:</span>
+                    <div class="flex items-center gap-1.5">
+                        <strong id="modal-perfil-email" class="text-slate-200 font-mono">---</strong>
+                        <button onclick="copiarTexto(document.getElementById('modal-perfil-email').textContent, 'E-mail copiado!')" class="text-slate-400 hover:text-cyan-400">
+                            <span class="material-symbols-outlined text-xs">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 flex-wrap" id="modal-perfil-tel-row">
+                    <span class="text-slate-400">Telefone / WhatsApp:</span>
+                    <div class="flex items-center gap-2">
+                        <strong id="modal-perfil-tel" class="text-slate-200">Não informado</strong>
+                        <a id="modal-perfil-whatsapp-btn" href="#" target="_blank" class="hidden px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold hover:bg-emerald-500/25 flex items-center gap-1 text-[11px]">
+                            <span class="material-symbols-outlined text-xs">chat</span> Conversar no WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 flex-wrap" id="modal-perfil-negocio-row">
+                    <span class="text-slate-400">Negócio / Confeitaria:</span>
+                    <strong id="modal-perfil-negocio" class="text-slate-200">—</strong>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 flex-wrap" id="modal-perfil-local-row">
+                    <span class="text-slate-400">Cidade / Estado:</span>
+                    <strong id="modal-perfil-local" class="text-slate-200">—</strong>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <span class="text-slate-400">Data de Cadastro:</span>
+                    <strong id="modal-perfil-cadastro" class="text-slate-300">—</strong>
+                </div>
+            </div>
+
+            <!-- Resumo de Performance -->
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-2.5">
+                    <div class="text-[10px] uppercase font-bold text-slate-500">Cliques</div>
+                    <div id="modal-perfil-cliques" class="text-base font-black text-cyan-400 mt-0.5">0</div>
+                </div>
+                <div class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-2.5">
+                    <div class="text-[10px] uppercase font-bold text-slate-500">Clientes</div>
+                    <div id="modal-perfil-vendas" class="text-base font-black text-purple-400 mt-0.5">0</div>
+                </div>
+                <div class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-2.5">
+                    <div class="text-[10px] uppercase font-bold text-slate-500">Faturado</div>
+                    <div id="modal-perfil-faturamento" class="text-base font-black text-emerald-400 mt-0.5">R$ 0</div>
+                </div>
+            </div>
+
+            <!-- Links que esse Afiliado Promove -->
+            <div class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-4 space-y-2">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-cyan-400">link</span>
+                    Links Promovidos por este Afiliado
+                </div>
+                <div id="modal-perfil-links-list" class="space-y-1.5">
+                    <!-- Lista de links e cliques -->
+                </div>
+            </div>
+
+            <!-- Clientes Trazidos por este Afiliado -->
+            <div class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-4 space-y-2">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-emerald-400">group</span>
+                    Clientes Trazidos por este Afiliado
+                </div>
+                <div id="modal-perfil-clientes-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    <!-- Lista de clientes e compras -->
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 bg-[#161616] border-t border-[#2A2A2A] flex justify-between items-center text-xs">
+            <button id="modal-perfil-btn-copiar" onclick="copiarLinkAfiliadoAtual()" class="px-3 py-1.5 bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 rounded-lg font-bold transition flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">content_copy</span>
+                Copiar Link com ?ref
+            </button>
+            <button onclick="fecharModalPerfil()" class="px-4 py-1.5 bg-[#252525] hover:bg-[#333] text-slate-200 rounded-lg font-bold transition">
+                Fechar
+            </button>
         </div>
     </div>
 </div>
 
-<script>
-let allCliques = [];
-let currentTab = 'ranking';
-
-(async () => {
-    await _waitForRole(4000);
-    if(window.__userRole !== 'admin') {
-        document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9"><span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span><h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1></div>`;
-        return;
-    }
-    document.getElementById('admin-badge').style.display = '';
-    carregar();
-})();
-
-async function carregar() {
-    try {
-        const { data, error } = await sb
-            .from('cliques_afiliados')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(500);
-        if(error) throw error;
-        allCliques = data || [];
-        updateStats();
-        renderCurrent();
-    } catch(e) {
-        console.error(e);
-        document.getElementById('content-area').innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
-    }
-}
-
-function updateStats() {
-    const hoje = new Date().toISOString().split('T')[0];
-    const cliquesHoje = allCliques.filter(c => c.created_at.startsWith(hoje));
-    const codigos = new Set(allCliques.map(c => c.afiliado_codigo));
-    const referrers = new Set(allCliques.map(c => c.referrer).filter(Boolean));
-
-    document.getElementById('stat-total').textContent = allCliques.length;
-    document.getElementById('stat-hoje').textContent = cliquesHoje.length;
-    document.getElementById('stat-afiliados').textContent = codigos.size;
-    document.getElementById('stat-referrers').textContent = referrers.size;
-}
-
-function switchTab(tab, btn) {
-    currentTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderCurrent();
-}
-
-function renderCurrent() {
-    if(currentTab === 'ranking') renderRanking();
-    else renderHistorico();
-}
-
-function renderRanking() {
-    const term = document.getElementById('search-input').value.toLowerCase();
-    const area = document.getElementById('content-area');
-
-    // Agrupar por código
-    const map = {};
-    allCliques.forEach(c => {
-        const code = c.afiliado_codigo.toUpperCase();
-        if(term && !code.toLowerCase().includes(term)) return;
-        if(!map[code]) map[code] = { count:0, lastClick:c.created_at, referrers: new Set() };
-        map[code].count++;
-        if(c.referrer) map[code].referrers.add(c.referrer);
-    });
-
-    const sorted = Object.entries(map).sort((a,b) => b[1].count - a[1].count);
-
-    if(sorted.length === 0) {
-        area.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">ads_click</span><p style="font-size:.85rem;font-weight:600">Nenhum clique registrado ainda.</p></div>`;
-        return;
-    }
-
-    area.innerHTML = sorted.map(([code, info], i) => {
-        const lastDate = new Date(info.lastClick).toLocaleString('pt-BR');
-        const refs = [...info.referrers];
-        const refText = refs.length > 0
-            ? refs.map(r => { try { return new URL(r).hostname; } catch(e) { return r.substring(0,40); } }).join(', ')
-            : 'Direto';
-        return `
-        <div class="agg-card">
-            <div class="agg-rank">${i+1}</div>
-            <div style="flex:1;min-width:0">
-                <div class="agg-code">${code}</div>
-                <div style="font-size:.65rem;color:#475569;margin-top:.2rem">
-                    Último: ${lastDate} · Origens: ${refText}
-                </div>
+<!-- ═════════════════════════════════════════════════════════════
+     MODAL 2: INSPEÇÃO DE REGISTRO BRUTO (JSON DO SUPABASE)
+══════════════════════════════════════════════════════════════ -->
+<div id="modal-json" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl w-full max-w-xl overflow-hidden flex flex-col m-4 max-h-[85vh] shadow-2xl transform scale-95 transition-transform duration-200" id="modal-json-content">
+        <div class="flex items-center justify-between p-4 border-b border-[#2A2A2A] bg-[#1E1E1E]">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyan-400">data_object</span>
+                <h3 class="font-extrabold text-slate-100 text-sm">Registro Bruto do Supabase</h3>
             </div>
-            <div style="text-align:right">
-                <div class="agg-count">${info.count}</div>
-                <div class="agg-label">cliques</div>
-            </div>
-            <button style="display:flex;align-items:center;justify-content:center;gap:.25rem;padding:.35rem .65rem;border-radius:.5rem;border:1px solid rgba(167,139,250,.4);color:#a78bfa;background:rgba(167,139,250,.08);font-size:.68rem;font-weight:700;cursor:pointer;margin-left:.25rem;transition:all .15s;" onclick="verUsos('${code}')" onmouseover="this.style.background='rgba(167,139,250,.18)'" onmouseout="this.style.background='rgba(167,139,250,.08)'">
-                <span class="material-symbols-outlined" style="font-size:.8rem">history</span>
-                Ver Vendas
+            <button onclick="fecharModalJson()" class="text-slate-400 hover:text-white transition">
+                <span class="material-symbols-outlined">close</span>
             </button>
-        </div>`;
-    }).join('');
-}
-
-function renderHistorico() {
-    const term = document.getElementById('search-input').value.toLowerCase();
-    const area = document.getElementById('content-area');
-
-    const filtered = allCliques.filter(c => {
-        if(term) return c.afiliado_codigo.toLowerCase().includes(term);
-        return true;
-    });
-
-    if(filtered.length === 0) {
-        area.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">ads_click</span><p style="font-size:.85rem;font-weight:600">Nenhum clique encontrado.</p></div>`;
-        return;
-    }
-
-    area.innerHTML = filtered.map(c => {
-        const dt = new Date(c.created_at).toLocaleString('pt-BR');
-        let refDisplay = 'Acesso direto';
-        if(c.referrer) {
-            try { refDisplay = new URL(c.referrer).hostname + new URL(c.referrer).pathname; }
-            catch(e) { refDisplay = c.referrer.substring(0, 60); }
-        }
-        // Detectar dispositivo do user agent
-        const ua = c.user_agent || '';
-        let device = 'Desktop';
-        if(/Android/i.test(ua)) device = 'Android';
-        else if(/iPhone|iPad/i.test(ua)) device = 'iPhone';
-        else if(/Mobile/i.test(ua)) device = 'Mobile';
-
-        return `
-        <div class="click-card">
-            <div class="click-icon">
-                <span class="material-symbols-outlined">ads_click</span>
-            </div>
-            <div class="click-info">
-                <div class="click-code">${c.afiliado_codigo.toUpperCase()}</div>
-                <div class="click-meta">
-                    <span><span class="material-symbols-outlined">schedule</span> ${dt}</span>
-                    <span><span class="material-symbols-outlined">devices</span> ${device}</span>
-                    <span><span class="material-symbols-outlined">language</span> Origem: ${refDisplay}</span>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-}
-
-function esc(str) {
-    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-async function verUsos(codigo) {
-    const modal = document.getElementById('modal-usos');
-    const content = document.getElementById('modal-usos-content');
-    const list = document.getElementById('modal-usos-list');
-    document.getElementById('modal-usos-codigo').textContent = codigo;
-    
-    list.innerHTML = '<div class="shimmer" style="height:3rem"></div><div class="shimmer" style="height:3rem"></div>';
-    
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    setTimeout(() => content.classList.remove('scale-95'), 10);
-
-    try {
-        const { data, error } = await sb
-            .from('pedidos')
-            .select('email, created_at, status, valor_pago')
-            .ilike('cupom_usado', codigo)
-            .order('created_at', {ascending: false});
+        </div>
+        <div class="p-4 overflow-y-auto space-y-3">
+            <p class="text-xs text-slate-400">
+                Abaixo está a linha exata conforme armazenada na tabela <code class="text-cyan-400 font-mono">cliques_afiliados</code>:
+            </p>
+            <pre id="modal-json-data" class="bg-[#121212] border border-[#2A2A2A] rounded-xl p-4 font-mono text-[11px] text-emerald-400 overflow-x-auto whitespace-pre-wrap"></pre>
             
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-            list.innerHTML = `
-                <div class="text-center py-8 text-slate-400">
-                    <span class="material-symbols-outlined block text-4xl mb-2 text-[#2A2A2A]">history_toggle_off</span>
-                    Nenhum pedido atrelado a este código ainda.
+            <div id="modal-json-analise" class="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3 text-xs space-y-1.5 text-slate-300">
+                <!-- Análise humana e amigável da linha -->
+            </div>
+        </div>
+        <div class="p-3 bg-[#161616] border-t border-[#2A2A2A] flex justify-end">
+            <button onclick="fecharModalJson()" class="px-4 py-1.5 bg-[#252525] hover:bg-[#333] text-slate-200 rounded-lg text-xs font-bold transition">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════
+     MODAL 3: VENDAS DO AFILIADO (PEDIDOS PAGOS)
+══════════════════════════════════════════════════════════════ -->
+<div id="modal-vendas" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl w-full max-w-lg overflow-hidden flex flex-col m-4 max-h-[85vh] shadow-2xl transform scale-95 transition-transform duration-200" id="modal-vendas-content">
+        <div class="flex items-center justify-between p-4 border-b border-[#2A2A2A] bg-[#1E1E1E]">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-400">shopping_cart</span>
+                <h3 class="font-extrabold text-slate-100 text-sm">
+                    Vendas do Afiliado: <span id="modal-vendas-codigo" class="text-cyan-400 font-mono px-1">---</span>
+                </h3>
+            </div>
+            <button onclick="fecharModalVendas()" class="text-slate-400 hover:text-white transition">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-4 overflow-y-auto flex-1 space-y-3" id="modal-vendas-list">
+            <div class="shimmer h-14"></div>
+            <div class="shimmer h-14"></div>
+        </div>
+        <div class="p-3 bg-[#161616] border-t border-[#2A2A2A] flex justify-between items-center text-xs">
+            <span class="text-slate-400">Total Faturado: <strong class="text-emerald-400 font-bold" id="modal-vendas-total">R$ 0,00</strong></span>
+            <button onclick="fecharModalVendas()" class="px-4 py-1.5 bg-[#252525] hover:bg-[#333] text-slate-200 rounded-lg font-bold transition">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════
+     MODAL 4: SIMULADOR DE CLIQUE DE TESTE
+══════════════════════════════════════════════════════════════ -->
+<div id="modal-teste" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl w-full max-w-md overflow-hidden flex flex-col m-4 shadow-2xl transform scale-95 transition-transform duration-200" id="modal-teste-content">
+        <div class="flex items-center justify-between p-4 border-b border-[#2A2A2A] bg-[#1E1E1E]">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-400">science</span>
+                <h3 class="font-extrabold text-slate-100 text-sm">Simular Clique de Teste</h3>
+            </div>
+            <button onclick="fecharModalTeste()" class="text-slate-400 hover:text-white transition">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-4 space-y-3">
+            <p class="text-xs text-slate-400">
+                Envie um registro diretamente para o Supabase para testar se a tabela está gravando corretamente em tempo real.
+            </p>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Código do Afiliado</label>
+                <input id="teste-codigo" type="text" value="DOCECOLE10" class="w-full bg-[#121212] border border-[#2A2A2A] rounded-xl px-3 py-2 text-xs text-white uppercase font-mono font-bold focus:border-cyan-400 focus:outline-none" />
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Rede de Origem (Referrer)</label>
+                <select id="teste-referrer" class="w-full bg-[#121212] border border-[#2A2A2A] rounded-xl px-3 py-2 text-xs text-white font-medium focus:border-cyan-400 focus:outline-none">
+                    <option value="https://l.instagram.com/">Instagram (l.instagram.com)</option>
+                    <option value="https://www.tiktok.com/">TikTok (tiktok.com)</option>
+                    <option value="https://web.whatsapp.com/">WhatsApp Web</option>
+                    <option value="https://www.google.com/">Google Busca</option>
+                    <option value="">Acesso Direto (Sem referrer)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Página de Destino (Link)</label>
+                <select id="teste-pagina" class="w-full bg-[#121212] border border-[#2A2A2A] rounded-xl px-3 py-2 text-xs text-white font-medium focus:border-cyan-400 focus:outline-none">
+                    <option value="/acesso-vitalicio">/acesso-vitalicio (Oferta Vitalícia)</option>
+                    <option value="/comecegratis">/comecegratis (Lead Grátis)</option>
+                    <option value="/checkout">/checkout (Página de Pagamento)</option>
+                    <option value="/calculadora">/calculadora (Calculadora Grátis)</option>
+                </select>
+            </div>
+        </div>
+        <div class="p-3 bg-[#161616] border-t border-[#2A2A2A] flex justify-end gap-2">
+            <button onclick="fecharModalTeste()" class="px-4 py-1.5 bg-[#252525] text-slate-300 rounded-lg text-xs font-bold hover:bg-[#333]">Cancelar</button>
+            <button onclick="executarCliqueTeste()" id="btn-enviar-teste" class="px-4 py-1.5 bg-cyan-400 text-black font-extrabold rounded-lg text-xs hover:bg-cyan-300 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">send</span>
+                Enviar ao Supabase
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST DE NOTIFICAÇÃO -->
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-[#1E1E1E] border border-cyan-400/40 text-slate-100 text-xs font-semibold shadow-2xl flex items-center gap-2 transform translate-y-16 opacity-0 pointer-events-none transition-all duration-300">
+    <span class="material-symbols-outlined text-cyan-400 text-sm" id="toast-icon">check_circle</span>
+    <span id="toast-msg">Mensagem</span>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════
+     SCRIPTS & LÓGICA DE DADOS
+══════════════════════════════════════════════════════════════ -->
+<script>
+// Variáveis Globais de Estado
+let rawCliques = [];
+let filteredCliques = [];
+let afiliadosMap = {}; // codigo -> { id, nome, email, user_id, telefone, negocio, cidade, estado, vendasCount, faturamento, clientesList }
+let pedidosList = [];
+let currentTab = 'ranking';
+let afiliadoModalAtual = null;
+
+// Instâncias do Chart.js
+let chartTimelineInstance = null;
+let chartOrigemInstance = null;
+
+// Inicialização com Auth Guard
+(async () => {
+    try {
+        await _waitForRole(4000);
+        if (window.__userRole !== 'admin') {
+            document.body.innerHTML = `
+                <div class="flex flex-col items-center justify-center min-h-screen gap-3 text-center p-4">
+                    <span class="material-symbols-outlined text-rose-500 text-6xl">lock</span>
+                    <h1 class="text-xl font-bold">Acesso Restrito ao Administrador</h1>
+                    <p class="text-xs text-slate-400">Você não tem permissão para visualizar o painel de cliques de afiliados.</p>
+                    <a href="index.html" class="mt-2 px-4 py-2 bg-[#222] border border-[#333] rounded-lg text-xs font-bold text-cyan-400">Voltar ao Início</a>
                 </div>
             `;
             return;
         }
 
-        list.innerHTML = data.map(p => {
-            const dt = new Date(p.created_at).toLocaleString('pt-BR');
-            const stsColor = p.status === 'pago' ? 'text-emerald-400' : 'text-slate-400';
-            const valLabel = p.valor_pago ? `R$ ${Number(p.valor_pago).toFixed(2).replace('.',',')}` : '---';
-            return `
-                <div class="bg-[#141414] border border-[#2A2A2A] rounded-lg p-3 flex flex-col gap-1">
-                    <div class="flex justify-between items-start">
-                        <span class="text-sm font-semibold text-slate-200">${esc(p.email || 'Sem email')}</span>
-                        <span class="text-xs font-bold ${stsColor} uppercase tracking-wide bg-[#1A1A1A] border border-[#2A2A2A] px-2 py-0.5 rounded">${p.status}</span>
+        // Carregar dados principais
+        await carregarDados();
+    } catch(err) {
+        console.error('Erro de inicialização:', err);
+    }
+})();
+
+// ─── CARREGAR DADOS DO SUPABASE ─────────────────────────────────
+async function carregarDados(forcarAnimacao = false) {
+    const reloadIcon = document.getElementById('reload-icon');
+    if (reloadIcon) reloadIcon.classList.add('animate-spin');
+
+    try {
+        // Consultas em paralelo para performance máxima
+        const [cliquesRes, afiliadosRes, perfisRes, cuponsRes, pedidosRes, indicacoesRes] = await Promise.allSettled([
+            sb.from('cliques_afiliados').select('*').order('created_at', { ascending: false }).limit(2000),
+            sb.from('afiliados').select('id, user_id, codigo, email, total_vendas, total_ganhos, total_cliques, total_indicados, comissao_pct, created_at'),
+            sb.from('perfis').select('id, nome, sobrenome, telefone, negocio, cidade, estado, role, plano'),
+            sb.from('cupons').select('id, codigo, tipo, valor, afiliado_id'),
+            sb.from('pedidos').select('id, email, status, valor_pago, cupom_usado, ref_afiliado, created_at'),
+            sb.from('indicacoes').select('id, afiliado_id, indicado_email, converteu, valor_pago, comissao, created_at')
+        ]);
+
+        // Processar Cliques
+        if (cliquesRes.status === 'fulfilled' && !cliquesRes.value.error) {
+            rawCliques = cliquesRes.value.data || [];
+        } else {
+            console.warn('Erro ao ler cliques_afiliados:', cliquesRes.value?.error);
+            rawCliques = [];
+        }
+
+        // Processar Perfis (id -> dados)
+        const perfisMap = {};
+        if (perfisRes.status === 'fulfilled' && perfisRes.value.data) {
+            perfisRes.value.data.forEach(p => {
+                const nomePartes = [p.nome, p.sobrenome].filter(Boolean);
+                const nomeCompleto = nomePartes.length > 0 ? nomePartes.join(' ') : null;
+                perfisMap[p.id] = {
+                    id: p.id,
+                    nome: nomeCompleto,
+                    primeiroNome: p.nome || '',
+                    sobrenome: p.sobrenome || '',
+                    telefone: p.telefone || '',
+                    negocio: p.negocio || '',
+                    cidade: p.cidade || '',
+                    estado: p.estado || '',
+                    plano: p.plano || 'gratuito'
+                };
+            });
+        }
+
+        // Processar Afiliados (443 cadastrados)
+        afiliadosMap = {};
+        if (afiliadosRes.status === 'fulfilled' && afiliadosRes.value.data) {
+            afiliadosRes.value.data.forEach(a => {
+                const perfil = perfisMap[a.user_id] || {};
+                const codigo = (a.codigo || '').toUpperCase();
+                if (codigo) {
+                    // Se não tiver nome no perfil, extrai um nome legível do email
+                    let nomeFinal = perfil.nome;
+                    if (!nomeFinal && a.email) {
+                        const parteEmail = a.email.split('@')[0].replace(/[._-]/g, ' ');
+                        nomeFinal = parteEmail.charAt(0).toUpperCase() + parteEmail.slice(1);
+                    }
+
+                    afiliadosMap[codigo] = {
+                        id: a.id,
+                        user_id: a.user_id,
+                        codigo: codigo,
+                        nome: nomeFinal || 'Afiliado ' + codigo,
+                        email: a.email || '',
+                        telefone: perfil.telefone || '',
+                        negocio: perfil.negocio || '',
+                        cidade: perfil.cidade || '',
+                        estado: perfil.estado || '',
+                        iniciais: extrairIniciais(nomeFinal || codigo),
+                        total_ganhos: Number(a.total_ganhos || 0),
+                        total_vendas: Number(a.total_vendas || 0),
+                        total_cliques_banco: Number(a.total_cliques || 0),
+                        comissao_pct: Number(a.comissao_pct || 10),
+                        created_at: a.created_at,
+                        tipo: 'Parceiro Afiliado Cadastrado',
+                        pedidosList: [],
+                        clientesList: []
+                    };
+                }
+            });
+        }
+
+        // Processar Cupons (para mapear cupons promocionais)
+        if (cuponsRes.status === 'fulfilled' && cuponsRes.value.data) {
+            cuponsRes.value.data.forEach(cup => {
+                const cod = (cup.codigo || '').toUpperCase();
+                if (cod && !afiliadosMap[cod]) {
+                    afiliadosMap[cod] = {
+                        id: cup.id,
+                        user_id: null,
+                        codigo: cod,
+                        nome: 'Cupom ' + cod,
+                        email: 'Cupom de Parceria',
+                        telefone: '',
+                        negocio: '',
+                        cidade: '',
+                        estado: '',
+                        iniciais: extrairIniciais(cod),
+                        total_ganhos: 0,
+                        total_vendas: 0,
+                        total_cliques_banco: 0,
+                        comissao_pct: 0,
+                        created_at: null,
+                        tipo: 'Cupom Promocional',
+                        pedidosList: [],
+                        clientesList: []
+                    };
+                }
+            });
+        }
+
+        // Processar Pedidos
+        pedidosList = (pedidosRes.status === 'fulfilled' && pedidosRes.value.data) ? pedidosRes.value.data : [];
+        
+        // Mapear vendas e clientes aos afiliados
+        pedidosList.forEach(ped => {
+            const codCupom = (ped.cupom_usado || '').toUpperCase();
+            const codRef = (ped.ref_afiliado || '').toUpperCase();
+            const codAfiliado = codCupom || codRef;
+
+            if (codAfiliado) {
+                if (!afiliadosMap[codAfiliado]) {
+                    afiliadosMap[codAfiliado] = {
+                        id: null,
+                        user_id: null,
+                        codigo: codAfiliado,
+                        nome: 'Afiliado ' + codAfiliado,
+                        email: ped.email || '',
+                        telefone: '',
+                        negocio: '',
+                        cidade: '',
+                        estado: '',
+                        iniciais: extrairIniciais(codAfiliado),
+                        total_ganhos: 0,
+                        total_vendas: 0,
+                        total_cliques_banco: 0,
+                        comissao_pct: 10,
+                        created_at: null,
+                        tipo: 'Identificado por Pedido',
+                        pedidosList: [],
+                        clientesList: []
+                    };
+                }
+                afiliadosMap[codAfiliado].pedidosList.push(ped);
+                
+                // Adiciona na lista de clientes trazidos
+                afiliadosMap[codAfiliado].clientesList.push({
+                    email: ped.email || 'Cliente sem email',
+                    valor: Number(ped.valor_pago || 0),
+                    status: ped.status || 'pendente',
+                    origem: ped.cupom_usado ? `Cupom: ${ped.cupom_usado}` : `Ref: ${ped.ref_afiliado}`,
+                    data: ped.created_at
+                });
+            }
+        });
+
+        // Adicionar também indicações da tabela indicacoes (se houver)
+        if (indicacoesRes.status === 'fulfilled' && indicacoesRes.value.data) {
+            const afiliadosPorId = {};
+            Object.values(afiliadosMap).forEach(a => { if (a.id) afiliadosPorId[a.id] = a; });
+
+            indicacoesRes.value.data.forEach(ind => {
+                const af = afiliadosPorId[ind.afiliado_id];
+                if (af) {
+                    const jaExiste = af.clientesList.some(c => c.email && c.email.toLowerCase() === (ind.indicado_email || '').toLowerCase());
+                    if (!jaExiste) {
+                        af.clientesList.push({
+                            email: ind.indicado_email || 'Lead indicado',
+                            valor: Number(ind.valor_pago || 0),
+                            status: ind.converteu ? 'pago' : 'lead',
+                            origem: 'Indicação Direta',
+                            data: ind.created_at
+                        });
+                    }
+                }
+            });
+        }
+
+        // Atualizar lista de links no filtro
+        atualizarOpcoesFiltroLink();
+
+        // Aplicar filtros e desenhar tela
+        aplicarFiltros();
+        if (forcarAnimacao) mostrarToast('Dados atualizados com sucesso!', 'check_circle');
+
+    } catch (e) {
+        console.error('Erro global ao carregar dados:', e);
+        mostrarToast('Erro ao carregar dados do Supabase', 'error');
+    } finally {
+        if (reloadIcon) reloadIcon.classList.remove('animate-spin');
+    }
+}
+
+// Extrair iniciais do nome para o avatar (ex: Daiana Cristina -> DC)
+function extrairIniciais(nome) {
+    if (!nome) return 'AF';
+    const partes = nome.trim().split(/\s+/).filter(Boolean);
+    if (partes.length === 1) return partes[0].substring(0, 2).toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
+
+// ─── DECODIFICADORES INTELIGENTES (REFERRER & USER AGENT & LINKS) ─
+
+// Decodifica o link/página de destino com nome amigável
+function formatPagina(url) {
+    if (!url || url === '/' || url === '') return { rotulo: 'Página Inicial', path: '/', icon: 'home', color: '#94a3b8' };
+    const u = url.toLowerCase();
+    if (u.includes('acesso-vitalicio')) return { rotulo: 'Oferta Vitalícia', path: '/acesso-vitalicio', icon: 'workspace_premium', color: '#f59e0b' };
+    if (u.includes('comecegratis')) return { rotulo: 'Comece Grátis (Lead)', path: '/comecegratis', icon: 'star', color: '#25f4f4' };
+    if (u.includes('checkout')) return { rotulo: 'Checkout Pagamento', path: '/checkout', icon: 'credit_card', color: '#10b981' };
+    if (u.includes('calculadora')) return { rotulo: 'Calculadora Grátis', path: '/calculadora', icon: 'calculate', color: '#38bdf8' };
+    if (u.includes('landing')) return { rotulo: 'Landing Page Principal', path: '/landing', icon: 'web', color: '#a78bfa' };
+    if (u.includes('promo') || u.includes('oferta')) return { rotulo: 'Página Promocional', path: '/oferta', icon: 'local_offer', color: '#f43f5e' };
+    if (u.includes('receitas-geladinho')) return { rotulo: 'Receitas de Geladinho', path: '/receitas-geladinho', icon: 'icecream', color: '#fb7185' };
+    if (u.includes('login')) return { rotulo: 'Login / Cadastro', path: '/login', icon: 'login', color: '#94a3b8' };
+    return { rotulo: url, path: url, icon: 'link', color: '#a78bfa' };
+}
+
+// Atualizar o dropdown de links disponíveis
+function atualizarOpcoesFiltroLink() {
+    const select = document.getElementById('filtro-link');
+    if (!select) return;
+    const valorAtual = select.value;
+    const linksUnicos = new Set();
+    
+    rawCliques.forEach(c => {
+        const p = c.pagina_destino || '/';
+        linksUnicos.add(p);
+    });
+
+    let html = '<option value="todos">Todos os Links</option>';
+    Array.from(linksUnicos).sort().forEach(link => {
+        const info = formatPagina(link);
+        html += `<option value="${escapeHtml(link)}">${escapeHtml(info.rotulo)} (${escapeHtml(link)})</option>`;
+    });
+    select.innerHTML = html;
+    
+    if (Array.from(linksUnicos).includes(valorAtual)) {
+        select.value = valorAtual;
+    }
+}
+
+// Decodifica a origem do tráfego em rede social amigável
+function parseOrigem(referrer) {
+    if (!referrer || referrer.trim() === '') {
+        return { nome: 'Direto / Privado', icon: 'link', color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.25)', tag: 'Direto' };
+    }
+    const r = referrer.toLowerCase();
+    if (r.includes('instagram.com') || r.includes('l.instagram')) {
+        return { nome: 'Instagram', icon: 'photo_camera', color: '#f43f5e', bg: 'rgba(244,63,94,0.15)', border: 'rgba(244,63,94,0.3)', tag: 'Instagram' };
+    }
+    if (r.includes('tiktok.com') || r.includes('vt.tiktok')) {
+        return { nome: 'TikTok', icon: 'music_note', color: '#22d3ee', bg: 'rgba(34,211,238,0.15)', border: 'rgba(34,211,238,0.3)', tag: 'TikTok' };
+    }
+    if (r.includes('whatsapp') || r.includes('wa.me')) {
+        return { nome: 'WhatsApp', icon: 'chat', color: '#10b981', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)', tag: 'WhatsApp' };
+    }
+    if (r.includes('facebook.com') || r.includes('fb.com') || r.includes('l.facebook')) {
+        return { nome: 'Facebook', icon: 'public', color: '#3b82f6', bg: 'rgba(59,130,246,0.15)', border: 'rgba(59,130,246,0.3)', tag: 'Facebook' };
+    }
+    if (r.includes('youtube.com') || r.includes('youtu.be')) {
+        return { nome: 'YouTube', icon: 'smart_display', color: '#ef4444', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)', tag: 'YouTube' };
+    }
+    if (r.includes('google.com') || r.includes('googleads')) {
+        return { nome: 'Google (Busca/Ads)', icon: 'search', color: '#38bdf8', bg: 'rgba(56,189,248,0.15)', border: 'rgba(56,189,248,0.3)', tag: 'Google' };
+    }
+    if (r.includes('t.co') || r.includes('twitter.com') || r.includes('x.com')) {
+        return { nome: 'X / Twitter', icon: 'alternate_email', color: '#60a5fa', bg: 'rgba(96,165,250,0.15)', border: 'rgba(96,165,250,0.3)', tag: 'X' };
+    }
+    if (r.includes('linktr.ee')) {
+        return { nome: 'Linktree', icon: 'forest', color: '#4ade80', bg: 'rgba(74,222,128,0.15)', border: 'rgba(74,222,128,0.3)', tag: 'Linktree' };
+    }
+    try {
+        const u = new URL(referrer);
+        return { nome: u.hostname.replace('www.', ''), icon: 'language', color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.3)', tag: 'Outro' };
+    } catch(e) {
+        return { nome: referrer.substring(0, 25), icon: 'language', color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.3)', tag: 'Outro' };
+    }
+}
+
+// Decodifica o User-Agent em modelo de aparelho, SO e navegador
+function parseUserAgent(ua) {
+    if (!ua) return { aparelho: 'Desconhecido', os: 'Outro', navegador: 'Outro', isMobile: false, icon: 'devices' };
+    const u = ua.toLowerCase();
+    let isMobile = false;
+    let aparelho = 'Computador (Desktop)';
+    let icon = 'desktop_windows';
+    let os = 'Windows';
+
+    if (u.includes('iphone')) {
+        aparelho = 'iPhone';
+        os = 'iOS';
+        isMobile = true;
+        icon = 'smartphone';
+    } else if (u.includes('ipad')) {
+        aparelho = 'iPad';
+        os = 'iPadOS';
+        isMobile = true;
+        icon = 'tablet_mac';
+    } else if (u.includes('android')) {
+        aparelho = 'Android';
+        os = 'Android';
+        isMobile = true;
+        icon = 'phone_android';
+    } else if (u.includes('macintosh') || u.includes('mac os')) {
+        aparelho = 'Mac';
+        os = 'macOS';
+        icon = 'laptop_mac';
+    } else if (u.includes('linux')) {
+        aparelho = 'Linux PC';
+        os = 'Linux';
+        icon = 'computer';
+    }
+
+    let navegador = 'Navegador Web';
+    if (u.includes('instagram')) navegador = 'Instagram In-App';
+    else if (u.includes('tiktok')) navegador = 'TikTok In-App';
+    else if (u.includes('edg/')) navegador = 'Microsoft Edge';
+    else if (u.includes('chrome') && !u.includes('edg/')) navegador = 'Google Chrome';
+    else if (u.includes('safari') && !u.includes('chrome')) navegador = 'Apple Safari';
+    else if (u.includes('firefox')) navegador = 'Mozilla Firefox';
+
+    return { aparelho, os, navegador, isMobile, icon };
+}
+
+// ─── APLICAÇÃO DE FILTROS ───────────────────────────────────────
+function aplicarFiltros() {
+    const periodo = document.getElementById('filtro-periodo').value;
+    const linkFiltro = document.getElementById('filtro-link')?.value || 'todos';
+    const canal = document.getElementById('filtro-canal').value;
+    const dispositivo = document.getElementById('filtro-dispositivo').value;
+    const busca = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+    const agora = new Date();
+    const hojeStr = agora.toISOString().split('T')[0];
+
+    filteredCliques = rawCliques.filter(c => {
+        // Filtro de Período
+        if (periodo === 'hoje') {
+            if (!c.created_at || !c.created_at.startsWith(hojeStr)) return false;
+        } else if (periodo === '7dias') {
+            const dataClique = new Date(c.created_at);
+            const diffDias = (agora - dataClique) / (1000 * 60 * 60 * 24);
+            if (diffDias > 7) return false;
+        } else if (periodo === '30dias') {
+            const dataClique = new Date(c.created_at);
+            const diffDias = (agora - dataClique) / (1000 * 60 * 60 * 24);
+            if (diffDias > 30) return false;
+        }
+
+        // Filtro de Link de Destino
+        if (linkFiltro !== 'todos') {
+            const pag = c.pagina_destino || '/';
+            if (pag !== linkFiltro && !pag.includes(linkFiltro)) return false;
+        }
+
+        // Filtro de Canal / Rede
+        const orig = parseOrigem(c.referrer);
+        if (canal !== 'todos' && !orig.nome.toLowerCase().includes(canal.toLowerCase())) {
+            return false;
+        }
+
+        // Filtro de Dispositivo
+        const dev = parseUserAgent(c.user_agent);
+        if (dispositivo === 'mobile' && !dev.isMobile) return false;
+        if (dispositivo === 'desktop' && dev.isMobile) return false;
+
+        // Filtro de Busca de Texto (busca por Nome, Email, Código, Link, Origem ou Cliente)
+        if (busca) {
+            const cod = (c.afiliado_codigo || '').toLowerCase();
+            const pag = (c.pagina_destino || '').toLowerCase();
+            const ref = (c.referrer || '').toLowerCase();
+            const af = afiliadosMap[c.afiliado_codigo?.toUpperCase()] || {};
+            const nome = (af.nome || '').toLowerCase();
+            const email = (af.email || '').toLowerCase();
+            const tel = (af.telefone || '').toLowerCase();
+            const clientesEmails = (af.clientesList || []).map(cli => (cli.email || '').toLowerCase()).join(' ');
+
+            const match = cod.includes(busca) || pag.includes(busca) || ref.includes(busca) || 
+                          nome.includes(busca) || email.includes(busca) || tel.includes(busca) ||
+                          clientesEmails.includes(busca);
+            if (!match) return false;
+        }
+
+        return true;
+    });
+
+    document.getElementById('contador-exibindo').textContent = filteredCliques.length;
+    atualizarKPIs();
+    renderizarGraficos();
+    renderizarAbaAtual();
+}
+
+// ─── ATUALIZAÇÃO DOS KPIS ───────────────────────────────────────
+function atualizarKPIs() {
+    const hojeStr = new Date().toISOString().split('T')[0];
+    const cliquesHoje = rawCliques.filter(c => c.created_at && c.created_at.startsWith(hojeStr));
+    
+    // Contagem de afiliados com cliques
+    const codigosUnicos = new Set(filteredCliques.map(c => (c.afiliado_codigo || '').toUpperCase()).filter(Boolean));
+
+    // Cruzar com pedidos pagos gerados
+    let totalVendasPagas = 0;
+    let faturamentoTotal = 0;
+
+    codigosUnicos.forEach(cod => {
+        const af = afiliadosMap[cod];
+        if (af && af.pedidosList) {
+            const pagos = af.pedidosList.filter(p => p.status === 'pago');
+            totalVendasPagas += pagos.length;
+            pagos.forEach(p => {
+                faturamentoTotal += Number(p.valor_pago || 0);
+            });
+        }
+    });
+
+    // Taxa de Conversão: Vendas / Cliques
+    const totalCliquesCount = filteredCliques.length;
+    let taxaConversaoStr = '0.0%';
+    if (totalCliquesCount > 0 && totalVendasPagas > 0) {
+        taxaConversaoStr = ((totalVendasPagas / totalCliquesCount) * 100).toFixed(1) + '%';
+    }
+
+    // Top Canal de Origem
+    const origensCount = {};
+    filteredCliques.forEach(c => {
+        const orig = parseOrigem(c.referrer);
+        origensCount[orig.nome] = (origensCount[orig.nome] || 0) + 1;
+    });
+    const topOrigemArr = Object.entries(origensCount).sort((a,b) => b[1] - a[1]);
+    const topOrigemNome = topOrigemArr.length > 0 ? `${topOrigemArr[0][0]} (${topOrigemArr[0][1]})` : 'Nenhum clique';
+
+    // Dispositivo Principal
+    let mobileCount = 0;
+    let desktopCount = 0;
+    filteredCliques.forEach(c => {
+        const dev = parseUserAgent(c.user_agent);
+        if (dev.isMobile) mobileCount++;
+        else desktopCount++;
+    });
+    let topDevTexto = '—';
+    if (totalCliquesCount > 0) {
+        const pctMobile = Math.round((mobileCount / totalCliquesCount) * 100);
+        topDevTexto = `${pctMobile}% Mobile / ${100 - pctMobile}% PC`;
+    }
+
+    // Top Link / Página de Destino Mais Clicado
+    const linksCount = {};
+    filteredCliques.forEach(c => {
+        const l = c.pagina_destino || '/';
+        linksCount[l] = (linksCount[l] || 0) + 1;
+    });
+    const topLinkArr = Object.entries(linksCount).sort((a,b) => b[1] - a[1]);
+    let topLinkTexto = '—';
+    if (topLinkArr.length > 0 && totalCliquesCount > 0) {
+        const topL = topLinkArr[0][0];
+        const topQtd = topLinkArr[0][1];
+        const topPct = Math.round((topQtd / totalCliquesCount) * 100);
+        topLinkTexto = `${topL} (${topQtd} · ${topPct}%)`;
+    }
+
+    // Atualizar UI
+    document.getElementById('kpi-total-cliques').textContent = totalCliquesCount.toLocaleString('pt-BR');
+    document.getElementById('kpi-total-sub').textContent = `${rawCliques.length} cliques gravados no total`;
+    
+    document.getElementById('kpi-cliques-hoje').textContent = cliquesHoje.length.toLocaleString('pt-BR');
+    document.getElementById('kpi-afiliados-ativos').textContent = codigosUnicos.size;
+    
+    document.getElementById('kpi-conversao').textContent = taxaConversaoStr;
+    document.getElementById('kpi-vendas-sub').textContent = `${totalVendasPagas} compras de ${codigosUnicos.size} afiliados`;
+
+    document.getElementById('kpi-top-origem').textContent = topOrigemNome;
+    document.getElementById('kpi-top-dispositivo').textContent = topDevTexto;
+    document.getElementById('kpi-top-link').textContent = topLinkTexto;
+    document.getElementById('kpi-faturamento-gerado').textContent = `R$ ${faturamentoTotal.toFixed(2).replace('.', ',')}`;
+
+    document.getElementById('badge-total-afiliados').textContent = codigosUnicos.size;
+    document.getElementById('badge-total-jornada').textContent = codigosUnicos.size;
+    document.getElementById('badge-total-links').textContent = Object.keys(linksCount).length;
+    document.getElementById('badge-total-feed').textContent = filteredCliques.length;
+}
+
+// ─── RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS) ───────────────────────
+function renderizarGraficos() {
+    // 1. Gráfico de Evolução Temporal (Últimos 14 dias)
+    const diasMap = {};
+    const agora = new Date();
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date(agora);
+        d.setDate(d.getDate() - i);
+        const diaIso = d.toISOString().split('T')[0];
+        diasMap[diaIso] = 0;
+    }
+
+    filteredCliques.forEach(c => {
+        if (!c.created_at) return;
+        const diaIso = c.created_at.split('T')[0];
+        if (diasMap.hasOwnProperty(diaIso)) {
+            diasMap[diaIso]++;
+        }
+    });
+
+    const labelsTimeline = Object.keys(diasMap).map(d => {
+        const [_, mes, dia] = d.split('-');
+        return `${dia}/${mes}`;
+    });
+    const dataTimeline = Object.values(diasMap);
+
+    const ctxTimeline = document.getElementById('chart-timeline').getContext('2d');
+    if (chartTimelineInstance) chartTimelineInstance.destroy();
+
+    chartTimelineInstance = new Chart(ctxTimeline, {
+        type: 'bar',
+        data: {
+            labels: labelsTimeline,
+            datasets: [{
+                label: 'Cliques',
+                data: dataTimeline,
+                backgroundColor: 'rgba(37, 244, 244, 0.5)',
+                borderColor: '#25f4f4',
+                borderWidth: 1.5,
+                borderRadius: 4,
+                hoverBackgroundColor: '#25f4f4'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E1E1E',
+                    borderColor: '#2A2A2A',
+                    borderWidth: 1,
+                    titleColor: '#25f4f4',
+                    bodyColor: '#f1f5f9',
+                    padding: 8
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b', font: { size: 10, family: 'Inter' } }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#222' },
+                    ticks: { color: '#64748b', font: { size: 10, family: 'Inter' }, precision: 0 }
+                }
+            }
+        }
+    });
+
+    // 2. Gráfico de Origem / Redes (Doughnut)
+    const canaisMap = { 'Instagram': 0, 'TikTok': 0, 'WhatsApp': 0, 'Facebook': 0, 'Google': 0, 'Direto': 0, 'Outros': 0 };
+    filteredCliques.forEach(c => {
+        const orig = parseOrigem(c.referrer);
+        if (canaisMap.hasOwnProperty(orig.tag)) {
+            canaisMap[orig.tag]++;
+        } else {
+            canaisMap['Outros']++;
+        }
+    });
+
+    const canaisLabels = [];
+    const canaisData = [];
+    const canaisColors = [];
+
+    const colorConfig = {
+        'Instagram': '#f43f5e',
+        'TikTok': '#22d3ee',
+        'WhatsApp': '#10b981',
+        'Facebook': '#3b82f6',
+        'Google': '#38bdf8',
+        'Direto': '#64748b',
+        'Outros': '#a78bfa'
+    };
+
+    Object.entries(canaisMap).forEach(([k, v]) => {
+        if (v > 0) {
+            canaisLabels.push(k);
+            canaisData.push(v);
+            canaisColors.push(colorConfig[k] || '#888');
+        }
+    });
+
+    if (canaisLabels.length === 0) {
+        canaisLabels.push('Sem dados');
+        canaisData.push(1);
+        canaisColors.push('#2A2A2A');
+    }
+
+    const ctxOrigem = document.getElementById('chart-origem').getContext('2d');
+    if (chartOrigemInstance) chartOrigemInstance.destroy();
+
+    chartOrigemInstance = new Chart(ctxOrigem, {
+        type: 'doughnut',
+        data: {
+            labels: canaisLabels,
+            datasets: [{
+                data: canaisData,
+                backgroundColor: canaisColors,
+                borderWidth: 2,
+                borderColor: '#1A1A1A'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', font: { size: 11, family: 'Inter' }, boxWidth: 10, padding: 12 }
+                },
+                tooltip: {
+                    backgroundColor: '#1E1E1E',
+                    borderColor: '#2A2A2A',
+                    borderWidth: 1,
+                    padding: 8
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+// ─── NAVEGAÇÃO DE ABAS ──────────────────────────────────────────
+function switchTab(tab) {
+    currentTab = tab;
+    ['ranking', 'jornada', 'links', 'feed', 'diagnostico'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+            btn?.classList.add('active');
+            content?.classList.remove('hidden');
+        } else {
+            btn?.classList.remove('active');
+            content?.classList.add('hidden');
+        }
+    });
+    renderizarAbaAtual();
+}
+
+function renderizarAbaAtual() {
+    if (currentTab === 'ranking') renderizarRanking();
+    else if (currentTab === 'jornada') renderizarJornada();
+    else if (currentTab === 'links') renderizarLinks();
+    else if (currentTab === 'feed') renderizarFeed();
+}
+
+// ─── HELPER: AGRUPAMENTO DE AFILIADOS ───────────────────────────
+function obterAgregadosAfiliados() {
+    const agregados = {};
+    filteredCliques.forEach(c => {
+        const cod = (c.afiliado_codigo || 'DESCONHECIDO').toUpperCase();
+        if (!agregados[cod]) {
+            agregados[cod] = {
+                codigo: cod,
+                cliquesCount: 0,
+                ultimoClique: c.created_at,
+                origensCount: {},
+                linksCount: {} // link -> { count, rotulo }
+            };
+        }
+        agregados[cod].cliquesCount++;
+        if (new Date(c.created_at) > new Date(agregados[cod].ultimoClique)) {
+            agregados[cod].ultimoClique = c.created_at;
+        }
+
+        // Origens
+        const orig = parseOrigem(c.referrer);
+        agregados[cod].origensCount[orig.nome] = (agregados[cod].origensCount[orig.nome] || 0) + 1;
+
+        // Links de Destino individuais deste afiliado
+        const rawLink = c.pagina_destino || '/';
+        if (!agregados[cod].linksCount[rawLink]) {
+            agregados[cod].linksCount[rawLink] = { count: 0, rotulo: formatPagina(rawLink).rotulo };
+        }
+        agregados[cod].linksCount[rawLink].count++;
+    });
+
+    return Object.values(agregados).sort((a,b) => b.cliquesCount - a.cliquesCount);
+}
+
+// ─── RENDERIZAÇÃO: RANKING POR AFILIADO (COM FRASE DE JORNADA) ──
+function renderizarRanking() {
+    const list = document.getElementById('ranking-list');
+    const ordenados = obterAgregadosAfiliados();
+
+    if (ordenados.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-16 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <span class="material-symbols-outlined text-5xl text-slate-600 block mb-2">ads_click</span>
+                <h3 class="text-base font-bold text-slate-200">Nenhum clique encontrado</h3>
+                <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                    Nenhum clique corresponde aos filtros selecionados. Tente ajustar o período ou termos de busca.
+                </p>
+                <button onclick="abrirModalTeste()" class="mt-4 px-4 py-2 bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 rounded-xl text-xs font-bold hover:bg-cyan-400/20 transition">
+                    Simular Clique de Teste
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = ordenados.map((item, index) => {
+        const af = afiliadosMap[item.codigo] || { 
+            nome: 'Afiliado ' + item.codigo, 
+            email: 'Sem email cadastrado',
+            telefone: '',
+            iniciais: extrairIniciais(item.codigo),
+            clientesList: [],
+            pedidosList: []
+        };
+        
+        // Vendas atreladas e clientes
+        const pedidosDoAfiliado = af.pedidosList || [];
+        const pagos = pedidosDoAfiliado.filter(p => p.status === 'pago');
+        const faturamentoAf = pagos.reduce((acc, p) => acc + Number(p.valor_pago || 0), 0);
+        const clientesDoAf = af.clientesList || [];
+        
+        // Taxa de conversão
+        const taxaConv = item.cliquesCount > 0 ? ((pagos.length / item.cliquesCount) * 100).toFixed(1) : '0.0';
+
+        // Top origem desse afiliado
+        const topOrigemAf = Object.entries(item.origensCount).sort((a,b) => b[1] - a[1])[0];
+        const topOrigemNome = topOrigemAf ? `${topOrigemAf[0]} (${topOrigemAf[1]})` : 'Direto';
+
+        // Data formatada
+        const dtUltimo = new Date(item.ultimoClique).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+        // WhatsApp link se tiver telefone
+        const linkWhats = af.telefone ? formatarWhatsApp(af.telefone) : null;
+
+        // Quantidade de links usados
+        const totalLinksUsados = Object.keys(item.linksCount || {}).length;
+
+        // HTML das pílulas de cada link
+        const linksDoAfiliadoHtml = Object.entries(item.linksCount || {})
+            .sort((a,b) => b[1].count - a[1].count)
+            .map(([link, data]) => {
+                return `
+                <span class="inline-flex items-center gap-1.5 text-[11px] bg-[#141414] border border-[#2A2A2A] px-2.5 py-1 rounded-lg text-slate-300">
+                    <span class="font-mono text-cyan-400 font-bold">${escapeHtml(link)}</span>
+                    <span class="text-slate-500 font-semibold">•</span>
+                    <strong class="text-white font-extrabold">${data.count} clique${data.count > 1 ? 's' : ''}</strong>
+                </span>`;
+            }).join(' ');
+
+        return `
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] hover:border-cyan-400/30 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 transition-all shadow-md">
+                
+                <!-- FRASE DIDÁTICA DA JORNADA: QUEM USOU O QUE E TROUXE QUEM -->
+                <div class="bg-gradient-to-r from-cyan-950/20 via-[#181818] to-purple-950/20 border border-cyan-500/20 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="material-symbols-outlined text-cyan-400 text-base">route</span>
+                        <span class="text-slate-200">
+                            O afiliado <strong class="text-white font-black">${escapeHtml(af.nome)}</strong> usou 
+                            <strong class="text-cyan-300">${totalLinksUsados} link(s)</strong> para trazer 
+                            <strong class="text-emerald-400 font-extrabold">${pagos.length} cliente(s) pagante(s)</strong>.
+                        </span>
                     </div>
-                    <div class="flex justify-between items-center text-xs text-slate-500 mt-1">
-                        <span>${dt}</span>
-                        <span class="font-bold text-slate-300">${valLabel}</span>
+                    <button onclick="switchTab('jornada')" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 shrink-0">
+                        <span>Ver Jornada Completa</span>
+                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <!-- Identificação do Afiliado (QUEM É A PESSOA) -->
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <!-- Posição no Ranking -->
+                        <div class="w-8 h-8 rounded-lg bg-[#222] border border-[#333] text-slate-400 font-extrabold text-xs flex items-center justify-center shrink-0">
+                            #${index + 1}
+                        </div>
+
+                        <!-- Avatar com Iniciais -->
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-cyan-600/10 border border-cyan-400/30 text-cyan-300 font-black text-sm flex items-center justify-center shrink-0 shadow-sm cursor-pointer hover:border-cyan-400 transition" onclick="abrirModalPerfil('${item.codigo}')" title="Ver ficha completa de ${escapeHtml(af.nome)}">
+                            ${af.iniciais || 'AF'}
+                        </div>
+
+                        <!-- Dados do Afiliado -->
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="text-sm font-extrabold text-slate-100 hover:text-cyan-400 transition cursor-pointer flex items-center gap-1.5" onclick="abrirModalPerfil('${item.codigo}')">
+                                    ${escapeHtml(af.nome)}
+                                    <span class="material-symbols-outlined text-xs text-slate-500 hover:text-cyan-400">visibility</span>
+                                </h4>
+                                <span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-[#121212] text-cyan-300 border border-[#2A2A2A]">
+                                    ?ref=${item.codigo}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2.5 text-xs text-slate-400 mt-1 flex-wrap">
+                                <span class="text-slate-300 font-mono text-[11px] bg-[#141414] px-1.5 py-0.5 rounded border border-[#222]">${escapeHtml(af.email)}</span>
+                                ${af.telefone ? `
+                                    <span>•</span>
+                                    <span class="text-slate-300 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-xs text-emerald-400">call</span>
+                                        ${escapeHtml(af.telefone)}
+                                    </span>
+                                ` : ''}
+                                <span>•</span>
+                                <span class="flex items-center gap-1 text-slate-400">
+                                    <span class="material-symbols-outlined text-xs">share</span>
+                                    Top: ${topOrigemNome}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas & Ações -->
+                    <div class="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto border-t md:border-t-0 border-[#222] pt-3 md:pt-0">
+                        <!-- Cliques -->
+                        <div class="text-left md:text-right">
+                            <div class="text-base font-black text-cyan-400">${item.cliquesCount}</div>
+                            <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">cliques</div>
+                        </div>
+
+                        <!-- Vendas / Clientes -->
+                        <div class="text-left md:text-right">
+                            <div class="text-base font-black text-purple-400">${pagos.length} <span class="text-xs font-semibold text-slate-400">(${taxaConv}%)</span></div>
+                            <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">clientes</div>
+                        </div>
+
+                        <!-- Faturamento -->
+                        <div class="text-left md:text-right">
+                            <div class="text-base font-black text-emerald-400">R$ ${faturamentoAf.toFixed(2).replace('.', ',')}</div>
+                            <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">faturado</div>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <!-- Botão Ver Perfil Completo -->
+                            <button onclick="abrirModalPerfil('${item.codigo}')" title="Ver ficha e dados completos deste afiliado" class="px-3 py-1.5 rounded-xl bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 text-xs font-bold transition flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">person</span>
+                                <span class="hidden sm:inline">Perfil</span>
+                            </button>
+
+                            <!-- Botão WhatsApp se tiver -->
+                            ${linkWhats ? `
+                                <a href="${linkWhats}" target="_blank" title="Chamar ${escapeHtml(af.nome)} no WhatsApp" class="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition flex items-center">
+                                    <span class="material-symbols-outlined text-sm">chat</span>
+                                </a>
+                            ` : ''}
+
+                            <!-- Botão Vendas / Clientes -->
+                            <button onclick="abrirModalVendas('${item.codigo}')" title="Ver clientes trazidos por este parceiro" class="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold transition flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">shopping_bag</span>
+                            </button>
+
+                            <!-- Copiar Link -->
+                            <button onclick="copiarLinkAfiliado('${item.codigo}')" title="Copiar link com este ref" class="p-2 rounded-xl bg-[#222] hover:bg-[#2A2A2A] border border-[#333] text-slate-300 hover:text-cyan-400 text-xs transition">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhamento de cada Link usado por este parceiro -->
+                ${linksDoAfiliadoHtml ? `
+                <div class="mt-1 pt-2.5 border-t border-[#222] flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-cyan-400">link</span>
+                        Links divulgados:
+                    </span>
+                    ${linksDoAfiliadoHtml}
+                </div>` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// ─── RENDERIZAÇÃO: ABA JORNADA (AFILIADO ➔ LINKS ➔ CLIENTES) ────
+function renderizarJornada() {
+    const list = document.getElementById('jornada-list');
+    const ordenados = obterAgregadosAfiliados();
+
+    if (ordenados.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-16 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <span class="material-symbols-outlined text-5xl text-slate-600 block mb-2">route</span>
+                <h3 class="text-base font-bold text-slate-200">Nenhum dado encontrado</h3>
+                <p class="text-xs text-slate-500 mt-1">Ajuste os filtros acima para visualizar a jornada dos parceiros.</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = ordenados.map((item, index) => {
+        const af = afiliadosMap[item.codigo] || { 
+            nome: 'Afiliado ' + item.codigo, 
+            email: 'Sem email cadastrado',
+            telefone: '',
+            iniciais: extrairIniciais(item.codigo),
+            clientesList: [],
+            pedidosList: []
+        };
+
+        const pedidosDoAf = af.pedidosList || [];
+        const pedidosPagos = pedidosDoAf.filter(p => p.status === 'pago');
+        const faturamentoAf = pedidosPagos.reduce((acc, p) => acc + Number(p.valor_pago || 0), 0);
+        const clientesDoAf = af.clientesList || [];
+        const linkWhats = af.telefone ? formatarWhatsApp(af.telefone) : null;
+
+        // Lista de Links formatada
+        const linksEntries = Object.entries(item.linksCount || {}).sort((a,b) => b[1].count - a[1].count);
+        const totalCliquesAf = item.cliquesCount;
+
+        const linksListHtml = linksEntries.map(([link, data]) => {
+            const info = formatPagina(link);
+            const pct = totalCliquesAf > 0 ? Math.round((data.count / totalCliquesAf) * 100) : 0;
+            return `
+                <div class="bg-[#181818] border border-[#262626] rounded-xl p-3 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-xs text-cyan-400">link</span>
+                            <span class="text-xs font-bold text-slate-200 truncate">${escapeHtml(info.rotulo)}</span>
+                        </div>
+                        <div class="font-mono text-[10px] text-cyan-400 mt-0.5">${escapeHtml(link)}</div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <div class="text-sm font-black text-white">${data.count} <span class="text-[10px] font-normal text-slate-400">(${pct}%)</span></div>
+                        <div class="text-[9px] uppercase font-bold text-slate-500">cliques</div>
                     </div>
                 </div>
             `;
         }).join('');
-    } catch(e) {
-        list.innerHTML = `<div class="text-red-400 text-sm text-center py-4">Erro ao buscar no servidor: ${esc(e.message)}</div>`;
+
+        // Lista de Clientes formatada
+        let clientesListHtml = '';
+        if (clientesDoAf.length === 0) {
+            clientesListHtml = `
+                <div class="text-center py-6 text-slate-500 italic text-xs">
+                    <span class="material-symbols-outlined text-3xl text-slate-600 block mb-1">person_search</span>
+                    Este afiliado gerou <strong>${item.cliquesCount} cliques</strong> nos links ao lado, mas ainda não converteu clientes pagantes.
+                </div>
+            `;
+        } else {
+            clientesListHtml = clientesDoAf.map(cli => {
+                const isPago = cli.status === 'pago';
+                const dt = cli.data ? new Date(cli.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não reg.';
+                return `
+                    <div class="bg-[#181818] border border-[#262626] rounded-xl p-2.5 flex items-center justify-between gap-3 text-xs">
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-200 truncate flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-xs ${isPago ? 'text-emerald-400' : 'text-amber-400'}">person</span>
+                                <span class="truncate">${escapeHtml(cli.email)}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-2">
+                                <span>${dt}</span>
+                                <span>•</span>
+                                <span class="text-slate-400 font-mono">${escapeHtml(cli.origem || 'Checkout')}</span>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="font-extrabold ${isPago ? 'text-emerald-400' : 'text-amber-400'}">
+                                R$ ${Number(cli.valor || 0).toFixed(2).replace('.', ',')}
+                            </div>
+                            <span class="text-[9px] uppercase font-bold px-1 py-0.5 rounded ${isPago ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
+                                ${cli.status}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        return `
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] hover:border-purple-400/30 rounded-2xl p-4 sm:p-5 space-y-4 shadow-lg transition">
+                <!-- Cabeçalho do Afiliado -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#262626]">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-500/25 to-purple-800/20 border border-purple-500/30 text-purple-300 font-black text-sm flex items-center justify-center shrink-0">
+                            ${af.iniciais || 'AF'}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-sm sm:text-base font-black text-slate-100">${escapeHtml(af.nome)}</h3>
+                                <span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-[#121212] text-cyan-300 border border-[#2A2A2A]">
+                                    ?ref=${item.codigo}
+                                </span>
+                            </div>
+                            <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
+                                <span class="font-mono text-[11px] text-slate-300">${escapeHtml(af.email)}</span>
+                                ${af.telefone ? `<span>•</span><span class="text-emerald-400">${escapeHtml(af.telefone)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        ${linkWhats ? `
+                            <a href="${linkWhats}" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">chat</span>
+                                WhatsApp
+                            </a>
+                        ` : ''}
+                        <button onclick="abrirModalPerfil('${item.codigo}')" class="px-3 py-1.5 rounded-xl bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 text-xs font-bold transition flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">person</span>
+                            Ver Perfil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FRASE EXPLICATIVA DA JORNADA -->
+                <div class="bg-gradient-to-r from-cyan-950/25 via-[#161616] to-purple-950/25 border border-cyan-500/25 rounded-xl p-3.5 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-cyan-400 text-2xl shrink-0">campaign</span>
+                    <div class="text-xs text-slate-200 leading-relaxed">
+                        O afiliado <strong class="text-white font-black">${escapeHtml(af.nome)}</strong> usou 
+                        <strong class="text-cyan-400 font-mono">${linksEntries.length} link(s)</strong> para atrair 
+                        <strong class="text-cyan-300 font-bold">${item.cliquesCount} clique(s)</strong> e trouxe 
+                        <strong class="text-emerald-400 font-extrabold">${pedidosPagos.length} cliente(s) pagante(s)</strong>
+                        ${faturamentoAf > 0 ? ` (totalizando <strong class="text-emerald-300 font-black">R$ ${faturamentoAf.toFixed(2).replace('.', ',')}</strong> faturados)` : ''}.
+                    </div>
+                </div>
+
+                <!-- GRID 2 COLUNAS: LINKS USADOS vs CLIENTES TRAZIDOS -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+                    <!-- Coluna 1: Links Divulgados -->
+                    <div class="bg-[#141414] border border-[#262626] rounded-xl p-4 space-y-2.5">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-300 pb-2 border-b border-[#222]">
+                            <span class="flex items-center gap-1.5 text-cyan-400">
+                                <span class="material-symbols-outlined text-sm">link</span>
+                                Links que o afiliado usou (${linksEntries.length})
+                            </span>
+                            <span class="text-[11px] text-slate-500 font-normal">Cliques</span>
+                        </div>
+                        <div class="space-y-2">
+                            ${linksListHtml}
+                        </div>
+                    </div>
+
+                    <!-- Coluna 2: Clientes Trazidos -->
+                    <div class="bg-[#141414] border border-[#262626] rounded-xl p-4 space-y-2.5">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-300 pb-2 border-b border-[#222]">
+                            <span class="flex items-center gap-1.5 text-emerald-400">
+                                <span class="material-symbols-outlined text-sm">group</span>
+                                Clientes que ele trouxe (${clientesDoAf.length})
+                            </span>
+                            <span class="text-[11px] text-slate-500 font-normal">Compras</span>
+                        </div>
+                        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                            ${clientesListHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ─── RENDERIZAÇÃO: CLIQUES POR LINK / PÁGINA DE DESTINO ─────────
+function renderizarLinks() {
+    const container = document.getElementById('links-list');
+    if (!container) return;
+
+    const linksMap = {};
+    const totalCliquesFiltro = filteredCliques.length;
+
+    filteredCliques.forEach(c => {
+        const link = c.pagina_destino || '/';
+        if (!linksMap[link]) {
+            linksMap[link] = {
+                link: link,
+                cliquesCount: 0,
+                afiliadosCount: new Set(),
+                afiliadosCliques: {}, // codigo -> count
+                origensCount: {},
+                ultimoClique: c.created_at
+            };
+        }
+        linksMap[link].cliquesCount++;
+        const cod = (c.afiliado_codigo || 'DESCONHECIDO').toUpperCase();
+        linksMap[link].afiliadosCount.add(cod);
+        linksMap[link].afiliadosCliques[cod] = (linksMap[link].afiliadosCliques[cod] || 0) + 1;
+        
+        const orig = parseOrigem(c.referrer);
+        linksMap[link].origensCount[orig.nome] = (linksMap[link].origensCount[orig.nome] || 0) + 1;
+
+        if (new Date(c.created_at) > new Date(linksMap[link].ultimoClique)) {
+            linksMap[link].ultimoClique = c.created_at;
+        }
+    });
+
+    const ordenados = Object.values(linksMap).sort((a,b) => b.cliquesCount - a.cliquesCount);
+
+    if (ordenados.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-16 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <span class="material-symbols-outlined text-5xl text-slate-600 block mb-2">link_off</span>
+                <h3 class="text-base font-bold text-slate-200">Nenhum link encontrado no período</h3>
+                <p class="text-xs text-slate-500 mt-1">Ajuste os filtros de busca ou período acima.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = ordenados.map((item, index) => {
+        const info = formatPagina(item.link);
+        const pctTotal = totalCliquesFiltro > 0 ? ((item.cliquesCount / totalCliquesFiltro) * 100).toFixed(1) : '0';
+        
+        // Top 4 afiliados que mais mandaram tráfego para este link (com NOME REAL)
+        const topAfs = Object.entries(item.afiliadosCliques)
+            .sort((a,b) => b[1] - a[1])
+            .slice(0, 4)
+            .map(([cod, qtd]) => {
+                const af = afiliadosMap[cod] || {};
+                const primeiroNome = af.nome ? af.nome.split(' ')[0] : cod;
+                return `
+                <button onclick="abrirModalPerfil('${cod}')" class="inline-flex items-center gap-1.5 bg-[#121212] hover:bg-[#1E1E1E] border border-[#2A2A2A] px-2.5 py-1 rounded-lg text-xs font-medium text-slate-200 transition cursor-pointer">
+                    <span class="font-mono text-cyan-400 font-bold">${escapeHtml(cod)}</span>
+                    <span class="text-slate-400 font-semibold">(${escapeHtml(primeiroNome)})</span>
+                    <span class="text-slate-500">•</span>
+                    <strong class="text-emerald-400 font-extrabold">${qtd} cliques</strong>
+                </button>`;
+            }).join(' ');
+
+        // Top rede social desse link
+        const topOrigem = Object.entries(item.origensCount).sort((a,b) => b[1] - a[1])[0];
+        const topOrigemNome = topOrigem ? `${topOrigem[0]} (${topOrigem[1]})` : 'Direto';
+
+        const dtUltimo = new Date(item.ultimoClique).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+        return `
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] hover:border-cyan-400/30 rounded-2xl p-4 sm:p-5 flex flex-col gap-3.5 transition-all shadow-md">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                    <!-- Informações do Link -->
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 font-extrabold text-sm flex items-center justify-center shrink-0">
+                            #${index + 1}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="text-sm font-extrabold text-slate-100">${escapeHtml(info.rotulo)}</h4>
+                                <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-[#121212] text-cyan-300 border border-[#2A2A2A]">
+                                    ${escapeHtml(item.link)}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-slate-500 mt-1 flex-wrap">
+                                <span class="flex items-center gap-1 text-slate-400">
+                                    <span class="material-symbols-outlined text-xs text-cyan-400">group</span>
+                                    <strong>${item.afiliadosCount.size}</strong> parceiros divulgando
+                                </span>
+                                <span>•</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">share</span>
+                                    Top origem: ${topOrigemNome}
+                                </span>
+                                <span>•</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">schedule</span>
+                                    Último clique: ${dtUltimo}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas de Cliques do Link -->
+                    <div class="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto border-t md:border-t-0 border-[#222] pt-3 md:pt-0">
+                        <div class="text-left md:text-right">
+                            <div class="text-xl font-black text-cyan-400">${item.cliquesCount.toLocaleString('pt-BR')}</div>
+                            <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">${pctTotal}% de todo o tráfego</div>
+                        </div>
+
+                        <!-- Ações rápidas -->
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="filtrarPorLink('${escapeHtml(item.link)}')" title="Filtrar todo o painel apenas para este link" class="px-3 py-1.5 rounded-xl bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 text-xs font-bold transition flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">filter_alt</span>
+                                <span>Filtrar</span>
+                            </button>
+                            <button onclick="copiarLinkModelo('${escapeHtml(item.link)}')" title="Copiar link modelo com ref" class="p-2 rounded-xl bg-[#222] hover:bg-[#2A2A2A] border border-[#333] text-slate-300 hover:text-cyan-400 text-xs transition">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                            </button>
+                            <a href="${escapeHtml(item.link)}" target="_blank" title="Abrir página em nova aba" class="p-2 rounded-xl bg-[#222] hover:bg-[#2A2A2A] border border-[#333] text-slate-300 hover:text-cyan-400 text-xs transition">
+                                <span class="material-symbols-outlined text-sm">open_in_new</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Progresso Visual de Volume -->
+                <div class="w-full bg-[#121212] rounded-full h-2 overflow-hidden border border-[#222]">
+                    <div class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width: ${Math.max(Number(pctTotal), 3)}%"></div>
+                </div>
+
+                <!-- Principais Afiliados que usam esse Link -->
+                ${topAfs ? `
+                <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">leaderboard</span>
+                        Top Afiliados deste link:
+                    </span>
+                    ${topAfs}
+                </div>` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// Filtrar automaticamente por um link específico
+function filtrarPorLink(link) {
+    const select = document.getElementById('filtro-link');
+    if (select) {
+        select.value = link;
+        aplicarFiltros();
+        mostrarToast(`Filtrado para o link: ${link}`, 'filter_alt');
     }
 }
 
-function fecharModalUsos() {
-    const modal = document.getElementById('modal-usos');
-    const content = document.getElementById('modal-usos-content');
+// Copiar link modelo
+function copiarLinkModelo(link) {
+    const urlCompleta = `${window.location.origin}${link.startsWith('/') ? '' : '/'}${link}?ref=SEU_CODIGO`;
+    navigator.clipboard.writeText(urlCompleta).then(() => {
+        mostrarToast(`Link modelo copiado!`, 'content_copy');
+    });
+}
+
+// ─── RENDERIZAÇÃO: FEED EM TEMPO REAL DO SUPABASE ──────────────
+function renderizarFeed() {
+    const list = document.getElementById('feed-list');
+
+    if (filteredCliques.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-16 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6">
+                <span class="material-symbols-outlined text-5xl text-slate-600 block mb-2">find_in_page</span>
+                <h3 class="text-base font-bold text-slate-200">Nenhum clique registrado</h3>
+                <p class="text-xs text-slate-500 mt-1">Os novos cliques capturados pelo Supabase aparecerão aqui em tempo real.</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = filteredCliques.slice(0, 150).map((c, i) => {
+        const orig = parseOrigem(c.referrer);
+        const dev = parseUserAgent(c.user_agent);
+        const pag = formatPagina(c.pagina_destino);
+        const af = afiliadosMap[c.afiliado_codigo?.toUpperCase()] || { 
+            nome: 'Afiliado ' + c.afiliado_codigo,
+            email: 'Sem email',
+            iniciais: extrairIniciais(c.afiliado_codigo)
+        };
+        const dataObj = new Date(c.created_at);
+        const dataFormatada = dataObj.toLocaleString('pt-BR');
+        const tempoRelativo = calcularTempoRelativo(dataObj);
+
+        return `
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] hover:border-[#3A3A3A] rounded-2xl p-3.5 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition">
+                <!-- Coluna 1: Afiliado e Hora -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-black border" style="background:${orig.bg}; border-color:${orig.border}; color:${orig.color};">
+                        <span class="material-symbols-outlined text-base">${orig.icon}</span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-mono font-bold text-xs text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded cursor-pointer hover:bg-cyan-400/20" onclick="abrirModalPerfil('${c.afiliado_codigo}')">
+                                ?ref=${escapeHtml(c.afiliado_codigo || '---')}
+                            </span>
+                            <span class="text-xs font-extrabold text-slate-100 hover:text-cyan-400 transition cursor-pointer truncate" onclick="abrirModalPerfil('${c.afiliado_codigo}')">
+                                ${escapeHtml(af.nome)}
+                            </span>
+                            <span class="text-[11px] text-slate-500 font-mono">(${escapeHtml(af.email)})</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span title="${dataFormatada}">${tempoRelativo}</span>
+                            <span>•</span>
+                            <span class="text-cyan-300 font-mono text-[11px] font-bold bg-[#141414] border border-[#2A2A2A] px-1.5 py-0.5 rounded">${pag.path}</span>
+                            <span class="text-slate-400">(${escapeHtml(pag.rotulo)})</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Origem & Dispositivo -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Selo de Origem -->
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg border" style="background:${orig.bg}; border-color:${orig.border}; color:${orig.color};">
+                        <span class="material-symbols-outlined text-xs">${orig.icon}</span>
+                        ${orig.nome}
+                    </span>
+
+                    <!-- Selo de Aparelho -->
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#222] border border-[#333] text-slate-300">
+                        <span class="material-symbols-outlined text-xs">${dev.icon}</span>
+                        ${dev.aparelho} · ${dev.navegador}
+                    </span>
+
+                    <!-- Botão Perfil -->
+                    <button onclick="abrirModalPerfil('${c.afiliado_codigo}')" title="Ver quem é este afiliado" class="px-2.5 py-1 rounded-lg bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 text-[11px] font-bold transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">person</span>
+                        <span class="hidden sm:inline">Afiliado</span>
+                    </button>
+
+                    <!-- Botão Inspecionar JSON -->
+                    <button onclick="abrirModalJson(${i})" title="Ver registro JSON bruto do Supabase" class="px-2.5 py-1 rounded-lg bg-[#252525] hover:bg-[#333] border border-[#3A3A3A] text-slate-400 hover:text-cyan-400 text-[11px] font-bold transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">code</span>
+                        <span class="hidden sm:inline">JSON</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ─── MODAIS & UTILITÁRIOS ───────────────────────────────────────
+
+// 1. Modal Perfil Completo do Afiliado (QUEM É O AFILIADO)
+function abrirModalPerfil(codigo) {
+    if (!codigo) return;
+    const codUpper = codigo.toUpperCase();
+    afiliadoModalAtual = codUpper;
+    const af = afiliadosMap[codUpper] || {
+        codigo: codUpper,
+        nome: 'Afiliado ' + codUpper,
+        email: 'Sem email cadastrado',
+        telefone: '',
+        negocio: '',
+        cidade: '',
+        estado: '',
+        tipo: 'Parceiro',
+        created_at: null,
+        total_ganhos: 0,
+        total_vendas: 0,
+        pedidosList: [],
+        clientesList: []
+    };
+
+    // Preencher dados na interface
+    document.getElementById('modal-perfil-avatar').textContent = af.iniciais || extrairIniciais(af.nome);
+    document.getElementById('modal-perfil-nome').textContent = af.nome;
+    document.getElementById('modal-perfil-codigo').textContent = `?ref=${af.codigo}`;
+    document.getElementById('modal-perfil-tipo').textContent = af.tipo || 'Parceiro Afiliado do ReceitasX';
+    document.getElementById('modal-perfil-email').textContent = af.email || 'Não informado';
+
+    // Telefone & WhatsApp
+    const telEl = document.getElementById('modal-perfil-tel');
+    const whatsBtn = document.getElementById('modal-perfil-whatsapp-btn');
+    if (af.telefone) {
+        telEl.textContent = af.telefone;
+        const whatsLink = formatarWhatsApp(af.telefone);
+        if (whatsLink) {
+            whatsBtn.href = whatsLink;
+            whatsBtn.classList.remove('hidden');
+        } else {
+            whatsBtn.classList.add('hidden');
+        }
+    } else {
+        telEl.textContent = 'Não informado';
+        whatsBtn.classList.add('hidden');
+    }
+
+    // Negócio e Local
+    document.getElementById('modal-perfil-negocio').textContent = af.negocio || 'Não informado';
+    document.getElementById('modal-perfil-local').textContent = (af.cidade || af.estado) ? `${af.cidade || ''} ${af.estado ? `(${af.estado})` : ''}` : 'Não informado';
+    document.getElementById('modal-perfil-cadastro').textContent = af.created_at ? new Date(af.created_at).toLocaleDateString('pt-BR') : 'Data não registrada';
+
+    // Contabilizar cliques específicos desse afiliado
+    const cliquesDesteAf = rawCliques.filter(c => (c.afiliado_codigo || '').toUpperCase() === codUpper);
+    const pedidosPagos = (af.pedidosList || []).filter(p => p.status === 'pago');
+    const faturamentoTotal = pedidosPagos.reduce((acc, p) => acc + Number(p.valor_pago || 0), 0);
+
+    document.getElementById('modal-perfil-cliques').textContent = cliquesDesteAf.length;
+    document.getElementById('modal-perfil-vendas').textContent = pedidosPagos.length;
+    document.getElementById('modal-perfil-faturamento').textContent = `R$ ${faturamentoTotal.toFixed(2).replace('.', ',')}`;
+
+    // Agrupar links usados por esse afiliado
+    const linksMap = {};
+    cliquesDesteAf.forEach(c => {
+        const l = c.pagina_destino || '/';
+        linksMap[l] = (linksMap[l] || 0) + 1;
+    });
+
+    const linksListEl = document.getElementById('modal-perfil-links-list');
+    const linksEntries = Object.entries(linksMap).sort((a,b) => b[1] - a[1]);
+
+    if (linksEntries.length === 0) {
+        linksListEl.innerHTML = `<div class="text-slate-500 italic py-2">Nenhum clique registrado para este parceiro no histórico.</div>`;
+    } else {
+        linksListEl.innerHTML = linksEntries.map(([link, count]) => {
+            const info = formatPagina(link);
+            return `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-[#181818] border border-[#262626]">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-xs text-cyan-400">link</span>
+                        <div>
+                            <div class="font-bold text-slate-200">${escapeHtml(info.rotulo)}</div>
+                            <div class="font-mono text-[10px] text-slate-400">${escapeHtml(link)}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <strong class="text-cyan-400 font-extrabold text-sm">${count}</strong>
+                        <span class="text-[10px] text-slate-500 uppercase block">clique${count > 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Lista de clientes trazidos
+    const clientesListEl = document.getElementById('modal-perfil-clientes-list');
+    const clientes = af.clientesList || [];
+    if (clientes.length === 0) {
+        clientesListEl.innerHTML = `<div class="text-slate-500 italic py-2">Nenhum cliente registrado através deste parceiro ainda.</div>`;
+    } else {
+        clientesListEl.innerHTML = clientes.map(cli => {
+            const isPago = cli.status === 'pago';
+            const dt = cli.data ? new Date(cli.data).toLocaleDateString('pt-BR') : '';
+            return `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-[#181818] border border-[#262626]">
+                    <div>
+                        <div class="font-bold text-slate-200 truncate">${escapeHtml(cli.email)}</div>
+                        <div class="text-[10px] text-slate-500">${dt} · ${escapeHtml(cli.origem || 'Pedido')}</div>
+                    </div>
+                    <div class="text-right">
+                        <strong class="${isPago ? 'text-emerald-400' : 'text-amber-400'} font-bold">R$ ${Number(cli.valor || 0).toFixed(2).replace('.', ',')}</strong>
+                        <span class="text-[9px] uppercase font-bold block ${isPago ? 'text-emerald-500' : 'text-amber-500'}">${cli.status}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Exibir Modal
+    const modal = document.getElementById('modal-perfil');
+    const content = document.getElementById('modal-perfil-content');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    content.classList.remove('scale-95');
+}
+
+function fecharModalPerfil() {
+    const modal = document.getElementById('modal-perfil');
+    const content = document.getElementById('modal-perfil-content');
     content.classList.add('scale-95');
     modal.classList.add('opacity-0', 'pointer-events-none');
 }
 
+function copiarLinkAfiliadoAtual() {
+    if (!afiliadoModalAtual) return;
+    copiarLinkAfiliado(afiliadoModalAtual);
+}
+
+// 2. Modal JSON do Supabase
+function abrirModalJson(index) {
+    const item = filteredCliques[index];
+    if (!item) return;
+
+    const orig = parseOrigem(item.referrer);
+    const dev = parseUserAgent(item.user_agent);
+    const af = afiliadosMap[item.afiliado_codigo?.toUpperCase()] || {};
+
+    document.getElementById('modal-json-data').textContent = JSON.stringify(item, null, 2);
+    document.getElementById('modal-json-analise').innerHTML = `
+        <div class="font-bold text-slate-200 mb-1">Decodificação da Linha:</div>
+        <div>• <strong>Afiliado:</strong> ${escapeHtml(af.nome || 'Não identificado')} (<code class="text-cyan-300">${escapeHtml(item.afiliado_codigo)}</code>)</div>
+        <div>• <strong>Email do Afiliado:</strong> ${escapeHtml(af.email || 'Sem email')}</div>
+        <div>• <strong>Link / Rota de Destino:</strong> <code class="text-purple-300">${escapeHtml(item.pagina_destino || '/')}</code> (${formatPagina(item.pagina_destino).rotulo})</div>
+        <div>• <strong>Origem identificada:</strong> ${orig.nome} (URL: ${escapeHtml(item.referrer || 'Vazio/Direto')})</div>
+        <div>• <strong>Dispositivo:</strong> ${dev.aparelho} (${dev.os}) - Navegador: ${dev.navegador}</div>
+        <div>• <strong>Data/Hora local:</strong> ${new Date(item.created_at).toLocaleString('pt-BR')}</div>
+    `;
+
+    const modal = document.getElementById('modal-json');
+    const content = document.getElementById('modal-json-content');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    content.classList.remove('scale-95');
+}
+function fecharModalJson() {
+    const modal = document.getElementById('modal-json');
+    const content = document.getElementById('modal-json-content');
+    content.classList.add('scale-95');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+// 3. Modal Vendas do Afiliado
+function abrirModalVendas(codigo) {
+    document.getElementById('modal-vendas-codigo').textContent = codigo;
+    const list = document.getElementById('modal-vendas-list');
+    const af = afiliadosMap[codigo];
+
+    const modal = document.getElementById('modal-vendas');
+    const content = document.getElementById('modal-vendas-content');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    content.classList.remove('scale-95');
+
+    const pedidos = af?.pedidosList || [];
+    if (pedidos.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-10 text-slate-400">
+                <span class="material-symbols-outlined text-4xl text-slate-600 block mb-2">shopping_bag</span>
+                Nenhum pedido atrelado a este código ainda.
+            </div>
+        `;
+        document.getElementById('modal-vendas-total').textContent = 'R$ 0,00';
+        return;
+    }
+
+    let total = 0;
+    list.innerHTML = pedidos.map(p => {
+        const dt = new Date(p.created_at).toLocaleString('pt-BR');
+        const isPago = p.status === 'pago';
+        if (isPago) total += Number(p.valor_pago || 0);
+
+        return `
+            <div class="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3 flex items-center justify-between gap-3">
+                <div>
+                    <div class="text-xs font-bold text-slate-200 truncate">${escapeHtml(p.email || 'Cliente sem email')}</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">${dt}</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs font-black ${isPago ? 'text-emerald-400' : 'text-amber-400'}">
+                        R$ ${Number(p.valor_pago || 0).toFixed(2).replace('.', ',')}
+                    </div>
+                    <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${isPago ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
+                        ${p.status || 'pendente'}
+                    </span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('modal-vendas-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+function fecharModalVendas() {
+    const modal = document.getElementById('modal-vendas');
+    const content = document.getElementById('modal-vendas-content');
+    content.classList.add('scale-95');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+// 4. Modal Simulador de Teste
+function abrirModalTeste() {
+    const modal = document.getElementById('modal-teste');
+    const content = document.getElementById('modal-teste-content');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    content.classList.remove('scale-95');
+}
+function fecharModalTeste() {
+    const modal = document.getElementById('modal-teste');
+    const content = document.getElementById('modal-teste-content');
+    content.classList.add('scale-95');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+// Executar Simulação de Clique
+async function executarCliqueTeste() {
+    const btn = document.getElementById('btn-enviar-teste');
+    const codigo = document.getElementById('teste-codigo').value.trim().toUpperCase();
+    const referrer = document.getElementById('teste-referrer').value;
+    const pagina = document.getElementById('teste-pagina').value;
+
+    if (!codigo) {
+        alert('Digite um código de afiliado para o teste');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="material-symbols-outlined text-sm animate-spin">sync</span> Gravando...`;
+
+    try {
+        const { error } = await sb.from('cliques_afiliados').insert({
+            afiliado_codigo: codigo,
+            pagina_destino: pagina,
+            referrer: referrer || null,
+            user_agent: navigator.userAgent || 'Simulador de Teste ReceitasX'
+        });
+
+        if (error) throw error;
+
+        fecharModalTeste();
+        mostrarToast('Clique de teste gravado no Supabase!', 'check_circle');
+        await carregarDados();
+
+    } catch (e) {
+        console.error('Erro no clique teste:', e);
+        alert('Erro ao gravar no Supabase: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined text-sm">send</span> Enviar ao Supabase`;
+    }
+}
+
+// Alternar Guia Didático
+function toggleGuiaSupabase() {
+    const box = document.getElementById('guia-supabase-box');
+    box.classList.toggle('hidden');
+}
+
+// Formatar link para WhatsApp
+function formatarWhatsApp(tel) {
+    if (!tel) return null;
+    const apenasNum = tel.replace(/\D/g, '');
+    if (apenasNum.length < 10) return null;
+    const ddi = apenasNum.startsWith('55') ? apenasNum : '55' + apenasNum;
+    return `https://wa.me/${ddi}?text=${encodeURIComponent('Olá! Sou da equipe ReceitasX sobre o seu link de afiliado.')}`;
+}
+
+// Copiar Link com Ref
+function copiarLinkAfiliado(codigo) {
+    const link = `${window.location.origin}/acesso-vitalicio?ref=${codigo}`;
+    navigator.clipboard.writeText(link).then(() => {
+        mostrarToast(`Link com ?ref=${codigo} copiado!`, 'content_copy');
+    });
+}
+
+// Copiar texto genérico
+function copiarTexto(texto, mensagem = 'Copiado!') {
+    navigator.clipboard.writeText(texto).then(() => {
+        mostrarToast(mensagem, 'content_copy');
+    });
+}
+
+// Copiar SQL
+function copiarSQL() {
+    const sql = document.getElementById('sql-code').textContent;
+    navigator.clipboard.writeText(sql).then(() => {
+        mostrarToast('SQL copiado para a área de transferência!', 'content_copy');
+    });
+}
+
+// Mostrar Toast
+function mostrarToast(msg, icone = 'check_circle') {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    document.getElementById('toast-icon').textContent = icone;
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-16');
+    toast.classList.add('translate-y-0');
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-16');
+        toast.classList.remove('translate-y-0');
+    }, 3000);
+}
+
+// Helper: Tempo Relativo
+function calcularTempoRelativo(date) {
+    const segundos = Math.floor((new Date() - date) / 1000);
+    if (segundos < 60) return 'Agora mesmo';
+    const minutos = Math.floor(segundos / 60);
+    if (minutos < 60) return `Há ${minutos} min`;
+    const horas = Math.floor(minutos / 60);
+    if (horas < 24) return `Há ${horas} h`;
+    const dias = Math.floor(horas / 24);
+    if (dias < 30) return `Há ${dias} dias`;
+    return date.toLocaleDateString('pt-BR');
+}
+
+// Helper: Escape HTML
+function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Fechar modais ao teclar ESC
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && document.getElementById('modal-usos') && !document.getElementById('modal-usos').classList.contains('opacity-0')) {
-        fecharModalUsos();
+    if (e.key === 'Escape') {
+        fecharModalPerfil();
+        fecharModalJson();
+        fecharModalVendas();
+        fecharModalTeste();
     }
 });
 </script>

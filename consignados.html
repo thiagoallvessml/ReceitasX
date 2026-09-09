@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Locais Consignados - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#25f4f4", "background-dark": "#121212", "card-dark": "#1E1E1E", "border-dark": "#2A2A2A" } } } }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #f1f5f9; }
+        input, select, textarea { background-color: #1E1E1E !important; color: #f1f5f9 !important; border-color: #2A2A2A !important; border-radius: .6rem; padding: .65rem 1rem; width: 100%; outline: none; }
+        input:focus { border-color: rgba(37,244,244,0.5) !important; box-shadow: 0 0 0 3px rgba(37,244,244,0.07) !important; }
+        .card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: .875rem; padding: 1.25rem; transition: border-color .15s; cursor:pointer;}
+        .card:hover { border-color: rgba(139,92,246,0.3); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .btn-primary { background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: #fff; padding: .6rem 1.2rem; border-radius: .6rem; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: .4rem; }
+        .btn-primary:hover { opacity: .9; }
+        .btn-outline { background: transparent; border: 1px solid #2A2A2A; color: #94a3b8; padding: .6rem 1.2rem; border-radius: .6rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content:center; gap: .4rem; transition:all 0.15s; }
+        .btn-outline:hover { color: #f1f5f9; border-color: #475569; }
+        .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
+        .modal-bg.open { opacity: 1; pointer-events: auto; }
+        .modal-card { background: #1E1E1E; border: 1px solid #2A2A2A; border-radius: 1rem; padding: 1.5rem; width: 100%; max-width: 400px; transform: scale(.95); transition: transform .2s; }
+        .modal-bg.open .modal-card { transform: scale(1); }
+        .text-purple { color: #a78bfa; }
+        .bg-purple-subtle { background: rgba(139,92,246,0.1); }
+    </style>
+</head>
+<body class="pb-20">
+
+<header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button onclick="location.href='index.html'" class="btn-outline" style="border:none;padding:0">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="text-base font-semibold flex-1">Locais Consignados</h1>
+        <button onclick="openModal()" class="btn-primary text-sm">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">add</span> Novo Local
+        </button>
+    </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6">
+    <div id="loading" class="text-center text-slate-500 py-10">Carregando locais...</div>
+    <div id="parceiros-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" style="display:none;"></div>
+    
+    <div id="empty-state" class="text-center py-16" style="display:none;">
+        <span class="material-symbols-outlined" style="font-size:3rem;color:#334155;margin-bottom:.5rem">storefront</span>
+        <h2 class="text-lg font-bold text-slate-300">Nenhum local cadastrado</h2>
+        <p class="text-sm text-slate-500 mb-4 max-w-sm mx-auto mt-2">Cadastre padarias, cafeterias ou mercados onde você deixa seus produtos em consignação.</p>
+        <button onclick="openModal()" class="btn-primary mx-auto mt-4">Cadastrar Primeiro Local</button>
+    </div>
+</main>
+
+<div id="modal-parceiro" class="modal-bg">
+    <div class="modal-card">
+        <div class="flex justify-between items-center mb-4">
+            <h2 id="modal-title" class="font-bold text-lg text-slate-100">Novo Local</h2>
+            <button onclick="closeModal()" class="text-slate-500 hover:text-slate-300"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="space-y-4">
+            <input type="hidden" id="f-id" />
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nome do Local <span class="text-red-400">*</span></label>
+                <input type="text" id="f-nome" placeholder="Ex: Padaria do João" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Responsável</label>
+                <input type="text" id="f-resp" placeholder="Ex: João Silva" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Telefone</label>
+                <input type="text" id="f-tel" placeholder="(11) 99999-9999" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Endereço</label>
+                <input type="text" id="f-end" placeholder="Av. Principal, 123" />
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeModal()" class="btn-outline flex-1 justify-center">Cancelar</button>
+                <button onclick="salvar()" class="btn-primary flex-1 justify-center">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let parceiros = [];
+
+async function init() {
+    const session = await getSession();
+    if (!session?.user) {
+        window.location.href = 'login.html';
+        return;
+    }
+    await loadDados();
+}
+
+async function loadDados() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('parceiros-grid').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'none';
+    
+    try {
+        const user = await getUser();
+        const { data, error } = await sb.from('consignados_parceiros').select('*').eq('user_id', user.id).order('nome_local');
+        if (error) throw error;
+        parceiros = data || [];
+        render();
+    } catch (e) {
+        console.error(e);
+    }
+    document.getElementById('loading').style.display = 'none';
+}
+
+function render() {
+    const grid = document.getElementById('parceiros-grid');
+    const empty = document.getElementById('empty-state');
+    
+    if (parceiros.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+    
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+    
+    grid.innerHTML = parceiros.map(p => `
+        <div class="card" onclick="location.href='consignado-detalhe.html?id=${p.id}'">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-subtle flex items-center justify-center text-purple">
+                    <span class="material-symbols-outlined">storefront</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-100">${p.nome_local}</h3>
+                    <p class="text-xs text-slate-400">${p.nome_responsavel || 'Sem responsável'}</p>
+                </div>
+            </div>
+            <div class="space-y-1 mt-4">
+                <div class="flex items-center gap-2 text-sm text-slate-400">
+                    <span class="material-symbols-outlined" style="font-size:1rem">call</span> ${p.telefone || '-'}
+                </div>
+                <div class="flex items-center gap-2 text-sm text-slate-400">
+                    <span class="material-symbols-outlined" style="font-size:1rem">location_on</span> ${p.endereco || '-'}
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-border-dark flex justify-between items-center">
+                <span class="text-xs text-purple font-semibold">Gerenciar Estoque →</span>
+                <button onclick="event.stopPropagation(); editar(${p.id})" class="text-slate-500 hover:text-slate-300 bg-transparent border-none cursor-pointer p-0">
+                    <span class="material-symbols-outlined" style="font-size:1.15rem">edit</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openModal() {
+    document.getElementById('f-id').value = '';
+    document.getElementById('f-nome').value = '';
+    document.getElementById('f-resp').value = '';
+    document.getElementById('f-tel').value = '';
+    document.getElementById('f-end').value = '';
+    document.getElementById('modal-title').textContent = 'Novo Local';
+    document.getElementById('modal-parceiro').classList.add('open');
+    setTimeout(()=>document.getElementById('f-nome').focus(), 100);
+}
+
+function closeModal() {
+    document.getElementById('modal-parceiro').classList.remove('open');
+}
+
+function editar(id) {
+    const p = parceiros.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('f-id').value = p.id;
+    document.getElementById('f-nome').value = p.nome_local;
+    document.getElementById('f-resp').value = p.nome_responsavel || '';
+    document.getElementById('f-tel').value = p.telefone || '';
+    document.getElementById('f-end').value = p.endereco || '';
+    document.getElementById('modal-title').textContent = 'Editar Local';
+    document.getElementById('modal-parceiro').classList.add('open');
+}
+
+async function salvar() {
+    const nome = document.getElementById('f-nome').value.trim();
+    if (!nome) {
+        alert('Informe o nome do local!');
+        return;
+    }
+    
+    const id = document.getElementById('f-id').value;
+    const payload = {
+        nome_local: nome,
+        nome_responsavel: document.getElementById('f-resp').value.trim(),
+        telefone: document.getElementById('f-tel').value.trim(),
+        endereco: document.getElementById('f-end').value.trim()
+    };
+    
+    try {
+        const user = await getUser();
+        payload.user_id = user.id;
+        
+        if (id) {
+            await sb.from('consignados_parceiros').update(payload).eq('id', id);
+        } else {
+            await sb.from('consignados_parceiros').insert([payload]);
+        }
+        closeModal();
+        loadDados();
+    } catch (e) {
+        console.error(e);
+        alert('Erro ao salvar no Supabase.');
+    }
+}
+
+init();
+</script>
+</body>
+</html>
