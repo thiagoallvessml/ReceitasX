@@ -34,9 +34,9 @@
         .text-purple { color: #a78bfa; }
         .bg-purple-subtle { background: rgba(139,92,246,0.1); }
         
-        .tab-btn { padding: .75rem 1rem; color: #64748b; font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer; transition:all .15s; background:transparent;}
-        .tab-btn.active { color: #a78bfa; border-bottom-color: #a78bfa; }
-        .tab-btn:hover:not(.active) { color: #94a3b8; }
+        .tab-btn { padding: .6rem 1rem; color: #64748b; font-weight: 600; border: 1px solid #2A2A2A; border-radius: .5rem; cursor: pointer; transition:all .15s; background: #141414; display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
+        .tab-btn.active { color: #a78bfa; border-color: #a78bfa; background: #1a1625; }
+        .tab-btn:hover:not(.active) { color: #94a3b8; border-color: #3f3f46; background: #1c1c1c; }
         
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: .75rem 1rem; color: #64748b; font-size: .75rem; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid #2A2A2A; white-space:nowrap; }
@@ -95,10 +95,16 @@
             </div>
         </div>
 
-        <div class="border-b border-border-dark flex mb-4">
-            <button class="tab-btn active" onclick="switchTab('estoque', this)">Estoque Atual</button>
-            <button class="tab-btn" onclick="switchTab('historico', this)">Vendas</button>
-            <button class="tab-btn" onclick="switchTab('recolhimentos', this)">Recolhimentos</button>
+        <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex flex-wrap gap-3 mb-6">
+            <button class="tab-btn active" onclick="switchTab('estoque', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Estoque Atual
+            </button>
+            <button class="tab-btn" onclick="switchTab('historico', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">attach_money</span> Acertos & Vendas
+            </button>
+            <button class="tab-btn" onclick="switchTab('recolhimentos', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">history</span> Histórico de Recolhimento
+            </button>
         </div>
 
         <div id="tab-estoque" class="card overflow-x-auto p-0">
@@ -121,22 +127,73 @@
             </div>
         </div>
 
-        <div id="tab-historico" class="card overflow-x-auto p-0" style="display:none">
-            <table class="min-w-full">
-                <thead>
-                    <tr>
-                        <th class="pl-5">Data</th>
-                        <th>Produto</th>
-                        <th>Qtd.</th>
-                        <th>V. Bruto</th>
-                        <th class="pr-5">V. Líquido (Você)</th>
-                    </tr>
-                </thead>
-                <tbody id="vendas-body"></tbody>
-            </table>
-            <div id="vendas-empty" class="text-center py-10 text-slate-500" style="display:none">
-                <span class="material-symbols-outlined" style="font-size:2rem;margin-bottom:.5rem">receipt_long</span>
-                <p>Nenhuma venda registrada ainda.</p>
+        <div id="tab-historico" style="display:none">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Card Pendente -->
+                <div class="card bg-[#141414] border border-[#2A2A2A] p-5 rounded-xl">
+                    <div class="flex items-center gap-2 mb-4 text-slate-400 font-bold text-xs uppercase tracking-wider">
+                        <div class="w-8 h-8 rounded-lg bg-purple-900/30 text-purple-400 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">attach_money</span></div>
+                        VALOR PENDENTE A RECEBER
+                    </div>
+                    <div id="valor-pendente" class="text-3xl font-black text-purple-400 mb-2">R$ 0,00</div>
+                    <p class="text-xs text-slate-500 mb-6">Dinheiro de vendas ainda não acertadas.</p>
+                    <button onclick="realizarFechamento()" class="btn-primary w-full justify-center py-3 bg-[#4c2f82] hover:bg-[#5a3b98] border-none text-slate-300">Realizar Fechamento</button>
+                </div>
+
+                <!-- Card Recebido -->
+                <div class="card bg-[#141414] border border-[#2A2A2A] p-5 rounded-xl">
+                    <div class="flex items-center gap-2 mb-4 text-slate-400 font-bold text-xs uppercase tracking-wider">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-900/30 text-emerald-400 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">trending_up</span></div>
+                        TOTAL JÁ RECEBIDO
+                    </div>
+                    <div id="valor-recebido" class="text-3xl font-black text-slate-100 mb-2">R$ 0,00</div>
+                    <p class="text-xs text-slate-500 mb-6">Soma de todos os acertos já feitos.</p>
+                </div>
+            </div>
+
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-0 mb-6 rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-yellow-900/30 text-yellow-500 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">attach_money</span></div>
+                    <h3 class="font-bold text-[15px] text-slate-100">Vendas Pendentes (Aguardando Acerto)</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-[#141414]">
+                            <tr>
+                                <th class="pl-5 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data da Venda</th>
+                                <th class="py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Produto</th>
+                                <th class="py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Qtd</th>
+                                <th class="pr-5 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Valor a Receber</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendas-pendentes-body"></tbody>
+                    </table>
+                </div>
+                <div id="vendas-pendentes-empty" class="text-center py-8 text-slate-500 bg-[#141414]" style="display:none">
+                    <p class="text-sm">Nenhuma venda aguardando acerto.</p>
+                </div>
+            </div>
+
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-0 mb-6 rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-900/30 text-emerald-500 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">history</span></div>
+                    <h3 class="font-bold text-[15px] text-slate-100">Histórico de Fechamentos</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-[#141414]">
+                            <tr>
+                                <th class="pl-5 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data do Acerto</th>
+                                <th class="py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Qtd Itens Acertados</th>
+                                <th class="pr-5 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Valor Recebido</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fechamentos-body"></tbody>
+                    </table>
+                </div>
+                <div id="fechamentos-empty" class="text-center py-8 text-slate-500 bg-[#141414]" style="display:none">
+                    <p class="text-sm">Nenhum fechamento realizado.</p>
+                </div>
             </div>
         </div>
 
@@ -269,6 +326,7 @@ const parceiroId = urlParams.get('id');
 let parceiro = null;
 let estoque = [];
 let vendas = [];
+let fechamentos = [];
 let recolhimentos = [];
 let produtos = []; // user catalog
 let vendaTemp = null; // item being sold
@@ -311,6 +369,10 @@ async function loadDados() {
         // Load Recolhimentos
         const { data: rData } = await sb.from('consignados_recolhimentos').select('*').eq('parceiro_id', parceiroId).order('created_at', {ascending:false});
         recolhimentos = rData || [];
+        
+        // Load Fechamentos
+        const { data: fData } = await sb.from('consignados_fechamentos').select('*').eq('parceiro_id', parceiroId).order('created_at', {ascending:false});
+        fechamentos = fData || [];
         
         // Load User Catalog
         const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado').eq('user_id', user.id).eq('ativo', true).order('nome');
@@ -376,23 +438,46 @@ function render() {
         }).join('');
     }
     
-    // Vendas
-    const tbodyV = document.getElementById('vendas-body');
-    if(vendas.length === 0) {
-        tbodyV.innerHTML = '';
-        document.getElementById('vendas-empty').style.display = 'block';
+    // Vendas Pendentes e Fechamentos
+    const pendentes = vendas.filter(v => !v.fechamento_id);
+    const tbodyPendentes = document.getElementById('vendas-pendentes-body');
+    if(pendentes.length === 0) {
+        tbodyPendentes.innerHTML = '';
+        document.getElementById('vendas-pendentes-empty').style.display = 'block';
     } else {
-        document.getElementById('vendas-empty').style.display = 'none';
-        tbodyV.innerHTML = vendas.map(v => `
-            <tr>
-                <td class="pl-5 text-sm text-slate-400">${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
-                <td class="font-semibold text-slate-200">${v.nome_produto}</td>
-                <td><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 font-bold">${v.quantidade}</span></td>
-                <td class="text-slate-400">${fmtR(v.valor_bruto)}</td>
-                <td class="font-bold text-emerald-400 pr-5">${fmtR(v.valor_liquido)}</td>
+        document.getElementById('vendas-pendentes-empty').style.display = 'none';
+        tbodyPendentes.innerHTML = pendentes.map(v => `
+            <tr class="border-b border-[#2A2A2A] last:border-0">
+                <td class="pl-5 py-4 text-sm text-slate-400">${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
+                <td class="py-4 font-semibold text-slate-200">${v.nome_produto}</td>
+                <td class="py-4"><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 font-bold">${v.quantidade}</span></td>
+                <td class="pr-5 py-4 text-right font-bold text-emerald-400">${fmtR(v.valor_liquido)}</td>
             </tr>
         `).join('');
     }
+
+    const tbodyFechamentos = document.getElementById('fechamentos-body');
+    if(fechamentos.length === 0) {
+        tbodyFechamentos.innerHTML = '';
+        document.getElementById('fechamentos-empty').style.display = 'block';
+    } else {
+        document.getElementById('fechamentos-empty').style.display = 'none';
+        tbodyFechamentos.innerHTML = fechamentos.map(f => `
+            <tr class="border-b border-[#2A2A2A] last:border-0">
+                <td class="pl-5 py-4 text-sm text-slate-400">${new Date(f.created_at).toLocaleDateString('pt-BR')}</td>
+                <td class="py-4"><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 font-bold">${f.qtd_itens}</span></td>
+                <td class="pr-5 py-4 text-right font-bold text-emerald-400">${fmtR(f.valor_recebido)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Calcula valor pendente
+    const valorPendente = pendentes.reduce((acc, v) => acc + parseFloat(v.valor_liquido || 0), 0);
+    document.getElementById('valor-pendente').textContent = fmtR(valorPendente);
+
+    // Calcula valor já recebido
+    const valorRecebido = fechamentos.reduce((acc, f) => acc + parseFloat(f.valor_recebido || 0), 0);
+    document.getElementById('valor-recebido').textContent = fmtR(valorRecebido);
 
     // Recolhimentos
     const tbodyR = document.getElementById('recolhimentos-body');
@@ -464,12 +549,14 @@ async function salvarEstoque() {
             preco_venda: preco,
             taxa_comissao: comissao
         };
-        await sb.from('consignados_estoque').insert([payload]);
+        const { error } = await sb.from('consignados_estoque').insert([payload]);
+        if (error) throw error;
+        
         document.getElementById('modal-estoque').classList.remove('open');
         loadDados();
     } catch(e) {
         console.error(e);
-        alert('Erro ao adicionar');
+        alert('Erro ao adicionar estoque: ' + (e.message || JSON.stringify(e)));
     }
 }
 
@@ -519,7 +606,7 @@ async function confirmarVenda() {
     try {
         const user = await getUser();
         // 1. Registra venda
-        await sb.from('consignados_vendas').insert([{
+        const { error: e1 } = await sb.from('consignados_vendas').insert([{
             user_id: user.id,
             parceiro_id: parceiroId,
             estoque_id: vendaTemp.id,
@@ -528,15 +615,53 @@ async function confirmarVenda() {
             valor_bruto: bruto,
             valor_liquido: liq
         }]);
+        if (e1) throw e1;
+
         // 2. Abate estoque
         const newQtd = vendaTemp.quantidade_restante - q;
-        await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', vendaTemp.id);
+        const { error: e2 } = await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', vendaTemp.id);
+        if (e2) throw e2;
         
         document.getElementById('modal-venda').classList.remove('open');
         loadDados();
     } catch(e) {
         console.error(e);
-        alert('Erro ao registrar venda no Supabase');
+        alert('Erro ao registrar venda no Supabase: ' + (e.message || JSON.stringify(e)));
+    }
+}
+
+async function realizarFechamento() {
+    const pendentes = vendas.filter(v => !v.fechamento_id);
+    if(pendentes.length === 0) return alert('Nenhuma venda pendente para acerto.');
+    
+    if(!confirm(`Deseja realizar o fechamento de ${pendentes.length} vendas? O valor pendente será recebido e as vendas marcadas como acertadas.`)) return;
+
+    try {
+        const user = await getUser();
+        const qtdItens = pendentes.reduce((acc, v) => acc + v.quantidade, 0);
+        const valorRecebido = pendentes.reduce((acc, v) => acc + parseFloat(v.valor_liquido||0), 0);
+        
+        // Insere o fechamento
+        const { data: fechData, error: fechErr } = await sb.from('consignados_fechamentos').insert([{
+            user_id: user.id,
+            parceiro_id: parceiroId,
+            qtd_itens: qtdItens,
+            valor_recebido: valorRecebido
+        }]).select('id').single();
+
+        if (fechErr) throw fechErr;
+
+        // Atualiza as vendas com o fechamento_id
+        const vendasIds = pendentes.map(v => v.id);
+        const { error: updErr } = await sb.from('consignados_vendas').update({ fechamento_id: fechData.id }).in('id', vendasIds);
+        
+        if (updErr) throw updErr;
+
+        alert('Fechamento realizado com sucesso!');
+        loadDados();
+    } catch(e) {
+        console.error(e);
+        alert('Erro ao realizar fechamento no Supabase');
     }
 }
 
@@ -580,22 +705,24 @@ async function confirmarRecolher() {
         const user = await getUser();
         // 1. Abate estoque
         const newQtd = recolherTemp.quantidade_restante - q;
-        await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', recolherTemp.id);
+        const { error: e1 } = await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', recolherTemp.id);
+        if (e1) throw e1;
         
         // 2. Registra histórico
-        await sb.from('consignados_recolhimentos').insert([{
+        const { error: e2 } = await sb.from('consignados_recolhimentos').insert([{
             user_id: user.id,
             parceiro_id: parceiroId,
             estoque_id: recolherTemp.id,
             nome_produto: recolherTemp.nome_produto,
             quantidade: q
         }]);
+        if (e2) throw e2;
 
         document.getElementById('modal-recolher').classList.remove('open');
         loadDados();
     } catch(e) {
         console.error(e);
-        alert('Erro ao recolher no Supabase');
+        alert('Erro ao recolher no Supabase: ' + (e.message || JSON.stringify(e)));
     }
 }
 
