@@ -124,7 +124,13 @@
                 <span class="text-emerald-400">100%</span>
             </p>
             <p class="dre-val text-emerald-400" id="val-receita">R$ 0,00</p>
-            <p class="text-xs text-slate-500 mt-1">Total de vendas no período (sem devoluções ou descontos)</p>
+            <div id="breakdown-receita" class="mt-3 space-y-1 text-sm border-t border-slate-700/50 pt-2 text-slate-300" style="display:none;">
+                <div class="flex justify-between items-center"><span>Venda Direta / Porta de Casa</span><span id="val-direta" class="font-medium">R$ 0,00</span></div>
+                <div class="flex justify-between items-center"><span>iFood</span><span id="val-ifood" class="font-medium">R$ 0,00</span></div>
+                <div class="flex justify-between items-center"><span>Consignados</span><span id="val-consignado" class="font-medium">R$ 0,00</span></div>
+                <div class="flex justify-between items-center"><span>Outros Marketplaces</span><span id="val-outros" class="font-medium">R$ 0,00</span></div>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Total de vendas no período (sem devoluções ou descontos)</p>
         </div>
         
         <!-- 2. CUSTOS VARIÁVEIS (Deduções) -->
@@ -241,22 +247,49 @@ async function carregarDRE() {
 
     try {
         // 1. Fetch Sales (Receita Bruta e CMV)
-        const { data: vendas, error: errVendas } = await sb
-            .from('vendas_clientes')
-            .select('valor_total, itens')
-            .eq('user_id', userId)
-            .gte('data_venda', startISO)
-            .lt('data_venda', endISO);
+        const [resVendas, resConsig] = await Promise.all([
+            sb.from('vendas_clientes')
+                .select('valor_total, itens, canal_venda')
+                .eq('user_id', userId)
+                .gte('data_venda', startISO)
+                .lt('data_venda', endISO),
+            sb.from('consignados_vendas')
+                .select('valor_liquido, quantidade, estoque_id')
+                .eq('user_id', userId)
+                .gte('created_at', startISO)
+                .lt('created_at', endISO)
+        ]);
 
-        if (errVendas) throw errVendas;
+        if (resVendas.error) throw resVendas.error;
+        if (resConsig.error) console.warn(resConsig.error); // might not exist or error
+
+        const vendas = resVendas.data || [];
+        const consig = resConsig.data || [];
 
         let receitaBruta = 0;
+        let revDireta = 0;
+        let revIfood = 0;
+        let revOutros = 0;
+        let revConsignado = 0;
+
         let cmv = 0;
         let comissoes = 0; // Inicializa aqui para acumular taxas de marketplace
 
         if (vendas) {
             vendas.forEach(v => {
-                receitaBruta += parseFloat(v.valor_total || 0);
+                const val = parseFloat(v.valor_total || 0);
+                receitaBruta += val;
+                
+                // Distribui por canal
+                const canal = (v.canal_venda || 'Direta').toLowerCase();
+                if (canal === 'direta' || canal === 'whatsapp') {
+                    revDireta += val;
+                } else if (canal === 'ifood') {
+                    revIfood += val;
+                } else {
+                    revOutros += val;
+                }
+
                 if (v.itens && Array.isArray(v.itens)) {
                     v.itens.forEach(item => {
                         // Se houver custo salvo no momento da venda (implementado agora)
@@ -269,6 +302,19 @@ async function carregarDRE() {
                         }
                     });
                 }
+            });
+        }
+
+        // Soma consignados
+        if (consig) {
+            consig.forEach(c => {
+                const val = parseFloat(c.valor_liquido || 0);
+                receitaBruta += val;
+                revConsignado += val;
+                
+                // Nota: O CMV de consignados não está sendo contabilizado na hora da venda do consignado
+                // idealmente ele seria salvo em consignados_vendas, mas como não temos, fica de fora do CMV ou estimamos aqui.
+                // Mas a receita entra:
             });
         }
 
@@ -330,6 +376,18 @@ async function carregarDRE() {
         const rb = receitaBruta === 0 ? 1 : receitaBruta; // previne div/0 no %
 
         document.getElementById('val-receita').textContent = fmt(receitaBruta);
+        
+        // Show breakdown if any channel has sales
+        const bd = document.getElementById('breakdown-receita');
+        if (receitaBruta > 0) {
+            bd.style.display = 'block';
+            document.getElementById('val-direta').textContent = fmt(revDireta);
+            document.getElementById('val-ifood').textContent = fmt(revIfood);
+            document.getElementById('val-consignado').textContent = fmt(revConsignado);
+            document.getElementById('val-outros').textContent = fmt(revOutros);
+        } else {
+            bd.style.display = 'none';
+        }
         
         document.getElementById('val-custos').textContent = '- ' + fmt(deducoes);
         document.getElementById('pct-custos').textContent = pct(deducoes, rb);
