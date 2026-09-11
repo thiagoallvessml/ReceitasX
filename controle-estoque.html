@@ -352,16 +352,17 @@
 
         async function salvarEstoque() {
             if(!recSelected) return;
+            const targetRec = recSelected;
             const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
             if(ajuste === 0) { closeModal(); return; }
             
-            const novoEstoque = (recSelected.estoque_atual || 0) + ajuste;
+            const novoEstoque = (targetRec.estoque_atual || 0) + ajuste;
             
             try {
-                const { error } = await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', recSelected.id);
+                const { error } = await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', targetRec.id);
                 if (error) throw error;
                 
-                recSelected.estoque_atual = novoEstoque;
+                targetRec.estoque_atual = novoEstoque;
                 renderEstoque();
                 closeModal();
             } catch(e) {
