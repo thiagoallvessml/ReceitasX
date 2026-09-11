@@ -695,7 +695,7 @@ async function salvar() {
                 if (comboRef && comboRef.combo_itens) {
                     for (const item of comboRef.combo_itens) {
                         // achar o produto vinculado para saber a receita_id
-                        const prodTarget = resProd.data ? resProd.data.find(x => x.id === item.prodId) : null;
+                        const prodTarget = catalogo.find(x => x.id == item.prodId && x.tipo === 'produto');
                         if (prodTarget && prodTarget.receita_id) {
                             const { data: recData } = await sb.from('receitas').select('estoque_atual').eq('id', prodTarget.receita_id).single();
                             if (recData && recData.estoque_atual !== undefined) {
