@@ -80,6 +80,9 @@
             <button class="tab-btn active" onclick="switchTab('estoque', this)">
                 <span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Gestão de Estoque
             </button>
+            <button class="tab-btn" onclick="switchTab('entradas', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">move_to_inbox</span> Relatório de Entradas
+            </button>
             <button class="tab-btn" onclick="switchTab('relatorio', this)">
                 <span class="material-symbols-outlined" style="font-size:18px">receipt_long</span> Relatório de Saídas
             </button>
@@ -109,6 +112,33 @@
                 </div>
                 <div id="estoque-empty" class="text-center py-8 text-slate-500" style="display:none">
                     <p class="text-sm">Nenhum produto encontrado.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA ENTRADAS -->
+        <div id="tab-entradas" style="display:none">
+            <div class="search-wrap mb-4">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="search-entrada" type="search" class="search-box" placeholder="Procurar receita..." oninput="renderEntradas()" />
+            </div>
+            
+            <div class="card p-0 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-[#141414]">
+                            <tr>
+                                <th>Data</th>
+                                <th>Receita</th>
+                                <th>Qtd Adicionada</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entradas-body"></tbody>
+                    </table>
+                </div>
+                <div id="entradas-empty" class="text-center py-8 text-slate-500" style="display:none">
+                    <p class="text-sm">Nenhum registro encontrado.</p>
                 </div>
             </div>
         </div>
@@ -184,6 +214,7 @@
     <script>
         let receitas = [];
         let vendas = [];
+        let entradas = [];
         let recSelected = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -202,7 +233,12 @@
                 const { data: vData } = await sb.from('vendas_clientes').select('*').eq('user_id', user.id).order('created_at', {ascending: false});
                 vendas = vData || [];
                 
+                // Entradas/Movimentacoes
+                const { data: eData } = await sb.from('estoque_movimentacoes').select('*, receitas(nome)').eq('user_id', user.id).order('created_at', {ascending: false});
+                entradas = eData || [];
+                
                 renderEstoque();
+                renderEntradas();
                 renderRelatorio();
             } catch (e) {
                 console.error(e);
@@ -213,6 +249,7 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('tab-estoque').style.display = tab === 'estoque' ? 'block' : 'none';
+            document.getElementById('tab-entradas').style.display = tab === 'entradas' ? 'block' : 'none';
             document.getElementById('tab-relatorio').style.display = tab === 'relatorio' ? 'block' : 'none';
         }
 
@@ -258,6 +295,46 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function renderEntradas() {
+            const q = document.getElementById('search-entrada').value.toLowerCase();
+            let filtered = entradas;
+            if(q) {
+                filtered = entradas.filter(e => e.receitas && e.receitas.nome && e.receitas.nome.toLowerCase().includes(q));
+            }
+            
+            const tbody = document.getElementById('entradas-body');
+            const empty = document.getElementById('entradas-empty');
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            tbody.innerHTML = filtered.map(e => {
+                let txtTipo = e.quantidade > 0 ? 'Entrada / Produção' : 'Ajuste / Saída';
+                let styleTipo = e.quantidade > 0 ? 'text-emerald-400 bg-emerald-900/40 border-emerald-800' : 'text-red-400 bg-red-900/40 border-red-800';
+                
+                return `
+                <tr class="hover:bg-[#1A1A1A] transition-colors">
+                    <td class="text-slate-400 text-sm">
+                        ${new Date(e.created_at).toLocaleDateString('pt-BR')} <br>
+                        <span class="text-xs text-slate-600">${new Date(e.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</span>
+                    </td>
+                    <td class="text-slate-200 font-semibold">${e.receitas ? e.receitas.nome : 'Receita Excluída'}</td>
+                    <td class="font-bold text-slate-300">
+                        ${e.quantidade > 0 ? '+'+e.quantidade : e.quantidade} unid
+                    </td>
+                    <td>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold border ${styleTipo}">
+                            ${txtTipo}
+                        </span>
+                    </td>
+                </tr>
+            `}).join('');
         }
 
         function renderRelatorio() {
@@ -359,11 +436,25 @@
             const novoEstoque = (targetRec.estoque_atual || 0) + ajuste;
             
             try {
+                const user = await getUser();
                 const { error } = await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', targetRec.id);
                 if (error) throw error;
                 
+                await sb.from('estoque_movimentacoes').insert([{
+                    user_id: user.id,
+                    receita_id: targetRec.id,
+                    quantidade: ajuste,
+                    tipo: ajuste > 0 ? 'entrada' : 'ajuste_negativo'
+                }]);
+                
                 targetRec.estoque_atual = novoEstoque;
+                
+                // Refresh list of movimentacoes to reflect new entry immediately
+                const { data: eData } = await sb.from('estoque_movimentacoes').select('*, receitas(nome)').eq('user_id', user.id).order('created_at', {ascending: false});
+                entradas = eData || [];
+                
                 renderEstoque();
+                renderEntradas();
                 closeModal();
             } catch(e) {
                 console.error(e);
