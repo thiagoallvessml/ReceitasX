@@ -118,54 +118,76 @@
 
         <!-- ABA ENTRADAS -->
         <div id="tab-entradas" style="display:none">
-            <div class="search-wrap mb-4">
-                <span class="material-symbols-outlined ico">search</span>
-                <input id="search-entrada" type="search" class="search-box" placeholder="Procurar receita..." oninput="renderEntradas()" />
-            </div>
-            
-            <div class="card p-0 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-[#141414]">
-                            <tr>
-                                <th>Data</th>
-                                <th>Receita</th>
-                                <th>Qtd Adicionada</th>
-                                <th>Tipo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="entradas-body"></tbody>
-                    </table>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-2 card p-0 overflow-hidden">
+                    <div class="p-3 border-b border-slate-700/50 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-200">Histórico</h3>
+                        <div class="search-wrap" style="max-width: 250px;">
+                            <span class="material-symbols-outlined ico">search</span>
+                            <input id="search-entrada" type="search" class="search-box" placeholder="Procurar..." oninput="renderEntradas()" />
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-[#141414]">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Receita</th>
+                                    <th>Qtd</th>
+                                    <th>Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entradas-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="entradas-empty" class="text-center py-8 text-slate-500" style="display:none">
+                        <p class="text-sm">Nenhum registro encontrado.</p>
+                    </div>
                 </div>
-                <div id="entradas-empty" class="text-center py-8 text-slate-500" style="display:none">
-                    <p class="text-sm">Nenhum registro encontrado.</p>
+                
+                <div class="card p-4 h-max">
+                    <h3 class="font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined">social_leaderboard</span> Top 10 Mais Produzidos
+                    </h3>
+                    <ul id="entradas-top10" class="space-y-2 text-sm text-slate-300"></ul>
                 </div>
             </div>
         </div>
 
         <!-- ABA RELATÓRIO -->
         <div id="tab-relatorio" style="display:none">
-            <div class="search-wrap mb-4">
-                <span class="material-symbols-outlined ico">search</span>
-                <input id="search-venda" type="search" class="search-box" placeholder="Procurar no relatório..." oninput="renderRelatorio()" />
-            </div>
-            
-            <div class="card p-0 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-[#141414]">
-                            <tr>
-                                <th>Data</th>
-                                <th>Itens Vendidos</th>
-                                <th>Canal de Venda</th>
-                                <th class="text-right">Valor Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="relatorio-body"></tbody>
-                    </table>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-2 card p-0 overflow-hidden">
+                    <div class="p-3 border-b border-slate-700/50 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-200">Últimas Saídas</h3>
+                        <div class="search-wrap" style="max-width: 250px;">
+                            <span class="material-symbols-outlined ico">search</span>
+                            <input id="search-venda" type="search" class="search-box" placeholder="Procurar..." oninput="renderRelatorio()" />
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-[#141414]">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Itens Vendidos</th>
+                                    <th>Canal de Venda</th>
+                                    <th class="text-right">Valor Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="relatorio-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="relatorio-empty" class="text-center py-8 text-slate-500" style="display:none">
+                        <p class="text-sm">Nenhuma saída encontrada.</p>
+                    </div>
                 </div>
-                <div id="relatorio-empty" class="text-center py-8 text-slate-500" style="display:none">
-                    <p class="text-sm">Nenhuma venda encontrada.</p>
+                
+                <div class="card p-4 h-max">
+                    <h3 class="font-semibold text-sky-400 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined">trending_up</span> Top 10 Mais Vendidos
+                    </h3>
+                    <ul id="relatorio-top10" class="space-y-2 text-sm text-slate-300"></ul>
                 </div>
             </div>
         </div>
@@ -335,6 +357,27 @@
                     </td>
                 </tr>
             `}).join('');
+
+            // Top 10 Produção
+            const producao = {};
+            entradas.forEach(e => {
+                if (e.quantidade > 0 && e.receitas && e.receitas.nome) {
+                    producao[e.receitas.nome] = (producao[e.receitas.nome] || 0) + e.quantidade;
+                }
+            });
+            const topProd = Object.entries(producao).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            
+            const ulProd = document.getElementById('entradas-top10');
+            if (topProd.length === 0) {
+                ulProd.innerHTML = '<li class="text-slate-500">Nenhuma produção registrada.</li>';
+            } else {
+                ulProd.innerHTML = topProd.map(([nome, qtd], i) => `
+                    <li class="flex justify-between items-center bg-[#141414] p-2 rounded border border-slate-700/50">
+                        <span><strong class="text-slate-400 mr-2">#${i+1}</strong> ${nome}</span>
+                        <span class="font-bold text-emerald-400">${qtd} un</span>
+                    </li>
+                `).join('');
+            }
         }
 
         function renderRelatorio() {
@@ -387,6 +430,34 @@
                     <td class="text-right font-bold text-primary">${fmtR(v.valor_total)}</td>
                 </tr>
             `}).join('');
+
+            // Top 10 Mais Vendidos
+            const vendidos = {};
+            vendas.forEach(v => {
+                try {
+                    const arr = typeof v.itens === 'string' ? JSON.parse(v.itens) : v.itens;
+                    if(Array.isArray(arr)) {
+                        arr.forEach(i => {
+                            if (i.nome) {
+                                vendidos[i.nome] = (vendidos[i.nome] || 0) + (i.quantidade || 1);
+                            }
+                        });
+                    }
+                } catch(e) {}
+            });
+            const topVend = Object.entries(vendidos).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            
+            const ulVend = document.getElementById('relatorio-top10');
+            if (topVend.length === 0) {
+                ulVend.innerHTML = '<li class="text-slate-500">Nenhuma venda registrada.</li>';
+            } else {
+                ulVend.innerHTML = topVend.map(([nome, qtd], i) => `
+                    <li class="flex justify-between items-center bg-[#141414] p-2 rounded border border-slate-700/50">
+                        <span><strong class="text-slate-400 mr-2">#${i+1}</strong> ${nome}</span>
+                        <span class="font-bold text-sky-400">${qtd} un</span>
+                    </li>
+                `).join('');
+            }
         }
 
         // Modal Logic
