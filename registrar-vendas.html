@@ -332,7 +332,7 @@ async function carregarCatalogos() {
     
     try {
           const [p, c, pr] = await Promise.all([
-            sb.from('produtos').select('id, nome, preco, custo, estoque_atual, receita_id, ativo, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades)').eq('user_id', userId).order('nome'),
+            sb.from('produtos').select('id, nome, preco, custo, receita_id, ativo, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades, estoque_atual)').eq('user_id', userId).order('nome'),
             sb.from('combos').select('*').eq('user_id', userId),
             sb.from('precificacao').select('*').eq('user_id', userId)
         ]);
@@ -369,7 +369,8 @@ async function carregarCatalogos() {
                     preco: p.preco || 0,
                     basePreco: p.preco || 0,
                     custo: custoFinal,
-                    estoque_atual: p.estoque_atual || 0
+                    receita_id: p.receita_id,
+                    estoque_atual: p.receitas ? p.receitas.estoque_atual : 0
                 });
             }
         });
@@ -648,13 +649,20 @@ async function salvar() {
     document.getElementById('btn-save').textContent = 'Finalizar Venda';
     
     if (!error) {
-        // Deduz estoque para os produtos vendidos
+        // Deduz estoque para os produtos vendidos (no estoque das receitas!)
         for (const c of carrinho) {
             if (c.tipo === 'produto') {
                 const prodRef = catalogo.find(x => x.id == c.id && x.tipo === 'produto');
-                if (prodRef && prodRef.estoque_atual !== undefined) {
-                    const novoEstoque = (prodRef.estoque_atual || 0) - c.quantidade;
-                    await sb.from('produtos').update({ estoque_atual: novoEstoque }).eq('id', c.id);
+                if (prodRef && prodRef.receita_id) {
+                    // Aqui pegamos o estoque atual da receita que foi injetada no catalogo (ou buscar no banco se preferir, mas como colocamos estoque_atual no prodRef vindo da receita, podemos usar)
+                    // Wait, prodRef in catalogo has estoque_atual which we fetched from `produtos.receitas(...)` ? Let's check how we fetched it.
+                    // To be completely safe and avoid race conditions, we can let the SQL/Supabase handle the delta if we had RPC.
+                    // But we don't. We'll query the current stock of the recipe just to be sure, or use what we have.
+                    const { data: recData } = await sb.from('receitas').select('estoque_atual').eq('id', prodRef.receita_id).single();
+                    if (recData && recData.estoque_atual !== undefined) {
+                        const novoEstoque = (recData.estoque_atual || 0) - c.quantidade;
+                        await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', prodRef.receita_id);
+                    }
                 }
             }
         }

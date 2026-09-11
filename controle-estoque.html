@@ -97,9 +97,9 @@
                     <table class="min-w-full">
                         <thead class="bg-[#141414]">
                             <tr>
-                                <th>Produto</th>
-                                <th>Categoria</th>
-                                <th>Preço Venda</th>
+                                <th>Receita</th>
+                                <th>Rendimento</th>
+                                <th>Custo Total</th>
                                 <th>Estoque Atual</th>
                                 <th class="text-right">Ação</th>
                             </tr>
@@ -182,9 +182,9 @@
     </div>
 
     <script>
-        let produtos = [];
+        let receitas = [];
         let vendas = [];
-        let prodSelected = null;
+        let recSelected = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             await checkAuth();
@@ -195,9 +195,9 @@
             try {
                 const user = await getUser();
                 
-                // Produtos (somente ativos)
-                const { data: pData } = await sb.from('produtos').select('*').eq('user_id', user.id).eq('ativo', true).order('nome');
-                produtos = pData || [];
+                // Receitas
+                const { data: rData } = await sb.from('receitas').select('*').eq('user_id', user.id).order('nome');
+                receitas = rData || [];
                 
                 // Vendas (relatório)
                 const { data: vData } = await sb.from('vendas_clientes').select('*').eq('user_id', user.id).order('created_at', {ascending: false});
@@ -223,7 +223,7 @@
 
         function renderEstoque() {
             const q = document.getElementById('search-prod').value.toLowerCase();
-            const filtered = produtos.filter(p => p.nome.toLowerCase().includes(q) || (p.categoria && p.categoria.toLowerCase().includes(q)));
+            const filtered = receitas.filter(r => r.nome.toLowerCase().includes(q));
             
             const tbody = document.getElementById('estoque-body');
             const empty = document.getElementById('estoque-empty');
@@ -235,25 +235,25 @@
             }
             
             empty.style.display = 'none';
-            tbody.innerHTML = filtered.map(p => `
+            tbody.innerHTML = filtered.map(r => `
                 <tr class="hover:bg-[#1A1A1A] transition-colors">
                     <td>
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-[#111] overflow-hidden flex-shrink-0 border border-[#2A2A2A] flex items-center justify-center">
-                                ${p.imagem_url ? `<img src="${p.imagem_url}" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-slate-600">fastfood</span>`}
+                                <span class="material-symbols-outlined text-slate-600">receipt_long</span>
                             </div>
-                            <span class="font-semibold text-slate-200">${p.nome}</span>
+                            <span class="font-semibold text-slate-200">${r.nome}</span>
                         </div>
                     </td>
-                    <td class="text-slate-400">${p.categoria || '-'}</td>
-                    <td class="text-slate-300 font-medium">${fmtR(p.preco)}</td>
+                    <td class="text-slate-400">Rende ${r.unidades || 1} unid</td>
+                    <td class="text-slate-300 font-medium">${fmtR(r.custo_total)}</td>
                     <td>
-                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold ${p.estoque_atual > 0 ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800' : 'bg-red-900/40 text-red-400 border border-red-800'}">
-                            ${p.estoque_atual || 0} unid
+                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold ${r.estoque_atual > 0 ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800' : 'bg-red-900/40 text-red-400 border border-red-800'}">
+                            ${r.estoque_atual || 0} unid
                         </span>
                     </td>
                     <td class="text-right">
-                        <button onclick="openModal(${p.id})" class="btn-sec text-xs px-3 py-1.5 inline-flex items-center gap-1">
+                        <button onclick="openModal(${r.id})" class="btn-sec text-xs px-3 py-1.5 inline-flex items-center gap-1">
                             <span class="material-symbols-outlined" style="font-size:16px">edit_square</span> Ajustar
                         </button>
                     </td>
@@ -315,11 +315,11 @@
 
         // Modal Logic
         function openModal(id) {
-            prodSelected = produtos.find(p => p.id === id);
-            if(!prodSelected) return;
+            recSelected = receitas.find(r => r.id === id);
+            if(!recSelected) return;
             
-            document.getElementById('modal-prod-nome').textContent = prodSelected.nome;
-            document.getElementById('modal-prod-atual').textContent = (prodSelected.estoque_atual || 0) + ' unid';
+            document.getElementById('modal-prod-nome').textContent = recSelected.nome;
+            document.getElementById('modal-prod-atual').textContent = (recSelected.estoque_atual || 0) + ' unid';
             document.getElementById('modal-qtd').value = 0;
             updateSaldo();
             
@@ -328,7 +328,7 @@
 
         function closeModal() {
             document.getElementById('modal-estoque').classList.remove('open');
-            prodSelected = null;
+            recSelected = null;
         }
 
         function changeQtd(delta) {
@@ -341,8 +341,8 @@
         document.getElementById('modal-qtd').addEventListener('input', updateSaldo);
 
         function updateSaldo() {
-            if(!prodSelected) return;
-            const atual = prodSelected.estoque_atual || 0;
+            if(!recSelected) return;
+            const atual = recSelected.estoque_atual || 0;
             const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
             const novo = atual + ajuste;
             const d = document.getElementById('modal-novo-saldo');
@@ -352,17 +352,17 @@
         }
 
         async function salvarEstoque() {
-            if(!prodSelected) return;
+            if(!recSelected) return;
             const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
             if(ajuste === 0) { closeModal(); return; }
             
-            const novoEstoque = (prodSelected.estoque_atual || 0) + ajuste;
+            const novoEstoque = (recSelected.estoque_atual || 0) + ajuste;
             
             try {
-                const { error } = await sb.from('produtos').update({ estoque_atual: novoEstoque }).eq('id', prodSelected.id);
+                const { error } = await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', recSelected.id);
                 if (error) throw error;
                 
-                prodSelected.estoque_atual = novoEstoque;
+                recSelected.estoque_atual = novoEstoque;
                 renderEstoque();
                 closeModal();
             } catch(e) {
