@@ -385,27 +385,39 @@ async function carregarCatalogos() {
 
     combos.forEach(c => {
         let custoCombo = 0;
+        let estoqueCombo = Infinity;
         if (c.itens && resProd.data) {
             c.itens.forEach(item => {
                 const prod = resProd.data.find(x => x.id === item.prodId);
                 if (prod) {
                     let pCusto = prod.custo || 0;
+                    let pEstoque = 0;
                     if (prod.receitas) {
                         const sumSemMob = parseFloat(prod.receitas.custo_ing || 0) + parseFloat(prod.receitas.custo_emb || 0) + parseFloat(prod.receitas.custo_eqp || 0);
                         const un = prod.receitas.unidades > 0 ? prod.receitas.unidades : 1;
                         pCusto = sumSemMob / un;
+                        pEstoque = prod.receitas.estoque_atual || 0;
                     }
                     custoCombo += pCusto * (item.qty || 1);
+                    
+                    if (prod.receitas) {
+                        const possible = Math.floor(pEstoque / (item.qty || 1));
+                        if (possible < estoqueCombo) estoqueCombo = possible;
+                    }
                 }
             });
         }
+        if (estoqueCombo === Infinity) estoqueCombo = 0; // Se não tem itens válidos com estoque
+
         catalogo.push({
             tipo: 'combo',
             id: c.id,
             nome: `(Combo) ${c.nome}`,
             preco: c.preco || 0,
             basePreco: c.preco || 0,
-            custo: custoCombo
+            custo: custoCombo,
+            estoque_atual: estoqueCombo,
+            combo_itens: c.itens || []
         });
     });
 
@@ -464,7 +476,7 @@ function addToCartFromCatalog(idStr, tipo) {
     const ex = carrinho.find(c => c.tipo === itemCat.tipo && c.id == itemCat.id);
     const currentQty = ex ? ex.quantidade : 0;
 
-    if (tipo === 'produto') {
+    if (tipo === 'produto' || tipo === 'combo') {
         if (currentQty + 1 > (itemCat.estoque_atual || 0)) {
             showToast('Estoque insuficiente para esse item!', 'error');
             return;
@@ -494,8 +506,8 @@ function updateQty(tempId, delta) {
     const it = carrinho.find(c => c.tempId === tempId);
     if (!it) return;
 
-    if (delta > 0 && it.tipo === 'produto') {
-        const itemCat = catalogo.find(c => c.id == it.id && c.tipo === 'produto');
+    if (delta > 0 && (it.tipo === 'produto' || it.tipo === 'combo')) {
+        const itemCat = catalogo.find(c => c.id == it.id && c.tipo === it.tipo);
         if (itemCat && (it.quantidade + delta > (itemCat.estoque_atual || 0))) {
             showToast('Estoque insuficiente para essa quantidade!', 'error');
             return;
@@ -672,14 +684,26 @@ async function salvar() {
             if (c.tipo === 'produto') {
                 const prodRef = catalogo.find(x => x.id == c.id && x.tipo === 'produto');
                 if (prodRef && prodRef.receita_id) {
-                    // Aqui pegamos o estoque atual da receita que foi injetada no catalogo (ou buscar no banco se preferir, mas como colocamos estoque_atual no prodRef vindo da receita, podemos usar)
-                    // Wait, prodRef in catalogo has estoque_atual which we fetched from `produtos.receitas(...)` ? Let's check how we fetched it.
-                    // To be completely safe and avoid race conditions, we can let the SQL/Supabase handle the delta if we had RPC.
-                    // But we don't. We'll query the current stock of the recipe just to be sure, or use what we have.
                     const { data: recData } = await sb.from('receitas').select('estoque_atual').eq('id', prodRef.receita_id).single();
                     if (recData && recData.estoque_atual !== undefined) {
                         const novoEstoque = (recData.estoque_atual || 0) - c.quantidade;
                         await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', prodRef.receita_id);
+                    }
+                }
+            } else if (c.tipo === 'combo') {
+                const comboRef = catalogo.find(x => x.id == c.id && x.tipo === 'combo');
+                if (comboRef && comboRef.combo_itens) {
+                    for (const item of comboRef.combo_itens) {
+                        // achar o produto vinculado para saber a receita_id
+                        const prodTarget = resProd.data ? resProd.data.find(x => x.id === item.prodId) : null;
+                        if (prodTarget && prodTarget.receita_id) {
+                            const { data: recData } = await sb.from('receitas').select('estoque_atual').eq('id', prodTarget.receita_id).single();
+                            if (recData && recData.estoque_atual !== undefined) {
+                                const qtdDeducao = c.quantidade * (item.qty || 1);
+                                const novoEstoque = (recData.estoque_atual || 0) - qtdDeducao;
+                                await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', prodTarget.receita_id);
+                            }
+                        }
                     }
                 }
             }
