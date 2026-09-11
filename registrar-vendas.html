@@ -462,6 +462,15 @@ function addToCartFromCatalog(idStr, tipo) {
     }
     
     const ex = carrinho.find(c => c.tipo === itemCat.tipo && c.id == itemCat.id);
+    const currentQty = ex ? ex.quantidade : 0;
+
+    if (tipo === 'produto') {
+        if (currentQty + 1 > (itemCat.estoque_atual || 0)) {
+            showToast('Estoque insuficiente para esse item!', 'error');
+            return;
+        }
+    }
+
     if (ex) {
         ex.quantidade++;
         ex.preco = precoReal;
@@ -484,6 +493,15 @@ function addToCartFromCatalog(idStr, tipo) {
 function updateQty(tempId, delta) {
     const it = carrinho.find(c => c.tempId === tempId);
     if (!it) return;
+
+    if (delta > 0 && it.tipo === 'produto') {
+        const itemCat = catalogo.find(c => c.id == it.id && c.tipo === 'produto');
+        if (itemCat && (it.quantidade + delta > (itemCat.estoque_atual || 0))) {
+            showToast('Estoque insuficiente para essa quantidade!', 'error');
+            return;
+        }
+    }
+
     it.quantidade += delta;
     if (it.quantidade <= 0) {
         carrinho = carrinho.filter(c => c.tempId !== tempId);
