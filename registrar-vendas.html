@@ -194,9 +194,9 @@
           </div>
       </div>
       
-      <!-- Pagamento e Cliente -->
-      <div style="display:flex; gap:1rem;">
-          <div style="flex:1;">
+      <!-- Pagamento, Canal e Cliente -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div>
             <label class="field-label">Pagamento</label>
             <div class="select-wrap">
               <select id="f-pgto" class="fc" onchange="checkDinheiro()">
@@ -209,11 +209,24 @@
               <span class="chev material-symbols-outlined">expand_more</span>
             </div>
           </div>
-          
-          <div style="flex:1;">
-            <label class="field-label">Cliente (Opcional)</label>
-            <input id="f-cliente" type="text" class="fc" placeholder="Ex: Maria" />
+          <div>
+            <label class="field-label">Canal de Venda</label>
+            <div class="select-wrap">
+              <select id="f-canal" class="fc">
+                <option value="Direta">Venda Direta / Balcão</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="iFood">iFood</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <span class="chev material-symbols-outlined">expand_more</span>
+            </div>
           </div>
+      </div>
+      
+      <div class="mb-4">
+          <label class="field-label">Cliente (Opcional)</label>
+          <input id="f-cliente" type="text" class="fc" placeholder="Ex: Maria" />
       </div>
       
       <!-- Troco (Só para Dinheiro) -->
@@ -318,8 +331,8 @@ async function carregarCatalogos() {
     let resProd = { data: [] }, resCombo = { data: [] }, resPrec = { data: [] };
     
     try {
-        const [p, c, pr] = await Promise.all([
-            sb.from('produtos').select('id, nome, preco, custo, receita_id, ativo, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades)').eq('user_id', userId).order('nome'),
+          const [p, c, pr] = await Promise.all([
+            sb.from('produtos').select('id, nome, preco, custo, estoque_atual, receita_id, ativo, receitas(custo_ing, custo_emb, custo_eqp, custo_total, unidades)').eq('user_id', userId).order('nome'),
             sb.from('combos').select('*').eq('user_id', userId),
             sb.from('precificacao').select('*').eq('user_id', userId)
         ]);
@@ -355,7 +368,8 @@ async function carregarCatalogos() {
                     nome: p.nome,
                     preco: p.preco || 0,
                     basePreco: p.preco || 0,
-                    custo: custoFinal
+                    custo: custoFinal,
+                    estoque_atual: p.estoque_atual || 0
                 });
             }
         });
@@ -419,8 +433,13 @@ function filtrarCatalogo() {
         if (item.tipo === 'produto' || item.tipo === 'combo') {
             displayPreco = getMktPreco(item, currentMktId);
         }
+        let estoqueInfo = '';
+        if (item.tipo === 'produto') {
+            estoqueInfo = `<div style="font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom: 0.25rem;">Estoque: <span style="color:${item.estoque_atual > 0 ? '#10b981' : '#ef4444'}">${item.estoque_atual || 0}</span></div>`;
+        }
         return `
-        <div class="cat-card" style="padding-top: 1.5rem; min-height: 100px;">
+        <div class="cat-card" style="padding-top: 1rem; min-height: 100px;">
+            ${estoqueInfo}
             <div class="cat-title">${item.nome}</div>
             <div class="cat-price">${fmtR(displayPreco)}</div>
             <button class="cat-btn" onclick="addToCartFromCatalog('${item.id}', '${item.tipo}')" title="Adicionar ao Carrinho">
@@ -620,6 +639,7 @@ async function salvar() {
         valor_total: total,
         cliente_nome: cliente,
         forma_pagamento: pgto,
+        canal_venda: document.getElementById('f-canal').value,
         valor_recebido: pgto === 'Dinheiro' ? recebido : null,
         troco: pgto === 'Dinheiro' ? troco : null
     };
@@ -628,6 +648,17 @@ async function salvar() {
     document.getElementById('btn-save').textContent = 'Finalizar Venda';
     
     if (!error) {
+        // Deduz estoque para os produtos vendidos
+        for (const c of carrinho) {
+            if (c.tipo === 'produto') {
+                const prodRef = catalogo.find(x => x.id == c.id && x.tipo === 'produto');
+                if (prodRef && prodRef.estoque_atual !== undefined) {
+                    const novoEstoque = (prodRef.estoque_atual || 0) - c.quantidade;
+                    await sb.from('produtos').update({ estoque_atual: novoEstoque }).eq('id', c.id);
+                }
+            }
+        }
+
         showToast('Venda registrada com sucesso!');
         closeModal();
         carrinho = []; // limpa o carrinho
@@ -636,6 +667,7 @@ async function salvar() {
         // Limpa form
         document.getElementById('f-cliente').value = '';
         document.getElementById('f-pgto').value = 'Pix';
+        document.getElementById('f-canal').value = 'Direta';
         document.getElementById('f-recebido').value = '';
         checkDinheiro();
     } else {

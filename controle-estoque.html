@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Controle de Estoque - ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="plano-guard.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        input,select,textarea { background-color:#1E1E1E !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder,textarea::placeholder { color:#475569 !important; }
+        input:focus,select:focus,textarea:focus { border-color:rgba(37,244,244,.5) !important; box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; outline:none !important; }
+
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+        
+        .tab-btn { padding: .6rem 1rem; color: #64748b; font-weight: 600; border: 1px solid #2A2A2A; border-radius: .5rem; cursor: pointer; transition:all .15s; background: #141414; display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
+        .tab-btn.active { color: #25f4f4; border-color: #25f4f4; background: rgba(37,244,244,0.1); }
+        .tab-btn:hover:not(.active) { color: #94a3b8; border-color: #3f3f46; background: #1c1c1c; }
+
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.05rem;pointer-events:none; }
+        .search-box { width:100%;padding:.7rem 1rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.875rem;outline:none;transition:border-color .2s; }
+        .search-box:focus { border-color:rgba(37,244,244,.45); }
+
+        .card { background:#141414;border:1px solid #2A2A2A;border-radius:1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem 1.25rem; color: #64748b; font-size: .75rem; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid #2A2A2A; white-space:nowrap; }
+        td { padding: 1rem 1.25rem; border-bottom: 1px solid #1f1f1f; font-size: .875rem; white-space:nowrap; }
+        tr:last-child td { border-bottom: none; }
+
+        /* Modal Base */
+        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);z-index:50;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:1rem; }
+        .modal-overlay.open { opacity:1;pointer-events:auto; }
+        .modal-content { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem;width:100%;max-width:400px;transform:translateY(15px) scale(0.98);transition:all .2s;display:flex;flex-direction:column;max-height:90vh; }
+        .modal-overlay.open .modal-content { transform:translateY(0) scale(1); }
+        .modal-header { padding:1.25rem 1.5rem;border-b:1px solid #2A2A2A;display:flex;align-items:center;justify-content:space-between; }
+        .modal-header h3 { font-size:1.1rem;font-weight:700;margin:0; }
+        .modal-close { color:#64748b;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s; }
+        .modal-close:hover { color:#f1f5f9; }
+        .modal-body { padding:1.5rem;overflow-y:auto; }
+        .modal-footer { padding:1.25rem 1.5rem;border-t:1px solid #2A2A2A;display:flex;gap:.75rem;justify-content:flex-end; }
+        
+        .btn-primary { background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#000;font-weight:700;padding:.6rem 1.2rem;border-radius:.5rem;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:.875rem; }
+        .btn-primary:hover { box-shadow:0 0 15px rgba(37,244,244,.4); }
+        .btn-sec { background:#1E1E1E;color:#f1f5f9;border:1px solid #333;font-weight:600;padding:.6rem 1.2rem;border-radius:.5rem;cursor:pointer;font-size:.875rem; }
+        .btn-sec:hover { background:#2A2A2A;border-color:#444; }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-28">
+
+    <header class="sticky top-0 z-20 bg-background-dark/90 backdrop-blur border-b border-border-dark">
+        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+            <button class="btn-back" onclick="location.href='index.html'">
+                <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+            </button>
+            <h1 class="text-base font-semibold flex-1">Controle de Estoque</h1>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        
+        <div class="card p-3 flex flex-wrap gap-3 mb-6">
+            <button class="tab-btn active" onclick="switchTab('estoque', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Gestão de Estoque
+            </button>
+            <button class="tab-btn" onclick="switchTab('relatorio', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">receipt_long</span> Relatório de Saídas
+            </button>
+        </div>
+
+        <!-- ABA ESTOQUE -->
+        <div id="tab-estoque">
+            <div class="search-wrap mb-4">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="search-prod" type="search" class="search-box" placeholder="Procurar produto..." oninput="renderEstoque()" />
+            </div>
+            
+            <div class="card p-0 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-[#141414]">
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th>Preço Venda</th>
+                                <th>Estoque Atual</th>
+                                <th class="text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estoque-body"></tbody>
+                    </table>
+                </div>
+                <div id="estoque-empty" class="text-center py-8 text-slate-500" style="display:none">
+                    <p class="text-sm">Nenhum produto encontrado.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA RELATÓRIO -->
+        <div id="tab-relatorio" style="display:none">
+            <div class="search-wrap mb-4">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="search-venda" type="search" class="search-box" placeholder="Procurar no relatório..." oninput="renderRelatorio()" />
+            </div>
+            
+            <div class="card p-0 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-[#141414]">
+                            <tr>
+                                <th>Data</th>
+                                <th>Itens Vendidos</th>
+                                <th>Canal de Venda</th>
+                                <th class="text-right">Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relatorio-body"></tbody>
+                    </table>
+                </div>
+                <div id="relatorio-empty" class="text-center py-8 text-slate-500" style="display:none">
+                    <p class="text-sm">Nenhuma venda encontrada.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Ajustar Estoque -->
+    <div id="modal-estoque" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ajustar Estoque</h3>
+                <button class="modal-close" onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4 text-sm text-slate-300">
+                    Produto: <strong id="modal-prod-nome" class="text-white"></strong><br>
+                    Estoque Atual: <strong id="modal-prod-atual" class="text-primary"></strong>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Ajuste de Quantidade</label>
+                    <div class="flex gap-2">
+                        <button onclick="changeQtd(-1)" class="w-10 h-10 rounded bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333]">
+                            <span class="material-symbols-outlined">remove</span>
+                        </button>
+                        <input id="modal-qtd" type="number" class="w-full text-center rounded border-[#2A2A2A] bg-[#1A1A1A] text-white" value="0">
+                        <button onclick="changeQtd(1)" class="w-10 h-10 rounded bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333]">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Dica: Use valores positivos para adicionar e negativos para remover avarias/perdas.</p>
+                </div>
+                
+                <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <div class="text-xs text-slate-400">Novo Saldo Final:</div>
+                    <div id="modal-novo-saldo" class="text-xl font-bold text-white mt-1">0</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-sec" onclick="closeModal()">Cancelar</button>
+                <button class="btn-primary" onclick="salvarEstoque()">Salvar Ajuste</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let produtos = [];
+        let vendas = [];
+        let prodSelected = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadDados();
+        });
+
+        async function loadDados() {
+            try {
+                const user = await getUser();
+                
+                // Produtos (somente ativos)
+                const { data: pData } = await sb.from('produtos').select('*').eq('user_id', user.id).eq('ativo', true).order('nome');
+                produtos = pData || [];
+                
+                // Vendas (relatório)
+                const { data: vData } = await sb.from('vendas_clientes').select('*').eq('user_id', user.id).order('created_at', {ascending: false});
+                vendas = vData || [];
+                
+                renderEstoque();
+                renderRelatorio();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-estoque').style.display = tab === 'estoque' ? 'block' : 'none';
+            document.getElementById('tab-relatorio').style.display = tab === 'relatorio' ? 'block' : 'none';
+        }
+
+        function fmtR(val) {
+            return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function renderEstoque() {
+            const q = document.getElementById('search-prod').value.toLowerCase();
+            const filtered = produtos.filter(p => p.nome.toLowerCase().includes(q) || (p.categoria && p.categoria.toLowerCase().includes(q)));
+            
+            const tbody = document.getElementById('estoque-body');
+            const empty = document.getElementById('estoque-empty');
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-[#1A1A1A] transition-colors">
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-[#111] overflow-hidden flex-shrink-0 border border-[#2A2A2A] flex items-center justify-center">
+                                ${p.imagem_url ? `<img src="${p.imagem_url}" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-slate-600">fastfood</span>`}
+                            </div>
+                            <span class="font-semibold text-slate-200">${p.nome}</span>
+                        </div>
+                    </td>
+                    <td class="text-slate-400">${p.categoria || '-'}</td>
+                    <td class="text-slate-300 font-medium">${fmtR(p.preco)}</td>
+                    <td>
+                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold ${p.estoque_atual > 0 ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800' : 'bg-red-900/40 text-red-400 border border-red-800'}">
+                            ${p.estoque_atual || 0} unid
+                        </span>
+                    </td>
+                    <td class="text-right">
+                        <button onclick="openModal(${p.id})" class="btn-sec text-xs px-3 py-1.5 inline-flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:16px">edit_square</span> Ajustar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderRelatorio() {
+            const q = document.getElementById('search-venda').value.toLowerCase();
+            
+            let filtered = vendas;
+            if(q) {
+                filtered = vendas.filter(v => 
+                    (v.canal_venda && v.canal_venda.toLowerCase().includes(q)) || 
+                    (v.cliente_nome && v.cliente_nome.toLowerCase().includes(q)) ||
+                    JSON.stringify(v.itens).toLowerCase().includes(q)
+                );
+            }
+            
+            const tbody = document.getElementById('relatorio-body');
+            const empty = document.getElementById('relatorio-empty');
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            tbody.innerHTML = filtered.map(v => {
+                let txtItens = '';
+                try {
+                    const arr = typeof v.itens === 'string' ? JSON.parse(v.itens) : v.itens;
+                    if(Array.isArray(arr)) {
+                        txtItens = arr.map(i => `${i.quantidade}x ${i.nome}`).join('<br>');
+                    }
+                } catch(e) {}
+                
+                let canalStyle = 'bg-slate-800 text-slate-300';
+                if(v.canal_venda === 'iFood') canalStyle = 'bg-red-900/40 text-red-400 border border-red-800';
+                else if(v.canal_venda === 'WhatsApp') canalStyle = 'bg-emerald-900/40 text-emerald-400 border border-emerald-800';
+                
+                return `
+                <tr class="hover:bg-[#1A1A1A] transition-colors">
+                    <td class="text-slate-400 text-sm">
+                        ${new Date(v.created_at).toLocaleDateString('pt-BR')} <br>
+                        <span class="text-xs text-slate-600">${new Date(v.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</span>
+                    </td>
+                    <td class="text-slate-300 text-sm font-medium leading-relaxed">${txtItens || '-'}</td>
+                    <td>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold ${canalStyle}">
+                            ${v.canal_venda || 'Direta'}
+                        </span>
+                    </td>
+                    <td class="text-right font-bold text-primary">${fmtR(v.valor_total)}</td>
+                </tr>
+            `}).join('');
+        }
+
+        // Modal Logic
+        function openModal(id) {
+            prodSelected = produtos.find(p => p.id === id);
+            if(!prodSelected) return;
+            
+            document.getElementById('modal-prod-nome').textContent = prodSelected.nome;
+            document.getElementById('modal-prod-atual').textContent = (prodSelected.estoque_atual || 0) + ' unid';
+            document.getElementById('modal-qtd').value = 0;
+            updateSaldo();
+            
+            document.getElementById('modal-estoque').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-estoque').classList.remove('open');
+            prodSelected = null;
+        }
+
+        function changeQtd(delta) {
+            const inp = document.getElementById('modal-qtd');
+            let val = parseInt(inp.value) || 0;
+            inp.value = val + delta;
+            updateSaldo();
+        }
+        
+        document.getElementById('modal-qtd').addEventListener('input', updateSaldo);
+
+        function updateSaldo() {
+            if(!prodSelected) return;
+            const atual = prodSelected.estoque_atual || 0;
+            const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
+            const novo = atual + ajuste;
+            const d = document.getElementById('modal-novo-saldo');
+            d.textContent = novo + ' unid';
+            if(novo < 0) d.classList.replace('text-white', 'text-red-400');
+            else d.classList.replace('text-red-400', 'text-white');
+        }
+
+        async function salvarEstoque() {
+            if(!prodSelected) return;
+            const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
+            if(ajuste === 0) { closeModal(); return; }
+            
+            const novoEstoque = (prodSelected.estoque_atual || 0) + ajuste;
+            
+            try {
+                const { error } = await sb.from('produtos').update({ estoque_atual: novoEstoque }).eq('id', prodSelected.id);
+                if (error) throw error;
+                
+                prodSelected.estoque_atual = novoEstoque;
+                renderEstoque();
+                closeModal();
+            } catch(e) {
+                console.error(e);
+                alert('Erro ao atualizar estoque: ' + (e.message || JSON.stringify(e)));
+            }
+        }
+    </script>
+</body>
+</html>
