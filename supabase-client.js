@@ -5,6 +5,15 @@
 const SUPABASE_URL = 'https://pipknmwjpblitqlxxdcw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
 
+const APP_VERSION = 'v1.1'; // Change to force logout and reload
+if (localStorage.getItem('rx_app_version') !== APP_VERSION) {
+    localStorage.clear();
+    localStorage.setItem('rx_app_version', APP_VERSION);
+    if (!window.location.href.includes('login.html')) {
+        window.location.href = 'login.html?updated=true';
+    }
+}
+
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
         persistSession: true,
