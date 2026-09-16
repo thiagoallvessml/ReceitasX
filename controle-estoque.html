@@ -49,15 +49,15 @@
         .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:0; }
         @media(min-width:640px) { .modal-overlay { align-items:center;padding:1rem; } }
         .modal-overlay.open { opacity:1;pointer-events:auto; }
-        .modal-content { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.5rem 1.5rem 0 0;width:100%;max-width:440px;transform:translateY(30px);transition:all .25s;display:flex;flex-direction:column;max-height:90vh; }
+        .modal-content { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.25rem 1.25rem 0 0;width:100%;max-width:440px;transform:translateY(30px);transition:all .25s;display:flex;flex-direction:column; }
         @media(min-width:640px) { .modal-content { border-radius:1.25rem;transform:translateY(15px) scale(0.98); } }
         .modal-overlay.open .modal-content { transform:translateY(0) scale(1); }
-        .modal-header { padding:1.25rem 1.5rem;border-b:1px solid #2A2A2A;display:flex;align-items:center;justify-content:space-between; }
-        .modal-header h3 { font-size:1.05rem;font-weight:700;margin:0; }
+        .modal-header { padding:.875rem 1.25rem;border-b:1px solid #2A2A2A;display:flex;align-items:center;justify-content:space-between; }
+        .modal-header h3 { font-size:.95rem;font-weight:700;margin:0; }
         .modal-close { color:#64748b;background:none;border:none;cursor:pointer;padding:.25rem;display:flex;align-items:center;justify-content:center;border-radius:.5rem;transition:all .15s; }
         .modal-close:hover { color:#f1f5f9;background:#2A2A2A; }
-        .modal-body { padding:1.5rem;overflow-y:auto;flex:1; }
-        .modal-footer { padding:1.25rem 1.5rem;border-t:1px solid #2A2A2A;display:flex;gap:.75rem;justify-content:flex-end; }
+        .modal-body { padding:1rem 1.25rem;overflow-y:auto;flex:1; }
+        .modal-footer { padding:.875rem 1.25rem;border-t:1px solid #2A2A2A;display:flex;gap:.75rem;justify-content:flex-end; }
         .btn-primary { background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#000;font-weight:700;padding:.65rem 1.4rem;border-radius:.75rem;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:.875rem;transition:all .15s; }
         .btn-primary:hover { box-shadow:0 0 20px rgba(37,244,244,.35); }
         .btn-sec { background:#1E1E1E;color:#cbd5e1;border:1px solid #333;font-weight:600;padding:.65rem 1.4rem;border-radius:.75rem;cursor:pointer;font-size:.875rem;transition:all .15s; }
@@ -195,32 +195,35 @@
             <div class="modal-header">
                 <div>
                     <h3>Ajustar Estoque</h3>
-                    <p class="text-xs text-slate-500 mt-0.5" id="modal-prod-nome"></p>
+                    <p class="text-xs text-slate-500" id="modal-prod-nome"></p>
                 </div>
                 <button class="modal-close" onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <div class="modal-body space-y-4">
-                <div class="flex items-center justify-between p-3 bg-[#111] rounded-xl border border-[#2A2A2A]">
+            <div class="modal-body" style="gap:.75rem;display:flex;flex-direction:column;">
+                <!-- Saldo atual -->
+                <div class="flex items-center justify-between p-2.5 bg-[#111] rounded-xl border border-[#2A2A2A]">
                     <span class="text-xs text-slate-500 font-medium">Saldo Atual</span>
-                    <span class="font-bold text-lg text-slate-200" id="modal-prod-atual">0 unid</span>
+                    <span class="font-bold text-base text-slate-200" id="modal-prod-atual">0 unid</span>
                 </div>
+                <!-- Ajuste -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Quantidade a Ajustar</label>
+                    <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Ajuste</label>
                     <div class="flex gap-2 items-center">
                         <button onclick="changeQtd(-1)" class="w-11 h-11 rounded-xl bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333] text-slate-300 flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">remove</span>
                         </button>
-                        <input id="modal-qtd" type="number" class="flex-1 text-center rounded-xl border-[#2A2A2A] bg-[#1A1A1A] text-white text-xl font-bold py-2.5" value="0" />
+                        <input id="modal-qtd" type="number" class="flex-1 text-center rounded-xl border-[#2A2A2A] bg-[#1A1A1A] text-white text-2xl font-bold py-2" value="0" />
                         <button onclick="changeQtd(1)" class="w-11 h-11 rounded-xl bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333] text-slate-300 flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">add</span>
                         </button>
                     </div>
-                    <p class="text-xs text-slate-600 mt-2">Positivo (+) para producao, negativo (-) para avarias/perdas.</p>
+                    <p class="text-xs text-slate-600 mt-1.5">Positivo (+) para producao, negativo (-) para perdas.</p>
                 </div>
-                <div class="p-4 bg-[#0d0d0d] rounded-xl border border-[#2A2A2A] flex items-center justify-between">
+                <!-- Novo saldo -->
+                <div class="p-2.5 bg-[#0d0d0d] rounded-xl border border-[#2A2A2A] flex items-center justify-between">
                     <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Novo Saldo</span>
-                    <div class="text-right">
-                        <span id="modal-novo-saldo" class="text-2xl font-black text-white">0</span>
+                    <div>
+                        <span id="modal-novo-saldo" class="text-xl font-black text-white">0</span>
                         <span class="text-sm text-slate-500 ml-1">unid</span>
                     </div>
                 </div>
@@ -228,7 +231,7 @@
             <div class="modal-footer">
                 <button class="btn-sec" onclick="closeModal()">Cancelar</button>
                 <button class="btn-primary" onclick="salvarEstoque()">
-                    <span class="material-symbols-outlined" style="font-size:18px">check</span> Salvar
+                    <span class="material-symbols-outlined" style="font-size:17px">check</span> Salvar
                 </button>
             </div>
         </div>
