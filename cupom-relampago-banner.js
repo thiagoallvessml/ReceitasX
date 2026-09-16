@@ -10,6 +10,18 @@
             ref = localStorage.getItem('receitasx_ref');
         }
         
+        // Se ainda não tiver ref, mas o usuário estiver logado, buscar do perfil dele no Supabase
+        if (!ref && window.sb) {
+            const { data: { session } } = await window.sb.auth.getSession();
+            if (session) {
+                const { data: perfil } = await window.sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
+                if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora') {
+                    ref = perfil.origem_cadastro;
+                    localStorage.setItem('receitasx_ref', ref);
+                }
+            }
+        }
+
         if (!ref) return;
 
         const couponCode = (ref + 'RELAMPAGO').toUpperCase().substring(0,30);
@@ -43,7 +55,6 @@
             msg.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem;vertical-align:middle">check_circle</span> Copiado!';
             setTimeout(() => { msg.innerHTML = oldHtml; }, 2000);
             
-            // Se já estiver na página de checkout, aplicar o cupom automaticamente!
             const impCupom = document.getElementById('f-cupom');
             const btnCupom = document.getElementById('btn-aplicar');
             if (impCupom && btnCupom) {
