@@ -465,8 +465,15 @@ function addMkt() {
     closeMktForm();
     showToast('Marketplace adicionado!');
 }
-function delMkt(i) {
+async function delMkt(i) {
+    const mkt = marketplaces[i];
     marketplaces.splice(i, 1);
+    
+    try {
+        const uid = (await sb.auth.getSession()).data?.session?.user?.id;
+        if (uid) await sb.from('marketplaces').delete().eq('user_id', uid).eq('id', mkt.id);
+    } catch(e) {}
+    
     localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
     renderMkts();
     showToast('Marketplace removido.');
@@ -487,15 +494,24 @@ async function load() {
             localStorage.setItem('receitasx_uid', user.id);
 
             const { data, error } = await sb.from('configuracoes')
-                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem, taxa_cartao, taxa_imposto, taxa_comissao, marketplaces')
+                .select('gas_custo, gas_rendimento, energia_kwh, mao_obra_hora, meta_margem, taxa_cartao, taxa_imposto, taxa_comissao')
                 .eq('user_id', user.id).maybeSingle();
 
+            // Busca os marketplaces na tabela separada
+            const { data: mktData } = await sb.from('marketplaces').select('*').eq('user_id', user.id);
+            if (mktData && mktData.length > 0) {
+                marketplaces = mktData.map(m => ({ id: m.id, nome: m.nome, taxa: m.taxa }));
+                
+                // Força os padroes
+                const hasCasa = marketplaces.find(x => x.id === 'casa');
+                if (!hasCasa) marketplaces.unshift(MKT_DEFAULTS[0]);
+                const hasIfood = marketplaces.find(x => x.id === 'ifood');
+                if (!hasIfood && marketplaces.length < 2) marketplaces.splice(1, 0, MKT_DEFAULTS[1]);
+                
+                localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
+            }
+
             if (!error && data) {
-                // Sincroniza dinâmicos
-                if (data.marketplaces) {
-                    marketplaces = Array.isArray(data.marketplaces) ? data.marketplaces : JSON.parse(data.marketplaces);
-                    localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
-                }
 
                 // Usuário tem dados salvos — carrega normalmente
                 const gasPeso  = parseFloat(data.gas_rendimento || DEFAULTS.gasPeso);
@@ -579,21 +595,26 @@ async function salvar() {
         const user = await getUser();
         if (user) {
             const custoKg = gasPeso > 0 ? gasPreco / gasPeso : 0;
-            const payload = {
-                user_id:       user.id,
-                gas_custo:     custoKg,            // custo por kg
-                gas_rendimento: gasPeso,           // peso do botiajão
-                energia_kwh:   cfg.kwh,
-                meta_margem:   cfg.precExcel,
-                taxa_cartao:   cfg.taxaCartao,
-                taxa_imposto:  cfg.taxaImposto,
-                taxa_comissao: cfg.taxaComissao,
-                marketplaces:  marketplaces,
-                updated_at:    new Date().toISOString(),
-            };
-            const { error } = await sb.from('configuracoes')
-                .upsert(payload, { onConflict: 'user_id' });
-            if (error) throw error;
+                const payload = {
+                    user_id:       user.id,
+                    gas_custo:     custoKg,            // custo por kg
+                    gas_rendimento: gasPeso,           // peso do botijão
+                    energia_kwh:   cfg.kwh,
+                    meta_margem:   cfg.precExcel,
+                    taxa_cartao:   cfg.taxaCartao,
+                    taxa_imposto:  cfg.taxaImposto,
+                    taxa_comissao: cfg.taxaComissao,
+                    updated_at:    new Date().toISOString(),
+                };
+                const { error } = await sb.from('configuracoes')
+                    .upsert(payload, { onConflict: 'user_id' });
+                if (error) throw error;
+                
+                // Sincroniza Marketplaces na tabela separada
+                const insertData = marketplaces.map(mk => ({ id: mk.id, user_id: user.id, nome: mk.nome, taxa: mk.taxa || 0 }));
+                if (insertData.length > 0) {
+                    await sb.from('marketplaces').upsert(insertData);
+                }
             showToast('Configurações salvas! ☁️');
         } else {
             showToast('Configurações salvas localmente!');
