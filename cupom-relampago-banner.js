@@ -9,31 +9,30 @@
             ref = localStorage.getItem('receitasx_ref');
         }
         
-        // Tentar pegar a sessao diretamente do localStorage do Supabase, já que o supabase-js faz isso
         if (!ref) {
-            // Verifica se o objeto "sb" existe no escopo global
-            if (typeof sb !== 'undefined') {
-                const { data: { session } } = await sb.auth.getSession();
-                if (session) {
-                    const { data: perfil } = await sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
-                    if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora') {
-                        ref = perfil.origem_cadastro;
-                        localStorage.setItem('receitasx_ref', ref);
+            if (typeof sb !== 'undefined' && sb.auth) {
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session) {
+                        const { data: perfil } = await sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
+                        if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora') {
+                            ref = perfil.origem_cadastro;
+                            localStorage.setItem('receitasx_ref', ref);
+                        }
                     }
-                }
+                } catch(e) { console.error('SB fetch err', e); }
             } else {
-                // Fallback manual pra ler o localStorage se o "sb" nao estiver carregado
                 const authKeys = Object.keys(localStorage).filter(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
                 if (authKeys.length > 0) {
                     try {
                         const tokenStr = localStorage.getItem(authKeys[0]);
                         const tokenData = JSON.parse(tokenStr);
                         if (tokenData && tokenData.user && tokenData.user.id) {
-                            const SUPABASE_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://pipknmwjpblitqlxxdcw.supabase.co';
-                            const SUPABASE_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
+                            const API_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://pipknmwjpblitqlxxdcw.supabase.co';
+                            const API_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
                             
-                            const resPerf = await fetch(SUPABASE_URL + '/rest/v1/perfis?select=origem_cadastro&id=eq.' + tokenData.user.id, {
-                                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+                            const resPerf = await fetch(API_URL + '/rest/v1/perfis?select=origem_cadastro&id=eq.' + tokenData.user.id, {
+                                headers: { 'apikey': API_KEY, 'Authorization': 'Bearer ' + tokenData.access_token }
                             });
                             if (resPerf.ok) {
                                 const perfs = await resPerf.json();
@@ -48,9 +47,13 @@
             }
         }
 
-        if (!ref) return;
+        if (!ref) {
+            console.log('Sem ref definido.');
+            return;
+        }
 
         const couponCode = (ref + 'RELAMPAGO').toUpperCase().substring(0,30);
+        console.log('Buscando cupom:', couponCode);
 
         const API_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://pipknmwjpblitqlxxdcw.supabase.co';
         const API_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
@@ -59,15 +62,24 @@
             headers: { 'apikey': API_KEY, 'Authorization': 'Bearer ' + API_KEY }
         });
         
-        if (!res.ok) return;
+        if (!res.ok) {
+            console.log('Erro ao buscar cupom', await res.text());
+            return;
+        }
         const cupons = await res.json();
-        if (!cupons || cupons.length === 0) return;
+        if (!cupons || cupons.length === 0) {
+            console.log('Cupom nao encontrado ou inativo');
+            return;
+        }
 
         const cupom = cupons[0];
         if (!cupom.data_expiracao) return;
 
         const expDate = new Date(cupom.data_expiracao);
-        if (expDate <= new Date()) return;
+        if (expDate <= new Date()) {
+            console.log('Cupom expirado');
+            return;
+        }
 
         const banner = document.createElement('div');
         banner.id = 'cr-banner';
