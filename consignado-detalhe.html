@@ -332,7 +332,7 @@ async function loadDados() {
         fechamentos = fData || [];
         
         // Load User Catalog
-        const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado').eq('user_id', user.id).eq('ativo', true).order('nome');
+        const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado, receita_id, receitas(estoque_atual)').eq('user_id', user.id).eq('ativo', true).order('nome');
         produtos = prodData || [];
         
         render();
@@ -476,7 +476,10 @@ function switchTab(tab, btn) {
 
 function openAddEstoque() {
     let opts = '<option value="">-- Selecione ou digite abaixo --</option>';
-    produtos.forEach(p => opts += `<option value="${p.id}">${p.nome}</option>`);
+    produtos.forEach(p => {
+        const est = p.receitas?.estoque_atual || 0;
+        opts += `<option value="${p.id}">${p.nome} (${est} em estoque)</option>`;
+    });
     document.getElementById('f-prod').innerHTML = opts;
     
     document.getElementById('f-nome').value = '';
@@ -506,6 +509,17 @@ async function salvarEstoque() {
     if(!nome || qtd <= 0 || preco <= 0) return alert('Preencha os campos corretamente');
     
     const pId = document.getElementById('f-prod').value;
+    
+    // Validação de estoque
+    if (pId) {
+        const prod = produtos.find(x => x.id == pId);
+        if (prod) {
+            const estoqueAtual = prod.receitas?.estoque_atual || 0;
+            if (qtd > estoqueAtual) {
+                return alert(`Quantidade inválida! Você possui apenas ${estoqueAtual} unid. de ${prod.nome} em estoque.`);
+            }
+        }
+    }
     
     try {
         const user = await getUser();
