@@ -44,8 +44,8 @@
             setTimeout(() => { msg.innerHTML = oldHtml; }, 2000);
             
             // Se já estiver na página de checkout, aplicar o cupom automaticamente!
-            const impCupom = document.getElementById('inp-cupom');
-            const btnCupom = document.getElementById('btn-aplicar-cupom');
+            const impCupom = document.getElementById('f-cupom');
+            const btnCupom = document.getElementById('btn-aplicar');
             if (impCupom && btnCupom) {
                 impCupom.value = cupom.codigo;
                 btnCupom.click();
@@ -71,6 +71,18 @@
 
         document.body.appendChild(banner);
         document.body.style.paddingTop = '4rem';
+
+        // Auto-aplica no checkout se estiver na página!
+        const impCupom = document.getElementById('f-cupom');
+        const btnCupom = document.getElementById('btn-aplicar');
+        if (impCupom && btnCupom) {
+            setTimeout(() => {
+                impCupom.disabled = false;
+                btnCupom.disabled = false;
+                impCupom.value = cupom.codigo;
+                btnCupom.click();
+            }, 1000);
+        }
 
         // Timer
         const updateTimer = () => {
