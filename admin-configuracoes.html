@@ -162,6 +162,49 @@
         </div>
     </div>
 
+    <!-- ⚡ Cupom Relâmpago ⚡ -->
+    <div class="cfg-card">
+        <div class="cfg-card-head" style="border-bottom:none">
+            <div class="ico" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.2);">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;color:#eab308;font-variation-settings:'FILL' 1">bolt</span>
+            </div>
+            <div>
+                <h2>Cupom Relâmpago Global</h2>
+                <p>Gere e ative cupons de desconto temporários para todos os afiliados simultaneamente.</p>
+            </div>
+        </div>
+        <div class="cfg-body" style="padding-top:0;">
+            <div style="background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.15);border-radius:.75rem;padding:1rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end">
+                
+                <div style="flex:1;min-width:120px">
+                    <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Desconto (%)</label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">%</div>
+                        <input class="cfg-input" id="relampago_desc" type="number" min="1" max="100" value="20" />
+                    </div>
+                </div>
+                
+                <div style="flex:1;min-width:120px">
+                    <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Duração (Horas)</label>
+                    <div class="input-wrap">
+                        <div class="input-prefix"><span class="material-symbols-outlined" style="font-size:1rem">schedule</span></div>
+                        <input class="cfg-input" id="relampago_horas" type="number" min="1" max="168" value="24" />
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                    <button id="btn-ativar-rel" onclick="ativarRelampago()" style="background:#eab308;color:#422006;font-weight:700;border:none;padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:opacity .2s">
+                        <span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Cupons Relâmpago
+                    </button>
+                    <button id="btn-desativar-rel" onclick="desativarRelampago()" style="background:transparent;color:#eab308;font-weight:600;border:1px solid rgba(234,179,8,.3);padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;transition:background .2s">
+                        Desativar Todos
+                    </button>
+                </div>
+            </div>
+            <p style="font-size:.7rem;color:#64748b;margin-top:.2rem">Isso criará o código <strong>[AFILIADO]RELAMPAGO</strong> para cada um. Se um cupom relâmpago já estiver rodando, ele será substituído.</p>
+        </div>
+    </div>
+
     <!-- ── Resumo atual ── -->
     <div class="cfg-card">
         <div class="cfg-card-head">
@@ -263,7 +306,77 @@ function renderResumo(cfg) {
         </div>`;
 }
 
-/* ── Salvar ──────────────────────────────────────────────────────── */
+/* ⚡ Cupom Relâmpago ⚡ */
+async function ativarRelampago() {
+    const desconto = parseFloat(document.getElementById('relampago_desc').value);
+    const horas = parseFloat(document.getElementById('relampago_horas').value);
+    
+    if(!desconto || desconto <= 0) return alert('Insira um desconto válido');
+    if(!horas || horas <= 0) return alert('Insira horas válidas');
+    
+    if(!confirm(`Isto irá CRIAR cupons de ${desconto}% para TODOS os afiliados. Os cupons serão válidos por ${horas} horas. Confirma?`)) return;
+    
+    const btn = document.getElementById('btn-ativar-rel');
+    btn.innerHTML = 'Gerando...';
+    btn.disabled = true;
+    
+    try {
+        const { data: afiliados, error: errAf } = await sb.from('afiliados').select('id, codigo').not('codigo', 'is', null);
+        if(errAf) throw errAf;
+        
+        const expDate = new Date(Date.now() + (horas * 60 * 60 * 1000)).toISOString();
+        const cuponsToInsert = afiliados.map(af => ({
+            codigo: (af.codigo + 'RELAMPAGO').toUpperCase().substring(0,30),
+            tipo: 'porcentagem',
+            valor: desconto,
+            ativo: true,
+            usos_atual: 0,
+            cliques: 0,
+            afiliado_id: af.id,
+            data_expiracao: expDate
+        }));
+        
+        const codigosParaDeletar = cuponsToInsert.map(c => c.codigo);
+        await sb.from('cupons').delete().in('codigo', codigosParaDeletar);
+        
+        const { error: errIns } = await sb.from('cupons').insert(cuponsToInsert);
+        if(errIns) throw errIns;
+        
+        showToast(`⚡ Sucesso! ${cuponsToInsert.length} cupons ativados!`);
+    } catch(e) {
+        alert('Erro ao ativar: ' + e.message);
+    } finally {
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Cupons Relâmpago';
+        btn.disabled = false;
+    }
+}
+
+async function desativarRelampago() {
+    if(!confirm('Isto irá DESATIVAR (excluir) todos os cupons relâmpago ativos. Confirma?')) return;
+    
+    const btn = document.getElementById('btn-desativar-rel');
+    btn.innerHTML = 'Desativando...';
+    btn.disabled = true;
+    
+    try {
+        const { data: afiliados } = await sb.from('afiliados').select('codigo').not('codigo', 'is', null);
+        const codigosParaDeletar = (afiliados||[]).map(af => (af.codigo + 'RELAMPAGO').toUpperCase().substring(0,30));
+        
+        if (codigosParaDeletar.length > 0) {
+            const { error } = await sb.from('cupons').delete().in('codigo', codigosParaDeletar);
+            if(error) throw error;
+        }
+        
+        showToast('Cupons Relâmpago desativados!');
+    } catch(e) {
+        alert('Erro ao desativar: ' + e.message);
+    } finally {
+        btn.innerHTML = 'Desativar Todos';
+        btn.disabled = false;
+    }
+}
+
+/* 🔄 Salvar 🔄─────────────────────────────────────────────────────────────────── */
 async function salvar() {
     const btn = document.getElementById('btn-save');
     btn.disabled = true;
