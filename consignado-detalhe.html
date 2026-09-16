@@ -536,6 +536,15 @@ async function salvarEstoque() {
         const { error } = await sb.from('consignados_estoque').insert([payload]);
         if (error) throw error;
         
+        // Desconta do estoque principal (receitas)
+        if (pId) {
+            const prod = produtos.find(x => x.id == pId);
+            if (prod && prod.receita_id) {
+                const novoEstoque = (prod.receitas?.estoque_atual || 0) - qtd;
+                await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', prod.receita_id);
+            }
+        }
+        
         document.getElementById('modal-estoque').classList.remove('open');
         loadDados();
     } catch(e) {
@@ -701,6 +710,17 @@ async function confirmarRecolher() {
             quantidade: q
         }]);
         if (e2) throw e2;
+
+        // 3. Devolve para o estoque principal (receitas)
+        if (recolherTemp.produto_id) {
+            const prod = produtos.find(x => x.id == recolherTemp.produto_id);
+            if (prod && prod.receita_id) {
+                // Como não atualizamos o 'produtos' local no Recolher em tempo real, 
+                // é mais seguro ler direto do banco, mas podemos usar o valor atual da RAM e somar.
+                const estoqueAtual = prod.receitas?.estoque_atual || 0;
+                await sb.from('receitas').update({ estoque_atual: estoqueAtual + q }).eq('id', prod.receita_id);
+            }
+        }
 
         document.getElementById('modal-recolher').classList.remove('open');
         loadDados();
