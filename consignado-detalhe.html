@@ -379,7 +379,7 @@ async function loadDados() {
         fechamentos = fData || [];
         
         // Load User Catalog
-        const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado, receita_id, receitas(estoque_atual)').eq('user_id', user.id).eq('ativo', true).order('nome');
+        const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado, receita_id, receitas(estoque_atual, custo_por_porcao)').eq('user_id', user.id).eq('ativo', true).order('nome');
         produtos = prodData || [];
         
         render();
@@ -646,6 +646,15 @@ async function confirmarVenda() {
     const bruto = vendaTemp.preco_venda * q;
     const liq = bruto * (1 - (vendaTemp.taxa_comissao/100));
     
+    // Obter custo do produto
+    let custoTotal = 0;
+    if (vendaTemp.produto_id) {
+        const prod = produtos.find(p => p.id == vendaTemp.produto_id);
+        if (prod && prod.receitas && prod.receitas.custo_por_porcao) {
+            custoTotal = parseFloat(prod.receitas.custo_por_porcao) * q;
+        }
+    }
+    
     try {
         const user = await getUser();
         // 1. Registra venda
@@ -656,7 +665,8 @@ async function confirmarVenda() {
             nome_produto: vendaTemp.nome_produto,
             quantidade: q,
             valor_bruto: bruto,
-            valor_liquido: liq
+            valor_liquido: liq,
+            custo_total: custoTotal
         }]);
         if (e1) throw e1;
 

@@ -1,0 +1,1 @@
+ALTER TABLE consignados_vendas ADD COLUMN IF NOT EXISTS custo_total NUMERIC DEFAULT 0;

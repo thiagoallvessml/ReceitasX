@@ -254,7 +254,7 @@ async function carregarDRE() {
                 .gte('data_venda', startISO)
                 .lt('data_venda', endISO),
             sb.from('consignados_vendas')
-                .select('valor_liquido, quantidade, estoque_id')
+                .select('valor_liquido, quantidade, estoque_id, custo_total')
                 .eq('user_id', userId)
                 .gte('created_at', startISO)
                 .lt('created_at', endISO)
@@ -312,9 +312,10 @@ async function carregarDRE() {
                 receitaBruta += val;
                 revConsignado += val;
                 
-                // Nota: O CMV de consignados não está sendo contabilizado na hora da venda do consignado
-                // idealmente ele seria salvo em consignados_vendas, mas como não temos, fica de fora do CMV ou estimamos aqui.
-                // Mas a receita entra:
+                // Adiciona o custo do produto consignado ao CMV
+                if (c.custo_total !== undefined && c.custo_total !== null) {
+                    cmv += parseFloat(c.custo_total || 0);
+                }
             });
         }
 
