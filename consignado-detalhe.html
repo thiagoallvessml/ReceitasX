@@ -471,17 +471,20 @@ function render() {
         document.getElementById('fechamentos-empty').style.display = 'block';
     } else {
         document.getElementById('fechamentos-empty').style.display = 'none';
-        tbodyFechamentos.innerHTML = fechamentos.map(f => `
+        tbodyFechamentos.innerHTML = fechamentos.map(f => {
+            const m = f.forma_pagamento ? (f.forma_pagamento === 'pix' ? 'PIX' : 'Dinheiro') : '';
+            const mBadge = m ? `<span class="px-1.5 py-0.5 rounded ${m === 'PIX' ? 'bg-purple-900/30 text-purple-400 border border-purple-500/30' : 'bg-slate-800 text-slate-300 border border-slate-600'} ml-2 font-bold" style="font-size:9px">${m}</span>` : '';
+            return `
             <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
                 <div>
-                    <p class="font-bold text-slate-200 text-sm leading-tight">Fechamento</p>
-                    <p class="text-[11px] text-slate-500 mt-1">${new Date(f.created_at).toLocaleDateString('pt-BR')} • ${f.qtd_itens} unid. vendidas</p>
+                    <p class="font-bold text-slate-200 text-sm leading-tight flex items-center">Fechamento ${mBadge}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${new Date(f.created_at).toLocaleDateString('pt-BR')} • ${f.qtd_itens} unid.</p>
                 </div>
                 <div class="text-right">
                     <p class="font-black text-emerald-400">+ ${fmtR(f.valor_recebido)}</p>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     // Calcula valor pendente
@@ -723,7 +726,8 @@ async function confirmarFechamento() {
             user_id: user.id,
             parceiro_id: parceiroId,
             qtd_itens: qtdItens,
-            valor_recebido: valorRecebido
+            valor_recebido: valorRecebido,
+            forma_pagamento: fchMetodo
         }]).select('id').single();
 
         if (fechErr) throw fechErr;
