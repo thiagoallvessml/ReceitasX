@@ -266,7 +266,16 @@
                     <input type="number" id="r-qtd" value="1" min="1" class="text-center font-bold text-lg" oninput="calcRecolher()" />
                     <button onclick="modRecolher(1)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-bold border border-slate-700 hover:bg-slate-700">+</button>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">Essa quantidade será baixada do estoque sem registrar lucro, ideal para produtos que você retirou ou venceram.</p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Motivo do Recolhimento</label>
+                <select id="r-motivo" class="w-full bg-[#1E1E1E] text-slate-200 border border-[#2A2A2A] rounded-lg px-3 py-2">
+                    <option value="Troca">Troca de Estoque / Lote Novo</option>
+                    <option value="Vencido">Produto Vencido / Estragado</option>
+                    <option value="Devolução">Devolução Simples</option>
+                    <option value="Outro">Outro Motivo</option>
+                </select>
+                <p class="text-xs text-slate-500 mt-2">Essa quantidade será baixada do estoque atual do parceiro e devolvida ao seu estoque principal (exceto Vencidos).</p>
             </div>
             <div class="flex gap-2 pt-4">
                 <button onclick="document.getElementById('modal-recolher').classList.remove('open')" class="btn-outline flex-1">Cancelar</button>
@@ -761,6 +770,7 @@ function openRecolher(id) {
     document.getElementById('r-max').textContent = item.quantidade_restante;
     document.getElementById('r-qtd').value = 1;
     document.getElementById('r-qtd').max = item.quantidade_restante;
+    document.getElementById('r-motivo').value = 'Troca';
     calcRecolher();
     document.getElementById('modal-recolher').classList.add('open');
 }
@@ -770,6 +780,8 @@ async function confirmarRecolher() {
     const q = parseInt(document.getElementById('r-qtd').value) || 1;
     if(q <= 0 || q > recolherTemp.quantidade_restante) return alert('Quantidade inválida');
     
+    const motivo = document.getElementById('r-motivo').value;
+    
     try {
         const user = await getUser();
         // 1. Abate estoque
@@ -777,22 +789,20 @@ async function confirmarRecolher() {
         const { error: e1 } = await sb.from('consignados_estoque').update({ quantidade_restante: newQtd }).eq('id', recolherTemp.id);
         if (e1) throw e1;
         
-        // 2. Registra histórico
+        // 2. Registra histórico (apenda o motivo no nome do produto)
         const { error: e2 } = await sb.from('consignados_recolhimentos').insert([{
             user_id: user.id,
             parceiro_id: parceiroId,
             estoque_id: recolherTemp.id,
-            nome_produto: recolherTemp.nome_produto,
+            nome_produto: `${recolherTemp.nome_produto} (${motivo})`,
             quantidade: q
         }]);
         if (e2) throw e2;
 
-        // 3. Devolve para o estoque principal (receitas)
-        if (recolherTemp.produto_id) {
+        // 3. Devolve para o estoque principal (receitas) APENAS SE NÃO FOR VENCIDO
+        if (motivo !== 'Vencido' && recolherTemp.produto_id) {
             const prod = produtos.find(x => x.id == recolherTemp.produto_id);
             if (prod && prod.receita_id) {
-                // Como não atualizamos o 'produtos' local no Recolher em tempo real, 
-                // é mais seguro ler direto do banco, mas podemos usar o valor atual da RAM e somar.
                 const estoqueAtual = prod.receitas?.estoque_atual || 0;
                 await sb.from('receitas').update({ estoque_atual: estoqueAtual + q }).eq('id', prod.receita_id);
             }
