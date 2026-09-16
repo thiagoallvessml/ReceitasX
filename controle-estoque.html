@@ -39,6 +39,37 @@
         .search-box { width:100%;padding:.7rem 1rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A;color:#f1f5f9;font-size:.875rem;outline:none;transition:border-color .2s; }
         .search-box:focus { border-color:rgba(37,244,244,.45); }
 
+        /* Responsividade para Tabelas no Mobile */
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr { display: block; width: 100%; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            tr { border: 1px solid #2A2A2A; border-radius: 0.5rem; margin-bottom: 1rem; padding: 0.75rem; background: #141414; }
+            td { border: none; position: relative; padding: 0.5rem 0 0.5rem 45%; text-align: right; min-height: 2.5rem; border-bottom: 1px dashed #2A2A2A; }
+            td:last-child { border-bottom: none; }
+            td::before { 
+                position: absolute; left: 0; top: 0.5rem; width: 40%; 
+                text-align: left; font-weight: 600; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;
+            }
+            td .flex { justify-content: flex-end; width: 100%; }
+            td > div { width: 100%; text-align: right; }
+            
+            #estoque-body td:nth-of-type(1)::before { content: "Receita"; }
+            #estoque-body td:nth-of-type(2)::before { content: "Rendimento"; }
+            #estoque-body td:nth-of-type(3)::before { content: "Custo"; }
+            #estoque-body td:nth-of-type(4)::before { content: "Saldo Atual"; }
+            #estoque-body td:nth-of-type(5)::before { content: "Ações"; }
+
+            #entradas-body td:nth-of-type(1)::before { content: "Data"; }
+            #entradas-body td:nth-of-type(2)::before { content: "Receita"; }
+            #entradas-body td:nth-of-type(3)::before { content: "Qtd"; }
+            #entradas-body td:nth-of-type(4)::before { content: "Tipo"; }
+
+            #relatorio-body td:nth-of-type(1)::before { content: "Data"; }
+            #relatorio-body td:nth-of-type(2)::before { content: "Itens Vendidos"; }
+            #relatorio-body td:nth-of-type(3)::before { content: "Canal"; }
+            #relatorio-body td:nth-of-type(4)::before { content: "Valor Total"; }
+        }
+
         .card { background:#141414;border:1px solid #2A2A2A;border-radius:1rem; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 1rem 1.25rem; color: #64748b; font-size: .75rem; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid #2A2A2A; white-space:nowrap; }
