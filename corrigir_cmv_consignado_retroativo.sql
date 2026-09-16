@@ -1,0 +1,1 @@
+UPDATE consignados_vendas cv SET custo_total = COALESCE(( SELECT (COALESCE(p.custo, 0) * cv.quantidade) FROM consignados_estoque ce JOIN produtos p ON ce.produto_id = p.id WHERE ce.id = cv.estoque_id ), 0) WHERE cv.custo_total IS NULL OR cv.custo_total = 0;

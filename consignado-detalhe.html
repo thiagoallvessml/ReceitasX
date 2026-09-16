@@ -379,7 +379,7 @@ async function loadDados() {
         fechamentos = fData || [];
         
         // Load User Catalog
-        const { data: prodData } = await sb.from('produtos').select('id, nome, preco, consignado, receita_id, receitas(estoque_atual, custo_por_porcao)').eq('user_id', user.id).eq('ativo', true).order('nome');
+        const { data: prodData } = await sb.from('produtos').select('id, nome, preco, custo, consignado, receita_id, receitas(estoque_atual)').eq('user_id', user.id).eq('ativo', true).order('nome');
         produtos = prodData || [];
         
         render();
@@ -650,8 +650,8 @@ async function confirmarVenda() {
     let custoTotal = 0;
     if (vendaTemp.produto_id) {
         const prod = produtos.find(p => p.id == vendaTemp.produto_id);
-        if (prod && prod.receitas && prod.receitas.custo_por_porcao) {
-            custoTotal = parseFloat(prod.receitas.custo_por_porcao) * q;
+        if (prod && prod.custo) {
+            custoTotal = parseFloat(prod.custo) * q;
         }
     }
     
