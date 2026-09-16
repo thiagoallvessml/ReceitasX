@@ -314,7 +314,7 @@ async function checkAuth() {
     try {
         const { data: mktData } = await sb.from('marketplaces').select('*').eq('user_id', userId);
         if (mktData && mktData.length > 0) {
-            marketplaces = mktData.map(m => ({ id: m.nome.toLowerCase().replace(/\s+/g,''), nome: m.nome, taxa: m.taxa }));
+            marketplaces = mktData.map(m => ({ id: m.id, nome: m.nome, taxa: m.taxa }));
             localStorage.setItem('receitasx_marketplaces', JSON.stringify(marketplaces));
         }
     } catch(e) {}
