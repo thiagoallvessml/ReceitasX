@@ -107,20 +107,9 @@
             </button>
         </div>
 
-        <div id="tab-estoque" class="card overflow-x-auto p-0">
-            <table class="min-w-full">
-                <thead>
-                    <tr>
-                        <th class="pl-5">Produto</th>
-                        <th>Estoque</th>
-                        <th>Venda (R$)</th>
-                        <th>Comissão (%)</th>
-                        <th class="text-right pr-5">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="estoque-body"></tbody>
-            </table>
-            <div id="estoque-empty" class="text-center py-10 text-slate-500" style="display:none">
+        <div id="tab-estoque" class="overflow-x-hidden">
+            <div id="estoque-body" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <div id="estoque-empty" class="card text-center py-10 text-slate-500 mt-3" style="display:none">
                 <span class="material-symbols-outlined" style="font-size:2rem;margin-bottom:.5rem">inventory_2</span>
                 <p>Nenhum item no estoque deste local.</p>
                 <button onclick="openAddEstoque()" class="btn-primary mx-auto mt-3 text-sm px-3 py-1.5">Adicionar Primeiro Lote</button>
@@ -151,64 +140,32 @@
                 </div>
             </div>
 
-            <div class="card bg-[#141414] border border-[#2A2A2A] p-0 mb-6 rounded-xl overflow-hidden">
-                <div class="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-yellow-900/30 text-yellow-500 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">attach_money</span></div>
-                    <h3 class="font-bold text-[15px] text-slate-100">Vendas Pendentes (Aguardando Acerto)</h3>
+            <div class="mb-6">
+                <div class="p-0 mb-3 flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-yellow-900/30 text-yellow-500 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:14px">attach_money</span></div>
+                    <h3 class="font-bold text-sm text-slate-100">Vendas Pendentes</h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-[#141414]">
-                            <tr>
-                                <th class="pl-5 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data da Venda</th>
-                                <th class="py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Produto</th>
-                                <th class="py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Qtd</th>
-                                <th class="pr-5 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Valor a Receber</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vendas-pendentes-body"></tbody>
-                    </table>
-                </div>
-                <div id="vendas-pendentes-empty" class="text-center py-8 text-slate-500 bg-[#141414]" style="display:none">
+                <div id="vendas-pendentes-body" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                <div id="vendas-pendentes-empty" class="card text-center py-8 text-slate-500" style="display:none">
                     <p class="text-sm">Nenhuma venda aguardando acerto.</p>
                 </div>
             </div>
 
-            <div class="card bg-[#141414] border border-[#2A2A2A] p-0 mb-6 rounded-xl overflow-hidden">
-                <div class="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-900/30 text-emerald-500 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">history</span></div>
-                    <h3 class="font-bold text-[15px] text-slate-100">Histórico de Fechamentos</h3>
+            <div class="mb-6">
+                <div class="p-0 mb-3 flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-emerald-900/30 text-emerald-500 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:14px">history</span></div>
+                    <h3 class="font-bold text-sm text-slate-100">Histórico de Fechamentos</h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-[#141414]">
-                            <tr>
-                                <th class="pl-5 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Data do Acerto</th>
-                                <th class="py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Qtd Itens Acertados</th>
-                                <th class="pr-5 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Valor Recebido</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fechamentos-body"></tbody>
-                    </table>
-                </div>
-                <div id="fechamentos-empty" class="text-center py-8 text-slate-500 bg-[#141414]" style="display:none">
+                <div id="fechamentos-body" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                <div id="fechamentos-empty" class="card text-center py-8 text-slate-500" style="display:none">
                     <p class="text-sm">Nenhum fechamento realizado.</p>
                 </div>
             </div>
         </div>
 
-        <div id="tab-recolhimentos" class="card overflow-x-auto p-0" style="display:none">
-            <table class="min-w-full">
-                <thead>
-                    <tr>
-                        <th class="pl-5">Data</th>
-                        <th>Produto</th>
-                        <th>Qtd. Recolhida</th>
-                    </tr>
-                </thead>
-                <tbody id="recolhimentos-body"></tbody>
-            </table>
-            <div id="recolhimentos-empty" class="text-center py-10 text-slate-500" style="display:none">
+        <div id="tab-recolhimentos" class="overflow-x-hidden" style="display:none">
+            <div id="recolhimentos-body" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <div id="recolhimentos-empty" class="card text-center py-10 text-slate-500 mt-3" style="display:none">
                 <span class="material-symbols-outlined" style="font-size:2rem;margin-bottom:.5rem">assignment_return</span>
                 <p>Nenhum recolhimento registrado ainda.</p>
             </div>
@@ -414,26 +371,28 @@ function render() {
         tbodyE.innerHTML = estoque.map(e => {
             const isEmpty = e.quantidade_restante <= 0;
             return `
-            <tr style="opacity: ${isEmpty ? '0.6' : '1'}">
-                <td class="pl-5">
-                    <p class="font-semibold text-slate-100">${e.nome_produto}</p>
-                    <p class="text-xs text-slate-500">Add em ${new Date(e.created_at).toLocaleDateString('pt-BR')}</p>
-                </td>
-                <td>
-                    <span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded font-bold ${isEmpty ? 'text-red-400' : 'text-slate-200'}">${e.quantidade_restante}</span> 
-                    <span class="text-xs text-slate-500 ml-1">de ${e.quantidade}</span>
-                </td>
-                <td class="font-semibold">${fmtR(e.preco_venda)}</td>
-                <td><span class="text-purple bg-purple-subtle px-2 py-0.5 rounded font-bold">${e.taxa_comissao}%</span></td>
-                <td class="text-right pr-5">
-                    ${!isEmpty ? `
-                    <div class="flex items-center justify-end gap-2">
-                        <button onclick="openVenda(${e.id})" class="btn-green"><span class="material-symbols-outlined" style="font-size:18px">point_of_sale</span> Vender</button>
-                        <button onclick="openRecolher(${e.id})" class="btn-outline" style="padding:.4rem .8rem;font-size:.8rem"><span class="material-symbols-outlined" style="font-size:18px">assignment_return</span> Recolher</button>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-4 flex flex-col gap-3" style="opacity: ${isEmpty ? '0.6' : '1'}">
+                <div>
+                    <p class="font-bold text-slate-100 text-[15px] leading-tight">${e.nome_produto}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Adicionado em ${new Date(e.created_at).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div class="flex justify-between items-center gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-1 bg-[#1E1E1E] border border-[#2A2A2A] rounded font-bold ${isEmpty ? 'text-red-400' : 'text-emerald-400'} text-lg">${e.quantidade_restante}</span> 
+                        <span class="text-xs text-slate-500 leading-tight">unidades<br>restantes</span>
                     </div>
-                    ` : '<span class="text-xs font-bold text-red-400 bg-red-900/20 px-2 py-1 rounded">Esgotado</span>'}
-                </td>
-            </tr>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-slate-300">${fmtR(e.preco_venda)}</p>
+                        <p class="text-[10px] text-purple bg-purple-subtle px-1.5 py-0.5 rounded font-bold inline-block mt-1">${e.taxa_comissao}% comissão</p>
+                    </div>
+                </div>
+                ${!isEmpty ? `
+                <div class="flex items-center gap-2 mt-2 pt-3 border-t border-[#2A2A2A]">
+                    <button onclick="openVenda(${e.id})" class="btn-green flex-1 justify-center py-2"><span class="material-symbols-outlined" style="font-size:18px">point_of_sale</span> Vender</button>
+                    <button onclick="openRecolher(${e.id})" class="btn-outline flex-1 justify-center py-2" style="font-size:.85rem"><span class="material-symbols-outlined" style="font-size:18px">assignment_return</span> Recolher</button>
+                </div>
+                ` : '<div class="mt-2 pt-3 border-t border-[#2A2A2A] text-center"><span class="text-xs font-bold text-red-400 bg-red-900/20 px-3 py-1.5 rounded">Lote Esgotado</span></div>'}
+            </div>
             `;
         }).join('');
     }
@@ -447,12 +406,15 @@ function render() {
     } else {
         document.getElementById('vendas-pendentes-empty').style.display = 'none';
         tbodyPendentes.innerHTML = pendentes.map(v => `
-            <tr class="border-b border-[#2A2A2A] last:border-0">
-                <td class="pl-5 py-4 text-sm text-slate-400">${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
-                <td class="py-4 font-semibold text-slate-200">${v.nome_produto}</td>
-                <td class="py-4"><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 font-bold">${v.quantidade}</span></td>
-                <td class="pr-5 py-4 text-right font-bold text-emerald-400">${fmtR(v.valor_liquido)}</td>
-            </tr>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
+                <div>
+                    <p class="font-bold text-slate-200 text-sm leading-tight">${v.nome_produto}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${new Date(v.created_at).toLocaleDateString('pt-BR')} • ${v.quantidade} unid.</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-emerald-400">${fmtR(v.valor_liquido)}</p>
+                </div>
+            </div>
         `).join('');
     }
 
@@ -463,11 +425,15 @@ function render() {
     } else {
         document.getElementById('fechamentos-empty').style.display = 'none';
         tbodyFechamentos.innerHTML = fechamentos.map(f => `
-            <tr class="border-b border-[#2A2A2A] last:border-0">
-                <td class="pl-5 py-4 text-sm text-slate-400">${new Date(f.created_at).toLocaleDateString('pt-BR')}</td>
-                <td class="py-4"><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 font-bold">${f.qtd_itens}</span></td>
-                <td class="pr-5 py-4 text-right font-bold text-emerald-400">${fmtR(f.valor_recebido)}</td>
-            </tr>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
+                <div>
+                    <p class="font-bold text-slate-200 text-sm leading-tight">Fechamento</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${new Date(f.created_at).toLocaleDateString('pt-BR')} • ${f.qtd_itens} unid. vendidas</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-emerald-400">+ ${fmtR(f.valor_recebido)}</p>
+                </div>
+            </div>
         `).join('');
     }
 
@@ -487,11 +453,15 @@ function render() {
     } else {
         document.getElementById('recolhimentos-empty').style.display = 'none';
         tbodyR.innerHTML = recolhimentos.map(r => `
-            <tr>
-                <td class="pl-5 text-sm text-slate-400">${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
-                <td class="font-semibold text-slate-200">${r.nome_produto}</td>
-                <td><span class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-red-400 font-bold">-${r.quantidade}</span></td>
-            </tr>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
+                <div>
+                    <p class="font-bold text-slate-200 text-sm leading-tight">${r.nome_produto}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${new Date(r.created_at).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div class="text-right">
+                    <span class="px-2 py-1 bg-[#1E1E1E] border border-[#2A2A2A] rounded text-red-400 font-bold text-sm">-${r.quantidade} unid.</span>
+                </div>
+            </div>
         `).join('');
     }
 }
