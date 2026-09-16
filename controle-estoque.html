@@ -256,13 +256,30 @@
             document.getElementById('estoque-grid').style.display = 'none';
             try {
                 const user = await getUser();
-                const [rRes, vRes, eRes] = await Promise.all([
+                const [rRes, vRes, eRes, cRes] = await Promise.all([
                     sb.from('receitas').select('*').eq('user_id', user.id).order('nome'),
                     sb.from('vendas_clientes').select('*').eq('user_id', user.id).order('created_at', {ascending: false}),
-                    sb.from('estoque_movimentacoes').select('*, receitas(nome)').eq('user_id', user.id).order('created_at', {ascending: false})
+                    sb.from('estoque_movimentacoes').select('*, receitas(nome)').eq('user_id', user.id).order('created_at', {ascending: false}),
+                    sb.from('consignados_estoque').select('*, consignados_parceiros(nome_local)').eq('user_id', user.id).order('created_at', {ascending: false})
                 ]);
                 receitas = rRes.data || [];
-                vendas = vRes.data || [];
+                
+                // Mescla Vendas e Envios para Consignado nas Saidas
+                const v = vRes.data || [];
+                const c = cRes.data || [];
+                
+                const cMapped = c.map(item => ({
+                    id: 'cons_' + item.id,
+                    created_at: item.created_at,
+                    canal_venda: 'Consignado',
+                    cliente_nome: item.consignados_parceiros?.nome_local || 'Parceiro',
+                    itens: JSON.stringify([{ nome: item.nome_produto, quantidade: item.quantidade }]),
+                    valor_total: item.preco_venda * item.quantidade,
+                    is_consignado: true
+                }));
+                
+                vendas = [...v, ...cMapped].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
                 entradas = eRes.data || [];
                 renderEstoque();
                 renderEntradas();
@@ -382,6 +399,7 @@
                 const cm = {
                     'iFood': {bg:'rgba(239,68,68,.1)',col:'#f87171',ico:'delivery_dining'},
                     'WhatsApp': {bg:'rgba(52,211,153,.1)',col:'#34d399',ico:'chat'},
+                    'Consignado': {bg:'rgba(168,85,247,.1)',col:'#a855f7',ico:'storefront'},
                     'Direta': {bg:'rgba(148,163,184,.1)',col:'#94a3b8',ico:'storefront'}
                 };
                 list.innerHTML = filtered.map(v => {
@@ -397,11 +415,12 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-0.5">
                                 <span class="text-xs font-bold px-1.5 py-0.5 rounded" style="background:${c.bg};color:${c.col}">${canal}</span>
-                                <span class="text-xs text-slate-500">${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+                                ${v.is_consignado ? `<span class="text-xs font-semibold text-slate-300 truncate">Para: ${v.cliente_nome}</span>` : ''}
+                                <span class="text-xs text-slate-500 flex-shrink-0">${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
                             </div>
                             <p class="text-sm text-slate-300 truncate">${txt||'Sem itens registrados'}</p>
                         </div>
-                        <span class="font-black text-sm text-primary flex-shrink-0">${fmtR(v.valor_total)}</span>
+                        <span class="font-black text-sm ${v.is_consignado ? 'text-purple-400' : 'text-primary'} flex-shrink-0">${v.is_consignado ? 'Envio' : fmtR(v.valor_total)}</span>
                     </div>`;
                 }).join('');
             }
