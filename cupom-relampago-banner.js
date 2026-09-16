@@ -1,4 +1,4 @@
-(async function() {
+ï»¿(async function() {
     try {
         // Aguarda o Supabase resolver a sessao (mesmo delay do heartbeat)
         await new Promise(r => setTimeout(r, 1200));
@@ -96,7 +96,7 @@
 
         const topRow = document.createElement('div');
         topRow.style.cssText = 'display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.02em;';
-        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">Desconto Relâmpago liberado pelo seu afiliado!</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
+        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">Desconto RELAMPAGO liberado pelo seu afiliado!</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
         
         const bottomRow = document.createElement('div');
         bottomRow.style.cssText = 'font-size:0.8rem;font-weight:500;background:rgba(0,0,0,0.2);padding:0.2rem 0.8rem;border-radius:99px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:center;';
@@ -148,4 +148,5 @@
         console.error('[CupomRelampago] Erro:', e);
     }
 })();
+
 
