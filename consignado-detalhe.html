@@ -276,6 +276,44 @@
     </div>
 </div>
 
+<!-- Modal Fechamento -->
+<div id="modal-fechamento" class="modal-bg">
+    <div class="modal-card">
+        <h2 class="font-bold text-lg mb-1 text-slate-100">Acerto de Vendas</h2>
+        <p class="text-sm text-emerald-400 mb-5 font-semibold">Confirmar recebimento</p>
+        <div class="space-y-4">
+            <div class="bg-[#141414] p-3 rounded-xl border border-[#2A2A2A] flex justify-between items-center">
+                <span class="text-slate-400 text-sm font-semibold uppercase">Total a Receber</span>
+                <span class="text-xl font-black text-slate-100" id="fch-total">R$ 0,00</span>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Forma de Pagamento</label>
+                <div class="flex gap-2">
+                    <button id="btn-fch-pix" onclick="setFchMetodo('pix')" class="flex-1 py-3 bg-[#1E1E1E] border border-purple-500 text-purple-400 font-bold rounded-xl transition-all">PIX</button>
+                    <button id="btn-fch-din" onclick="setFchMetodo('dinheiro')" class="flex-1 py-3 bg-[#1E1E1E] border border-[#2A2A2A] text-slate-400 font-bold rounded-xl transition-all">Dinheiro</button>
+                </div>
+            </div>
+
+            <div id="fch-dinheiro-wrap" style="display:none;" class="space-y-4 pt-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cliente pagou com (R$)</label>
+                    <input type="number" step="0.01" id="fch-pagou" class="text-lg font-bold" placeholder="0.00" oninput="calcFchTroco()" />
+                </div>
+                <div class="bg-[#141414] p-3 rounded-xl border border-yellow-900/30 flex justify-between items-center">
+                    <span class="text-yellow-500 text-sm font-semibold uppercase">Troco</span>
+                    <span class="text-xl font-black text-yellow-500" id="fch-troco">R$ 0,00</span>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 pt-4">
+                <button onclick="document.getElementById('modal-fechamento').classList.remove('open')" class="btn-outline flex-1">Cancelar</button>
+                <button onclick="confirmarFechamento()" class="btn-primary flex-1">Confirmar Acerto</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const urlParams = new URLSearchParams(window.location.search);
 const parceiroId = urlParams.get('id');
@@ -623,16 +661,53 @@ async function confirmarVenda() {
     }
 }
 
-async function realizarFechamento() {
+let fchTempValor = 0;
+let fchMetodo = 'pix';
+
+function realizarFechamento() {
     const pendentes = vendas.filter(v => !v.fechamento_id);
     if(pendentes.length === 0) return alert('Nenhuma venda pendente para acerto.');
     
-    if(!confirm(`Deseja realizar o fechamento de ${pendentes.length} vendas? O valor pendente será recebido e as vendas marcadas como acertadas.`)) return;
+    fchTempValor = pendentes.reduce((acc, v) => acc + parseFloat(v.valor_liquido||0), 0);
+    document.getElementById('fch-total').textContent = fmtR(fchTempValor);
+    
+    setFchMetodo('pix');
+    document.getElementById('modal-fechamento').classList.add('open');
+}
+
+function setFchMetodo(m) {
+    fchMetodo = m;
+    const btnPix = document.getElementById('btn-fch-pix');
+    const btnDin = document.getElementById('btn-fch-din');
+    const wrapDin = document.getElementById('fch-dinheiro-wrap');
+    
+    if (m === 'pix') {
+        btnPix.className = "flex-1 py-3 bg-[#1E1E1E] border border-purple-500 text-purple-400 font-bold rounded-xl transition-all";
+        btnDin.className = "flex-1 py-3 bg-[#1E1E1E] border border-[#2A2A2A] text-slate-400 font-bold rounded-xl transition-all";
+        wrapDin.style.display = 'none';
+    } else {
+        btnDin.className = "flex-1 py-3 bg-[#1E1E1E] border border-emerald-500 text-emerald-400 font-bold rounded-xl transition-all";
+        btnPix.className = "flex-1 py-3 bg-[#1E1E1E] border border-[#2A2A2A] text-slate-400 font-bold rounded-xl transition-all";
+        wrapDin.style.display = 'block';
+        document.getElementById('fch-pagou').value = '';
+        document.getElementById('fch-troco').textContent = 'R$ 0,00';
+    }
+}
+
+function calcFchTroco() {
+    const pagou = parseFloat(document.getElementById('fch-pagou').value) || 0;
+    const troco = pagou - fchTempValor;
+    document.getElementById('fch-troco').textContent = troco > 0 ? fmtR(troco) : 'R$ 0,00';
+}
+
+async function confirmarFechamento() {
+    const pendentes = vendas.filter(v => !v.fechamento_id);
+    if(pendentes.length === 0) return;
 
     try {
         const user = await getUser();
         const qtdItens = pendentes.reduce((acc, v) => acc + v.quantidade, 0);
-        const valorRecebido = pendentes.reduce((acc, v) => acc + parseFloat(v.valor_liquido||0), 0);
+        const valorRecebido = fchTempValor;
         
         // Insere o fechamento
         const { data: fechData, error: fechErr } = await sb.from('consignados_fechamentos').insert([{
@@ -650,6 +725,7 @@ async function realizarFechamento() {
         
         if (updErr) throw updErr;
 
+        document.getElementById('modal-fechamento').classList.remove('open');
         alert('Fechamento realizado com sucesso!');
         loadDados();
     } catch(e) {
