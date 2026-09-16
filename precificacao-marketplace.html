@@ -311,10 +311,11 @@ async function carregarDados() {
             return;
         }
         const user = session.user;
-        const [prodRes, comboRes, precRes] = await Promise.all([
+        const [prodRes, comboRes, precRes, mktRes] = await Promise.all([
             sb.from('produtos').select('*, receitas(custo_ing, custo_emb, custo_eqp, unidades)').eq('user_id', user.id).order('nome'),
             sb.from('combos').select('*').eq('user_id', user.id),
-            sb.from('precificacao').select('*').eq('user_id', user.id)
+            sb.from('precificacao').select('*').eq('user_id', user.id),
+            sb.from('marketplaces').select('*').eq('user_id', user.id)
         ]);
 
         if (!prodRes.error && prodRes.data) {
@@ -383,6 +384,26 @@ async function carregarDados() {
                 precificacao[pr.marketplace_id][itemId] = parseFloat(pr.preco);
             });
             localStorage.setItem(PREC_KEY, JSON.stringify(precificacao));
+        }
+
+        // Marketplaces
+        if (!mktRes.error && mktRes.data && mktRes.data.length > 0) {
+            marketplaces = mktRes.data.map((m, i) => ({
+                id: m.id,
+                nome: m.nome,
+                taxa: m.taxa,
+                icon: MKT_ICONS[m.id] || MKT_ICONS.default,
+                color: MKT_COLORS[i % MKT_COLORS.length],
+                bg: 'rgba(37,244,244,.1)'
+            }));
+            const hasCasa = marketplaces.find(x => x.id === 'casa');
+            if (!hasCasa) marketplaces.unshift(MKT_DEFAULTS[0]);
+            const hasIfood = marketplaces.find(x => x.id === 'ifood');
+            if (!hasIfood && marketplaces.length < 2) marketplaces.splice(1, 0, MKT_DEFAULTS[1]);
+            
+            localStorage.setItem(MKT_KEY, JSON.stringify(marketplaces));
+        } else {
+            marketplaces = loadMkts();
         }
 
     } catch(e) {
@@ -674,6 +695,12 @@ async function salvar() {
                 await Promise.all([...pUpdates, ...cUpdates]);
             }
 
+            // Sincroniza Marketplaces PRIMEIRO (para Foreign Key não falhar)
+            const insertData = marketplaces.map(mk => ({ id: mk.id, user_id: uid, nome: mk.nome, taxa: mk.taxa || 0 }));
+            if (insertData.length > 0) {
+                await sb.from('marketplaces').upsert(insertData);
+            }
+
             // Sincroniza Precificacao no Supabase
             await sb.from('precificacao').delete().eq('user_id', uid).eq('marketplace_id', m.id);
             
@@ -697,13 +724,6 @@ async function salvar() {
             
             if (precData.length > 0) {
                 await sb.from('precificacao').insert(precData);
-            }
-
-            // Sincroniza Marketplaces no Supabase
-            await sb.from('marketplaces').delete().eq('user_id', uid);
-            const insertData = marketplaces.map(mk => ({ user_id: uid, nome: mk.nome, taxa: mk.taxa || 0 }));
-            if (insertData.length > 0) {
-                await sb.from('marketplaces').insert(insertData);
             }
         }
         showToast('Precificação salva!');
