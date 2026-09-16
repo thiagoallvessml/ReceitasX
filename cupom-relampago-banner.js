@@ -19,7 +19,7 @@
                 if (session && session.user) {
                     const { data: perfil } = await sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
                     if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora' && perfil.origem_cadastro !== 'ads') {
-                        ref = perfil.origem_cadastro;
+                        ref = perfil.origem_cadastro.replace(/^Afiliado:\s*/i, '').trim();
                         localStorage.setItem('receitasx_ref', ref);
                     }
                 }
@@ -148,3 +148,4 @@
         console.error('[CupomRelampago] Erro:', e);
     }
 })();
+
