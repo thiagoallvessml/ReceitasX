@@ -1,5 +1,8 @@
 (async function() {
     try {
+        // Aguarda o Supabase resolver a sessao (mesmo delay do heartbeat)
+        await new Promise(r => setTimeout(r, 1200));
+
         const urlParams = new URLSearchParams(window.location.search);
         let ref = urlParams.get('ref') || urlParams.get('af');
         
@@ -8,67 +11,51 @@
         } else {
             ref = localStorage.getItem('receitasx_ref');
         }
-        
-        if (!ref) {
-            if (typeof sb !== 'undefined' && sb.auth) {
-                try {
-                    const { data: { session } } = await sb.auth.getSession();
-                    if (session) {
-                        const { data: perfil } = await sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
-                        if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora') {
-                            ref = perfil.origem_cadastro;
-                            localStorage.setItem('receitasx_ref', ref);
-                        }
+
+        // Se nao tem ref no localStorage (outro PC, localStorage limpo), busca no perfil do usuario logado
+        if (!ref && typeof sb !== 'undefined' && typeof getSession === 'function') {
+            try {
+                const session = await getSession();
+                if (session && session.user) {
+                    const { data: perfil } = await sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
+                    if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora' && perfil.origem_cadastro !== 'ads') {
+                        ref = perfil.origem_cadastro;
+                        localStorage.setItem('receitasx_ref', ref);
                     }
-                } catch(e) { console.error('SB fetch err', e); }
-            } else {
-                const authKeys = Object.keys(localStorage).filter(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-                if (authKeys.length > 0) {
-                    try {
-                        const tokenStr = localStorage.getItem(authKeys[0]);
-                        const tokenData = JSON.parse(tokenStr);
-                        if (tokenData && tokenData.user && tokenData.user.id) {
-                            const API_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://pipknmwjpblitqlxxdcw.supabase.co';
-                            const API_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
-                            
-                            const resPerf = await fetch(API_URL + '/rest/v1/perfis?select=origem_cadastro&id=eq.' + tokenData.user.id, {
-                                headers: { 'apikey': API_KEY, 'Authorization': 'Bearer ' + tokenData.access_token }
-                            });
-                            if (resPerf.ok) {
-                                const perfs = await resPerf.json();
-                                if (perfs && perfs.length > 0 && perfs[0].origem_cadastro && perfs[0].origem_cadastro !== 'calculadora') {
-                                    ref = perfs[0].origem_cadastro;
-                                    localStorage.setItem('receitasx_ref', ref);
-                                }
-                            }
-                        }
-                    } catch(e){}
                 }
+            } catch(e) {
+                console.log('[CupomRelampago] Erro ao buscar perfil:', e.message);
             }
         }
 
+        // Tambem tenta do sessionStorage (ref_afiliado do checkout/login)
         if (!ref) {
-            console.log('Sem ref definido.');
-            return;
+            ref = sessionStorage.getItem('ref_afiliado');
         }
 
+        if (!ref) {
+            console.log('[CupomRelampago] Nenhum afiliado encontrado.');
+            return;
+        }
+        
+        console.log('[CupomRelampago] Ref encontrado:', ref);
+
         const couponCode = (ref + 'RELAMPAGO').toUpperCase().substring(0,30);
-        console.log('Buscando cupom:', couponCode);
+        console.log('[CupomRelampago] Buscando cupom:', couponCode);
 
-        const API_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://pipknmwjpblitqlxxdcw.supabase.co';
-        const API_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
-
-        const res = await fetch(API_URL + '/rest/v1/cupons?select=codigo,valor,data_expiracao,ativo&codigo=eq.' + couponCode + '&ativo=eq.true', {
-            headers: { 'apikey': API_KEY, 'Authorization': 'Bearer ' + API_KEY }
+        const res = await fetch(SUPABASE_URL + '/rest/v1/cupons?select=codigo,valor,data_expiracao,ativo&codigo=eq.' + couponCode + '&ativo=eq.true', {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
         });
         
         if (!res.ok) {
-            console.log('Erro ao buscar cupom', await res.text());
+            console.log('[CupomRelampago] Erro HTTP:', res.status);
             return;
         }
         const cupons = await res.json();
+        console.log('[CupomRelampago] Resultado:', cupons);
+
         if (!cupons || cupons.length === 0) {
-            console.log('Cupom nao encontrado ou inativo');
+            console.log('[CupomRelampago] Nenhum cupom ativo encontrado.');
             return;
         }
 
@@ -77,10 +64,13 @@
 
         const expDate = new Date(cupom.data_expiracao);
         if (expDate <= new Date()) {
-            console.log('Cupom expirado');
+            console.log('[CupomRelampago] Cupom expirado.');
             return;
         }
 
+        console.log('[CupomRelampago] Cupom valido! Exibindo banner...');
+
+        // Cria o banner
         const banner = document.createElement('div');
         banner.id = 'cr-banner';
         banner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:linear-gradient(90deg, #b45309, #eab308, #ca8a04);color:#fff;z-index:999999;box-shadow:0 4px 15px rgba(0,0,0,0.3);font-family:Inter,sans-serif;padding:0.6rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3rem;cursor:pointer;transition:transform 0.3s;';
@@ -97,6 +87,8 @@
             const impCupom = document.getElementById('f-cupom');
             const btnCupom = document.getElementById('btn-aplicar');
             if (impCupom && btnCupom) {
+                impCupom.disabled = false;
+                btnCupom.disabled = false;
                 impCupom.value = cupom.codigo;
                 btnCupom.click();
             }
@@ -113,7 +105,7 @@
         spanTime.style.fontWeight = '800';
         spanTime.style.color = '#fff';
 
-        bottomRow.innerHTML = `Utilize o cupom <b style="color:#25f4f4">${cupom.codigo}</b> e ganhe <b>${cupom.valor}% OFF</b>. Expira em: `;
+        bottomRow.innerHTML = 'Utilize o cupom <b style="color:#25f4f4">' + cupom.codigo + '</b> e ganhe <b>' + cupom.valor + '% OFF</b>. Expira em: ';
         bottomRow.appendChild(spanTime);
 
         banner.appendChild(topRow);
@@ -122,6 +114,7 @@
         document.body.appendChild(banner);
         document.body.style.paddingTop = '4rem';
 
+        // Auto-aplica no checkout
         const impCupom = document.getElementById('f-cupom');
         const btnCupom = document.getElementById('btn-aplicar');
         if (impCupom && btnCupom) {
@@ -133,6 +126,7 @@
             }, 1000);
         }
 
+        // Timer regressivo
         const updateTimer = () => {
             const now = new Date();
             const diff = expDate - now;
@@ -145,12 +139,12 @@
             const h = Math.floor(diff / (1000 * 60 * 60));
             const m = Math.floor((diff / 1000 / 60) % 60);
             const s = Math.floor((diff / 1000) % 60);
-            spanTime.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            spanTime.textContent = h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
         };
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
 
     } catch(e) {
-        console.error('Erro no cupom relampago banner:', e);
+        console.error('[CupomRelampago] Erro:', e);
     }
 })();
