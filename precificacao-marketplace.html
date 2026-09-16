@@ -780,10 +780,17 @@ function closeModalExcluirCat() {
     document.getElementById('modal-excluir-cat').classList.remove('open');
     pendingDelCatId = null;
 }
-function excluirCategoria() {
+async function excluirCategoria() {
     if (!pendingDelCatId) return;
     const mktId = pendingDelCatId;
     const m = marketplaces.find(x => x.id === mktId);
+    
+    // Deleta do Supabase (ignora erro se nao estiver logado)
+    try {
+        const uid = (await sb.auth.getSession()).data?.session?.user?.id;
+        if (uid) await sb.from('marketplaces').delete().eq('user_id', uid).eq('id', mktId);
+    } catch(e) {}
+
     marketplaces = marketplaces.filter(x => x.id !== mktId);
     const stored = JSON.parse(localStorage.getItem(MKT_KEY) || '[]');
     localStorage.setItem(MKT_KEY, JSON.stringify(stored.filter(x => x.id !== mktId)));
