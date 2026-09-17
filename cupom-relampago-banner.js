@@ -36,7 +36,7 @@
         let couponCode = null;
         let msgRelampago = '';
         
-        // Verifica se é uma origem direta/interna (ignora para cupons de afiliado)
+        // Verifica se Ã© uma origem direta/interna (ignora para cupons de afiliado)
         const isDireto = !ref || ['direto', 'calculadora', 'ads', 'google', 'facebook', 'instagram', 'tiktok'].includes(ref.toLowerCase());
 
         if (!isDireto) {
@@ -46,7 +46,7 @@
         } else {
             console.log('[CupomRelampago] Nenhum afiliado encontrado (Origem: ' + (ref || 'Nenhuma') + '). Usando cupom direto.');
             couponCode = 'OFERTARELAMPAGO';
-            msgRelampago = 'Desconto RELAMPAGO ativado para você!';
+            msgRelampago = 'Desconto RELAMPAGO ativado para vocÃª!';
         }
 
         console.log('[CupomRelampago] Buscando cupom:', couponCode);
@@ -79,51 +79,86 @@
             return;
         }
 
-        console.log('[CupomRelampago] Cupom valido! Exibindo banner...');
+        // RenderizaÃ§Ã£o (Discreta na Navbar ou Full Screen)
+        const navSlot = document.getElementById('cr-navbar-slot');
+        let bannerElement = null;
 
-        // Cria o banner
-        const banner = document.createElement('div');
-        banner.id = 'cr-banner';
-        banner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:linear-gradient(90deg, #b45309, #eab308, #ca8a04);color:#fff;z-index:999999;box-shadow:0 4px 15px rgba(0,0,0,0.3);font-family:Inter,sans-serif;padding:0.6rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3rem;cursor:pointer;transition:transform 0.3s;';
-        
-        banner.onclick = () => {
-            navigator.clipboard.writeText(cupom.codigo);
-            const msg = document.getElementById('cr-msg');
-            if (msg) {
-                const oldHtml = msg.innerHTML;
-                msg.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem;vertical-align:middle">check_circle</span> Copiado!';
-                setTimeout(() => { msg.innerHTML = oldHtml; }, 2000);
-            }
-            
-            const impCupom = document.getElementById('f-cupom');
-            const btnCupom = document.getElementById('btn-aplicar');
-            if (impCupom && btnCupom) {
-                impCupom.disabled = false;
-                btnCupom.disabled = false;
-                impCupom.value = cupom.codigo;
-                btnCupom.click();
-            }
-        };
-
-        const topRow = document.createElement('div');
-        topRow.style.cssText = 'display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.02em;';
-        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">' + msgRelampago + '</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
-        
-        const bottomRow = document.createElement('div');
-        bottomRow.style.cssText = 'font-size:0.8rem;font-weight:500;background:rgba(0,0,0,0.2);padding:0.2rem 0.8rem;border-radius:99px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:center;';
-        
         const spanTime = document.createElement('span');
         spanTime.style.fontWeight = '800';
-        spanTime.style.color = '#fff';
 
-        bottomRow.innerHTML = 'Utilize o cupom <b style="color:#25f4f4">' + cupom.codigo + '</b> e ganhe <b>' + cupom.valor + '% OFF</b>. Expira em: ';
-        bottomRow.appendChild(spanTime);
+        if (navSlot) {
+            // VersÃ£o Discreta (Navbar)
+            const pill = document.createElement('div');
+            bannerElement = pill;
+            pill.id = 'cr-pill';
+            pill.style.cssText = 'display:flex;align-items:center;gap:0.3rem;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.3);color:#eab308;padding:0.2rem 0.5rem;border-radius:99px;font-size:0.65rem;font-weight:700;cursor:pointer;animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;margin-right:0.25rem;';
+            pill.title = 'Clique para copiar o cupom!';
+            
+            const ico = document.createElement('span');
+            ico.className = 'material-symbols-outlined';
+            ico.style.cssText = 'font-size:1rem;color:#eab308;';
+            ico.textContent = 'bolt';
+            
+            const textSpan = document.createElement('span');
+            textSpan.innerHTML = `-${cupom.valor}% | `;
+            textSpan.appendChild(spanTime);
 
-        banner.appendChild(topRow);
-        banner.appendChild(bottomRow);
+            pill.appendChild(ico);
+            pill.appendChild(textSpan);
+            
+            pill.onclick = () => {
+                navigator.clipboard.writeText(cupom.codigo);
+                const oldHtml = textSpan.innerHTML;
+                textSpan.innerHTML = 'Copiado!';
+                setTimeout(() => { textSpan.innerHTML = oldHtml; textSpan.appendChild(spanTime); }, 2000);
+            };
 
-        document.body.appendChild(banner);
-        document.body.style.paddingTop = '4rem';
+            navSlot.appendChild(pill);
+
+        } else {
+            // VersÃ£o Fixa Tradicional (Landing/Checkout)
+            spanTime.style.color = '#fff';
+            
+            const banner = document.createElement('div');
+            bannerElement = banner;
+            banner.id = 'cr-banner';
+            banner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:linear-gradient(90deg, #b45309, #eab308, #ca8a04);color:#fff;z-index:999999;box-shadow:0 4px 15px rgba(0,0,0,0.3);font-family:Inter,sans-serif;padding:0.6rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3rem;cursor:pointer;transition:transform 0.3s;';
+            
+            banner.onclick = () => {
+                navigator.clipboard.writeText(cupom.codigo);
+                const msg = document.getElementById('cr-msg');
+                if (msg) {
+                    const oldHtml = msg.innerHTML;
+                    msg.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem;vertical-align:middle">check_circle</span> Copiado!';
+                    setTimeout(() => { msg.innerHTML = oldHtml; }, 2000);
+                }
+                
+                const impCupom = document.getElementById('f-cupom');
+                const btnCupom = document.getElementById('btn-aplicar');
+                if (impCupom && btnCupom) {
+                    impCupom.disabled = false;
+                    btnCupom.disabled = false;
+                    impCupom.value = cupom.codigo;
+                    btnCupom.click();
+                }
+            };
+
+            const topRow = document.createElement('div');
+            topRow.style.cssText = 'display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.02em;';
+            topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">' + msgRelampago + '</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
+            
+            const bottomRow = document.createElement('div');
+            bottomRow.style.cssText = 'font-size:0.8rem;font-weight:500;background:rgba(0,0,0,0.2);padding:0.2rem 0.8rem;border-radius:99px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:center;';
+            
+            bottomRow.innerHTML = 'Utilize o cupom <b style="color:#25f4f4">' + cupom.codigo + '</b> e ganhe <b>' + cupom.valor + '% OFF</b>. Expira em: ';
+            bottomRow.appendChild(spanTime);
+
+            banner.appendChild(topRow);
+            banner.appendChild(bottomRow);
+
+            document.body.appendChild(banner);
+            document.body.style.paddingTop = '4rem';
+        }
 
         // Auto-aplica no checkout
         const impCupom = document.getElementById('f-cupom');
@@ -142,8 +177,8 @@
             const now = new Date();
             const diff = expDate - now;
             if (diff <= 0) {
-                banner.style.display = 'none';
-                document.body.style.paddingTop = '0';
+                if (bannerElement) bannerElement.style.display = 'none';
+                if (!navSlot) document.body.style.paddingTop = '0';
                 clearInterval(interval);
                 return;
             }
@@ -159,3 +194,5 @@
         console.error('[CupomRelampago] Erro:', e);
     }
 })();
+
+
