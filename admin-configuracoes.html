@@ -379,7 +379,8 @@ async function ativarRelampago() {
         const { error: errIns } = await sb.from('cupons').insert(cuponsToInsert);
         if(errIns) throw errIns;
         
-        showToast(`âš¡ Sucesso! ${cuponsToInsert.length} cupons ativados!`);
+        showToast(`🎉 Sucesso! ${cuponsToInsert.length} cupons ativados!`);
+        carregarStatusRelampago();
     } catch(e) {
         alert('Erro ao ativar: ' + e.message);
     } finally {
@@ -405,6 +406,7 @@ async function desativarRelampago() {
         }
         
         showToast('Cupons RelÃ¢mpago desativados!');
+        carregarStatusRelampago();
     } catch(e) {
         alert('Erro ao desativar: ' + e.message);
     } finally {
@@ -445,6 +447,7 @@ async function ativarRelampagoDireto() {
         if(errIns) throw errIns;
         
         showToast(`⚡ Sucesso! Cupom OFERTARELAMPAGO ativado!`);
+        carregarStatusRelampago();
     } catch(e) {
         alert('Erro ao ativar: ' + e.message);
     } finally {
@@ -465,6 +468,7 @@ async function desativarRelampagoDireto() {
         if(error) throw error;
         
         showToast('Cupom Acesso Direto desativado!');
+        carregarStatusRelampago();
     } catch(e) {
         alert('Erro ao desativar: ' + e.message);
     } finally {
