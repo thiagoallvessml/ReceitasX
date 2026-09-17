@@ -18,7 +18,7 @@
                 const session = await getSession();
                 if (session && session.user) {
                     const { data: perfil } = await sb.from('perfis').select('origem_cadastro').eq('id', session.user.id).single();
-                    if (perfil && perfil.origem_cadastro && perfil.origem_cadastro !== 'calculadora' && perfil.origem_cadastro !== 'ads') {
+                    if (perfil && perfil.origem_cadastro) {
                         ref = perfil.origem_cadastro.replace(/^Afiliado:\s*/i, '').trim();
                         localStorage.setItem('receitasx_ref', ref);
                     }
@@ -35,21 +35,27 @@
 
         let couponCode = null;
         let msgRelampago = '';
+        
+        // Verifica se é uma origem direta/interna (ignora para cupons de afiliado)
+        const isDireto = !ref || ['direto', 'calculadora', 'ads', 'google', 'facebook', 'instagram', 'tiktok'].includes(ref.toLowerCase());
 
-        if (ref) {
+        if (!isDireto) {
             console.log('[CupomRelampago] Ref afiliado encontrado:', ref);
             couponCode = (ref + 'RELAMPAGO').toUpperCase().substring(0,30);
-            msgRelampago = ''+msgRelampago+'';
+            msgRelampago = 'Desconto RELAMPAGO liberado pelo seu afiliado!';
         } else {
-            console.log('[CupomRelampago] Nenhum afiliado encontrado. Usando cupom direto.');
+            console.log('[CupomRelampago] Nenhum afiliado encontrado (Origem: ' + (ref || 'Nenhuma') + '). Usando cupom direto.');
             couponCode = 'OFERTARELAMPAGO';
-            msgRelampago = 'Desconto RELAMPAGO ativado para vocÃª!';
+            msgRelampago = 'Desconto RELAMPAGO ativado para você!';
         }
 
         console.log('[CupomRelampago] Buscando cupom:', couponCode);
 
-        const res = await fetch(SUPABASE_URL + '/rest/v1/cupons?select=codigo,valor,data_expiracao,ativo&codigo=eq.' + couponCode + '&ativo=eq.true', {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        const API_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://pipknmwjpblitqlxxdcw.supabase.co';
+        const API_KEY = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpcGtubXdqcGJsaXRxbHh4ZGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NTgzNjcsImV4cCI6MjA4OTMzNDM2N30.2aiHf_9T9j1S6VMh9euY0wFn2r4S2OezCrYi2ZJ6W-E';
+
+        const res = await fetch(API_URL + '/rest/v1/cupons?select=codigo,valor,data_expiracao,ativo&codigo=eq.' + couponCode + '&ativo=eq.true', {
+            headers: { 'apikey': API_KEY, 'Authorization': 'Bearer ' + API_KEY }
         });
         
         if (!res.ok) {
@@ -101,7 +107,7 @@
 
         const topRow = document.createElement('div');
         topRow.style.cssText = 'display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.02em;';
-        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">'+msgRelampago+'</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
+        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">' + msgRelampago + '</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
         
         const bottomRow = document.createElement('div');
         bottomRow.style.cssText = 'font-size:0.8rem;font-weight:500;background:rgba(0,0,0,0.2);padding:0.2rem 0.8rem;border-radius:99px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:center;';
@@ -153,6 +159,3 @@
         console.error('[CupomRelampago] Erro:', e);
     }
 })();
-
-
-
