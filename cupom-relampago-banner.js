@@ -1,4 +1,4 @@
-﻿(async function() {
+(async function() {
     try {
         // Aguarda o Supabase resolver a sessao (mesmo delay do heartbeat)
         await new Promise(r => setTimeout(r, 1200));
@@ -99,18 +99,17 @@
             ico.style.cssText = 'font-size:1rem;color:#eab308;';
             ico.textContent = 'bolt';
             
-            const textSpan = document.createElement('span');
-            textSpan.innerHTML = `-${cupom.valor}% | `;
-            textSpan.appendChild(spanTime);
+            const spanLabel = document.createElement('span');
+            spanLabel.textContent = `Cupom -${cupom.valor}% | `;
 
             pill.appendChild(ico);
-            pill.appendChild(textSpan);
+            pill.appendChild(spanLabel);
+            pill.appendChild(spanTime);
             
             pill.onclick = () => {
                 navigator.clipboard.writeText(cupom.codigo);
-                const oldHtml = textSpan.innerHTML;
-                textSpan.innerHTML = 'Copiado!';
-                setTimeout(() => { textSpan.innerHTML = oldHtml; textSpan.appendChild(spanTime); }, 2000);
+                spanLabel.textContent = 'Copiado! | ';
+                setTimeout(() => { spanLabel.textContent = `Cupom -${cupom.valor}% | `; }, 2000);
             };
 
             navSlot.appendChild(pill);
