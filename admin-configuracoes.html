@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Configurações - Admin · ReceitasX</title>
+    <title>ConfiguraÃ§Ãµes - Admin Â· ReceitasX</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
     <script src="auth-guard.js"></script>
@@ -23,11 +23,11 @@
         body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; background:#121212; color:#f1f5f9; }
         .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
 
-        /* ── Back btn ── */
+        /* â”€â”€ Back btn â”€â”€ */
         .btn-back { display:flex;align-items:center;gap:.3rem;color:#64748b;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
         .btn-back:hover { color:#25f4f4; }
 
-        /* ── Section card ── */
+        /* â”€â”€ Section card â”€â”€ */
         .cfg-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:1.15rem;overflow:hidden;margin-bottom:1.25rem; }
         .cfg-card-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A; }
         .cfg-card-head .ico { width:2.2rem;height:2.2rem;border-radius:.6rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
@@ -35,7 +35,7 @@
         .cfg-card-head p  { font-size:.72rem;color:#64748b;margin-top:.1rem; }
         .cfg-body { padding:1.25rem;display:flex;flex-direction:column;gap:1rem; }
 
-        /* ── Field ── */
+        /* â”€â”€ Field â”€â”€ */
         .field { display:flex;flex-direction:column;gap:.35rem; }
         .field label { font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#64748b; }
         .field-desc { font-size:.7rem;color:#475569;margin-top:-.15rem; }
@@ -47,48 +47,48 @@
         .cfg-input { flex:1;background:transparent !important;border:none !important;outline:none !important;color:#f1f5f9 !important;font-size:.95rem;font-weight:600;padding:.7rem .9rem;width:100%;box-shadow:none !important; }
         .cfg-input::placeholder { color:#334155 !important;font-weight:400; }
 
-        /* ── Preview chip ── */
+        /* â”€â”€ Preview chip â”€â”€ */
         .preview-chip { display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .85rem;border-radius:9999px;font-size:.75rem;font-weight:700; }
         .chip-green  { background:rgba(37,244,244,.08);border:1px solid rgba(37,244,244,.2);color:#25f4f4; }
         .chip-yellow { background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fbbf24; }
 
-        /* ── Save button ── */
+        /* â”€â”€ Save button â”€â”€ */
         .btn-save { display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:.8rem;border:none;background:linear-gradient(135deg,#25f4f4,#0dc8c8);color:#0a0a0a;font-weight:800;font-size:.88rem;cursor:pointer;transition:opacity .15s, box-shadow .2s;box-shadow:0 4px 16px rgba(37,244,244,.2); }
         .btn-save:hover { opacity:.9;box-shadow:0 6px 24px rgba(37,244,244,.35); }
         .btn-save:disabled { opacity:.45;cursor:not-allowed;box-shadow:none; }
         .btn-save .material-symbols-outlined { font-size:1rem;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24; }
 
-        /* ── Admin banner ── */
+        /* â”€â”€ Admin banner â”€â”€ */
         .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.18);border-radius:.75rem;font-size:.75rem;color:#fb923c;margin-bottom:1.5rem; }
 
-        /* ── Divider ── */
+        /* â”€â”€ Divider â”€â”€ */
         .divider { height:1px;background:#2A2A2A;margin:.25rem 0; }
 
-        /* ── Info row ── */
+        /* â”€â”€ Info row â”€â”€ */
         .info-row { display:flex;justify-content:space-between;align-items:center;padding:.6rem 0; }
         .info-row:not(:last-child) { border-bottom:1px solid #1E1E1E; }
         .info-key { font-size:.78rem;color:#64748b; }
         .info-val { font-size:.88rem;font-weight:700;color:#f1f5f9; }
 
-        /* ── Toast ── */
+        /* â”€â”€ Toast â”€â”€ */
         #toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;border:1px solid rgba(37,244,244,.35);color:#f1f5f9;padding:.65rem 1.2rem;border-radius:.75rem;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.5rem;z-index:300;opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap; }
         #toast.show { transform:translateX(-50%) translateY(0);opacity:1; }
 
-        /* ── Skeleton ── */
+        /* â”€â”€ Skeleton â”€â”€ */
         .skeleton { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.5rem; }
         @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
     </style>
 </head>
 <body class="min-h-screen pb-24">
 
-<!-- ══ Header ══════════════════════════════════════════════════════ -->
+<!-- â•â• Header â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <header style="position:sticky;top:0;z-index:30;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #2A2A2A;">
     <div style="max-width:680px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:1rem;">
         <button class="btn-back" onclick="history.back()">
             <span class="material-symbols-outlined" style="font-size:1.2rem">arrow_back</span>
         </button>
         <span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">admin_panel_settings</span>
-        <h1 style="font-size:.95rem;font-weight:700;flex:1">Configurações do Sistema</h1>
+        <h1 style="font-size:.95rem;font-weight:700;flex:1">ConfiguraÃ§Ãµes do Sistema</h1>
         <button class="btn-save" id="btn-save" onclick="salvar()" disabled>
             <span class="material-symbols-outlined">save</span>
             Salvar
@@ -96,16 +96,16 @@
     </div>
 </header>
 
-<!-- ══ Main ════════════════════════════════════════════════════════ -->
+<!-- â•â• Main â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <main style="max-width:680px;margin:0 auto;padding:1.5rem 1.25rem;">
 
     <!-- Banner admin -->
     <div class="admin-banner">
         <span class="material-symbols-outlined" style="font-size:1rem;color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">lock</span>
-        <span>Apenas administradores podem alterar estas configurações.</span>
+        <span>Apenas administradores podem alterar estas configuraÃ§Ãµes.</span>
     </div>
 
-    <!-- ── Programa de Afiliados ── -->
+    <!-- â”€â”€ Programa de Afiliados â”€â”€ -->
     <div class="cfg-card">
         <div class="cfg-card-head">
             <div class="ico" style="background:rgba(37,244,244,.08);border:1px solid rgba(37,244,244,.18);">
@@ -113,14 +113,14 @@
             </div>
             <div>
                 <h2>Programa de Afiliados</h2>
-                <p>Controle comissão e regras do programa de indicação.</p>
+                <p>Controle comissÃ£o e regras do programa de indicaÃ§Ã£o.</p>
             </div>
         </div>
         <div class="cfg-body">
 
-            <!-- Comissão -->
+            <!-- ComissÃ£o -->
             <div class="field">
-                <label>Comissão por venda</label>
+                <label>ComissÃ£o por venda</label>
                 <p class="field-desc">Percentual pago ao afiliado em cada venda confirmada.</p>
                 <div class="input-wrap">
                     <div class="input-prefix" style="min-width:3rem;text-align:center">%</div>
@@ -134,25 +134,25 @@
 
             <div class="divider"></div>
 
-            <!-- Saque Mínimo -->
+            <!-- Saque MÃ­nimo -->
             <div class="field">
-                <label>Saque Mínimo</label>
-                <p class="field-desc">Valor mínimo acumulado para o afiliado solicitar saque via Pix.</p>
+                <label>Saque MÃ­nimo</label>
+                <p class="field-desc">Valor mÃ­nimo acumulado para o afiliado solicitar saque via Pix.</p>
                 <div class="input-wrap">
                     <div class="input-prefix">R$</div>
                     <input class="cfg-input" id="saque_minimo" type="number" min="1" step="0.01" placeholder="50.00" oninput="atualizarPreview()" />
                 </div>
                 <div style="margin-top:.2rem">
-                    <span class="preview-chip chip-yellow" id="preview-saque">Mínimo de R$ 50,00 para saque</span>
+                    <span class="preview-chip chip-yellow" id="preview-saque">MÃ­nimo de R$ 50,00 para saque</span>
                 </div>
             </div>
 
             <div class="divider"></div>
 
-            <!-- Valor do produto (referência) -->
+            <!-- Valor do produto (referÃªncia) -->
             <div class="field">
-                <label>Valor do Plano (referência)</label>
-                <p class="field-desc">Preço base do plano usado para calcular a comissão em reais.</p>
+                <label>Valor do Plano (referÃªncia)</label>
+                <p class="field-desc">PreÃ§o base do plano usado para calcular a comissÃ£o em reais.</p>
                 <div class="input-wrap">
                     <div class="input-prefix">R$</div>
                     <input class="cfg-input" id="valor_plano" type="number" min="1" step="0.01" placeholder="46.90" oninput="atualizarPreview()" />
@@ -162,50 +162,87 @@
         </div>
     </div>
 
-    <!-- ⚡ Cupom Relâmpago ⚡ -->
+    <!-- ⚡ Cupons Relâmpago ⚡ -->
     <div class="cfg-card">
         <div class="cfg-card-head" style="border-bottom:none">
             <div class="ico" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.2);">
                 <span class="material-symbols-outlined" style="font-size:1.1rem;color:#eab308;font-variation-settings:'FILL' 1">bolt</span>
             </div>
             <div>
-                <h2>Cupom Relâmpago Global</h2>
-                <p>Gere e ative cupons de desconto temporários para todos os afiliados simultaneamente.</p>
+                <h2>Cupons Relâmpago (Urgência)</h2>
+                <p>Gere cupons temporários de desconto para afiliados e acesso direto.</p>
             </div>
         </div>
-        <div class="cfg-body" style="padding-top:0;">
-            <div style="background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.15);border-radius:.75rem;padding:1rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end">
-                
-                <div style="flex:1;min-width:120px">
-                    <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Desconto (%)</label>
-                    <div class="input-wrap">
-                        <div class="input-prefix">%</div>
-                        <input class="cfg-input" id="relampago_desc" type="number" min="1" max="100" value="20" />
+        <div class="cfg-body" style="padding-top:0;display:flex;flex-direction:column;gap:1.5rem">
+            
+            <!-- Afiliados -->
+            <div>
+                <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.6rem;color:#f1f5f9;display:flex;align-items:center;gap:.3rem"><span class="material-symbols-outlined" style="font-size:1.1rem;color:#a78bfa">groups</span> Para Afiliados</h3>
+                <div style="background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.15);border-radius:.75rem;padding:1rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end">
+                    <div style="flex:1;min-width:120px">
+                        <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Desconto (%)</label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">%</div>
+                            <input class="cfg-input" id="relampago_desc" type="number" min="1" max="100" value="20" />
+                        </div>
                     </div>
-                </div>
-                
-                <div style="flex:1;min-width:120px">
-                    <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Duração (Horas)</label>
-                    <div class="input-wrap">
-                        <div class="input-prefix"><span class="material-symbols-outlined" style="font-size:1rem">schedule</span></div>
-                        <input class="cfg-input" id="relampago_horas" type="number" min="1" max="168" value="24" />
+                    
+                    <div style="flex:1;min-width:120px">
+                        <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Duração (Horas)</label>
+                        <div class="input-wrap">
+                            <div class="input-prefix"><span class="material-symbols-outlined" style="font-size:1rem">schedule</span></div>
+                            <input class="cfg-input" id="relampago_horas" type="number" min="1" max="168" value="24" />
+                        </div>
                     </div>
-                </div>
 
-                <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-                    <button id="btn-ativar-rel" onclick="ativarRelampago()" style="background:#eab308;color:#422006;font-weight:700;border:none;padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:opacity .2s">
-                        <span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Cupons Relâmpago
-                    </button>
-                    <button id="btn-desativar-rel" onclick="desativarRelampago()" style="background:transparent;color:#eab308;font-weight:600;border:1px solid rgba(234,179,8,.3);padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;transition:background .2s">
-                        Desativar Todos
-                    </button>
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                        <button id="btn-ativar-rel" onclick="ativarRelampago()" style="background:#eab308;color:#422006;font-weight:700;border:none;padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:opacity .2s">
+                            <span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Afiliados
+                        </button>
+                        <button id="btn-desativar-rel" onclick="desativarRelampago()" style="background:transparent;color:#eab308;font-weight:600;border:1px solid rgba(234,179,8,.3);padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;transition:background .2s">
+                            Desativar Todos
+                        </button>
+                    </div>
                 </div>
+                <p style="font-size:.7rem;color:#64748b;margin-top:.4rem">Isso criará o código <strong>[AFILIADO]RELAMPAGO</strong> para cada um. Substitui os ativos.</p>
             </div>
-            <p style="font-size:.7rem;color:#64748b;margin-top:.2rem">Isso criará o código <strong>[AFILIADO]RELAMPAGO</strong> para cada um. Se um cupom relâmpago já estiver rodando, ele será substituído.</p>
+
+            <!-- Acesso Direto -->
+            <div>
+                <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.6rem;color:#f1f5f9;display:flex;align-items:center;gap:.3rem"><span class="material-symbols-outlined" style="font-size:1.1rem;color:#34d399">public</span> Para Acesso Direto</h3>
+                <div style="background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.15);border-radius:.75rem;padding:1rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end">
+                    <div style="flex:1;min-width:120px">
+                        <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Desconto (%)</label>
+                        <div class="input-wrap">
+                            <div class="input-prefix" style="color:#34d399">%</div>
+                            <input class="cfg-input" id="relampago_direto_desc" type="number" min="1" max="100" value="20" />
+                        </div>
+                    </div>
+                    
+                    <div style="flex:1;min-width:120px">
+                        <label style="font-size:.75rem;color:#94a3b8;font-weight:600;margin-bottom:.3rem;display:block">Duração (Horas)</label>
+                        <div class="input-wrap">
+                            <div class="input-prefix" style="color:#34d399"><span class="material-symbols-outlined" style="font-size:1rem">schedule</span></div>
+                            <input class="cfg-input" id="relampago_direto_horas" type="number" min="1" max="168" value="24" />
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                        <button id="btn-ativar-direto" onclick="ativarRelampagoDireto()" style="background:#34d399;color:#064e3b;font-weight:700;border:none;padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:opacity .2s">
+                            <span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Direto
+                        </button>
+                        <button id="btn-desativar-direto" onclick="desativarRelampagoDireto()" style="background:transparent;color:#34d399;font-weight:600;border:1px solid rgba(52,211,153,.3);padding:.65rem 1rem;border-radius:.5rem;cursor:pointer;transition:background .2s">
+                            Desativar
+                        </button>
+                    </div>
+                </div>
+                <p style="font-size:.7rem;color:#64748b;margin-top:.4rem">Isso criará o código <strong>OFERTARELAMPAGO</strong> para quem entrar sem indicação.</p>
+            </div>
+
         </div>
     </div>
 
-    <!-- ── Resumo atual ── -->
+    <!-- â”€â”€ Resumo atual â”€â”€ -->
     <div class="cfg-card">
         <div class="cfg-card-head">
             <div class="ico" style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);">
@@ -213,7 +250,7 @@
             </div>
             <div>
                 <h2>Resumo Atual</h2>
-                <p>Como estão as configurações salvas no banco.</p>
+                <p>Como estÃ£o as configuraÃ§Ãµes salvas no banco.</p>
             </div>
         </div>
         <div class="cfg-body" id="resumo-body">
@@ -225,14 +262,14 @@
 
 </main>
 
-<!-- ══ Toast ══════════════════════════════════════════════════════ -->
+<!-- â•â• Toast â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="toast">
     <span id="toast-icon" class="material-symbols-outlined" style="font-size:1rem;color:#25f4f4">check_circle</span>
     <span id="toast-msg">Salvo!</span>
 </div>
 
 <script>
-/* ── Guard: só admin ─────────────────────────────────────────────── */
+/* â”€â”€ Guard: sÃ³ admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 (async () => {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { location.replace('login.html'); return; }
@@ -243,7 +280,7 @@
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;font-family:Inter,sans-serif">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
                 <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
-                <a href="index" style="color:#25f4f4;font-weight:600">← Voltar</a>
+                <a href="index" style="color:#25f4f4;font-weight:600">â† Voltar</a>
             </div>`;
         return;
     }
@@ -252,7 +289,7 @@
     document.getElementById('btn-save').disabled = false;
 })();
 
-/* ── Carregar configs do Supabase ────────────────────────────────── */
+/* â”€â”€ Carregar configs do Supabase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 async function carregarConfiguracoes() {
     const { data, error } = await sb.from('config_afiliados').select('*').eq('id', 1).single();
 
@@ -267,7 +304,7 @@ async function carregarConfiguracoes() {
 }
 
 
-/* ── Atualizar preview em tempo real ─────────────────────────────── */
+/* â”€â”€ Atualizar preview em tempo real â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function atualizarPreview() {
     const pct    = parseFloat(document.getElementById('comissao').value)    || 10;
     const saque  = parseFloat(document.getElementById('saque_minimo').value) || 50;
@@ -277,14 +314,14 @@ function atualizarPreview() {
 
     document.getElementById('preview-comissao').textContent      = `${pct}% por venda`;
     document.getElementById('preview-valor-comissao').textContent = `= R$ ${valorComissao} em compra de R$ ${fmtR(plano)}`;
-    document.getElementById('preview-saque').textContent          = `Mínimo de R$ ${fmtR(saque)} para saque`;
+    document.getElementById('preview-saque').textContent          = `MÃ­nimo de R$ ${fmtR(saque)} para saque`;
 }
 
 function fmtR(v) {
     return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/* ── Render resumo ───────────────────────────────────────────────── */
+/* â”€â”€ Render resumo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function renderResumo(cfg) {
     const pct   = cfg.comissao_pct  ?? '10';
     const saque = cfg.saque_minimo  ?? '50';
@@ -293,28 +330,28 @@ function renderResumo(cfg) {
 
     document.getElementById('resumo-body').innerHTML = `
         <div class="info-row">
-            <span class="info-key">Comissão</span>
+            <span class="info-key">ComissÃ£o</span>
             <span class="info-val" style="color:#25f4f4">${pct}% <span style="font-size:.72rem;color:#475569;font-weight:400">(R$ ${valorC} por venda)</span></span>
         </div>
         <div class="info-row">
-            <span class="info-key">Saque mínimo</span>
+            <span class="info-key">Saque mÃ­nimo</span>
             <span class="info-val" style="color:#fbbf24">R$ ${fmtR(parseFloat(saque))}</span>
         </div>
         <div class="info-row">
-            <span class="info-key">Valor do plano (referência)</span>
+            <span class="info-key">Valor do plano (referÃªncia)</span>
             <span class="info-val">R$ ${fmtR(parseFloat(plano))}</span>
         </div>`;
 }
 
-/* ⚡ Cupom Relâmpago ⚡ */
+/* âš¡ Cupom RelÃ¢mpago âš¡ */
 async function ativarRelampago() {
     const desconto = parseFloat(document.getElementById('relampago_desc').value);
     const horas = parseFloat(document.getElementById('relampago_horas').value);
     
-    if(!desconto || desconto <= 0) return alert('Insira um desconto válido');
-    if(!horas || horas <= 0) return alert('Insira horas válidas');
+    if(!desconto || desconto <= 0) return alert('Insira um desconto vÃ¡lido');
+    if(!horas || horas <= 0) return alert('Insira horas vÃ¡lidas');
     
-    if(!confirm(`Isto irá CRIAR cupons de ${desconto}% para TODOS os afiliados. Os cupons serão válidos por ${horas} horas. Confirma?`)) return;
+    if(!confirm(`Isto irÃ¡ CRIAR cupons de ${desconto}% para TODOS os afiliados. Os cupons serÃ£o vÃ¡lidos por ${horas} horas. Confirma?`)) return;
     
     const btn = document.getElementById('btn-ativar-rel');
     btn.innerHTML = 'Gerando...';
@@ -342,17 +379,17 @@ async function ativarRelampago() {
         const { error: errIns } = await sb.from('cupons').insert(cuponsToInsert);
         if(errIns) throw errIns;
         
-        showToast(`⚡ Sucesso! ${cuponsToInsert.length} cupons ativados!`);
+        showToast(`âš¡ Sucesso! ${cuponsToInsert.length} cupons ativados!`);
     } catch(e) {
         alert('Erro ao ativar: ' + e.message);
     } finally {
-        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Cupons Relâmpago';
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Cupons RelÃ¢mpago';
         btn.disabled = false;
     }
 }
 
 async function desativarRelampago() {
-    if(!confirm('Isto irá DESATIVAR (excluir) todos os cupons relâmpago ativos. Confirma?')) return;
+    if(!confirm('Isto irÃ¡ DESATIVAR (excluir) todos os cupons relÃ¢mpago ativos. Confirma?')) return;
     
     const btn = document.getElementById('btn-desativar-rel');
     btn.innerHTML = 'Desativando...';
@@ -367,7 +404,7 @@ async function desativarRelampago() {
             if(error) throw error;
         }
         
-        showToast('Cupons Relâmpago desativados!');
+        showToast('Cupons RelÃ¢mpago desativados!');
     } catch(e) {
         alert('Erro ao desativar: ' + e.message);
     } finally {
@@ -376,11 +413,71 @@ async function desativarRelampago() {
     }
 }
 
-/* 🔄 Salvar 🔄─────────────────────────────────────────────────────────────────── */
+async function ativarRelampagoDireto() {
+    const desconto = parseFloat(document.getElementById('relampago_direto_desc').value);
+    const horas = parseFloat(document.getElementById('relampago_direto_horas').value);
+    
+    if(!desconto || desconto <= 0) return alert('Insira um desconto válido');
+    if(!horas || horas <= 0) return alert('Insira horas válidas');
+    
+    if(!confirm(`Isto irá CRIAR o cupom OFERTARELAMPAGO de ${desconto}% para acessos diretos. Ele será válido por ${horas} horas. Confirma?`)) return;
+    
+    const btn = document.getElementById('btn-ativar-direto');
+    btn.innerHTML = 'Gerando...';
+    btn.disabled = true;
+    
+    try {
+        const expDate = new Date(Date.now() + (horas * 60 * 60 * 1000)).toISOString();
+        const cupom = {
+            codigo: 'OFERTARELAMPAGO',
+            tipo: 'porcentagem',
+            valor: desconto,
+            ativo: true,
+            usos_atual: 0,
+            cliques: 0,
+            afiliado_id: null,
+            data_expiracao: expDate
+        };
+        
+        await sb.from('cupons').delete().eq('codigo', 'OFERTARELAMPAGO');
+        
+        const { error: errIns } = await sb.from('cupons').insert(cupom);
+        if(errIns) throw errIns;
+        
+        showToast(`⚡ Sucesso! Cupom OFERTARELAMPAGO ativado!`);
+    } catch(e) {
+        alert('Erro ao ativar: ' + e.message);
+    } finally {
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem">bolt</span> Ativar Direto';
+        btn.disabled = false;
+    }
+}
+
+async function desativarRelampagoDireto() {
+    if(!confirm('Isto irá DESATIVAR (excluir) o cupom relâmpago de acesso direto. Confirma?')) return;
+    
+    const btn = document.getElementById('btn-desativar-direto');
+    btn.innerHTML = 'Desativando...';
+    btn.disabled = true;
+    
+    try {
+        const { error } = await sb.from('cupons').delete().eq('codigo', 'OFERTARELAMPAGO');
+        if(error) throw error;
+        
+        showToast('Cupom Acesso Direto desativado!');
+    } catch(e) {
+        alert('Erro ao desativar: ' + e.message);
+    } finally {
+        btn.innerHTML = 'Desativar';
+        btn.disabled = false;
+    }
+}
+
+/* ðŸ”„ Salvar ðŸ”„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 async function salvar() {
     const btn = document.getElementById('btn-save');
     btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin .8s linear infinite">sync</span> Salvando…`;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;animation:spin .8s linear infinite">sync</span> Salvandoâ€¦`;
 
 
     try {
@@ -396,10 +493,10 @@ async function salvar() {
             .upsert(payload, { onConflict: 'id' });
         if (error) throw new Error(error.message || JSON.stringify(error));
 
-        showToast('✓ Configurações salvas com sucesso!');
+        showToast('âœ“ ConfiguraÃ§Ãµes salvas com sucesso!');
         renderResumo(payload);
     } catch (e) {
-        console.error('Erro ao salvar configurações:', e?.message || e);
+        console.error('Erro ao salvar configuraÃ§Ãµes:', e?.message || e);
         showToast('Erro: ' + (e?.message || 'verifique o console'), 'error');
     } finally {
         btn.disabled = false;
@@ -407,7 +504,7 @@ async function salvar() {
     }
 }
 
-/* ── Toast ───────────────────────────────────────────────────────── */
+/* â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 let toastTimer;
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -420,10 +517,11 @@ function showToast(msg, type = 'success') {
     toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-/* Animação spin */
+/* AnimaÃ§Ã£o spin */
 const style = document.createElement('style');
 style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(style);
 </script>
 </body>
 </html>
+

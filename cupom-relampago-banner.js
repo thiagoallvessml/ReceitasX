@@ -33,14 +33,19 @@
             ref = sessionStorage.getItem('ref_afiliado');
         }
 
-        if (!ref) {
-            console.log('[CupomRelampago] Nenhum afiliado encontrado.');
-            return;
-        }
-        
-        console.log('[CupomRelampago] Ref encontrado:', ref);
+        let couponCode = null;
+        let msgRelampago = '';
 
-        const couponCode = (ref + 'RELAMPAGO').toUpperCase().substring(0,30);
+        if (ref) {
+            console.log('[CupomRelampago] Ref afiliado encontrado:', ref);
+            couponCode = (ref + 'RELAMPAGO').toUpperCase().substring(0,30);
+            msgRelampago = ''+msgRelampago+'';
+        } else {
+            console.log('[CupomRelampago] Nenhum afiliado encontrado. Usando cupom direto.');
+            couponCode = 'OFERTARELAMPAGO';
+            msgRelampago = 'Desconto RELAMPAGO ativado para vocÃª!';
+        }
+
         console.log('[CupomRelampago] Buscando cupom:', couponCode);
 
         const res = await fetch(SUPABASE_URL + '/rest/v1/cupons?select=codigo,valor,data_expiracao,ativo&codigo=eq.' + couponCode + '&ativo=eq.true', {
@@ -96,7 +101,7 @@
 
         const topRow = document.createElement('div');
         topRow.style.cssText = 'display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.02em;';
-        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">Desconto RELAMPAGO liberado pelo seu afiliado!</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
+        topRow.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span> <span id="cr-msg">'+msgRelampago+'</span> <span class="material-symbols-outlined" style="font-size:1.2rem">bolt</span>';
         
         const bottomRow = document.createElement('div');
         bottomRow.style.cssText = 'font-size:0.8rem;font-weight:500;background:rgba(0,0,0,0.2);padding:0.2rem 0.8rem;border-radius:99px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:center;';
@@ -148,5 +153,6 @@
         console.error('[CupomRelampago] Erro:', e);
     }
 })();
+
 
 
