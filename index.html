@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -71,7 +71,7 @@
         }
         .sino-ring { animation: sinoPulse .6s ease both; }
 
-        /* Painel de notificaÃ§Ãµes */
+        /* Painel de notificações */
         #notif-panel {
             position: fixed; top: 3.5rem; right: 1rem;
             width: 320px; max-width: calc(100vw - 2rem);
@@ -137,7 +137,7 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
-<!-- â•â• Header sticky â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ Header sticky ═════════════════════════════════════════ -->
 <header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
     <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.75rem">
         <span style="font-size:.95rem;font-weight:800;flex:1;letter-spacing:-.01em">
@@ -151,15 +151,15 @@
             onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
             <span class="material-symbols-outlined" style="font-size:1.15rem">tune</span>
         </button>
-        <!-- Sino de notificaÃ§Ãµes -->
-        <button id="sino-btn" onclick="toggleNotifPanel()" title="NotificaÃ§Ãµes"
+        <!-- Sino de notificações -->
+        <button id="sino-btn" onclick="toggleNotifPanel()" title="Notificações"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
             onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
             <span class="material-symbols-outlined" id="sino-icon" style="font-size:1.15rem">notifications</span>
             <span id="sino-badge">0</span>
         </button>
-        <!-- BotÃ£o Sair -->
+        <!-- Botão Sair -->
         <button onclick="signOut()" title="Sair"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#f87171';this.style.borderColor='rgba(248,113,113,.4)'"
@@ -169,7 +169,7 @@
         <!-- Painel -->
         <div id="notif-panel">
             <div class="notif-panel-head">
-                <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">NotificaÃ§Ãµes</span>
+                <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">Notificações</span>
                 <div style="display:flex;gap:.4rem">
                     <button onclick="marcarTodasLidas()" style="font-size:.68rem;color:#475569;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:.4rem;transition:color .15s" onmouseover="this.style.color='#25f4f4'" onmouseout="this.style.color='#475569'">Marcar todas como lidas</button>
                     <button onclick="limparNotificacoes()" style="font-size:.68rem;color:#475569;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:.4rem;transition:color .15s" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#475569'">Limpar</button>
@@ -180,7 +180,7 @@
     </div>
 </header>
 <div class="p-6 space-y-8">
-    <!-- â”€â”€ Guia de ConfiguraÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Guia de Configuração ─────────────────────────────── -->
     <a data-card-id="guia-configuracao" href="guia-configuracao" id="banner-guia"
         class="nav-card block p-4 rounded-xl border group"
         style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
@@ -190,7 +190,7 @@
             </div>
             <div class="flex-1">
                 <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                    <h4 class="text-sm font-bold">Guia de ConfiguraÃ§Ã£o</h4>
+                    <h4 class="text-sm font-bold">Guia de Configuração</h4>
                     <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Novo</span>
                 </div>
                 <p class="text-xs" style="color:#64748b;margin-top:.1rem">Siga o passo a passo para configurar tudo corretamente</p>
@@ -202,11 +202,11 @@
 
 
 
-    <!-- â”€â”€ Receitas BÃ´nus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Receitas Bônus ─────────────────────────────── -->
     <section style="display:none">
         <div class="flex items-center gap-2 mb-4 px-1 mt-6">
             <span class="material-symbols-outlined text-primary text-sm">icecream</span>
-            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Receitas BÃ´nus</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Receitas Bônus</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <a data-card-id="receitas-geladinho" href="receitas-geladinho"
@@ -218,20 +218,20 @@
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
                         <h4 class="text-sm font-bold">Receitas de Geladinho</h4>
-                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">ColeÃ§Ã£o</span>
+                        <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Coleção</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Veja todas as receitas e vÃ­deos passo a passo</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Veja todas as receitas e vídeos passo a passo</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
             </a>
         </div>
     </section>
 
-    <!-- â”€â”€ Acesso RÃ¡pido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Acesso Rápido ──────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-3 px-1 mt-6">
             <span class="material-symbols-outlined text-primary text-sm">bolt</span>
-            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Acesso RÃ¡pido</h2>
+            <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Acesso Rápido</h2>
         </div>
         <div class="grid grid-cols-2 gap-3 mb-6">
             <a data-card-id="cadastrar-insumo" href="gerenciar-insumos?action=new"
@@ -257,7 +257,7 @@
         </div>
     </section>
 
-    <!-- â”€â”€ Operacional â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Operacional ──────────────────────────────────────── -->
     <section>
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">precision_manufacturing</span>
@@ -305,7 +305,7 @@
                         
                         <span id="alert-equipamentos" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">DepreciaÃ§Ã£o e custos de maquinÃ¡rio</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Depreciação e custos de maquinário</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -350,7 +350,7 @@
                         
                         <span id="alert-receitas" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Crie e visualize fichas tÃ©cnicas</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Crie e visualize fichas técnicas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -363,7 +363,7 @@
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
                         <h4 class="text-sm font-bold">Quebras e Lixo</h4>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Controle de desperdÃ­cio e perdas</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Controle de desperdício e perdas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -378,7 +378,7 @@
                         
                         <span id="alert-produtos" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1">Sua vitrine e portfÃ³lio</p>
+                    <p class="text-xs text-slate-500 mt-1">Sua vitrine e portfólio</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -389,7 +389,7 @@
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Controle de Estoque</h4>
-                    <p class="text-xs text-slate-500 mt-1">Acompanhe saldo e relatÃ³rios</p>
+                    <p class="text-xs text-slate-500 mt-1">Acompanhe saldo e relatórios</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -415,11 +415,11 @@
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">PrecificaÃ§Ã£o</h4>
+                        <h4 class="text-sm font-bold">Precificação</h4>
                         
                         
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">PreÃ§os para iFood, Mercado Livre...</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Preços para iFood, Mercado Livre...</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -448,7 +448,7 @@
                         
                         <span id="alert-despesas" style="display:none;font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Cadastrar dados</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Custos fixos e variÃ¡veis do negÃ³cio</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Custos fixos e variáveis do negócio</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -460,11 +460,11 @@
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">EquilÃ­brio</h4>
+                        <h4 class="text-sm font-bold">Equilíbrio</h4>
                         
                         
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua meta mÃ­nima de vendas</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua meta mínima de vendas</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -479,7 +479,7 @@
                         <span style="font-size:.6rem;font-weight:700;background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Admin</span>
                         
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Ãrea exclusiva da administraÃ§Ã£o</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Área exclusiva da administração</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -490,7 +490,7 @@
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">ConfiguraÃ§Ãµes</h4>
+                        <h4 class="text-sm font-bold">Configurações</h4>
                         
                         
                     </div>
@@ -500,7 +500,7 @@
             </a>
         </div>
     </section>
-    <!-- â”€â”€ Financeiro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Financeiro ─────────────────────────────────────────────── -->
     <section id="secao-financeiro">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">payments</span>
@@ -523,7 +523,7 @@
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
-            <!-- Acesso VitalÃ­cio -->
+            <!-- Acesso Vitalício -->
             <a data-card-id="acesso-vitalicio" href="acesso-vitalicio"
                 id="card-acesso-vitalicio"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
@@ -533,7 +533,7 @@
                 </div>
                 <div class="flex-1">
                     <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-                        <h4 class="text-sm font-bold">Acesso VitalÃ­cio</h4>
+                        <h4 class="text-sm font-bold">Acesso Vitalício</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Premium</span>
                     </div>
                     <p class="text-xs" style="color:#64748b;margin-top:.1rem">Gerencie seu plano e assinatura</p>
@@ -556,7 +556,7 @@
                 </div>
                 <span class="material-symbols-outlined" style="color:#34d399;opacity:.5">chevron_right</span>
             </a>
-            <!-- HistÃ³rico de Vendas -->
+            <!-- Histórico de Vendas -->
             <a data-card-id="historico-vendas" href="historico-vendas.html"
                 class="nav-card flex items-center gap-4 p-4 rounded-xl border group"
                 style="background:linear-gradient(135deg,rgba(37,244,244,.06),rgba(37,244,244,.02));border-color:rgba(37,244,244,.2);">
@@ -564,7 +564,7 @@
                     <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">history</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold">HistÃ³rico de Vendas</h4>
+                    <h4 class="text-sm font-bold">Histórico de Vendas</h4>
                     <p class="text-xs" style="color:#64748b;margin-top:.1rem">Consulte suas vendas registradas</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
@@ -572,7 +572,7 @@
         </div>
     </section>
 
-    <!-- â”€â”€ Afiliados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Afiliados ────────────────────────────────────────── -->
     <section id="secao-afiliados" class="mb-10">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">handshake</span>
@@ -591,7 +591,7 @@
                         <h4 class="text-sm font-bold">Indique e Ganhe</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">10% por venda</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Indique amigas e ganhe comissÃ£o em Pix</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Indique amigas e ganhe comissão em Pix</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
@@ -607,7 +607,7 @@
                         <h4 class="text-sm font-bold">Meus Ganhos</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em" id="badge-saldo-idx">R$ 0,00</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Saldo, comissÃµes e solicitar saque</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Saldo, comissões e solicitar saque</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#fbbf24;opacity:.5">chevron_right</span>
             </a>
@@ -623,14 +623,14 @@
                         <h4 class="text-sm font-bold">Extrato de Vendas</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(37,244,244,.15);color:#25f4f4;border:1px solid rgba(37,244,244,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Afiliado</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">ComissÃµes, vendas e saques</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Comissões, vendas e saques</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#25f4f4;opacity:.5">chevron_right</span>
             </a>
         </div>
     </section>
 
-    <!-- â”€â”€ Sistema â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Sistema ──────────────────────────────────────────── -->
     <section id="secao-sistema" class="mb-10">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-primary text-sm">settings</span>
@@ -645,7 +645,7 @@
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Meu Perfil</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua conta e seguranÃ§a</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sua conta e segurança</p>
                 </div>
                 <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
             </a>
@@ -661,7 +661,7 @@
                         <h4 class="text-sm font-bold">Como Usar</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Tutoriais</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">VÃ­deos ensinando a usar o sistema</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Vídeos ensinando a usar o sistema</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#f87171;opacity:.5">chevron_right</span>
             </a>
@@ -677,7 +677,7 @@
                         <h4 class="text-sm font-bold">Meus Feedbacks</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Respostas</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">DÃºvida, sugestÃ£o, elogio ou bug</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Dúvida, sugestão, elogio ou bug</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#a78bfa;opacity:.5">chevron_right</span>
             </a>
@@ -693,14 +693,14 @@
                         <h4 class="text-sm font-bold">Dicas e Receitas</h4>
                         <span style="font-size:.6rem;font-weight:700;background:rgba(244,114,182,.15);color:#f472b6;border:1px solid rgba(244,114,182,.3);border-radius:9999px;padding:.1rem .45rem;letter-spacing:.04em">Blog</span>
                     </div>
-                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Artigos sobre precificaÃ§Ã£o e vendas</p>
+                    <p class="text-xs" style="color:#64748b;margin-top:.1rem">Artigos sobre precificação e vendas</p>
                 </div>
                 <span class="material-symbols-outlined" style="color:#f472b6;opacity:.5">chevron_right</span>
             </a>
         </div>
     </section>
     <script>
-    // Controle de visibilidade por role â€” executa direto ao carregar
+    // Controle de visibilidade por role — executa direto ao carregar
     (async () => {
         try {
             const session = await getSession();
@@ -754,14 +754,14 @@
                 } catch(_) {}
             }
 
-            // Oculta o card de Acesso VitalÃ­cio se o usuÃ¡rio jÃ¡ tem plano vitalicio
+            // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
             try {
-                // Usa o perfil jÃ¡ carregado acima (evita query duplicada)
+                // Usa o perfil já carregado acima (evita query duplicada)
                 if (perfil?.plano === 'vitalicio') {
-                    // UsuÃ¡rio jÃ¡ Ã© vitalÃ­cio â€” mantÃ©m card oculto
-                    // (o card jÃ¡ comeÃ§a com display:none no HTML)
+                    // Usuário já é vitalício — mantém card oculto
+                    // (o card já começa com display:none no HTML)
                 } else {
-                    // NÃ£o Ã© vitalÃ­cio â€” exibe o card de compra
+                    // Não é vitalício — exibe o card de compra
                     const card = document.getElementById('card-acesso-vitalicio');
                     if (card) card.style.display = '';
                 }
@@ -851,14 +851,14 @@
     <div style="height:.5rem"></div>
 
     <script>
-    /* â•â• SINO DE NOTIFICAÃ‡Ã•ES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+    /* ══ SINO DE NOTIFICAÇÕES ════════════════════════════════ */
     const NOTIF_KEY = 'receitasx_notificacoes';
 
     function getNotifs() {
         return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
     }
     function saveNotifs(arr) {
-        // MantÃ©m no mÃ¡ximo 50
+        // Mantém no máximo 50
         localStorage.setItem(NOTIF_KEY, JSON.stringify(arr.slice(0, 50)));
     }
 
@@ -889,8 +889,8 @@
             el.innerHTML = `
                 <div class="notif-empty">
                     <span class="material-symbols-outlined">notifications_off</span>
-                    <p style="font-size:.82rem;font-weight:600;color:#475569">Nenhuma notificaÃ§Ã£o ainda</p>
-                    <p style="font-size:.72rem;color:#334155">As atividades de venda aparecerÃ£o aqui.</p>
+                    <p style="font-size:.82rem;font-weight:600;color:#475569">Nenhuma notificação ainda</p>
+                    <p style="font-size:.72rem;color:#334155">As atividades de venda aparecerão aqui.</p>
                 </div>`;
             return;
         }
@@ -920,10 +920,10 @@
         const h    = Math.floor(diff / 3600000);
         const d    = Math.floor(diff / 86400000);
         if (min  < 1)  return 'agora mesmo';
-        if (min  < 60) return `hÃ¡ ${min} min`;
-        if (h    < 24) return `hÃ¡ ${h}h`;
+        if (min  < 60) return `há ${min} min`;
+        if (h    < 24) return `há ${h}h`;
         if (d    === 1) return 'ontem';
-        return `hÃ¡ ${d} dias`;
+        return `há ${d} dias`;
     }
 
     function toggleNotifPanel() {
@@ -968,13 +968,13 @@
         }
     });
 
-    // ExpÃµe funÃ§Ã£o para scripts externos (notificacoes-afiliado.js)
+    // Expõe função para scripts externos (notificacoes-afiliado.js)
     window.adicionarNotificacao = function(notif) {
         const list = getNotifs();
         list.unshift({
             id:     Date.now().toString(),
             tipo:   notif.tipo   || 'info',
-            titulo: notif.titulo || 'Nova notificaÃ§Ã£o',
+            titulo: notif.titulo || 'Nova notificação',
             desc:   notif.desc   || '',
             href:   notif.href   || '',
             ts:     Date.now(),
@@ -1130,7 +1130,7 @@
         const data = [];
         cards.forEach(card => {
             const id = card.getAttribute('data-card-id');
-            // Ignorar banners e cards dinÃ¢micos que nÃ£o devem ser configurÃ¡veis
+            // Ignorar banners e cards dinâmicos que não devem ser configuráveis
             if (['guia-configuracao', 'checkout.html?ref=DESCONTO60', '#', 'receitas-geladinho', 'acesso-vitalicio'].includes(id)) return;
             if (card.id && card.id.startsWith('banner-')) return;
             
@@ -1305,11 +1305,6 @@
             if (prefs) applyCustomMenu(prefs);
         } catch(e){}
     });
-</script>
-
 <script src="cupom-relampago-banner.js"></script>
 </body>
 </html>
-
-
-
