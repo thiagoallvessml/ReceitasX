@@ -283,7 +283,8 @@ let pagantesSet = new Set(); // emails de quem pagou
 let cupomMap    = {};  // user_id → cupom_usado
 let valorPagoMap = {}; // user_id → valor_pago
 let refAfiliadoMap = {}; // user_id → ref_afiliado
-let onlineMap   = {};  // user_id → { last_seen, pagina }
+let onlineMap = {};
+let enqueteMap = {};  // user_id → { last_seen, pagina }
 let currentFilter = 'todos';
 let currentDisplayedUsuarios = []; // Lista atualmente exibida (para CSV)
 
@@ -445,6 +446,12 @@ async function loadUsuarios() {
                 u._pagante = true;
             }
         });
+
+        // Carregar enquete
+        try {
+            const { data: enqueteData } = await sb.from('enquete_conheceu').select('user_id, resposta');
+            (enqueteData || []).forEach(eq => { enqueteMap[eq.user_id] = eq.resposta; });
+        } catch(eqErr) {}
 
         // Carregar presença online
         await refreshPresenca();
@@ -665,6 +672,11 @@ function renderUsuarios(list) {
             origemBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(100, 116, 139, 0.1);color:#94a3b8;border:1px solid rgba(100, 116, 139, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">link</span>Acesso Direto</span>`;
         }
 
+        let enqueteBadge = '';
+        if (enqueteMap[u.id]) {
+            enqueteBadge = `<span style="display:inline-flex;align-items:center;gap:.2rem;font-size:.62rem;font-weight:700;padding:.18rem .45rem;border-radius:.35rem;background:rgba(37, 244, 244, 0.1);color:#25f4f4;border:1px solid rgba(37, 244, 244, 0.2)"><span class="material-symbols-outlined" style="font-size:.7rem;font-variation-settings:'FILL' 1">campaign</span>Enquete: ${esc(enqueteMap[u.id])}</span>`;
+        }
+
         let cupomFinal = cupomMap[u.id] || refAfiliadoMap[u.id] || '';
         if (!cupomFinal && oc && /afiliados?:/i.test(oc)) {
             cupomFinal = oc.replace(/^afiliados?:\s*/i, '').trim();
@@ -707,6 +719,7 @@ function renderUsuarios(list) {
             <div style="display:flex;flex-direction:column;gap:.6rem;flex-shrink:0;" class="sm:items-end w-full sm:w-auto mt-1 sm:mt-0">
                 <div style="display:flex;gap:.3rem;flex-wrap:wrap;" class="sm:justify-end">
                     ${origemBadge}
+                    ${enqueteBadge}
                     ${keywordBadge}
                     ${vitalBadge}
                     ${cupomBadge}
