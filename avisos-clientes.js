@@ -59,7 +59,7 @@
             bg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999999;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeInAviso 0.3s ease;';
             
             const card = document.createElement('div');
-            card.style.cssText = 'background:#111;border:1px solid #2A2A2A;border-radius:1rem;padding:2rem;max-width:500px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.7);position:relative;animation:slideUpAviso 0.35s ease;text-align:center;';
+            card.style.cssText = 'background:#111;border:1px solid #2A2A2A;border-radius:1rem;padding:1.5rem;max-width:500px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.7);position:relative;animation:slideUpAviso 0.35s ease;text-align:center;';
             
             // Determina as cores e ícones de acordo com o tipo
             let icon = 'info';
@@ -70,23 +70,30 @@
             
             let imgHtml = '';
             if (aviso.imagem_url) {
-                imgHtml = `<img src="${aviso.imagem_url}" style="max-width:100%;border-radius:0.5rem;margin-bottom:1rem;max-height:250px;object-fit:cover;" />`;
+                imgHtml = `<img src="${aviso.imagem_url}" style="max-width:100%;border-radius:0.5rem;margin-bottom:1rem;max-height:200px;object-fit:cover;flex-shrink:0;" />`;
             }
 
             card.innerHTML = `
                 <style>
                     @keyframes slideUpAviso { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
                     @keyframes fadeInAviso { from{opacity:0}to{opacity:1} }
+                    .aviso-scroll::-webkit-scrollbar { width: 6px; }
+                    .aviso-scroll::-webkit-scrollbar-track { background: transparent; }
+                    .aviso-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
                 </style>
-                <div style="margin-bottom:1rem;">
-                    <span class="material-symbols-outlined" style="font-size:3.5rem;color:${color}">${icon}</span>
+                <div class="aviso-scroll" style="overflow-y:auto;flex:1;margin-bottom:1rem;padding-right:0.2rem;display:flex;flex-direction:column;">
+                    <div style="margin-bottom:0.75rem;flex-shrink:0;">
+                        <span class="material-symbols-outlined" style="font-size:3rem;color:${color}">${icon}</span>
+                    </div>
+                    ${imgHtml}
+                    <h2 style="font-size:1.2rem;font-weight:800;color:#f1f5f9;margin-bottom:0.75rem;flex-shrink:0;">${aviso.titulo}</h2>
+                    <div style="font-size:0.9rem;color:#cbd5e1;line-height:1.6;text-align:left;white-space:pre-wrap;background:#1A1A1A;padding:0.85rem;border-radius:0.5rem;border:1px solid #222;flex-shrink:0;">${aviso.mensagem}</div>
                 </div>
-                ${imgHtml}
-                <h2 style="font-size:1.3rem;font-weight:800;color:#f1f5f9;margin-bottom:1rem;">${aviso.titulo}</h2>
-                <div style="font-size:0.95rem;color:#cbd5e1;line-height:1.6;margin-bottom:1.5rem;text-align:left;white-space:pre-wrap;background:#1A1A1A;padding:1rem;border-radius:0.5rem;border:1px solid #222;">${aviso.mensagem}</div>
-                <button id="btn-entendi-${aviso.id}" style="width:100%;padding:1rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.4);color:#25f4f4;border-radius:.75rem;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;">
-                    Entendi
-                </button>
+                <div style="flex-shrink:0;margin-top:auto;">
+                    <button id="btn-entendi-${aviso.id}" style="width:100%;padding:0.85rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.4);color:#25f4f4;border-radius:.75rem;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;">
+                        Entendi
+                    </button>
+                </div>
             `;
             
             bg.appendChild(card);
