@@ -102,6 +102,9 @@
             <button class="tab-btn" onclick="switchTab('historico', this)">
                 <span class="material-symbols-outlined" style="font-size:18px">attach_money</span> Acertos & Vendas
             </button>
+            <button class="tab-btn" onclick="switchTab('faturamento', this)">
+                <span class="material-symbols-outlined" style="font-size:18px">bar_chart</span> Faturamento Mensal
+            </button>
             <button class="tab-btn" onclick="switchTab('recolhimentos', this)">
                 <span class="material-symbols-outlined" style="font-size:18px">history</span> Histórico de Recolhimento
             </button>
@@ -160,6 +163,35 @@
                 <div id="fechamentos-empty" class="card text-center py-8 text-slate-500" style="display:none">
                     <p class="text-sm">Nenhum fechamento realizado.</p>
                 </div>
+            </div>
+        </div>
+
+        <div id="tab-faturamento" style="display:none">
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-5 mb-4">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-8 h-8 rounded-lg bg-blue-900/30 text-blue-400 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size:18px">bar_chart</span></div>
+                    <h3 class="font-bold text-sm text-slate-100">Resumo de Faturamento Mensal</h3>
+                </div>
+                <p class="text-xs text-slate-500 mb-4">Acompanhe mês a mês quanto você vendeu, recebeu e pagou de comissão neste ponto de venda.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5" id="fat-kpis">
+                    <div class="bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl p-4 text-center">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Bruto (Geral)</p>
+                        <p class="text-2xl font-black text-slate-100 mt-1" id="fat-total-bruto">R$ 0,00</p>
+                    </div>
+                    <div class="bg-[#1E1E1E] border border-emerald-900/30 rounded-xl p-4 text-center">
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Total Líquido (Seu)</p>
+                        <p class="text-2xl font-black text-emerald-400 mt-1" id="fat-total-liquido">R$ 0,00</p>
+                    </div>
+                    <div class="bg-[#1E1E1E] border border-amber-900/30 rounded-xl p-4 text-center">
+                        <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider">Total Comissão (Parceiro)</p>
+                        <p class="text-2xl font-black text-amber-400 mt-1" id="fat-total-comissao">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+            <div id="fat-meses" class="grid grid-cols-1 gap-4"></div>
+            <div id="fat-empty" class="card text-center py-10 text-slate-500 mt-3" style="display:none">
+                <span class="material-symbols-outlined" style="font-size:2rem;margin-bottom:.5rem">bar_chart</span>
+                <p>Nenhuma venda registrada ainda para gerar o faturamento.</p>
             </div>
         </div>
 
@@ -521,7 +553,9 @@ function switchTab(tab, btn) {
     btn.classList.add('active');
     document.getElementById('tab-estoque').style.display = tab === 'estoque' ? 'block' : 'none';
     document.getElementById('tab-historico').style.display = tab === 'historico' ? 'block' : 'none';
+    document.getElementById('tab-faturamento').style.display = tab === 'faturamento' ? 'block' : 'none';
     document.getElementById('tab-recolhimentos').style.display = tab === 'recolhimentos' ? 'block' : 'none';
+    if (tab === 'faturamento') renderFaturamento();
 }
 
 function openAddEstoque() {
@@ -839,6 +873,130 @@ async function excluirParceiro() {
             alert('Erro ao excluir do Supabase');
         }
     }
+}
+
+// ── Faturamento Mensal ──────────────────────────────────────────
+const MESES_NOMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function renderFaturamento() {
+    const container = document.getElementById('fat-meses');
+    const emptyEl = document.getElementById('fat-empty');
+
+    if (vendas.length === 0) {
+        container.innerHTML = '';
+        emptyEl.style.display = 'block';
+        document.getElementById('fat-total-bruto').textContent = fmtR(0);
+        document.getElementById('fat-total-liquido').textContent = fmtR(0);
+        document.getElementById('fat-total-comissao').textContent = fmtR(0);
+        return;
+    }
+    emptyEl.style.display = 'none';
+
+    // Agrupa vendas por "YYYY-MM"
+    const mesesMap = {};
+    vendas.forEach(v => {
+        const d = new Date(v.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if (!mesesMap[key]) mesesMap[key] = [];
+        mesesMap[key].push(v);
+    });
+
+    // Ordena as chaves do mais recente para o mais antigo
+    const mesesOrdenados = Object.keys(mesesMap).sort((a, b) => b.localeCompare(a));
+
+    let totalGeralBruto = 0;
+    let totalGeralLiquido = 0;
+    let totalGeralComissao = 0;
+
+    container.innerHTML = mesesOrdenados.map(key => {
+        const vendasMes = mesesMap[key];
+        const [ano, mesNum] = key.split('-');
+        const mesNome = MESES_NOMES[parseInt(mesNum) - 1];
+
+        let brutoMes = 0;
+        let liquidoMes = 0;
+        let qtdMes = 0;
+
+        // Agrupa por produto dentro do mês
+        const prodMap = {};
+        vendasMes.forEach(v => {
+            const b = parseFloat(v.valor_bruto || 0);
+            const l = parseFloat(v.valor_liquido || 0);
+            brutoMes += b;
+            liquidoMes += l;
+            qtdMes += v.quantidade;
+
+            const nome = v.nome_produto;
+            if (!prodMap[nome]) prodMap[nome] = { qtd: 0, bruto: 0, liquido: 0 };
+            prodMap[nome].qtd += v.quantidade;
+            prodMap[nome].bruto += b;
+            prodMap[nome].liquido += l;
+        });
+
+        const comissaoMes = brutoMes - liquidoMes;
+        totalGeralBruto += brutoMes;
+        totalGeralLiquido += liquidoMes;
+        totalGeralComissao += comissaoMes;
+
+        // Renderiza detalhamento por produto
+        const prodKeys = Object.keys(prodMap).sort();
+        const prodHtml = prodKeys.map(nome => {
+            const p = prodMap[nome];
+            return `
+                <div class="flex justify-between items-center py-2 px-3 rounded-lg hover:bg-[#1a1a1a]" style="border-bottom:1px solid #1f1f1f;">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="material-symbols-outlined text-slate-600" style="font-size:16px">package_2</span>
+                        <span class="text-sm text-slate-300 truncate">${nome}</span>
+                        <span class="text-[11px] text-slate-500 flex-shrink-0">${p.qtd} unid.</span>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-2">
+                        <span class="text-sm font-bold text-emerald-400">${fmtR(p.liquido)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Verifica se o mês atual
+        const hoje = new Date();
+        const ehMesAtual = parseInt(ano) === hoje.getFullYear() && parseInt(mesNum) === (hoje.getMonth() + 1);
+
+        return `
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-0 overflow-hidden">
+                <div class="p-4 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2" style="border-bottom:1px solid #222;">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl ${ehMesAtual ? 'bg-blue-900/30 text-blue-400' : 'bg-slate-800 text-slate-400'} flex items-center justify-center font-black text-sm">${mesNum}</div>
+                        <div>
+                            <h4 class="font-bold text-slate-100 text-base">${mesNome} ${ano}</h4>
+                            <p class="text-[11px] text-slate-500">${qtdMes} unid. vendidas · ${vendasMes.length} venda${vendasMes.length > 1 ? 's' : ''}</p>
+                        </div>
+                        ${ehMesAtual ? '<span class="px-2 py-0.5 bg-blue-900/30 text-blue-400 border border-blue-500/30 rounded text-[10px] font-bold uppercase">Mês atual</span>' : ''}
+                    </div>
+                    <div class="flex gap-3 sm:gap-4 text-right">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase">Bruto</p>
+                            <p class="text-sm font-bold text-slate-200">${fmtR(brutoMes)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-emerald-500 font-bold uppercase">Líquido</p>
+                            <p class="text-sm font-bold text-emerald-400">${fmtR(liquidoMes)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-amber-500 font-bold uppercase">Comissão</p>
+                            <p class="text-sm font-bold text-amber-400">${fmtR(comissaoMes)}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    ${prodHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Atualiza KPIs gerais
+    document.getElementById('fat-total-bruto').textContent = fmtR(totalGeralBruto);
+    document.getElementById('fat-total-liquido').textContent = fmtR(totalGeralLiquido);
+    document.getElementById('fat-total-comissao').textContent = fmtR(totalGeralComissao);
 }
 
 init();
