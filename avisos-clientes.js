@@ -37,7 +37,12 @@
         const vistosSet = new Set((vistos || []).map(v => v.aviso_id));
         
         // 4. Seleciona apenas os pendentes (não vistos)
-        const avisosPendentes = avisosValidos.filter(a => !vistosSet.has(a.id));
+        const avisosPendentes = avisosValidos.filter(a => {
+            if (vistosSet.has(a.id)) return false;
+            // Checa também o localStorage para evitar reexibição imediata ou falhas de impersonation
+            if (localStorage.getItem(`aviso_visto_${a.id}_${session.user.id}`) === 'true') return false;
+            return true;
+        });
         
         if (avisosPendentes.length > 0) {
             mostrarFilaDeAvisos(avisosPendentes, session.user.id);
@@ -111,12 +116,16 @@
                 // Remove o modal
                 bg.remove();
                 
+                // Grava imediatamente no dispositivo local
+                localStorage.setItem(`aviso_visto_${aviso.id}_${userId}`, 'true');
+                
                 // Registra no banco que o usuário viu o aviso
                 try {
-                    await sb.from('avisos_vistos').insert({
+                    const res = await sb.from('avisos_vistos').insert({
                         aviso_id: aviso.id,
                         user_id: userId
                     });
+                    if (res.error) console.error('Erro RLS Supabase:', res.error.message);
                 } catch(err) {
                     console.error('Erro ao marcar aviso como visto:', err);
                 }
