@@ -151,6 +151,10 @@
                     <div><span class="b-val neg" id="val-comissoes">- R$ 0,00</span><span class="b-pct" id="pct-comissoes">0%</span></div>
                 </div>
                 <div class="breakdown-row">
+                    <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">storefront</span> Comissão Consignados (Parceiro)</span>
+                    <div><span class="b-val neg" id="val-comissao-consig">- R$ 0,00</span><span class="b-pct" id="pct-comissao-consig">0%</span></div>
+                </div>
+                <div class="breakdown-row">
                     <span class="b-label"><span class="material-symbols-outlined text-[1.1rem]">account_balance</span> Impostos</span>
                     <div><span class="b-val neg" id="val-impostos">- R$ 0,00</span><span class="b-pct" id="pct-impostos">0%</span></div>
                 </div>
@@ -265,7 +269,7 @@ async function carregarDRE() {
                 .gte('data_venda', startISO)
                 .lt('data_venda', endISO),
             sb.from('consignados_vendas')
-                .select('valor_liquido, quantidade, estoque_id, custo_total')
+                .select('valor_bruto, valor_liquido, quantidade, estoque_id, custo_total')
                 .eq('user_id', userId)
                 .gte('created_at', startISO)
                 .lt('created_at', endISO)
@@ -317,11 +321,16 @@ async function carregarDRE() {
         }
 
         // Soma consignados
+        let comissaoConsignados = 0;
         if (consig) {
             consig.forEach(c => {
-                const val = parseFloat(c.valor_liquido || 0);
-                receitaBruta += val;
-                revConsignado += val;
+                const bruto = parseFloat(c.valor_bruto || 0);
+                const liquido = parseFloat(c.valor_liquido || 0);
+                receitaBruta += bruto;
+                revConsignado += bruto;
+                
+                // Comissão paga ao parceiro = bruto - líquido
+                comissaoConsignados += (bruto - liquido);
                 
                 // Adiciona o custo do produto consignado ao CMV
                 if (c.custo_total !== undefined && c.custo_total !== null) {
@@ -380,7 +389,7 @@ async function carregarDRE() {
         }
 
         // CALCULATE
-        const deducoes = cmv + impostos + comissoes + totalQuebras;
+        const deducoes = cmv + impostos + comissoes + comissaoConsignados + totalQuebras;
         const margem = receitaBruta - deducoes;
         const resultado = margem - fixas;
 
@@ -409,6 +418,9 @@ async function carregarDRE() {
         
         document.getElementById('val-comissoes').textContent = '- ' + fmt(comissoes);
         document.getElementById('pct-comissoes').textContent = pct(comissoes, rb);
+        
+        document.getElementById('val-comissao-consig').textContent = '- ' + fmt(comissaoConsignados);
+        document.getElementById('pct-comissao-consig').textContent = pct(comissaoConsignados, rb);
         
         document.getElementById('val-impostos').textContent = '- ' + fmt(impostos);
         document.getElementById('pct-impostos').textContent = pct(impostos, rb);
