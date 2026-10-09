@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin — Quebras & Desperdícios dos Usuários · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* admin banner */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.25);border-radius:.75rem;font-size:.78rem;color:#f87171; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* badge admin */
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .badge-admin .material-symbols-outlined { font-size:.75rem; }
+
+        /* stats */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#64748b;margin-top:.2rem; }
+
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.85rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(37,244,244,.4) !important;box-shadow:0 0 0 3px rgba(37,244,244,.07) !important; }
+
+        input,select { background-color:#1A1A1A !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder { color:#475569 !important; }
+
+        /* user row */
+        .user-row { display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;cursor:pointer;transition:border-color .18s,background .18s; }
+        .user-row:hover, .user-row.active { border-color:rgba(239,68,68,.35);background:#1E1E1E; }
+        .user-row.active { background:rgba(239,68,68,.04); }
+
+        .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(239,68,68,.25),rgba(239,68,68,.05));border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.88rem;font-weight:700;color:#f87171;text-transform:uppercase; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.88rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-sub  { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem; }
+
+        .badge-status { display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;flex-shrink:0; }
+        .badge-status.has   { background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171; }
+        .badge-status.empty { background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#64748b; }
+        .badge-status .material-symbols-outlined { font-size:.75rem; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* drawer */
+        .drawer-bg { position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s; }
+        .drawer-bg.open { opacity:1;pointer-events:auto; }
+        .drawer { position:fixed;top:0;right:0;height:100%;width:100%;max-width:540px;background:#141414;border-left:1px solid #2A2A2A;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1);overflow:hidden; }
+        .drawer-bg.open .drawer { transform:translateX(0); }
+        @media(max-width:540px) { .drawer { max-width:100%;border-left:none;border-top:1px solid #2A2A2A;border-radius:1.1rem 1.1rem 0 0;height:92%;top:auto;bottom:0; } .drawer-bg { align-items:flex-end; } }
+
+        .drawer-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0; }
+        .drawer-body { flex:1;overflow-y:auto;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.6rem;min-height:0;-webkit-overflow-scrolling:touch; }
+
+        /* item card in drawer */
+        .item-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.75rem;padding:.75rem .9rem;display:flex;flex-direction:column;gap:.4rem; }
+        .item-card:hover { border-color:rgba(239,68,68,.3); }
+
+        .tag-tipo { font-size:.62rem;font-weight:700;padding:.12rem .45rem;border-radius:.35rem;text-transform:uppercase;letter-spacing:.04em; }
+        .tag-insumo   { background:rgba(37,244,244,.12);color:#25f4f4;border:1px solid rgba(37,244,244,.25); }
+        .tag-receita  { background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .tag-produto  { background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25); }
+
+        /* pill filter */
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .pill.active { background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4);color:#f87171; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        /* empty */
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* btn impersonate */
+        .btn-impersonate { display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:.5rem;border:1px solid rgba(37,244,244,.3);background:rgba(37,244,244,.05);color:#25f4f4;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s; }
+        .btn-impersonate:hover { background:rgba(37,244,244,.15);border-color:rgba(37,244,244,.6); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- Header -->
+<header class="sticky top-0 z-20 bg-background-dark/95 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="location.href='admin.html'">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-red-400" style="font-size:1.2rem;font-variation-settings:'FILL' 1">delete_sweep</span>
+        <h1 class="text-base font-semibold flex-1">Quebras & Desperdícios dos Usuários</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">shield</span> Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Banner -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">info</span>
+        <span>Acompanhe quem está preenchendo o controle de quebras, desperdícios e lixo na cozinha, com valores e motivos registrados.</span>
+    </div>
+
+    <!-- Navegação Rápida entre seções -->
+    <div class="flex gap-2 overflow-x-auto pb-1">
+        <button class="pill active" style="cursor:default">
+            <span class="material-symbols-outlined" style="font-size:.85rem">delete_sweep</span> Quebras & Lixo
+        </button>
+        <button class="pill" onclick="location.href='admin-consignados.html'">
+            <span class="material-symbols-outlined" style="font-size:.85rem">storefront</span> Consignados
+        </button>
+        <button class="pill" onclick="location.href='admin-vendas-clientes.html'">
+            <span class="material-symbols-outlined" style="font-size:.85rem">point_of_sale</span> Vendas dos Clientes
+        </button>
+        <button class="pill" onclick="location.href='admin-receitas-usuarios.html'">
+            <span class="material-symbols-outlined" style="font-size:.85rem">menu_book</span> Receitas
+        </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card">
+            <div class="stat-val text-red-400" id="stat-total-prejuizo">R$ 0,00</div>
+            <div class="stat-lbl">Prejuízo Total Registrado</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val text-slate-100" id="stat-total-quebras">0</div>
+            <div class="stat-lbl">Quebras Registradas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val text-amber-400" id="stat-usuarios-preencheram">0</div>
+            <div class="stat-lbl">Usuários que Preencheram</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val text-slate-300" id="stat-total-usuarios">0</div>
+            <div class="stat-lbl">Total de Contas na Base</div>
+        </div>
+    </div>
+
+    <!-- Busca e Filtros -->
+    <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div class="search-wrap flex-1 w-full">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="search" class="search-input" type="text" placeholder="Buscar por nome, negócio, e-mail ou item perdido..." oninput="filtrar()" />
+            </div>
+            <select id="sort-sel" class="search-input sm:w-56" style="padding-left:1rem !important" onchange="filtrar()">
+                <option value="prejuizo_desc">Maior Prejuízo (R$)</option>
+                <option value="qtd_desc">Mais Quebras</option>
+                <option value="recente">Mais Recente</option>
+                <option value="nome_asc">Nome (A → Z)</option>
+            </select>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <button class="pill active" id="pill-todos" onclick="setFilter('todos', this)">Todos (<span id="cnt-todos">0</span>)</button>
+                <button class="pill" id="pill-com" onclick="setFilter('com', this)">Com Quebras (<span id="cnt-com">0</span>)</button>
+                <button class="pill" id="pill-sem" onclick="setFilter('sem', this)">Nunca Preencheram (<span id="cnt-sem">0</span>)</button>
+            </div>
+            <span id="count-label" class="text-xs text-slate-500 font-medium"></span>
+        </div>
+    </div>
+
+    <!-- Lista de Usuários -->
+    <div id="user-list" class="space-y-2">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+    </div>
+
+</main>
+
+<!-- Drawer de Detalhes -->
+<div id="drawer-bg" class="drawer-bg" onclick="fecharDrawer(event)">
+    <div id="drawer" class="drawer">
+        <div class="drawer-head">
+            <div class="avatar" id="dr-avatar">?</div>
+            <div class="flex-1 min-width-0">
+                <div class="font-bold text-sm text-slate-100 truncate" id="dr-nome">--</div>
+                <div class="text-xs text-slate-400 truncate" id="dr-sub">--</div>
+            </div>
+            <button onclick="acessarComoCliente(currentDrawerUserId)" class="btn-impersonate" title="Acessar como este cliente">
+                <span class="material-symbols-outlined" style="font-size:.9rem">login</span> Ver Conta
+            </button>
+            <button onclick="fecharDrawerDireto()" class="text-slate-500 hover:text-slate-300 p-1">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Resumo do Usuário no topo do Drawer -->
+        <div class="p-4 bg-[#1A1A1A] border-b border-[#2A2A2A] grid grid-cols-3 gap-2 text-center">
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase font-bold">Total Perdido</p>
+                <p class="text-base font-black text-red-400 mt-0.5" id="dr-total-prejuizo">R$ 0,00</p>
+            </div>
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase font-bold">Qtd Quebras</p>
+                <p class="text-base font-black text-slate-100 mt-0.5" id="dr-qtd-quebras">0</p>
+            </div>
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase font-bold">Último Registro</p>
+                <p class="text-xs font-bold text-slate-300 mt-1" id="dr-ultimo-registro">--</p>
+            </div>
+        </div>
+
+        <!-- Lista de Quebras do Usuário -->
+        <div class="drawer-body" id="dr-body"></div>
+    </div>
+</div>
+
+<script>
+let todosUsuarios = []; // [{ perfil, quebras: [], totalPrejuizo, ultimoRegistro }]
+let currentFilter = 'todos';
+let currentDrawerUserId = null;
+const fmtR = v => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function getInitials(nome, sobrenome) {
+    const n = (nome || '').trim();
+    const s = (sobrenome || '').trim();
+    if (!n && !s) return '?';
+    return ((n[0] || '') + (s[0] || '')).toUpperCase();
+}
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão de administrador.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao Início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarDados();
+})();
+
+async function carregarDados() {
+    try {
+        // 1. Busca todos os perfis
+        const { data: perfis, error: ep } = await sb
+            .from('perfis')
+            .select('id, nome, sobrenome, negocio, plano, role, created_at')
+            .order('created_at', { ascending: false })
+            .range(0, 4999);
+        if (ep) throw ep;
+
+        // 2. Busca todas as quebras/desperdícios registrados
+        const { data: quebras, error: eq } = await sb
+            .from('desperdicios')
+            .select('*')
+            .order('data_registro', { ascending: false });
+        if (eq) {
+            console.warn('Aviso ao buscar desperdícios:', eq.message);
+        }
+
+        // Agrupa quebras por user_id
+        const quebrasPorUser = {};
+        (quebras || []).forEach(q => {
+            if (!quebrasPorUser[q.user_id]) quebrasPorUser[q.user_id] = [];
+            quebrasPorUser[q.user_id].push(q);
+        });
+
+        // 3. Monta estrutura consolidada
+        todosUsuarios = (perfis || []).map(p => {
+            const userQuebras = quebrasPorUser[p.id] || [];
+            const totalPrejuizo = userQuebras.reduce((acc, q) => acc + parseFloat(q.custo_perdido || 0), 0);
+            const ultimoRegistro = userQuebras.length > 0 ? new Date(userQuebras[0].data_registro) : null;
+            return {
+                perfil: p,
+                quebras: userQuebras,
+                totalPrejuizo,
+                ultimoRegistro
+            };
+        });
+
+        atualizarKPIs();
+        filtrar();
+    } catch(e) {
+        console.error('Erro ao carregar dados:', e);
+        document.getElementById('user-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined text-red-400">error</span>
+                <p>Erro ao carregar registros de quebras.<br><small class="text-xs text-slate-500">${esc(e.message)}</small></p>
+                <p class="text-xs text-amber-400 mt-2">Dica: Verifique se executou o script <strong>admin_rls_desperdicios_consignados.sql</strong> no Supabase.</p>
+            </div>`;
+    }
+}
+
+function atualizarKPIs() {
+    const totalContas = todosUsuarios.length;
+    let totalQuebras = 0;
+    let totalPrejuizo = 0;
+    let usuariosPreencheram = 0;
+
+    todosUsuarios.forEach(u => {
+        if (u.quebras.length > 0) {
+            usuariosPreencheram++;
+            totalQuebras += u.quebras.length;
+            totalPrejuizo += u.totalPrejuizo;
+        }
+    });
+
+    document.getElementById('stat-total-usuarios').textContent = totalContas;
+    document.getElementById('stat-usuarios-preencheram').textContent = usuariosPreencheram;
+    document.getElementById('stat-total-quebras').textContent = totalQuebras;
+    document.getElementById('stat-total-prejuizo').textContent = fmtR(totalPrejuizo);
+
+    document.getElementById('cnt-todos').textContent = totalContas;
+    document.getElementById('cnt-com').textContent = usuariosPreencheram;
+    document.getElementById('cnt-sem').textContent = totalContas - usuariosPreencheram;
+}
+
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    const sort = document.getElementById('sort-sel').value;
+    let list = [...todosUsuarios];
+
+    // Filtro por status
+    if (currentFilter === 'com') list = list.filter(u => u.quebras.length > 0);
+    if (currentFilter === 'sem') list = list.filter(u => u.quebras.length === 0);
+
+    // Busca textual
+    if (q) {
+        list = list.filter(u => {
+            const p = u.perfil;
+            const nomeCompleto = ((p.nome || '') + ' ' + (p.sobrenome || '')).toLowerCase();
+            const neg = (p.negocio || '').toLowerCase();
+            // Também busca dentro dos itens perdidos
+            const matchItem = u.quebras.some(k => (k.nome_item || '').toLowerCase().includes(q) || (k.motivo || '').toLowerCase().includes(q));
+            return nomeCompleto.includes(q) || neg.includes(q) || matchItem;
+        });
+    }
+
+    // Ordenação
+    list.sort((a, b) => {
+        if (sort === 'prejuizo_desc') return b.totalPrejuizo - a.totalPrejuizo;
+        if (sort === 'qtd_desc') return b.quebras.length - a.quebras.length;
+        if (sort === 'recente') {
+            const tA = a.ultimoRegistro ? a.ultimoRegistro.getTime() : 0;
+            const tB = b.ultimoRegistro ? b.ultimoRegistro.getTime() : 0;
+            return tB - tA;
+        }
+        if (sort === 'nome_asc') {
+            const nA = (a.perfil.nome || '').toLowerCase();
+            const nB = (b.perfil.nome || '').toLowerCase();
+            return nA.localeCompare(nB);
+        }
+        return 0;
+    });
+
+    document.getElementById('count-label').textContent = `${list.length} usuário${list.length !== 1 ? 's' : ''}`;
+    renderLista(list);
+}
+
+function renderLista(list) {
+    const el = document.getElementById('user-list');
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">search_off</span>
+                <p>Nenhum usuário encontrado com esse filtro.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(u => {
+        const p = u.perfil;
+        const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+        const initials = getInitials(p.nome, p.sobrenome);
+        const qtd = u.quebras.length;
+        const temQuebras = qtd > 0;
+        const badgeClass = temQuebras ? 'has' : 'empty';
+        const badgeIco = temQuebras ? 'delete_sweep' : 'check_circle';
+        const badgeTxt = temQuebras ? `${qtd} quebra${qtd > 1 ? 's' : ''}` : 'Nenhuma quebra';
+
+        let ultimoStr = 'Nunca preencheu';
+        if (u.ultimoRegistro) {
+            ultimoStr = `Última em ${u.ultimoRegistro.toLocaleDateString('pt-BR')}`;
+        }
+
+        return `
+            <div class="user-row" onclick="abrirDrawer('${p.id}')">
+                <div class="avatar">${initials}</div>
+                <div class="user-info">
+                    <div class="flex items-center gap-2">
+                        <span class="user-name">${esc(nomeCompleto)}</span>
+                        ${p.plano === 'vitalicio' ? '<span class="text-[10px] font-bold text-emerald-400 bg-emerald-900/30 px-1.5 py-0.5 rounded border border-emerald-500/30">Vitalício</span>' : ''}
+                    </div>
+                    <div class="user-sub">${esc(p.negocio || 'Negócio não informado')} · ${ultimoStr}</div>
+                </div>
+                <div class="text-right flex flex-col items-end gap-1 flex-shrink-0">
+                    <span class="badge-status ${badgeClass}">
+                        <span class="material-symbols-outlined">${badgeIco}</span>
+                        ${badgeTxt}
+                    </span>
+                    <span class="text-xs font-black ${temQuebras ? 'text-red-400' : 'text-slate-600'}">
+                        ${fmtR(u.totalPrejuizo)}
+                    </span>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function abrirDrawer(userId) {
+    const user = todosUsuarios.find(u => u.perfil.id === userId);
+    if (!user) return;
+
+    currentDrawerUserId = userId;
+    const p = user.perfil;
+    const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+
+    document.getElementById('dr-avatar').textContent = getInitials(p.nome, p.sobrenome);
+    document.getElementById('dr-nome').textContent = nomeCompleto;
+    document.getElementById('dr-sub').textContent = p.negocio || 'Negócio não informado';
+    document.getElementById('dr-total-prejuizo').textContent = fmtR(user.totalPrejuizo);
+    document.getElementById('dr-qtd-quebras').textContent = user.quebras.length;
+    document.getElementById('dr-ultimo-registro').textContent = user.ultimoRegistro ? user.ultimoRegistro.toLocaleDateString('pt-BR') : 'Nenhum';
+
+    const body = document.getElementById('dr-body');
+    if (user.quebras.length === 0) {
+        body.innerHTML = `
+            <div class="empty-state py-12">
+                <span class="material-symbols-outlined text-slate-600">cleaning_services</span>
+                <p class="font-bold text-slate-300">Este cliente ainda não registrou nenhuma quebra.</p>
+                <p class="text-xs text-slate-500 mt-1">Quando ele cadastrar perdas, insumos vencidos ou produtos descartados, a lista completa aparecerá aqui.</p>
+            </div>
+        `;
+    } else {
+        body.innerHTML = user.quebras.map(q => {
+            const dataFmt = new Date(q.data_registro).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            const tipo = (q.tipo_item || 'insumo').toLowerCase();
+            const tagClass = `tag-${tipo}`;
+            const qtdStr = `${q.quantidade} ${q.unidade || 'un'}`;
+
+            return `
+                <div class="item-card">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="tag-tipo ${tagClass}">${esc(tipo)}</span>
+                            <span class="font-bold text-sm text-slate-100 truncate">${esc(q.nome_item)}</span>
+                        </div>
+                        <span class="font-black text-sm text-red-400 flex-shrink-0">${fmtR(q.custo_perdido)}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-400 mt-1">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">scale</span>
+                            Qtd descartada: <strong class="text-slate-200">${esc(qtdStr)}</strong>
+                        </span>
+                        <span class="text-slate-500 text-[11px]">${dataFmt}</span>
+                    </div>
+
+                    ${q.motivo ? `
+                        <div class="mt-1 pt-1.5 border-t border-[#222] text-xs text-slate-400 flex items-start gap-1">
+                            <span class="material-symbols-outlined text-xs text-amber-500/80 mt-0.5">help</span>
+                            <span class="italic text-slate-300">Motivo: ${esc(q.motivo)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('drawer-bg').classList.add('open');
+}
+
+function fecharDrawer(e) {
+    if (e.target.id === 'drawer-bg') {
+        fecharDrawerDireto();
+    }
+}
+
+function fecharDrawerDireto() {
+    document.getElementById('drawer-bg').classList.remove('open');
+}
+
+function acessarComoCliente(userId) {
+    if (!userId) return;
+    localStorage.setItem('impersonate_id', userId);
+    window.location.href = 'desperdicios.html';
+}
+</script>
+</body>
+</html>

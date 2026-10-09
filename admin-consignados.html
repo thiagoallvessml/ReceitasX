@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin — Consignados dos Usuários · ReceitasX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth-guard.js"></script>
+    <link rel="stylesheet" href="critical.css" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode:"class",
+            theme:{ extend:{ colors:{ primary:"#25f4f4","background-dark":"#121212","card-dark":"#1E1E1E","border-dark":"#2A2A2A" }, fontFamily:{ display:["Inter","sans-serif"] } } }
+        }
+    </script>
+    <style>
+        * { box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+
+        /* back */
+        .btn-back { display:flex;align-items:center;gap:.3rem;color:#94a3b8;font-size:.85rem;cursor:pointer;transition:color .15s;background:none;border:none;padding:0; }
+        .btn-back:hover { color:#25f4f4; }
+
+        /* admin banner */
+        .admin-banner { display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:.75rem;font-size:.78rem;color:#c4b5fd; }
+        .admin-banner .material-symbols-outlined { font-size:1rem;flex-shrink:0; }
+
+        /* badge admin */
+        .badge-admin { display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25); }
+        .badge-admin .material-symbols-outlined { font-size:.75rem; }
+
+        /* stats */
+        .stat-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1.1rem; }
+        .stat-val { font-size:1.5rem;font-weight:800;color:#f1f5f9;line-height:1; }
+        .stat-lbl { font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#64748b;margin-top:.2rem; }
+
+        /* search */
+        .search-wrap { position:relative; }
+        .search-wrap .ico { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#475569;font-size:1.1rem; }
+        .search-input { width:100%;padding:.7rem .9rem .7rem 2.6rem;border-radius:.75rem;border:1px solid #2A2A2A;background:#1A1A1A !important;color:#f1f5f9 !important;font-size:.85rem;outline:none;transition:border-color .2s; }
+        .search-input::placeholder { color:#475569 !important; }
+        .search-input:focus { border-color:rgba(167,139,250,.4) !important;box-shadow:0 0 0 3px rgba(167,139,250,.07) !important; }
+
+        input,select { background-color:#1A1A1A !important; color:#f1f5f9 !important; border-color:#2A2A2A !important; }
+        input::placeholder { color:#475569 !important; }
+
+        /* user row */
+        .user-row { display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;cursor:pointer;transition:border-color .18s,background .18s; }
+        .user-row:hover, .user-row.active { border-color:rgba(167,139,250,.4);background:#1E1E1E; }
+        .user-row.active { background:rgba(167,139,250,.04); }
+
+        .avatar { width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,rgba(167,139,250,.25),rgba(167,139,250,.05));border:1px solid rgba(167,139,250,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.88rem;font-weight:700;color:#c4b5fd;text-transform:uppercase; }
+        .user-info { flex:1;min-width:0; }
+        .user-name { font-size:.88rem;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .user-sub  { font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem; }
+
+        .badge-status { display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:.4rem;flex-shrink:0; }
+        .badge-status.has   { background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#c4b5fd; }
+        .badge-status.empty { background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#64748b; }
+        .badge-status .material-symbols-outlined { font-size:.75rem; }
+
+        /* shimmer */
+        .shimmer { background:linear-gradient(90deg,#1A1A1A 25%,#222 50%,#1A1A1A 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:4rem; }
+        @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+        /* drawer */
+        .drawer-bg { position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s; }
+        .drawer-bg.open { opacity:1;pointer-events:auto; }
+        .drawer { position:fixed;top:0;right:0;height:100%;width:100%;max-width:580px;background:#141414;border-left:1px solid #2A2A2A;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1);overflow:hidden; }
+        .drawer-bg.open .drawer { transform:translateX(0); }
+        @media(max-width:580px) { .drawer { max-width:100%;border-left:none;border-top:1px solid #2A2A2A;border-radius:1.1rem 1.1rem 0 0;height:94%;top:auto;bottom:0; } .drawer-bg { align-items:flex-end; } }
+
+        .drawer-head { display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid #2A2A2A;flex-shrink:0; }
+        .drawer-body { flex:1;overflow-y:auto;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.75rem;min-height:0;-webkit-overflow-scrolling:touch; }
+
+        /* tab nav in drawer */
+        .dr-tab-nav { display:flex;gap:.35rem;padding:.5rem 1.25rem;border-bottom:1px solid #2A2A2A;background:#171717;overflow-x:auto; }
+        .dr-tab-btn { padding:.4rem .85rem;border-radius:.5rem;border:1px solid transparent;background:transparent;color:#94a3b8;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s; }
+        .dr-tab-btn.active { background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.4);color:#c4b5fd; }
+
+        /* partner card in drawer */
+        .parc-card { background:#1A1A1A;border:1px solid #2A2A2A;border-radius:.85rem;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.6rem; }
+        .parc-card:hover { border-color:rgba(167,139,250,.3); }
+
+        /* pill filter */
+        .pill { padding:.35rem .85rem;border-radius:9999px;border:1px solid #2A2A2A;background:transparent;color:#64748b;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap; }
+        .pill.active { background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.4);color:#c4b5fd; }
+        .pill:hover:not(.active) { border-color:#475569;color:#94a3b8; }
+
+        /* empty */
+        .empty-state { text-align:center;padding:3rem 1rem;color:#475569; }
+        .empty-state .material-symbols-outlined { font-size:3rem;color:#2A2A2A;display:block;margin-bottom:.75rem; }
+
+        /* btn impersonate */
+        .btn-impersonate { display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:.5rem;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.08);color:#c4b5fd;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s; }
+        .btn-impersonate:hover { background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.6); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen pb-24">
+
+<!-- Header -->
+<header class="sticky top-0 z-20 bg-background-dark/95 backdrop-blur border-b border-border-dark">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+        <button class="btn-back" onclick="location.href='admin.html'">
+            <span class="material-symbols-outlined" style="font-size:1.25rem">arrow_back</span>
+        </button>
+        <span class="material-symbols-outlined text-purple-400" style="font-size:1.2rem;font-variation-settings:'FILL' 1">storefront</span>
+        <h1 class="text-base font-semibold flex-1">Consignados dos Usuários</h1>
+        <span id="admin-badge" class="badge-admin" style="display:none">
+            <span class="material-symbols-outlined">shield</span> Admin
+        </span>
+    </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Banner -->
+    <div class="admin-banner">
+        <span class="material-symbols-outlined">info</span>
+        <span>Acompanhe quem está cadastrando pontos de venda consignados (lojas, mercados, cafés), estoques em parceiros, vendas e acertos financeiros.</span>
+    </div>
+
+    <!-- Navegação Rápida entre seções -->
+    <div class="flex gap-2 overflow-x-auto pb-1">
+        <button class="pill" onclick="location.href='admin-desperdicios.html'">
+            <span class="material-symbols-outlined" style="font-size:.85rem">delete_sweep</span> Quebras & Lixo
+        </button>
+        <button class="pill active" style="cursor:default">
+            <span class="material-symbols-outlined" style="font-size:.85rem">storefront</span> Consignados
+        </button>
+        <button class="pill" onclick="location.href='admin-vendas-clientes.html'">
+            <span class="material-symbols-outlined" style="font-size:.85rem">point_of_sale</span> Vendas dos Clientes
+        </button>
+        <button class="pill" onclick="location.href='admin-receitas-usuarios.html'">
+            <span class="material-symbols-outlined" style="font-size:.85rem">menu_book</span> Receitas
+        </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card">
+            <div class="stat-val text-purple-400" id="stat-total-parceiros">0</div>
+            <div class="stat-lbl">Pontos Parceiros Criados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val text-emerald-400" id="stat-total-vendas-liq">R$ 0,00</div>
+            <div class="stat-lbl">Total Vendido Líquido</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val text-amber-400" id="stat-estoque-restante">0</div>
+            <div class="stat-lbl">Itens no Local (Estoque)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val text-sky-400" id="stat-usuarios-consignado">0</div>
+            <div class="stat-lbl">Usuários com Consignados</div>
+        </div>
+    </div>
+
+    <!-- Busca e Filtros -->
+    <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div class="search-wrap flex-1 w-full">
+                <span class="material-symbols-outlined ico">search</span>
+                <input id="search" class="search-input" type="text" placeholder="Buscar por nome, negócio, e-mail ou nome do parceiro..." oninput="filtrar()" />
+            </div>
+            <select id="sort-sel" class="search-input sm:w-56" style="padding-left:1rem !important" onchange="filtrar()">
+                <option value="parceiros_desc">Mais Parceiros</option>
+                <option value="vendas_desc">Maior Valor Vendido (R$)</option>
+                <option value="estoque_desc">Mais Itens em Estoque</option>
+                <option value="recente">Mais Recente</option>
+                <option value="nome_asc">Nome (A → Z)</option>
+            </select>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <button class="pill active" id="pill-todos" onclick="setFilter('todos', this)">Todos (<span id="cnt-todos">0</span>)</button>
+                <button class="pill" id="pill-com" onclick="setFilter('com', this)">Com Consignados (<span id="cnt-com">0</span>)</button>
+                <button class="pill" id="pill-sem" onclick="setFilter('sem', this)">Sem Consignados (<span id="cnt-sem">0</span>)</button>
+            </div>
+            <span id="count-label" class="text-xs text-slate-500 font-medium"></span>
+        </div>
+    </div>
+
+    <!-- Lista de Usuários -->
+    <div id="user-list" class="space-y-2">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+    </div>
+
+</main>
+
+<!-- Drawer de Detalhes -->
+<div id="drawer-bg" class="drawer-bg" onclick="fecharDrawer(event)">
+    <div id="drawer" class="drawer">
+        <div class="drawer-head">
+            <div class="avatar" id="dr-avatar">?</div>
+            <div class="flex-1 min-width-0">
+                <div class="font-bold text-sm text-slate-100 truncate" id="dr-nome">--</div>
+                <div class="text-xs text-slate-400 truncate" id="dr-sub">--</div>
+            </div>
+            <button onclick="acessarComoCliente(currentDrawerUserId)" class="btn-impersonate" title="Acessar como este cliente">
+                <span class="material-symbols-outlined" style="font-size:.9rem">login</span> Ver Conta
+            </button>
+            <button onclick="fecharDrawerDireto()" class="text-slate-500 hover:text-slate-300 p-1">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Resumo do Usuário no topo do Drawer -->
+        <div class="p-4 bg-[#1A1A1A] border-b border-[#2A2A2A] grid grid-cols-4 gap-2 text-center">
+            <div>
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Parceiros</p>
+                <p class="text-base font-black text-purple-400 mt-0.5" id="dr-qtd-parceiros">0</p>
+            </div>
+            <div>
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Itens Restantes</p>
+                <p class="text-base font-black text-amber-400 mt-0.5" id="dr-qtd-estoque">0</p>
+            </div>
+            <div>
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Vendido (Líq)</p>
+                <p class="text-xs font-black text-emerald-400 mt-1" id="dr-total-vendas">R$ 0,00</p>
+            </div>
+            <div>
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Acertos Feitos</p>
+                <p class="text-base font-black text-slate-200 mt-0.5" id="dr-qtd-fechamentos">0</p>
+            </div>
+        </div>
+
+        <!-- Abas internas do Drawer -->
+        <div class="dr-tab-nav">
+            <button class="dr-tab-btn active" onclick="switchDrTab('parceiros', this)">Pontos Parceiros (<span id="tab-cnt-parc">0</span>)</button>
+            <button class="dr-tab-btn" onclick="switchDrTab('vendas', this)">Vendas (<span id="tab-cnt-vendas">0</span>)</button>
+            <button class="dr-tab-btn" onclick="switchDrTab('fechamentos', this)">Acertos (<span id="tab-cnt-fech">0</span>)</button>
+            <button class="dr-tab-btn" onclick="switchDrTab('recolhimentos', this)">Recolhimentos (<span id="tab-cnt-recolh">0</span>)</button>
+        </div>
+
+        <!-- Conteúdo do Drawer -->
+        <div class="drawer-body" id="dr-body"></div>
+    </div>
+</div>
+
+<script>
+let todosUsuarios = []; 
+let currentFilter = 'todos';
+let currentDrawerUserId = null;
+let currentDrTab = 'parceiros';
+
+const fmtR = v => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function getInitials(nome, sobrenome) {
+    const n = (nome || '').trim();
+    const s = (sobrenome || '').trim();
+    if (!n && !s) return '?';
+    return ((n[0] || '') + (s[0] || '')).toUpperCase();
+}
+
+(async () => {
+    await _waitForRole(4000);
+    if (window.__userRole !== 'admin') {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;color:#f1f5f9;font-family:Inter,sans-serif">
+                <span class="material-symbols-outlined" style="font-size:3rem;color:#f87171">block</span>
+                <h1 style="font-size:1.2rem;font-weight:700">Acesso Negado</h1>
+                <p style="color:#64748b;font-size:.9rem">Você não tem permissão de administrador.</p>
+                <a href="index.html" style="margin-top:.5rem;padding:.6rem 1.4rem;border-radius:.65rem;background:rgba(37,244,244,.1);border:1px solid rgba(37,244,244,.3);color:#25f4f4;font-weight:700;font-size:.85rem;text-decoration:none">Voltar ao Início</a>
+            </div>`;
+        return;
+    }
+    document.getElementById('admin-badge').style.display = '';
+    await carregarDados();
+})();
+
+async function carregarDados() {
+    try {
+        // 1. Busca perfis
+        const { data: perfis, error: ep } = await sb
+            .from('perfis')
+            .select('id, nome, sobrenome, negocio, plano, role, created_at')
+            .order('created_at', { ascending: false })
+            .range(0, 4999);
+        if (ep) throw ep;
+
+        // 2. Busca todas as tabelas de consignados em paralelo
+        const [
+            { data: parceiros, error: eParc },
+            { data: estoques, error: eEst },
+            { data: vendas, error: eVendas },
+            { data: fechamentos, error: eFech },
+            { data: recolhimentos, error: eRec }
+        ] = await Promise.all([
+            sb.from('consignados_parceiros').select('*').order('created_at', { ascending: false }),
+            sb.from('consignados_estoque').select('*').order('created_at', { ascending: false }),
+            sb.from('consignados_vendas').select('*').order('created_at', { ascending: false }),
+            sb.from('consignados_fechamentos').select('*').order('created_at', { ascending: false }),
+            sb.from('consignados_recolhimentos').select('*').order('created_at', { ascending: false }),
+        ]);
+
+        if (eParc) console.warn('Aviso consignados_parceiros:', eParc.message);
+
+        // Agrupamentos por user_id
+        const mapParceiros = {};
+        (parceiros || []).forEach(p => {
+            if (!mapParceiros[p.user_id]) mapParceiros[p.user_id] = [];
+            mapParceiros[p.user_id].push(p);
+        });
+
+        const mapEstoque = {};
+        (estoques || []).forEach(e => {
+            if (!mapEstoque[e.user_id]) mapEstoque[e.user_id] = [];
+            mapEstoque[e.user_id].push(e);
+        });
+
+        const mapVendas = {};
+        (vendas || []).forEach(v => {
+            if (!mapVendas[v.user_id]) mapVendas[v.user_id] = [];
+            mapVendas[v.user_id].push(v);
+        });
+
+        const mapFech = {};
+        (fechamentos || []).forEach(f => {
+            if (!mapFech[f.user_id]) mapFech[f.user_id] = [];
+            mapFech[f.user_id].push(f);
+        });
+
+        const mapRec = {};
+        (recolhimentos || []).forEach(r => {
+            if (!mapRec[r.user_id]) mapRec[r.user_id] = [];
+            mapRec[r.user_id].push(r);
+        });
+
+        // 3. Monta estrutura consolidada
+        todosUsuarios = (perfis || []).map(p => {
+            const userParc = mapParceiros[p.id] || [];
+            const userEst = mapEstoque[p.id] || [];
+            const userVendas = mapVendas[p.id] || [];
+            const userFech = mapFech[p.id] || [];
+            const userRec = mapRec[p.id] || [];
+
+            const totalVendasBruto = userVendas.reduce((acc, v) => acc + parseFloat(v.valor_bruto || 0), 0);
+            const totalVendasLiq = userVendas.reduce((acc, v) => acc + parseFloat(v.valor_liquido || 0), 0);
+            const totalEstoqueRestante = userEst.reduce((acc, e) => acc + parseInt(e.quantidade_restante || 0), 0);
+
+            return {
+                perfil: p,
+                parceiros: userParc,
+                estoques: userEst,
+                vendas: userVendas,
+                fechamentos: userFech,
+                recolhimentos: userRec,
+                totalVendasBruto,
+                totalVendasLiq,
+                totalEstoqueRestante
+            };
+        });
+
+        atualizarKPIs();
+        filtrar();
+    } catch(e) {
+        console.error('Erro ao carregar dados:', e);
+        document.getElementById('user-list').innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined text-red-400">error</span>
+                <p>Erro ao carregar dados de consignados.<br><small class="text-xs text-slate-500">${esc(e.message)}</small></p>
+                <p class="text-xs text-amber-400 mt-2">Dica: Verifique se executou o script <strong>admin_rls_desperdicios_consignados.sql</strong> no Supabase.</p>
+            </div>`;
+    }
+}
+
+function atualizarKPIs() {
+    const totalContas = todosUsuarios.length;
+    let totalParceiros = 0;
+    let totalVendasLiq = 0;
+    let totalEstoqueRestante = 0;
+    let usuariosAtivosConsignado = 0;
+
+    todosUsuarios.forEach(u => {
+        if (u.parceiros.length > 0 || u.vendas.length > 0 || u.estoques.length > 0) {
+            usuariosAtivosConsignado++;
+        }
+        totalParceiros += u.parceiros.length;
+        totalVendasLiq += u.totalVendasLiq;
+        totalEstoqueRestante += u.totalEstoqueRestante;
+    });
+
+    document.getElementById('stat-total-parceiros').textContent = totalParceiros;
+    document.getElementById('stat-total-vendas-liq').textContent = fmtR(totalVendasLiq);
+    document.getElementById('stat-estoque-restante').textContent = totalEstoqueRestante;
+    document.getElementById('stat-usuarios-consignado').textContent = usuariosAtivosConsignado;
+
+    document.getElementById('cnt-todos').textContent = totalContas;
+    document.getElementById('cnt-com').textContent = usuariosAtivosConsignado;
+    document.getElementById('cnt-sem').textContent = totalContas - usuariosAtivosConsignado;
+}
+
+function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function filtrar() {
+    const q = (document.getElementById('search').value || '').toLowerCase().trim();
+    const sort = document.getElementById('sort-sel').value;
+    let list = [...todosUsuarios];
+
+    // Filtro por status
+    if (currentFilter === 'com') list = list.filter(u => u.parceiros.length > 0 || u.estoques.length > 0 || u.vendas.length > 0);
+    if (currentFilter === 'sem') list = list.filter(u => u.parceiros.length === 0 && u.estoques.length === 0 && u.vendas.length === 0);
+
+    // Busca textual
+    if (q) {
+        list = list.filter(u => {
+            const p = u.perfil;
+            const nomeCompleto = ((p.nome || '') + ' ' + (p.sobrenome || '')).toLowerCase();
+            const neg = (p.negocio || '').toLowerCase();
+            const matchParceiro = u.parceiros.some(pt => (pt.nome_local || '').toLowerCase().includes(q) || (pt.nome_responsavel || '').toLowerCase().includes(q));
+            const matchProduto = u.estoques.some(e => (e.nome_produto || '').toLowerCase().includes(q));
+            return nomeCompleto.includes(q) || neg.includes(q) || matchParceiro || matchProduto;
+        });
+    }
+
+    // Ordenação
+    list.sort((a, b) => {
+        if (sort === 'parceiros_desc') return b.parceiros.length - a.parceiros.length;
+        if (sort === 'vendas_desc') return b.totalVendasLiq - a.totalVendasLiq;
+        if (sort === 'estoque_desc') return b.totalEstoqueRestante - a.totalEstoqueRestante;
+        if (sort === 'recente') {
+            const tA = new Date(a.perfil.created_at).getTime();
+            const tB = new Date(b.perfil.created_at).getTime();
+            return tB - tA;
+        }
+        if (sort === 'nome_asc') {
+            const nA = (a.perfil.nome || '').toLowerCase();
+            const nB = (b.perfil.nome || '').toLowerCase();
+            return nA.localeCompare(nB);
+        }
+        return 0;
+    });
+
+    document.getElementById('count-label').textContent = `${list.length} usuário${list.length !== 1 ? 's' : ''}`;
+    renderLista(list);
+}
+
+function renderLista(list) {
+    const el = document.getElementById('user-list');
+    if (!list.length) {
+        el.innerHTML = `
+            <div class="empty-state">
+                <span class="material-symbols-outlined">search_off</span>
+                <p>Nenhum usuário encontrado com esse filtro.</p>
+            </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(u => {
+        const p = u.perfil;
+        const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+        const initials = getInitials(p.nome, p.sobrenome);
+        const qtdParc = u.parceiros.length;
+        const temConsignados = qtdParc > 0 || u.vendas.length > 0;
+        const badgeClass = temConsignados ? 'has' : 'empty';
+        const badgeIco = temConsignados ? 'storefront' : 'store';
+        const badgeTxt = temConsignados ? `${qtdParc} parceiro${qtdParc !== 1 ? 's' : ''}` : 'Nenhum parceiro';
+
+        return `
+            <div class="user-row" onclick="abrirDrawer('${p.id}')">
+                <div class="avatar">${initials}</div>
+                <div class="user-info">
+                    <div class="flex items-center gap-2">
+                        <span class="user-name">${esc(nomeCompleto)}</span>
+                        ${p.plano === 'vitalicio' ? '<span class="text-[10px] font-bold text-emerald-400 bg-emerald-900/30 px-1.5 py-0.5 rounded border border-emerald-500/30">Vitalício</span>' : ''}
+                    </div>
+                    <div class="user-sub">${esc(p.negocio || 'Negócio não informado')} · ${u.totalEstoqueRestante} itens em estoque no local</div>
+                </div>
+                <div class="text-right flex flex-col items-end gap-1 flex-shrink-0">
+                    <span class="badge-status ${badgeClass}">
+                        <span class="material-symbols-outlined">${badgeIco}</span>
+                        ${badgeTxt}
+                    </span>
+                    <span class="text-xs font-black ${temConsignados ? 'text-emerald-400' : 'text-slate-600'}">
+                        ${fmtR(u.totalVendasLiq)}
+                    </span>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function abrirDrawer(userId) {
+    const user = todosUsuarios.find(u => u.perfil.id === userId);
+    if (!user) return;
+
+    currentDrawerUserId = userId;
+    const p = user.perfil;
+    const nomeCompleto = [p.nome, p.sobrenome].filter(Boolean).join(' ') || 'Sem nome';
+
+    document.getElementById('dr-avatar').textContent = getInitials(p.nome, p.sobrenome);
+    document.getElementById('dr-nome').textContent = nomeCompleto;
+    document.getElementById('dr-sub').textContent = p.negocio || 'Negócio não informado';
+    document.getElementById('dr-qtd-parceiros').textContent = user.parceiros.length;
+    document.getElementById('dr-qtd-estoque').textContent = user.totalEstoqueRestante;
+    document.getElementById('dr-total-vendas').textContent = fmtR(user.totalVendasLiq);
+    document.getElementById('dr-qtd-fechamentos').textContent = user.fechamentos.length;
+
+    document.getElementById('tab-cnt-parc').textContent = user.parceiros.length;
+    document.getElementById('tab-cnt-vendas').textContent = user.vendas.length;
+    document.getElementById('tab-cnt-fech').textContent = user.fechamentos.length;
+    document.getElementById('tab-cnt-recolh').textContent = user.recolhimentos.length;
+
+    // Reset tab to parceiros
+    currentDrTab = 'parceiros';
+    document.querySelectorAll('.dr-tab-btn').forEach((b, idx) => b.classList.toggle('active', idx === 0));
+
+    renderDrawerBody(user);
+    document.getElementById('drawer-bg').classList.add('open');
+}
+
+function switchDrTab(tab, btn) {
+    currentDrTab = tab;
+    document.querySelectorAll('.dr-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const user = todosUsuarios.find(u => u.perfil.id === currentDrawerUserId);
+    if (user) renderDrawerBody(user);
+}
+
+function renderDrawerBody(user) {
+    const body = document.getElementById('dr-body');
+
+    // Aba 1: Parceiros & Estoque
+    if (currentDrTab === 'parceiros') {
+        if (user.parceiros.length === 0) {
+            body.innerHTML = `
+                <div class="empty-state py-12">
+                    <span class="material-symbols-outlined text-slate-600">storefront</span>
+                    <p class="font-bold text-slate-300">Nenhum ponto parceiro cadastrado.</p>
+                    <p class="text-xs text-slate-500 mt-1">Este cliente ainda não criou pontos de venda consignados.</p>
+                </div>`;
+            return;
+        }
+
+        body.innerHTML = user.parceiros.map(pt => {
+            // Estoque deste parceiro
+            const estoqueDeste = user.estoques.filter(e => e.parceiro_id === pt.id);
+            const totalItens = estoqueDeste.reduce((acc, e) => acc + parseInt(e.quantidade_restante || 0), 0);
+
+            const lotesHtml = estoqueDeste.length === 0 
+                ? '<p class="text-xs text-slate-500 italic mt-2">Nenhum lote de produto ativo neste local.</p>'
+                : `<div class="mt-2 space-y-1.5 border-t border-[#222] pt-2">
+                    ${estoqueDeste.map(e => `
+                        <div class="flex items-center justify-between text-xs py-1 px-2 rounded bg-[#161616]">
+                            <div class="truncate pr-2">
+                                <span class="font-bold text-slate-200">${esc(e.nome_produto)}</span>
+                                <span class="text-slate-500 text-[11px] block">Comissão: ${e.taxa_comissao}%</span>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <span class="px-1.5 py-0.5 rounded ${e.quantidade_restante > 0 ? 'bg-emerald-900/30 text-emerald-400' : 'bg-red-900/30 text-red-400'} font-bold text-[11px]">${e.quantidade_restante} un</span>
+                                <span class="text-slate-400 text-[11px] block">${fmtR(e.preco_venda)}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                   </div>`;
+
+            return `
+                <div class="parc-card">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-purple-400 text-lg">storefront</span>
+                                <h4 class="font-bold text-sm text-slate-100">${esc(pt.nome_local)}</h4>
+                            </div>
+                            ${pt.nome_responsavel ? `<p class="text-xs text-slate-400 mt-0.5 flex items-center gap-1"><span class="material-symbols-outlined text-xs">person</span> ${esc(pt.nome_responsavel)}</p>` : ''}
+                            ${pt.telefone ? `<p class="text-xs text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">call</span> ${esc(pt.telefone)}</p>` : ''}
+                            ${pt.endereco ? `<p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-xs">location_on</span> ${esc(pt.endereco)}</p>` : ''}
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-900/30 text-purple-300 border border-purple-500/30">${totalItens} un no local</span>
+                        </div>
+                    </div>
+                    ${lotesHtml}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Aba 2: Vendas
+    else if (currentDrTab === 'vendas') {
+        if (user.vendas.length === 0) {
+            body.innerHTML = `
+                <div class="empty-state py-12">
+                    <span class="material-symbols-outlined text-slate-600">receipt_long</span>
+                    <p class="font-bold text-slate-300">Nenhuma venda registrada ainda.</p>
+                </div>`;
+            return;
+        }
+
+        body.innerHTML = user.vendas.map(v => {
+            const dataFmt = new Date(v.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            return `
+                <div class="parc-card">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm text-slate-100 truncate">${esc(v.nome_produto)}</span>
+                        <span class="font-black text-sm text-emerald-400">${fmtR(v.valor_liquido)}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span>Quantidade: <strong class="text-slate-200">${v.quantidade} un</strong> · Bruto: ${fmtR(v.valor_bruto)}</span>
+                        <span class="text-slate-500 text-[11px]">${dataFmt}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Aba 3: Fechamentos
+    else if (currentDrTab === 'fechamentos') {
+        if (user.fechamentos.length === 0) {
+            body.innerHTML = `
+                <div class="empty-state py-12">
+                    <span class="material-symbols-outlined text-slate-600">payments</span>
+                    <p class="font-bold text-slate-300">Nenhum acerto financeiro realizado.</p>
+                </div>`;
+            return;
+        }
+
+        body.innerHTML = user.fechamentos.map(f => {
+            const dataFmt = new Date(f.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            const m = f.forma_pagamento ? (f.forma_pagamento === 'pix' ? 'PIX' : 'Dinheiro') : 'Não especificado';
+            return `
+                <div class="parc-card">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-emerald-400 text-lg">check_circle</span>
+                            <span class="font-bold text-sm text-slate-100">Fechamento / Acerto</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">${m}</span>
+                        </div>
+                        <span class="font-black text-sm text-emerald-400">+ ${fmtR(f.valor_recebido)}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                        <span>Itens acertados: <strong class="text-slate-200">${f.qtd_itens} unid.</strong></span>
+                        <span class="text-slate-500 text-[11px]">${dataFmt}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Aba 4: Recolhimentos
+    else if (currentDrTab === 'recolhimentos') {
+        if (user.recolhimentos.length === 0) {
+            body.innerHTML = `
+                <div class="empty-state py-12">
+                    <span class="material-symbols-outlined text-slate-600">assignment_return</span>
+                    <p class="font-bold text-slate-300">Nenhum recolhimento registrado.</p>
+                </div>`;
+            return;
+        }
+
+        body.innerHTML = user.recolhimentos.map(r => {
+            const dataFmt = new Date(r.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+            return `
+                <div class="parc-card">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm text-slate-100 truncate">${esc(r.nome_produto)}</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-900/30 text-red-400">-${r.quantidade} un</span>
+                    </div>
+                    <div class="text-right text-slate-500 text-[11px] mt-1">
+                        ${dataFmt}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function fecharDrawer(e) {
+    if (e.target.id === 'drawer-bg') fecharDrawerDireto();
+}
+
+function fecharDrawerDireto() {
+    document.getElementById('drawer-bg').classList.remove('open');
+}
+
+function acessarComoCliente(userId) {
+    if (!userId) return;
+    localStorage.setItem('impersonate_id', userId);
+    window.location.href = 'consignados.html';
+}
+</script>
+</body>
+</html>
