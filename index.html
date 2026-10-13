@@ -116,9 +116,19 @@
             background: rgba(18,18,18,0.95); backdrop-filter: blur(16px);
             border-bottom: 1px solid #1E1E1E;
         }
+        .horizontal-tabs-container {
+            max-width: 1200px; margin: 0 auto; position: relative;
+            display: flex; align-items: center;
+        }
         .horizontal-tabs {
-            max-width: 1200px; margin: 0 auto; display: flex; gap: .45rem;
+            display: flex; gap: .45rem;
             overflow-x: auto; padding: .65rem 1.25rem; scrollbar-width: none;
+            cursor: grab; user-select: none; -webkit-user-select: none;
+            scroll-behavior: smooth;
+        }
+        .horizontal-tabs.is-dragging {
+            cursor: grabbing !important;
+            scroll-behavior: auto !important;
         }
         .horizontal-tabs::-webkit-scrollbar { display: none; }
         .tab-pill {
@@ -127,6 +137,7 @@
             background: #1A1A1A; border: 1px solid #2A2A2A;
             color: #94a3b8; font-size: .78rem; font-weight: 600;
             white-space: nowrap; text-decoration: none; transition: all .15s; flex-shrink: 0;
+            user-select: none; -webkit-user-drag: none;
         }
         .tab-pill:hover { color: #f1f5f9; border-color: #3f3f46; background: #222; }
         .tab-pill.active {
@@ -134,6 +145,24 @@
             color: #25f4f4; font-weight: 700;
         }
         .tab-pill .material-symbols-outlined { font-size: 1rem; }
+
+        .tab-arrow-btn {
+            display: none; align-items: center; justify-content: center;
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 2rem; height: 2rem; border-radius: 50%;
+            background: #1E1E1E; border: 1px solid #2A2A2A;
+            color: #cbd5e1; cursor: pointer; z-index: 10;
+            transition: all .2s; box-shadow: 0 4px 12px rgba(0,0,0,.6);
+            opacity: 0; pointer-events: none;
+        }
+        .tab-arrow-btn:hover { background: #2A2A2A; color: #25f4f4; border-color: rgba(37,244,244,.4); }
+        .tab-arrow-btn.left { left: .5rem; }
+        .tab-arrow-btn.right { right: .5rem; }
+
+        @media (min-width: 640px) {
+            .tab-arrow-btn { display: flex; }
+            .horizontal-tabs { padding: .65rem 2.8rem; }
+        }
 
         /* ── Drawer Lateral (Menu ☰) ─────────────────────── */
         .drawer-backdrop {
@@ -255,55 +284,67 @@
 
 <!-- ══ TABS HORIZONTAIS DE NAVEGAÇÃO (SCROLL LATERAL) ══════════ -->
 <nav class="horizontal-tabs-wrap">
-    <div class="horizontal-tabs">
-        <a href="#" class="tab-pill active">
-            <span class="material-symbols-outlined text-primary">dashboard</span>
-            Início
-        </a>
-        <a href="registrar-vendas" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#34d399">point_of_sale</span>
-            Vendas
-        </a>
-        <a href="receitas" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#25f4f4">menu_book</span>
-            Receitas
-        </a>
-        <a href="gerenciar-insumos" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#fbbf24">package_2</span>
-            Insumos
-        </a>
-        <a href="consignados.html" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#a78bfa">storefront</span>
-            Consignados
-        </a>
-        <a href="dre" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#38bdf8">monitoring</span>
-            DRE
-        </a>
-        <a href="precificacao-marketplace" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#f472b6">sell</span>
-            Precificação
-        </a>
-        <a href="controle-estoque.html" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#60a5fa">inventory_2</span>
-            Estoque
-        </a>
-        <a href="desperdicios" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#f87171">delete_sweep</span>
-            Quebras & Lixo
-        </a>
-        <a href="despesas" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#facc15">receipt_long</span>
-            Despesas
-        </a>
-        <a href="lista-compras" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#2dd4bf">shopping_cart</span>
-            Compras
-        </a>
-        <a href="gestao-produtos" class="tab-pill">
-            <span class="material-symbols-outlined" style="color:#fb923c">shopping_basket</span>
-            Produtos
-        </a>
+    <div class="horizontal-tabs-container">
+        <!-- Seta Esquerda (Desktop) -->
+        <button id="btn-tab-prev" class="tab-arrow-btn left" onclick="scrollTabs(-240)" aria-label="Rolar para esquerda">
+            <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
+        <div class="horizontal-tabs" id="horizontal-tabs">
+            <a href="#" class="tab-pill active">
+                <span class="material-symbols-outlined text-primary">dashboard</span>
+                Início
+            </a>
+            <a href="registrar-vendas" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#34d399">point_of_sale</span>
+                Vendas
+            </a>
+            <a href="receitas" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#25f4f4">menu_book</span>
+                Receitas
+            </a>
+            <a href="gerenciar-insumos" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#fbbf24">package_2</span>
+                Insumos
+            </a>
+            <a href="consignados.html" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#a78bfa">storefront</span>
+                Consignados
+            </a>
+            <a href="dre" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#38bdf8">monitoring</span>
+                DRE
+            </a>
+            <a href="precificacao-marketplace" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#f472b6">sell</span>
+                Precificação
+            </a>
+            <a href="controle-estoque.html" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#60a5fa">inventory_2</span>
+                Estoque
+            </a>
+            <a href="desperdicios" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#f87171">delete_sweep</span>
+                Quebras & Lixo
+            </a>
+            <a href="despesas" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#facc15">receipt_long</span>
+                Despesas
+            </a>
+            <a href="lista-compras" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#2dd4bf">shopping_cart</span>
+                Compras
+            </a>
+            <a href="gestao-produtos" class="tab-pill">
+                <span class="material-symbols-outlined" style="color:#fb923c">shopping_basket</span>
+                Produtos
+            </a>
+        </div>
+
+        <!-- Seta Direita (Desktop) -->
+        <button id="btn-tab-next" class="tab-arrow-btn right" onclick="scrollTabs(240)" aria-label="Rolar para direita">
+            <span class="material-symbols-outlined">chevron_right</span>
+        </button>
     </div>
 </nav>
 
@@ -549,6 +590,86 @@ function toggleDrawer(open) {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') toggleDrawer(false);
 });
+
+// ── Controle de Scroll Horizontal das Tabs com Mouse e Setas ──
+function scrollTabs(amount) {
+    const tabsEl = document.getElementById('horizontal-tabs');
+    if (tabsEl) {
+        tabsEl.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+}
+
+function initHorizontalTabsMouseScroll() {
+    const tabsEl = document.getElementById('horizontal-tabs');
+    if (!tabsEl) return;
+
+    const prevBtn = document.getElementById('btn-tab-prev');
+    const nextBtn = document.getElementById('btn-tab-next');
+
+    function updateTabArrows() {
+        if (!prevBtn || !nextBtn) return;
+        const sl = tabsEl.scrollLeft;
+        const maxScroll = tabsEl.scrollWidth - tabsEl.clientWidth - 5;
+        prevBtn.style.opacity = sl > 10 ? '1' : '0';
+        prevBtn.style.pointerEvents = sl > 10 ? 'auto' : 'none';
+        nextBtn.style.opacity = sl < maxScroll ? '1' : '0';
+        nextBtn.style.pointerEvents = sl < maxScroll ? 'auto' : 'none';
+    }
+
+    // 1. Rolar com a rodinha do mouse (Wheel)
+    tabsEl.addEventListener('wheel', e => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            tabsEl.scrollLeft += e.deltaY;
+            updateTabArrows();
+        }
+    }, { passive: false });
+
+    // 2. Clique e arraste com o mouse (Drag to scroll no PC)
+    let isDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+    let hasMoved = false;
+
+    tabsEl.addEventListener('mousedown', e => {
+        isDown = true;
+        hasMoved = false;
+        tabsEl.classList.add('is-dragging');
+        startX = e.pageX - tabsEl.offsetLeft;
+        scrollStart = tabsEl.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!isDown) return;
+        isDown = false;
+        tabsEl.classList.remove('is-dragging');
+    });
+
+    window.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        const x = e.pageX - tabsEl.offsetLeft;
+        const walk = (x - startX) * 1.6; // velocidade do arraste
+        if (Math.abs(walk) > 4) hasMoved = true;
+        tabsEl.scrollLeft = scrollStart - walk;
+        updateTabArrows();
+    });
+
+    // Impede clique acidental nos links ao arrastar com mouse
+    tabsEl.addEventListener('click', e => {
+        if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+            hasMoved = false;
+        }
+    }, true);
+
+    tabsEl.addEventListener('scroll', updateTabArrows);
+    window.addEventListener('resize', updateTabArrows);
+    setTimeout(updateTabArrows, 150);
+}
+
+document.addEventListener('DOMContentLoaded', initHorizontalTabsMouseScroll);
+initHorizontalTabsMouseScroll();
 
 (async () => {
     try {
