@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>ReceitasX - Dashboard</title>
+    <title>Dashboard Executivo - Admin · ReceitasX</title>
     <meta name="google-site-verification" content="u0POsj17QqD4iukUlLzIayovjOOk-s_nhfizVgi6ak0" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
@@ -127,37 +127,160 @@
             padding: 0 .25rem; pointer-events: none;
             box-shadow: 0 2px 8px rgba(239,68,68,.5);
         }
+
+        /* ── Menu Drawer Lateral Exclusivo do Admin ──────────────── */
+        .admin-drawer-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(5px); z-index: 999;
+            opacity: 0; pointer-events: none; transition: opacity .25s ease;
+        }
+        .admin-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+        .admin-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 320px; max-width: 86vw; background: #131313;
+            border-right: 1px solid #242424; z-index: 1000;
+            transform: translateX(-100%); transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; box-shadow: 10px 0 40px rgba(0,0,0,.85);
+        }
+        .admin-drawer.open { transform: translateX(0); }
+        .admin-drawer-header {
+            padding: 1.15rem 1.25rem; border-bottom: 1px solid #222;
+            display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-shrink: 0;
+            background: linear-gradient(180deg, rgba(251,146,60,.08), transparent);
+        }
+        .admin-drawer-avatar {
+            width: 2.6rem; height: 2.6rem; border-radius: .75rem;
+            background: linear-gradient(135deg, rgba(251,146,60,.25), rgba(251,146,60,.05));
+            border: 1px solid rgba(251,146,60,.35); color: #fb923c;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .admin-drawer-content {
+            flex: 1; overflow-y: auto; padding: 1.1rem .85rem; display: flex; flex-direction: column; gap: 1.25rem;
+        }
+        .admin-drawer-group-title {
+            font-size: .65rem; font-weight: 800; letter-spacing: .08em;
+            text-transform: uppercase; color: #64748b; margin-bottom: .4rem; padding-left: .5rem;
+            display: flex; align-items: center; gap: .35rem;
+        }
+        .admin-drawer-link {
+            display: flex; align-items: center; gap: .75rem; padding: .6rem .75rem;
+            border-radius: .65rem; color: #cbd5e1; text-decoration: none; font-size: .83rem; font-weight: 600;
+            transition: background .15s, color .15s;
+        }
+        .admin-drawer-link:hover { background: #1E1E1E; color: #fb923c; }
+        .admin-drawer-link.active {
+            background: rgba(251,146,60,.12); color: #fb923c; font-weight: 700;
+            border: 1px solid rgba(251,146,60,.25);
+        }
+        .admin-drawer-link .material-symbols-outlined { font-size: 1.2rem; color: #94a3b8; transition: color .15s; }
+        .admin-drawer-link:hover .material-symbols-outlined { color: #fb923c; }
+        .admin-drawer-link.active .material-symbols-outlined { color: #fb923c; }
+
+        /* ── Estilos do Dashboard Executivo Admin ───────────────── */
+        .dash-kpi {
+            background: #181818; border: 1px solid #262626; border-radius: 1rem;
+            padding: 1.1rem 1.15rem; display: flex; flex-direction: column;
+            text-decoration: none; transition: border-color .2s, transform .15s, box-shadow .2s;
+            position: relative; overflow: hidden;
+        }
+        .dash-kpi:hover {
+            border-color: rgba(251,146,60,.4); transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.45);
+        }
+        .dash-kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+        .dash-kpi-icon {
+            width: 2.25rem; height: 2.25rem; border-radius: .6rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .dash-kpi-label { font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #94a3b8; }
+        .dash-kpi-val { font-size: 1.55rem; font-weight: 900; line-height: 1.1; color: #f1f5f9; }
+        .dash-kpi-sub { font-size: .72rem; color: #64748b; margin-top: .35rem; font-weight: 500; display: flex; align-items: center; gap: .3rem; }
+
+        .recent-card {
+            background: #181818; border: 1px solid #262626; border-radius: 1.1rem;
+            padding: 1.25rem; display: flex; flex-direction: column; gap: .9rem;
+        }
+        .recent-head { display: flex; align-items: center; justify-content: space-between; }
+        .recent-title { font-size: .9rem; font-weight: 800; color: #f1f5f9; display: flex; align-items: center; gap: .45rem; }
+        .recent-row {
+            display: flex; align-items: center; gap: .75rem; padding: .65rem 0;
+            border-bottom: 1px solid #222;
+        }
+        .recent-row:last-child { border-bottom: none; }
+        .recent-avatar {
+            width: 2.2rem; height: 2.2rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .78rem; font-weight: 800; flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .btn-quick-action {
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .5rem .85rem; border-radius: .65rem;
+            background: #1A1A1A; border: 1px solid #2A2A2A;
+            color: #cbd5e1; font-size: .78rem; font-weight: 700;
+            text-decoration: none; transition: all .15s; white-space: nowrap;
+        }
+        .btn-quick-action:hover {
+            background: #222; border-color: rgba(251,146,60,.4); color: #fb923c;
+            transform: translateY(-1px);
+        }
+        .btn-quick-action .material-symbols-outlined { font-size: 1.1rem; }
+
+        .section-divider {
+            display: flex; align-items: center; gap: .5rem;
+            margin: 1.5rem 0 .75rem 0; padding-left: .25rem;
+        }
+        .section-divider .sec-icon {
+            width: 1.8rem; height: 1.8rem; border-radius: .45rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .section-divider .sec-icon .material-symbols-outlined { font-size: 1.05rem; }
+        .section-divider h3 {
+            font-size: .85rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .06em; color: #94a3b8;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
 <!-- ══ Header sticky ═════════════════════════════════════════ -->
-<header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.95);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
+<header style="position:sticky;top:0;z-index:200;background:rgba(18,18,18,.96);backdrop-filter:blur(16px);border-bottom:1px solid #1E1E1E">
     <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem;height:3.5rem;display:flex;align-items:center;gap:.75rem">
-        <span style="font-size:.95rem;font-weight:800;flex:1;letter-spacing:-.01em">
-            <span style="color:#25f4f4">Receitas</span><span style="color:#f1f5f9">X</span>
-        </span>
-        <!-- Badge Novo -->
-        <div style="display:flex;align-items:center;gap:0.15rem;margin-right:0.25rem;animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
-            <span style="font-size:0.65rem;font-weight:800;color:#e11d48;text-transform:uppercase;letter-spacing:0.05em;background:rgba(225,29,72,0.15);padding:0.15rem 0.4rem;border-radius:999px;border:1px solid rgba(225,29,72,0.3)">Novo</span>
-            <span class="material-symbols-outlined" style="font-size:1.1rem;color:#e11d48">arrow_forward</span>
+        <!-- Botão Menu Gaveta (Drawer ☰) Exclusivo do Admin -->
+        <button id="btn-admin-drawer" onclick="toggleAdminDrawer(true)" title="Menu Completo do Admin"
+            style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
+            onmouseover="this.style.color='#fb923c';this.style.borderColor='rgba(251,146,60,.4)'"
+            onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
+            <span class="material-symbols-outlined" style="font-size:1.35rem">menu</span>
+        </button>
+
+        <!-- Logo + Badge Admin -->
+        <div style="display:flex;align-items:center;gap:.5rem;flex:1">
+            <span style="font-size:1rem;font-weight:800;letter-spacing:-.01em">
+                <span style="color:#25f4f4">Receitas</span><span style="color:#f1f5f9">X</span>
+            </span>
+            <span class="role-badge-admin" style="font-size:0.62rem">Admin</span>
         </div>
-        <!-- Voltar ao Início -->
-          <button onclick="window.location.href='index.html'" title="Voltar ao Início"
-              style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
-              onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)'"
-              onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
-              <span class="material-symbols-outlined" style="font-size:1.15rem">home</span>
-          </button>
+
+        <!-- Modo Cliente (Ir para o App) -->
+        <a href="index.html" title="Modo Cliente (Ir para o App)"
+            style="position:relative;height:2.2rem;padding:0 .75rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;gap:.4rem;cursor:pointer;color:#94a3b8;font-size:.78rem;font-weight:600;text-decoration:none;transition:all .15s"
+            onmouseover="this.style.color='#25f4f4';this.style.borderColor='rgba(37,244,244,.4)';this.style.background='rgba(37,244,244,.05)'"
+            onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A';this.style.background='transparent'">
+            <span class="material-symbols-outlined" style="font-size:1.15rem">storefront</span>
+            <span class="hidden sm:inline">Modo Cliente</span>
+        </a>
           
         <!-- Personalizar Menu -->
-        <button onclick="openCustomMenuModal()" title="Personalizar Menu"
+        <button onclick="openCustomMenuModal()" title="Personalizar Módulos"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
             onmouseover="this.style.color='#e11d48';this.style.borderColor='rgba(225,29,72,.4)'"
             onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
             <span class="material-symbols-outlined" style="font-size:1.15rem">tune</span>
         </button>
+
         <!-- Sino de notificações -->
         <button id="sino-btn" onclick="toggleNotifPanel()" title="Notificações"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
@@ -166,6 +289,7 @@
             <span class="material-symbols-outlined" id="sino-icon" style="font-size:1.15rem">notifications</span>
             <span id="sino-badge">0</span>
         </button>
+
         <!-- Botão Sair -->
         <button onclick="sb.auth.signOut().then(() => window.location.replace('login.html'))" title="Sair"
             style="position:relative;width:2.2rem;height:2.2rem;border-radius:.55rem;border:1px solid #2A2A2A;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;transition:all .15s"
@@ -173,7 +297,8 @@
             onmouseout="this.style.color='#94a3b8';this.style.borderColor='#2A2A2A'">
             <span class="material-symbols-outlined" style="font-size:1.15rem">logout</span>
         </button>
-        <!-- Painel -->
+
+        <!-- Painel de Notificações Popover -->
         <div id="notif-panel">
             <div class="notif-panel-head">
                 <span style="font-size:.82rem;font-weight:700;color:#f1f5f9">Notificações</span>
@@ -186,8 +311,368 @@
         </div>
     </div>
 </header>
-<div class="p-6 space-y-8">
-    <!-- ── Admin (Dashboard Exclusivo) ─────────────── -->
+
+<!-- ══ MENU GAVETA LATERAL (DRAWER ☰) EXCLUSIVO DO ADMIN ════════ -->
+<div id="admin-drawer-backdrop" class="admin-drawer-backdrop" onclick="toggleAdminDrawer(false)"></div>
+<aside id="admin-drawer" class="admin-drawer">
+    <div class="admin-drawer-header">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="admin-drawer-avatar">
+                <span class="material-symbols-outlined" style="font-size:1.45rem;color:#fb923c">shield_person</span>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-bold text-slate-100 truncate" id="admin-drawer-user-name">Painel Admin</h3>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 uppercase tracking-wider">Acesso Master</span>
+                </div>
+            </div>
+        </div>
+        <button onclick="toggleAdminDrawer(false)" class="text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition-colors" title="Fechar Menu">
+            <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+    </div>
+
+    <div class="admin-drawer-content">
+        <!-- 1. Visão Geral & Métricas -->
+        <div>
+            <div class="admin-drawer-group-title">
+                <span class="material-symbols-outlined text-xs text-primary">dashboard</span> Visão Geral & Métricas
+            </div>
+            <a href="admin.html" class="admin-drawer-link active" onclick="toggleAdminDrawer(false)">
+                <span class="material-symbols-outlined text-primary">analytics</span> Dashboard Principal
+            </a>
+            <a href="admin-analytics" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-cyan-400">insights</span> Analytics
+            </a>
+            <a href="admin-sessoes" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-emerald-400">schedule</span> Sessões de Acesso
+            </a>
+            <a href="admin-progresso" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">query_stats</span> Visão de Progresso
+            </a>
+            <a href="admin-cliques-afiliados" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-sky-400">ads_click</span> Cliques de Afiliados
+            </a>
+        </div>
+
+        <!-- 2. Usuários & Contas -->
+        <div>
+            <div class="admin-drawer-group-title">
+                <span class="material-symbols-outlined text-xs text-amber-400">group</span> Usuários & Contas
+            </div>
+            <a href="admin-usuarios.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">manage_accounts</span> Gestão de Usuários
+            </a>
+            <a href="admin-usuarios-config.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-cyan-400">settings_account_box</span> Config dos Usuários
+            </a>
+            <a href="admin-vitalicio.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">key</span> Administrar Acessos
+            </a>
+            <a href="admin-emails.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-sky-400">mail</span> Email Marketing
+            </a>
+        </div>
+
+        <!-- 3. Financeiro & Vendas -->
+        <div>
+            <div class="admin-drawer-group-title">
+                <span class="material-symbols-outlined text-xs text-emerald-400">payments</span> Financeiro & Vendas
+            </div>
+            <a href="admin-vendas-clientes.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-emerald-400">point_of_sale</span> Faturamento Clientes
+            </a>
+            <a href="admin-pedidos.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">receipt_long</span> Pedidos da Plataforma
+            </a>
+            <a href="admin-historico-pagamentos.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">history</span> Histórico de Pagamentos
+            </a>
+            <a href="admin-faturamento-afiliados.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">payments</span> Faturamento de Afiliados
+            </a>
+            <a href="admin-cupons.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-purple-400">confirmation_number</span> Gerenciar Cupons
+            </a>
+            <a href="admin-reembolsos.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-red-400">currency_exchange</span> Ver Reembolsos
+            </a>
+        </div>
+
+        <!-- 4. Conteúdo & Monitoramento -->
+        <div>
+            <div class="admin-drawer-group-title">
+                <span class="material-symbols-outlined text-xs text-sky-400">database</span> Conteúdo & Monitoramento
+            </div>
+            <a href="admin-desperdicios.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-red-400">delete_sweep</span> Quebras & Lixo
+            </a>
+            <a href="admin-consignados.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-purple-400">storefront</span> Consignados dos Usuários
+            </a>
+            <a href="admin-receitas-usuarios.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">menu_book</span> Receitas dos Usuários
+            </a>
+            <a href="admin-insumos-usuarios.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">inventory_2</span> Ingredientes dos Usuários
+            </a>
+            <a href="admin-embalagens-usuarios.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">package_2</span> Embalagens dos Usuários
+            </a>
+            <a href="admin-produtos-vinculados.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">link</span> Produtos Vinculados
+            </a>
+            <a href="admin-vitrine-tiktok.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-cyan-400">storefront</span> Vitrine TikTok
+            </a>
+        </div>
+
+        <!-- 5. Sistema & Suporte -->
+        <div>
+            <div class="admin-drawer-group-title">
+                <span class="material-symbols-outlined text-xs text-purple-400">settings</span> Sistema & Configurações
+            </div>
+            <a href="admin-configuracoes.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">admin_panel_settings</span> Configurações Gerais
+            </a>
+            <a href="admin-avisos.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-amber-400">campaign</span> Avisos aos Usuários
+            </a>
+            <a href="admin-feedbacks.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-purple-400">forum</span> Feedbacks dos Usuários
+            </a>
+            <a href="admin-tutoriais.html" class="admin-drawer-link">
+                <span class="material-symbols-outlined text-red-400">video_library</span> Gerenciar Tutoriais
+            </a>
+        </div>
+
+        <!-- 6. Atalhos & Saída -->
+        <div class="pt-2 border-t border-border-dark">
+            <a href="index.html" class="admin-drawer-link text-cyan-400 hover:text-cyan-300">
+                <span class="material-symbols-outlined text-cyan-400">storefront</span> Modo Cliente (Ir para o App)
+            </a>
+            <button onclick="sb.auth.signOut().then(() => window.location.replace('login.html'))" class="admin-drawer-link text-red-400 hover:text-red-300 w-full text-left" style="background:transparent;border:none;cursor:pointer">
+                <span class="material-symbols-outlined text-red-400">logout</span> Sair do Sistema
+            </button>
+        </div>
+    </div>
+</aside>
+
+<!-- ══ CORPO PRINCIPAL: DASHBOARD EXECUTIVO ADMIN ═══════════════ -->
+<main class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- 1. Saudação + Status + Atalhos Rápidos -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-border-dark">
+        <div>
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <h1 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                    Painel Administrativo
+                </h1>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Ativo
+                </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-xs text-slate-500">calendar_today</span>
+                <span id="dash-data-atual" class="font-medium">Carregando data...</span>
+                <span class="text-slate-600">•</span>
+                <span class="text-slate-400">Visão Geral Executiva</span>
+            </p>
+        </div>
+
+        <!-- Ações Rápidas (Atalhos Diários) -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="admin-usuarios.html" class="btn-quick-action" title="Gestão de Usuários">
+                <span class="material-symbols-outlined text-amber-400">manage_accounts</span>
+                <span>Usuários</span>
+            </a>
+            <a href="admin-vendas-clientes.html" class="btn-quick-action" title="Faturamento Clientes">
+                <span class="material-symbols-outlined text-emerald-400">point_of_sale</span>
+                <span>Vendas PDV</span>
+            </a>
+            <a href="admin-desperdicios.html" class="btn-quick-action" title="Quebras & Lixo">
+                <span class="material-symbols-outlined text-red-400">delete_sweep</span>
+                <span>Quebras</span>
+            </a>
+            <a href="admin-consignados.html" class="btn-quick-action" title="Consignados">
+                <span class="material-symbols-outlined text-purple-400">storefront</span>
+                <span>Consignados</span>
+            </a>
+            <a href="admin-avisos.html" class="btn-quick-action" title="Avisos do Sistema">
+                <span class="material-symbols-outlined text-sky-400">campaign</span>
+                <span>Avisos</span>
+            </a>
+            <a href="admin-feedbacks.html" class="btn-quick-action" title="Feedbacks de Clientes">
+                <span class="material-symbols-outlined text-amber-400">forum</span>
+                <span>Feedbacks</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. Alerta de Ação Urgente: Feedbacks Pendentes -->
+    <div id="dash-feedbacks-alert" style="display:none;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.35);border-radius:1rem;padding:1rem 1.25rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:.75rem">
+            <div style="width:2.4rem;height:2.4rem;border-radius:.6rem;background:rgba(251,146,60,.15);display:flex;align-items:center;justify-content:center;color:#fb923c;flex-shrink:0">
+                <span class="material-symbols-outlined" style="font-size:1.3rem">notifications_active</span>
+            </div>
+            <div>
+                <h4 style="font-size:.88rem;font-weight:800;color:#f1f5f9" id="dash-feedbacks-alert-title">Feedbacks Aguardando Resposta</h4>
+                <p style="font-size:.75rem;color:#cbd5e1" id="dash-feedbacks-alert-count">Existem feedbacks de usuários sem atendimento.</p>
+            </div>
+        </div>
+        <a href="admin-feedbacks.html" style="display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 1rem;background:#fb923c;color:#0a0a0a;border-radius:.6rem;font-size:.78rem;font-weight:800;text-decoration:none;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+            <span>Atender Agora</span>
+            <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span>
+        </a>
+    </div>
+
+    <!-- 3. KPIs em Tempo Real (7 Cards) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <!-- KPI 1: Total Usuários -->
+        <a href="admin-usuarios.html" class="dash-kpi" title="Ver Gestão de Usuários">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Total Usuários</span>
+                <div class="dash-kpi-icon" style="background:rgba(251,146,60,.12);color:#fb923c">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">group</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val" id="dash-total-usuarios">--</div>
+            <div class="dash-kpi-sub" id="dash-hoje-usuarios">
+                <span class="material-symbols-outlined" style="font-size:.85rem;color:#fb923c">person_add</span>
+                <span>+0 hoje</span>
+            </div>
+        </a>
+
+        <!-- KPI 2: Online Agora -->
+        <a href="admin-sessoes" class="dash-kpi" title="Ver Sessões de Acesso">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Online Agora</span>
+                <div class="dash-kpi-icon" style="background:rgba(52,211,153,.12);color:#34d399">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">sensors</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val text-emerald-400" id="dash-online-usuarios">0</div>
+            <div class="dash-kpi-sub text-emerald-500">
+                <span style="width:.45rem;height:.45rem;border-radius:50%;background:#34d399;display:inline-block;animation:pulse-dot 2s infinite"></span>
+                <span>Tempo Real (2m)</span>
+            </div>
+        </a>
+
+        <!-- KPI 3: Assinantes Vitalício / Pro -->
+        <a href="admin-vitalicio.html" class="dash-kpi" title="Ver Acessos Premium">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Assinantes Pro</span>
+                <div class="dash-kpi-icon" style="background:rgba(37,244,244,.12);color:#25f4f4">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">diamond</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val text-cyan-400" id="dash-vitalicios-usuarios">--</div>
+            <div class="dash-kpi-sub" id="dash-taxa-conversao">
+                <span class="material-symbols-outlined" style="font-size:.85rem;color:#25f4f4">verified</span>
+                <span>0% conversão</span>
+            </div>
+        </a>
+
+        <!-- KPI 4: Faturamento Plataforma -->
+        <a href="admin-pedidos.html" class="dash-kpi" title="Ver Pedidos da Plataforma">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Receita Plataforma</span>
+                <div class="dash-kpi-icon" style="background:rgba(52,211,153,.12);color:#34d399">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">payments</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val text-emerald-400" id="dash-faturamento-total">R$ 0,00</div>
+            <div class="dash-kpi-sub" id="dash-faturamento-mes">R$ 0,00 este mês</div>
+        </a>
+
+        <!-- KPI 5: Vendas Clientes (PDV + Consignados) -->
+        <a href="admin-vendas-clientes.html" class="dash-kpi" title="Ver Faturamento dos Clientes">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Vendas Clientes</span>
+                <div class="dash-kpi-icon" style="background:rgba(56,189,248,.12);color:#38bdf8">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">point_of_sale</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val text-sky-400" id="dash-vendas-clientes">R$ 0,00</div>
+            <div class="dash-kpi-sub" id="dash-qtd-vendas-clientes">0 vendas registradas</div>
+        </a>
+
+        <!-- KPI 6: Quebras & Lixo -->
+        <a href="admin-desperdicios.html" class="dash-kpi" title="Ver Quebras & Desperdício">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Quebras & Lixo</span>
+                <div class="dash-kpi-icon" style="background:rgba(239,68,68,.12);color:#f87171">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">delete_sweep</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val text-red-400" id="dash-desperdicios-valor">R$ 0,00</div>
+            <div class="dash-kpi-sub" id="dash-desperdicios-count">0 descartes registrados</div>
+        </a>
+
+        <!-- KPI 7: Consignados Parceiros -->
+        <a href="admin-consignados.html" class="dash-kpi col-span-2 sm:col-span-1" title="Ver Consignados dos Usuários">
+            <div class="dash-kpi-top">
+                <span class="dash-kpi-label">Consignados</span>
+                <div class="dash-kpi-icon" style="background:rgba(167,139,250,.12);color:#a78bfa">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem">storefront</span>
+                </div>
+            </div>
+            <div class="dash-kpi-val text-purple-400" id="dash-consignados-count">0</div>
+            <div class="dash-kpi-sub">pontos parceiros ativos</div>
+        </a>
+    </div>
+
+    <!-- 4. Atividades Recentes: 2 Painéis -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Painel 1: Últimos Usuários Cadastrados -->
+        <div class="recent-card">
+            <div class="recent-head">
+                <div class="recent-title">
+                    <span class="material-symbols-outlined text-amber-400">group_add</span>
+                    <span>Últimos Usuários Cadastrados</span>
+                </div>
+                <a href="admin-usuarios.html" class="text-xs text-amber-400 hover:underline font-bold flex items-center gap-0.5">
+                    Ver todos <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
+            </div>
+            <div id="dash-recent-users" class="space-y-1">
+                <div class="text-xs text-slate-500 py-3 text-center">Carregando cadastros recentes...</div>
+            </div>
+        </div>
+
+        <!-- Painel 2: Últimos Pedidos do App -->
+        <div class="recent-card">
+            <div class="recent-head">
+                <div class="recent-title">
+                    <span class="material-symbols-outlined text-emerald-400">receipt_long</span>
+                    <span>Últimos Pedidos da Plataforma</span>
+                </div>
+                <a href="admin-pedidos.html" class="text-xs text-emerald-400 hover:underline font-bold flex items-center gap-0.5">
+                    Ver todos <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
+            </div>
+            <div id="dash-recent-orders" class="space-y-1">
+                <div class="text-xs text-slate-500 py-3 text-center">Carregando pedidos recentes...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Divisor da Central de Módulos & Ferramentas -->
+    <div class="pt-6 border-t border-border-dark flex items-center justify-between gap-3">
+        <div>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">apps</span>
+                Central de Módulos & Ferramentas
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Navegue pelas ferramentas de controle, dados e configurações do ReceitasX</p>
+        </div>
+        <button onclick="openCustomMenuModal()" class="btn-quick-action" title="Personalizar Ordem dos Módulos">
+            <span class="material-symbols-outlined text-rose-400">tune</span>
+            <span class="hidden sm:inline">Personalizar Grade</span>
+        </button>
+    </div>
+
+    <!-- ── Hub Completo de Módulos (Cards Categorizados) ─────────────── -->
     <section id="admin-hub">
         <div class="flex items-center gap-2 mb-4 px-1">
             <span class="material-symbols-outlined text-sm" style="color:#fb923c;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">shield</span>
@@ -513,169 +998,324 @@
         </div>
 
     </section>
-    <script>
-    // Controle de visibilidade por role — executa direto ao carregar
-    (async () => {
-        try {
-            const session = await getSession();
-            if (!session) return;
+</main>
 
-            const { data: perfil } = await sb
-                .from('perfis')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
+<script>
+/* ══ CONTROLE DO MENU GAVETA LATERAL DO ADMIN ═══════════════ */
+function toggleAdminDrawer(abrir) {
+    const drawer   = document.getElementById('admin-drawer');
+    const backdrop = document.getElementById('admin-drawer-backdrop');
+    if (!drawer || !backdrop) return;
+    if (abrir) {
+        drawer.classList.add('open');
+        backdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
 
-            const role = perfil?.role ?? 'afiliado';
-            console.log('[ReceitasX] Role:', role);
+// Fechar Drawer com a tecla ESC
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') toggleAdminDrawer(false);
+});
 
-            document.querySelectorAll('[data-role]').forEach(el => {
-                const allowed = el.dataset.role.split(',').map(r => r.trim());
-                el.style.display = allowed.includes(role) ? '' : 'none';
-            });
+/* ══ FORMATAR DATA ATUAL ═════════════════════════════════════ */
+function formatarDataHoje() {
+    const el = document.getElementById('dash-data-atual');
+    if (!el) return;
+    try {
+        const agora = new Date();
+        const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        let str = agora.toLocaleDateString('pt-BR', opcoes);
+        str = str.charAt(0).toUpperCase() + str.slice(1);
+        el.textContent = str;
+    } catch (_) {
+        el.textContent = new Date().toLocaleDateString('pt-BR');
+    }
+}
 
-            if (role === 'admin') {
-                // Contar online
-                try {
-                    const limiteOnline = new Date(Date.now() - 120000).toISOString();
-                    const { count: onlineCount } = await sb
-                        .from('presenca_online')
-                        .select('*', { count: 'exact', head: true })
-                        .gt('last_seen', limiteOnline);
+/* ══ CARREGAMENTO DO DASHBOARD E MÉTRICAS ════════════════════ */
+(async () => {
+    try {
+        formatarDataHoje();
+        const session = await getSession();
+        if (!session) return;
 
-                    const badgeOnline = document.getElementById('badge-online-usuarios');
-                    if (badgeOnline && onlineCount !== null) {
-                        badgeOnline.innerHTML = `<span style="width:.4rem;height:.4rem;border-radius:50%;background:#34d399;display:inline-block;animation:pulse-dot 2s ease-in-out infinite"></span> ${onlineCount} Online`;
-                        badgeOnline.style.display = 'inline-flex';
-                        badgeOnline.style.alignItems = 'center';
-                        badgeOnline.style.gap = '.25rem';
-                    }
-                } catch(_) {}
+        const { data: perfil } = await sb
+            .from('perfis')
+            .select('role, nome, sobrenome, email')
+            .eq('id', session.user.id)
+            .single();
 
-                // Contar total de usuários
-                try {
-                    const { count: totalUsuarios } = await sb
-                        .from('perfis')
-                        .select('*', { count: 'exact', head: true });
+        const role = perfil?.role ?? 'afiliado';
+        console.log('[ReceitasX Admin] Role:', role);
 
-                    const badgeTotal = document.getElementById('badge-total-usuarios');
-                    if (badgeTotal && totalUsuarios !== null) {
-                        badgeTotal.innerHTML = `<span class="material-symbols-outlined" style="font-size:.7rem;margin-right:-1px">group</span> ${totalUsuarios} Total`;
-                        badgeTotal.style.display = 'inline-flex';
-                        badgeTotal.style.alignItems = 'center';
-                        badgeTotal.style.gap = '.15rem';
-                    }
-                } catch(_) {}
-
-                // Contar vitalícios
-                try {
-                    const { count: vitaliciosCount } = await sb
-                        .from('perfis')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('plano', 'vitalicio');
-
-                    const badgeVit = document.getElementById('badge-vitalicios');
-                    if (badgeVit && vitaliciosCount !== null) {
-                        badgeVit.innerHTML = `<span class="material-symbols-outlined" style="font-size:.7rem;margin-right:-1px">diamond</span> ${vitaliciosCount} Premium`;
-                        badgeVit.style.display = 'inline-flex';
-                        badgeVit.style.alignItems = 'center';
-                        badgeVit.style.gap = '.15rem';
-                    }
-                } catch(_) {}
-
-                // Contar feedbacks pendentes
-                try {
-                    const { data: feedPendentes } = await sb.rpc('admin_contar_feedbacks_pendentes');
-                    const badgeFeedback = document.getElementById('badge-feedbacks-admin');
-                    if (badgeFeedback && feedPendentes > 0) {
-                        badgeFeedback.innerHTML = `<span class="material-symbols-outlined animate-pulse" style="font-size:.72rem;margin-right:-2px">notifications_active</span> ${feedPendentes} Novo${feedPendentes > 1 ? 's' : ''}`;
-                        badgeFeedback.style.display = 'inline-flex';
-                        badgeFeedback.style.alignItems = 'center';
-                        badgeFeedback.style.gap = '.2rem';
-                    }
-                } catch(_) {}
-            }
-
-            // Oculta o card de Acesso Vitalício se o usuário já tem plano vitalicio
-            try {
-                const { data: perfilPlano } = await sb
-                    .from('perfis')
-                    .select('plano')
-                    .eq('id', session.user.id)
-                    .maybeSingle();
-
-                if (perfilPlano?.plano === 'vitalicio') {
-                    // Usuário já é vitalício — mantém card oculto
-                    // (o card já começa com display:none no HTML)
-                } else {
-                    // Não é vitalício — exibe o card de compra
-                    const card = document.getElementById('card-acesso-vitalicio');
-                    if (card) card.style.display = '';
-                }
-            } catch(_) {}
-
-            // Buscar saldo do afiliado para exibir no badge
-            try {
-                const { data: afiliado } = await sb
-                    .from('afiliados')
-                    .select('total_ganhos')
-                    .eq('user_id', session.user.id)
-                    .single();
-
-                if (afiliado) {
-                    const { data: saques } = await sb
-                        .from('saques_afiliado')
-                        .select('valor, status')
-                        .eq('user_id', session.user.id);
-
-                    const ganhos = parseFloat(afiliado.total_ganhos || 0);
-                    let sacado = 0;
-                    (saques || []).forEach(s => {
-                        if (s.status !== 'cancelado') sacado += parseFloat(s.valor || 0);
-                    });
-                    const saldo = Math.max(0, ganhos - sacado);
-                    const badge = document.getElementById('badge-saldo-idx');
-                    if (badge) {
-                        badge.textContent = 'R$ ' + saldo.toFixed(2).replace('.', ',');
-                        if (saldo > 0) {
-                            badge.style.background = 'rgba(52,211,153,.15)';
-                            badge.style.color = '#34d399';
-                            badge.style.borderColor = 'rgba(52,211,153,.3)';
-                        }
-                    }
-                }
-            } catch(_) {}
-
-            // Ocultar banner do Guia se progresso = 100%
-            try {
-                const uid = session.user.id;
-                const countTable = async (table) => {
-                    const { count } = await sb.from(table).select('*', { count: 'exact', head: true }).eq('user_id', uid);
-                    return count || 0;
-                };
-
-                const { count: cfgCount } = await sb.from('configuracoes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
-                const steps = [
-                    cfgCount > 0,
-                    await countTable('equipamentos') > 0,
-                    await countTable('insumos') > 0,
-                    await countTable('embalagens') > 0,
-                    await countTable('receitas') > 0,
-                    await countTable('produtos') > 0,
-                    localStorage.getItem('receitasx_precificacao_hit') === 'true',
-                ];
-                const doneCount = steps.filter(Boolean).length;
-
-                if (doneCount >= 7) {
-                    const bannerGuia = document.getElementById('banner-guia');
-                    if (bannerGuia) bannerGuia.style.display = 'none';
-                }
-            } catch(_) {}
-        } catch (e) {
-            console.warn('[ReceitasX] Erro ao carregar role:', e);
+        // Atualizar nome no Drawer
+        const drawerName = document.getElementById('admin-drawer-user-name');
+        if (drawerName) {
+            const nomeExibicao = (perfil?.nome || perfil?.sobrenome) 
+                ? `${perfil.nome || ''} ${perfil.sobrenome || ''}`.trim() 
+                : 'Administrador';
+            drawerName.textContent = nomeExibicao;
         }
-    })();
-    </script>
+
+        if (role === 'admin') {
+            await loadAdminDashboard();
+        }
+    } catch (e) {
+        console.warn('[ReceitasX Admin] Erro de inicialização:', e);
+    }
+})();
+
+async function loadAdminDashboard() {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const limiteOnline = new Date(Date.now() - 120000).toISOString();
+
+    // 1. USUÁRIOS: Total, Novos Hoje, Vitalícios e Recentes
+    try {
+        const [perfisTotalRes, perfisHojeRes, perfisVitRes, ultimosPerfisRes] = await Promise.all([
+            sb.from('perfis').select('*', { count: 'exact', head: true }),
+            sb.from('perfis').select('*', { count: 'exact', head: true }).gte('created_at', startOfDay),
+            sb.from('perfis').select('*', { count: 'exact', head: true }).eq('plano', 'vitalicio'),
+            sb.from('perfis').select('id, nome, sobrenome, email, plano, role, created_at').order('created_at', { ascending: false }).limit(5)
+        ]);
+
+        const totalUsuarios = perfisTotalRes.count ?? 0;
+        const hojeUsuarios = perfisHojeRes.count ?? 0;
+        const totalVit = perfisVitRes.count ?? 0;
+        const ultimosPerfis = ultimosPerfisRes.data || [];
+
+        // Atualizar KPIs
+        const elTotal = document.getElementById('dash-total-usuarios');
+        if (elTotal) elTotal.textContent = totalUsuarios.toLocaleString('pt-BR');
+
+        const elHoje = document.getElementById('dash-hoje-usuarios');
+        if (elHoje) {
+            elHoje.innerHTML = `<span class="material-symbols-outlined" style="font-size:.85rem;color:#fb923c">person_add</span> +${hojeUsuarios} cadastrado${hojeUsuarios === 1 ? '' : 's'} hoje`;
+        }
+
+        const elVit = document.getElementById('dash-vitalicios-usuarios');
+        if (elVit) elVit.textContent = totalVit.toLocaleString('pt-BR');
+
+        const elTaxa = document.getElementById('dash-taxa-conversao');
+        if (elTaxa) {
+            const pct = totalUsuarios > 0 ? ((totalVit / totalUsuarios) * 100).toFixed(1) : '0';
+            elTaxa.innerHTML = `<span class="material-symbols-outlined" style="font-size:.85rem;color:#25f4f4">verified</span> ${pct}% de conversão`;
+        }
+
+        // Renderizar Últimos Usuários
+        renderUltimosUsuarios(ultimosPerfis);
+
+        // Manter badges dos cards de módulos legados
+        const badgeTotal = document.getElementById('badge-total-usuarios');
+        if (badgeTotal) {
+            badgeTotal.innerHTML = `<span class="material-symbols-outlined" style="font-size:.7rem;margin-right:-1px">group</span> ${totalUsuarios} Total`;
+            badgeTotal.style.display = 'inline-flex';
+            badgeTotal.style.alignItems = 'center';
+            badgeTotal.style.gap = '.15rem';
+        }
+        const badgeVit = document.getElementById('badge-vitalicios');
+        if (badgeVit) {
+            badgeVit.innerHTML = `<span class="material-symbols-outlined" style="font-size:.7rem;margin-right:-1px">diamond</span> ${totalVit} Premium`;
+            badgeVit.style.display = 'inline-flex';
+            badgeVit.style.alignItems = 'center';
+            badgeVit.style.gap = '.15rem';
+        }
+    } catch (e) {
+        console.warn('Erro ao carregar usuários:', e);
+    }
+
+    // 2. ONLINE AGORA
+    try {
+        const { count: onlineCount } = await sb
+            .from('presenca_online')
+            .select('*', { count: 'exact', head: true })
+            .gt('last_seen', limiteOnline);
+
+        const elOnline = document.getElementById('dash-online-usuarios');
+        if (elOnline) elOnline.textContent = onlineCount ?? 0;
+
+        const badgeOnline = document.getElementById('badge-online-usuarios');
+        if (badgeOnline && onlineCount !== null) {
+            badgeOnline.innerHTML = `<span style="width:.4rem;height:.4rem;border-radius:50%;background:#34d399;display:inline-block;animation:pulse-dot 2s ease-in-out infinite"></span> ${onlineCount} Online`;
+            badgeOnline.style.display = 'inline-flex';
+            badgeOnline.style.alignItems = 'center';
+            badgeOnline.style.gap = '.25rem';
+        }
+    } catch (_) {}
+
+    // 3. FATURAMENTO PLATAFORMA (Pedidos)
+    try {
+        const { data: pedidos } = await sb
+            .from('pedidos')
+            .select('id, email, valor_pago, status, created_at')
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (pedidos) {
+            const pedidosAprovados = pedidos.filter(p => p.status === 'aprovado' || p.status === 'pago');
+            const fatTotal = pedidosAprovados.reduce((s, p) => s + (parseFloat(p.valor_pago) || 0), 0);
+            const fatMes = pedidosAprovados.filter(p => new Date(p.created_at) >= new Date(startOfMonth))
+                .reduce((s, p) => s + (parseFloat(p.valor_pago) || 0), 0);
+
+            const elFatTot = document.getElementById('dash-faturamento-total');
+            if (elFatTot) elFatTot.textContent = 'R$ ' + fatTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const elFatMes = document.getElementById('dash-faturamento-mes');
+            if (elFatMes) elFatMes.textContent = `R$ ${fatMes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} este mês`;
+
+            renderUltimosPedidos(pedidos.slice(0, 5));
+        }
+    } catch (e) {
+        console.warn('Erro ao carregar pedidos:', e);
+    }
+
+    // 4. VENDAS REGISTRADAS POR CLIENTES (PDV + Consignados)
+    try {
+        const [vendasRes, consigVendasRes] = await Promise.all([
+            sb.from('vendas_clientes').select('total_venda'),
+            sb.from('consignados_vendas').select('valor_bruto')
+        ]);
+        let totalVendasClientes = 0;
+        let qtdVendas = 0;
+        if (vendasRes.data) {
+            totalVendasClientes += vendasRes.data.reduce((s, v) => s + (parseFloat(v.total_venda) || 0), 0);
+            qtdVendas += vendasRes.data.length;
+        }
+        if (consigVendasRes.data) {
+            totalVendasClientes += consigVendasRes.data.reduce((s, v) => s + (parseFloat(v.valor_bruto) || 0), 0);
+            qtdVendas += consigVendasRes.data.length;
+        }
+        const elVendas = document.getElementById('dash-vendas-clientes');
+        if (elVendas) elVendas.textContent = 'R$ ' + totalVendasClientes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const elQtdVendas = document.getElementById('dash-qtd-vendas-clientes');
+        if (elQtdVendas) elQtdVendas.textContent = `${qtdVendas.toLocaleString('pt-BR')} venda${qtdVendas === 1 ? '' : 's'} registradas`;
+    } catch (_) {}
+
+    // 5. QUEBRAS & DESPERDÍCIOS REGISTRADOS
+    try {
+        const { data: desperdicios } = await sb
+            .from('desperdicios')
+            .select('custo_perdido');
+
+        if (desperdicios) {
+            const totalPerdido = desperdicios.reduce((s, d) => s + (parseFloat(d.custo_perdido) || 0), 0);
+            const elDespVal = document.getElementById('dash-desperdicios-valor');
+            if (elDespVal) elDespVal.textContent = 'R$ ' + totalPerdido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const elDespCount = document.getElementById('dash-desperdicios-count');
+            if (elDespCount) elDespCount.textContent = `${desperdicios.length.toLocaleString('pt-BR')} registro${desperdicios.length === 1 ? '' : 's'} de quebra`;
+        }
+    } catch (_) {}
+
+    // 6. CONSIGNADOS PARCEIROS
+    try {
+        const { count: parceirosCount } = await sb
+            .from('consignados_parceiros')
+            .select('*', { count: 'exact', head: true });
+
+        const elConsig = document.getElementById('dash-consignados-count');
+        if (elConsig) elConsig.textContent = (parceirosCount ?? 0).toLocaleString('pt-BR');
+    } catch (_) {}
+
+    // 7. FEEDBACKS PENDENTES (Alerta Urgente)
+    try {
+        const { data: feedPendentes } = await sb.rpc('admin_contar_feedbacks_pendentes');
+        const alertBox = document.getElementById('dash-feedbacks-alert');
+        const alertCount = document.getElementById('dash-feedbacks-alert-count');
+        const badgeFeedback = document.getElementById('badge-feedbacks-admin');
+
+        if (feedPendentes && feedPendentes > 0) {
+            if (alertBox) alertBox.style.display = 'flex';
+            if (alertCount) alertCount.textContent = `Você tem ${feedPendentes} feedback${feedPendentes > 1 ? 's' : ''} de usuário${feedPendentes > 1 ? 's' : ''} aguardando resposta da equipe.`;
+            if (badgeFeedback) {
+                badgeFeedback.innerHTML = `<span class="material-symbols-outlined animate-pulse" style="font-size:.72rem;margin-right:-2px">notifications_active</span> ${feedPendentes} Novo${feedPendentes > 1 ? 's' : ''}`;
+                badgeFeedback.style.display = 'inline-flex';
+                badgeFeedback.style.alignItems = 'center';
+                badgeFeedback.style.gap = '.2rem';
+            }
+        } else {
+            if (alertBox) alertBox.style.display = 'none';
+        }
+    } catch (_) {}
+}
+
+/* ══ RENDERIZAR ATIVIDADE RECENTE ════════════════════════════ */
+function renderUltimosUsuarios(lista) {
+    const el = document.getElementById('dash-recent-users');
+    if (!el) return;
+    if (!lista || lista.length === 0) {
+        el.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Nenhum usuário cadastrado recentemente.</div>';
+        return;
+    }
+    el.innerHTML = lista.map(u => {
+        const nome = (u.nome || u.sobrenome) ? `${u.nome || ''} ${u.sobrenome || ''}`.trim() : (u.email?.split('@')[0] || 'Novo Usuário');
+        const inicial = (nome[0] || 'U').toUpperCase();
+        const isVit = u.plano === 'vitalicio';
+        const badgePlano = isVit 
+            ? `<span style="font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:.35rem;background:rgba(37,244,244,.12);color:#25f4f4;border:1px solid rgba(37,244,244,.25)">Vitalício</span>`
+            : `<span style="font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:.35rem;background:#242424;color:#94a3b8">Gratuito</span>`;
+
+        const tempo = formatRelTime(new Date(u.created_at).getTime());
+
+        return `
+        <div class="recent-row">
+            <div class="recent-avatar" style="background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25)">
+                ${inicial}
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs font-bold text-slate-200 truncate">${nome}</span>
+                    ${badgePlano}
+                </div>
+                <div class="text-[11px] text-slate-500 truncate mt-0.5">${u.email || 'Sem email'}</div>
+            </div>
+            <div class="text-[11px] text-slate-500 text-right whitespace-nowrap">
+                ${tempo}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderUltimosPedidos(lista) {
+    const el = document.getElementById('dash-recent-orders');
+    if (!el) return;
+    if (!lista || lista.length === 0) {
+        el.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Nenhum pedido recente registrado.</div>';
+        return;
+    }
+    el.innerHTML = lista.map(p => {
+        const valor = parseFloat(p.valor_pago || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const isPago = p.status === 'aprovado' || p.status === 'pago';
+        const badgeStatus = isPago
+            ? `<span style="font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:.35rem;background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25)">Pago</span>`
+            : `<span style="font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:.35rem;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)">Pendente</span>`;
+
+        const tempo = formatRelTime(new Date(p.created_at).getTime());
+
+        return `
+        <div class="recent-row">
+            <div class="recent-avatar" style="background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25)">
+                <span class="material-symbols-outlined" style="font-size:1.1rem">receipt</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs font-bold text-emerald-400">R$ ${valor}</span>
+                    ${badgeStatus}
+                </div>
+                <div class="text-[11px] text-slate-500 truncate mt-0.5">${p.email || 'Cliente Plataforma'}</div>
+            </div>
+            <div class="text-[11px] text-slate-500 text-right whitespace-nowrap">
+                ${tempo}
+            </div>
+        </div>`;
+    }).join('');
+}
+</script>
 
     <div style="height:.5rem"></div>
 
@@ -1008,7 +1648,6 @@
         }
     });
     </script>
-</div>
 
 <!-- Modal Personalizar Menu -->
 <style>
