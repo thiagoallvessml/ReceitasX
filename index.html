@@ -719,17 +719,18 @@ initHorizontalTabsMouseScroll();
         const startOfMonth = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
 
         const [
-            { data: vendasCli },
-            { data: vendasConsig },
-            { data: consignadosPend },
-            { data: receitasEstoque },
-            { data: ultimasVendas }
+            { data: vendasCli, error: errCli },
+            { data: vendasConsig, error: errConsig },
+            { data: consignadosPend, error: errPend },
+            { data: receitasEstoque, error: errEst },
+            { data: ultimasVendasCli, error: errUltCli },
+            { data: ultimasVendasConsig, error: errUltConsig }
         ] = await Promise.all([
             // Vendas Diretas do Mês
             sb.from('vendas_clientes')
-                .select('valor_total, itens, data_venda')
+                .select('valor_total, itens, created_at')
                 .eq('user_id', uid)
-                .gte('data_venda', startOfMonth),
+                .gte('created_at', startOfMonth),
             // Vendas Consignadas do Mês
             sb.from('consignados_vendas')
                 .select('valor_liquido, custo_total, created_at')
@@ -746,13 +747,23 @@ initHorizontalTabsMouseScroll();
                 .eq('user_id', uid)
                 .order('estoque_atual', { ascending: true })
                 .limit(6),
-            // Últimas Vendas registradas
+            // Últimas Vendas registradas (diretas)
             sb.from('vendas_clientes')
-                .select('id, valor_total, data_venda, itens, canal_venda, nome_cliente')
+                .select('id, valor_total, created_at, itens, canal_venda, cliente_nome, forma_pagamento')
                 .eq('user_id', uid)
-                .order('data_venda', { ascending: false })
-                .limit(4)
+                .order('created_at', { ascending: false })
+                .limit(5),
+            // Últimas Vendas registradas (consignados)
+            sb.from('consignados_vendas')
+                .select('id, valor_liquido, created_at, nome_produto, quantidade, consignados_parceiros(nome_local)')
+                .eq('user_id', uid)
+                .order('created_at', { ascending: false })
+                .limit(5)
         ]);
+
+        if (errCli) console.warn('[ReceitasX] Erro vendas_clientes:', errCli.message);
+        if (errUltCli) console.warn('[ReceitasX] Erro ultimas vendas_clientes:', errUltCli.message);
+        if (errUltConsig) console.warn('[ReceitasX] Erro ultimas consignados_vendas:', errUltConsig.message);
 
         // ── Calcula KPIs do Mês ─────────────────────────────
         let totalVendas = 0;
@@ -852,9 +863,51 @@ initHorizontalTabsMouseScroll();
             `).join('');
         }
 
-        // ── Renderiza Últimas Vendas ───────────────────────
+        // ── Monta e Renderiza Últimas Vendas (Diretas + Consignados) ───
+        const listaUltimas = [];
+
+        (ultimasVendasCli || []).forEach(v => {
+            let itemStr = 'Pedido Direto';
+            if (v.itens && Array.isArray(v.itens) && v.itens.length > 0) {
+                const primeiro = v.itens[0];
+                const qtd = primeiro.quantidade || primeiro.qtd || 1;
+                itemStr = `${qtd}x ${primeiro.nome || 'Produto'}`;
+                if (v.itens.length > 1) {
+                    itemStr += ` + ${v.itens.length - 1} outro${v.itens.length > 2 ? 's' : ''}`;
+                }
+            } else if (v.cliente_nome) {
+                itemStr = `Cliente: ${v.cliente_nome}`;
+            }
+
+            listaUltimas.push({
+                id: 'cli_' + v.id,
+                tipo: 'direta',
+                item: itemStr,
+                canal: v.canal_venda || 'Direta',
+                valor: parseFloat(v.valor_total || 0),
+                data: new Date(v.created_at || Date.now())
+            });
+        });
+
+        (ultimasVendasConsig || []).forEach(c => {
+            const local = c.consignados_parceiros?.nome_local || 'Consignado';
+            const itemStr = `${c.quantidade || 1}x ${c.nome_produto} (${local})`;
+            listaUltimas.push({
+                id: 'consig_' + c.id,
+                tipo: 'consignado',
+                item: itemStr,
+                canal: 'Consignado',
+                valor: parseFloat(c.valor_liquido || 0),
+                data: new Date(c.created_at || Date.now())
+            });
+        });
+
+        // Ordena pela mais recente primeiro
+        listaUltimas.sort((a, b) => b.data.getTime() - a.data.getTime());
+        const ultimasExibir = listaUltimas.slice(0, 5);
+
         const ultimasContainer = document.getElementById('dash-ultimas-vendas');
-        if (!ultimasVendas || ultimasVendas.length === 0) {
+        if (ultimasExibir.length === 0) {
             ultimasContainer.innerHTML = `
                 <div class="py-4 text-center">
                     <span class="material-symbols-outlined text-slate-500 text-2xl">point_of_sale</span>
@@ -863,32 +916,37 @@ initHorizontalTabsMouseScroll();
                 </div>
             `;
         } else {
-            ultimasContainer.innerHTML = ultimasVendas.map(uv => {
-                const d = new Date(uv.data_venda);
+            ultimasContainer.innerHTML = ultimasExibir.map(uv => {
+                const d = uv.data;
                 const hoje = new Date();
                 let diaStr = d.toLocaleDateString('pt-BR');
-                if (d.toDateString() === hoje.toDateString()) diaStr = 'Hoje';
+                const horaStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-                // Nome do item principal
-                let itemStr = 'Pedido';
-                if (uv.itens && Array.isArray(uv.itens) && uv.itens.length > 0) {
-                    const primeiro = uv.itens[0];
-                    itemStr = `${primeiro.quantidade || 1}x ${primeiro.nome || 'Item'}`;
-                    if (uv.itens.length > 1) itemStr += ` + ${uv.itens.length - 1} outro${uv.itens.length > 2 ? 's' : ''}`;
-                } else if (uv.nome_cliente) {
-                    itemStr = `Cliente: ${uv.nome_cliente}`;
+                if (d.toDateString() === hoje.toDateString()) {
+                    diaStr = `Hoje às ${horaStr}`;
+                } else {
+                    const ontem = new Date();
+                    ontem.setDate(hoje.getDate() - 1);
+                    if (d.toDateString() === ontem.toDateString()) {
+                        diaStr = `Ontem às ${horaStr}`;
+                    } else {
+                        diaStr = `${diaStr} às ${horaStr}`;
+                    }
                 }
+
+                const dotColor = uv.tipo === 'consignado' ? 'bg-purple-400' : 'bg-emerald-400';
+                const tagColor = uv.tipo === 'consignado' ? 'text-purple-300' : 'text-slate-500';
 
                 return `
                     <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#141414] border border-[#222]">
                         <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
+                            <span class="w-2 h-2 rounded-full ${dotColor} flex-shrink-0"></span>
                             <div class="truncate">
-                                <p class="text-xs font-bold text-slate-200 truncate">${esc(itemStr)}</p>
-                                <p class="text-[11px] text-slate-500">${diaStr} · ${esc(uv.canal_venda || 'Direta')}</p>
+                                <p class="text-xs font-bold text-slate-200 truncate">${esc(uv.item)}</p>
+                                <p class="text-[11px] ${tagColor}">${diaStr} · ${esc(uv.canal)}</p>
                             </div>
                         </div>
-                        <span class="text-xs font-black text-emerald-400 flex-shrink-0">+ ${fmtR(uv.valor_total)}</span>
+                        <span class="text-xs font-black text-emerald-400 flex-shrink-0">+ ${fmtR(uv.valor)}</span>
                     </div>
                 `;
             }).join('');
