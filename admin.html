@@ -1037,40 +1037,53 @@ function formatarDataHoje() {
     }
 }
 
+/* ══ UTILITÁRIO DE TEMPO RELATIVO ═════════════════════════════ */
+function formatRelTime(ts) {
+    if (!ts) return 'recente';
+    const time = typeof ts === 'number' ? ts : new Date(ts).getTime();
+    if (isNaN(time)) return 'recente';
+    const diff = Date.now() - time;
+    const min  = Math.floor(diff / 60000);
+    const h    = Math.floor(diff / 3600000);
+    const d    = Math.floor(diff / 86400000);
+    if (diff < 0 || min < 1) return 'agora mesmo';
+    if (min < 60) return `há ${min} min`;
+    if (h < 24) return `há ${h}h`;
+    if (d === 1) return 'ontem';
+    return `há ${d} dias`;
+}
+
 /* ══ CARREGAMENTO DO DASHBOARD E MÉTRICAS ════════════════════ */
 (async () => {
     try {
         formatarDataHoje();
+        await _waitForRole(4000);
+
+        if (window.__userRole !== 'admin') {
+            console.warn('[ReceitasX Admin] Acesso não é admin:', window.__userRole);
+            return;
+        }
+
         const session = await getSession();
-        if (!session) return;
-
-        const { data: perfil } = await sb
-            .from('perfis')
-            .select('role, nome, sobrenome, email')
-            .eq('id', session.user.id)
-            .single();
-
-        const role = perfil?.role ?? 'afiliado';
-        console.log('[ReceitasX Admin] Role:', role);
+        const profile = window.__userProfile;
 
         // Atualizar nome no Drawer
         const drawerName = document.getElementById('admin-drawer-user-name');
         if (drawerName) {
-            const nomeExibicao = (perfil?.nome || perfil?.sobrenome) 
-                ? `${perfil.nome || ''} ${perfil.sobrenome || ''}`.trim() 
-                : 'Administrador';
+            const nomeExibicao = (profile?.nome || profile?.sobrenome) 
+                ? `${profile.nome || ''} ${profile.sobrenome || ''}`.trim() 
+                : (session?.user?.email?.split('@')[0] || 'Administrador');
             drawerName.textContent = nomeExibicao;
         }
 
-        if (role === 'admin') {
-            await loadAdminDashboard();
-        }
+        await loadAdminDashboard();
     } catch (e) {
-        console.warn('[ReceitasX Admin] Erro de inicialização:', e);
+        console.error('[ReceitasX Admin] Erro de inicialização:', e);
     }
 })();
 
 async function loadAdminDashboard() {
+    console.log('[ReceitasX Admin] Iniciando carregamento do dashboard...');
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -1082,7 +1095,7 @@ async function loadAdminDashboard() {
             sb.from('perfis').select('*', { count: 'exact', head: true }),
             sb.from('perfis').select('*', { count: 'exact', head: true }).gte('created_at', startOfDay),
             sb.from('perfis').select('*', { count: 'exact', head: true }).eq('plano', 'vitalicio'),
-            sb.from('perfis').select('id, nome, sobrenome, email, plano, role, created_at').order('created_at', { ascending: false }).limit(5)
+            sb.from('perfis').select('id, nome, sobrenome, negocio, plano, role, created_at').order('created_at', { ascending: false }).limit(5)
         ]);
 
         const totalUsuarios = perfisTotalRes.count ?? 0;
@@ -1127,16 +1140,17 @@ async function loadAdminDashboard() {
             badgeVit.style.gap = '.15rem';
         }
     } catch (e) {
-        console.warn('Erro ao carregar usuários:', e);
+        console.error('Erro ao carregar usuários:', e);
     }
 
     // 2. ONLINE AGORA
     try {
-        const { count: onlineCount } = await sb
+        const { count: onlineCount, error: errOnline } = await sb
             .from('presenca_online')
             .select('*', { count: 'exact', head: true })
             .gt('last_seen', limiteOnline);
 
+        if (errOnline) console.warn('Aviso presenca_online:', errOnline.message);
         const elOnline = document.getElementById('dash-online-usuarios');
         if (elOnline) elOnline.textContent = onlineCount ?? 0;
 
@@ -1147,16 +1161,19 @@ async function loadAdminDashboard() {
             badgeOnline.style.alignItems = 'center';
             badgeOnline.style.gap = '.25rem';
         }
-    } catch (_) {}
+    } catch (e) {
+        console.warn('Erro ao carregar presença online:', e);
+    }
 
     // 3. FATURAMENTO PLATAFORMA (Pedidos)
     try {
-        const { data: pedidos } = await sb
+        const { data: pedidos, error: errPedidos } = await sb
             .from('pedidos')
             .select('id, email, valor_pago, status, created_at')
             .order('created_at', { ascending: false })
             .limit(100);
 
+        if (errPedidos) console.warn('Aviso pedidos:', errPedidos.message);
         if (pedidos) {
             const pedidosAprovados = pedidos.filter(p => p.status === 'aprovado' || p.status === 'pago');
             const fatTotal = pedidosAprovados.reduce((s, p) => s + (parseFloat(p.valor_pago) || 0), 0);
@@ -1178,13 +1195,13 @@ async function loadAdminDashboard() {
     // 4. VENDAS REGISTRADAS POR CLIENTES (PDV + Consignados)
     try {
         const [vendasRes, consigVendasRes] = await Promise.all([
-            sb.from('vendas_clientes').select('total_venda'),
+            sb.from('vendas_clientes').select('valor_total'),
             sb.from('consignados_vendas').select('valor_bruto')
         ]);
         let totalVendasClientes = 0;
         let qtdVendas = 0;
         if (vendasRes.data) {
-            totalVendasClientes += vendasRes.data.reduce((s, v) => s + (parseFloat(v.total_venda) || 0), 0);
+            totalVendasClientes += vendasRes.data.reduce((s, v) => s + (parseFloat(v.valor_total) || 0), 0);
             qtdVendas += vendasRes.data.length;
         }
         if (consigVendasRes.data) {
@@ -1195,14 +1212,17 @@ async function loadAdminDashboard() {
         if (elVendas) elVendas.textContent = 'R$ ' + totalVendasClientes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const elQtdVendas = document.getElementById('dash-qtd-vendas-clientes');
         if (elQtdVendas) elQtdVendas.textContent = `${qtdVendas.toLocaleString('pt-BR')} venda${qtdVendas === 1 ? '' : 's'} registradas`;
-    } catch (_) {}
+    } catch (e) {
+        console.warn('Erro ao carregar vendas dos clientes:', e);
+    }
 
     // 5. QUEBRAS & DESPERDÍCIOS REGISTRADOS
     try {
-        const { data: desperdicios } = await sb
+        const { data: desperdicios, error: errDesp } = await sb
             .from('desperdicios')
             .select('custo_perdido');
 
+        if (errDesp) console.warn('Aviso desperdicios:', errDesp.message);
         if (desperdicios) {
             const totalPerdido = desperdicios.reduce((s, d) => s + (parseFloat(d.custo_perdido) || 0), 0);
             const elDespVal = document.getElementById('dash-desperdicios-valor');
@@ -1210,21 +1230,27 @@ async function loadAdminDashboard() {
             const elDespCount = document.getElementById('dash-desperdicios-count');
             if (elDespCount) elDespCount.textContent = `${desperdicios.length.toLocaleString('pt-BR')} registro${desperdicios.length === 1 ? '' : 's'} de quebra`;
         }
-    } catch (_) {}
+    } catch (e) {
+        console.warn('Erro ao carregar desperdícios:', e);
+    }
 
     // 6. CONSIGNADOS PARCEIROS
     try {
-        const { count: parceirosCount } = await sb
+        const { count: parceirosCount, error: errParc } = await sb
             .from('consignados_parceiros')
             .select('*', { count: 'exact', head: true });
 
+        if (errParc) console.warn('Aviso consignados_parceiros:', errParc.message);
         const elConsig = document.getElementById('dash-consignados-count');
         if (elConsig) elConsig.textContent = (parceirosCount ?? 0).toLocaleString('pt-BR');
-    } catch (_) {}
+    } catch (e) {
+        console.warn('Erro ao carregar consignados:', e);
+    }
 
     // 7. FEEDBACKS PENDENTES (Alerta Urgente)
     try {
-        const { data: feedPendentes } = await sb.rpc('admin_contar_feedbacks_pendentes');
+        const { data: feedPendentes, error: errFeed } = await sb.rpc('admin_contar_feedbacks_pendentes');
+        if (errFeed) console.warn('Aviso feedbacks pendentes:', errFeed.message);
         const alertBox = document.getElementById('dash-feedbacks-alert');
         const alertCount = document.getElementById('dash-feedbacks-alert-count');
         const badgeFeedback = document.getElementById('badge-feedbacks-admin');
@@ -1241,7 +1267,9 @@ async function loadAdminDashboard() {
         } else {
             if (alertBox) alertBox.style.display = 'none';
         }
-    } catch (_) {}
+    } catch (e) {
+        console.warn('Erro ao verificar feedbacks pendentes:', e);
+    }
 }
 
 /* ══ RENDERIZAR ATIVIDADE RECENTE ════════════════════════════ */
@@ -1253,14 +1281,17 @@ function renderUltimosUsuarios(lista) {
         return;
     }
     el.innerHTML = lista.map(u => {
-        const nome = (u.nome || u.sobrenome) ? `${u.nome || ''} ${u.sobrenome || ''}`.trim() : (u.email?.split('@')[0] || 'Novo Usuário');
+        const nome = (u.nome || u.sobrenome) 
+            ? `${u.nome || ''} ${u.sobrenome || ''}`.trim() 
+            : (u.negocio || 'Usuário Sem Nome');
         const inicial = (nome[0] || 'U').toUpperCase();
         const isVit = u.plano === 'vitalicio';
         const badgePlano = isVit 
             ? `<span style="font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:.35rem;background:rgba(37,244,244,.12);color:#25f4f4;border:1px solid rgba(37,244,244,.25)">Vitalício</span>`
             : `<span style="font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:.35rem;background:#242424;color:#94a3b8">Gratuito</span>`;
 
-        const tempo = formatRelTime(new Date(u.created_at).getTime());
+        const tempo = formatRelTime(u.created_at);
+        const sub = u.negocio || (u.role === 'admin' ? 'Administrador' : 'Confeitaria / Negócio');
 
         return `
         <div class="recent-row">
@@ -1272,7 +1303,7 @@ function renderUltimosUsuarios(lista) {
                     <span class="text-xs font-bold text-slate-200 truncate">${nome}</span>
                     ${badgePlano}
                 </div>
-                <div class="text-[11px] text-slate-500 truncate mt-0.5">${u.email || 'Sem email'}</div>
+                <div class="text-[11px] text-slate-500 truncate mt-0.5">${sub}</div>
             </div>
             <div class="text-[11px] text-slate-500 text-right whitespace-nowrap">
                 ${tempo}
@@ -1295,7 +1326,7 @@ function renderUltimosPedidos(lista) {
             ? `<span style="font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:.35rem;background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25)">Pago</span>`
             : `<span style="font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:.35rem;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)">Pendente</span>`;
 
-        const tempo = formatRelTime(new Date(p.created_at).getTime());
+        const tempo = formatRelTime(p.created_at);
 
         return `
         <div class="recent-row">
