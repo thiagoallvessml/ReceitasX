@@ -321,10 +321,18 @@
 <div id="modal-fechamento" class="modal-bg">
     <div class="modal-card">
         <h2 class="font-bold text-lg mb-1 text-slate-100">Acerto de Vendas</h2>
-        <p class="text-sm text-emerald-400 mb-5 font-semibold">Confirmar recebimento</p>
+        <p class="text-sm text-emerald-400 mb-4 font-semibold">Confirmar recebimento</p>
         <div class="space-y-4">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Itens a Acertar Agora</label>
+                    <button type="button" onclick="toggleTodosFch()" class="text-xs text-purple-400 hover:underline font-semibold bg-transparent border-none cursor-pointer" id="btn-toggle-fch">Desmarcar Todos</button>
+                </div>
+                <div id="fch-itens-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+
             <div class="bg-[#141414] p-3 rounded-xl border border-[#2A2A2A] flex justify-between items-center">
-                <span class="text-slate-400 text-sm font-semibold uppercase">Total a Receber</span>
+                <span class="text-slate-400 text-sm font-semibold uppercase">Total Selecionado</span>
                 <span class="text-xl font-black text-slate-100" id="fch-total">R$ 0,00</span>
             </div>
             
@@ -349,7 +357,7 @@
             
             <div class="flex gap-2 pt-4">
                 <button onclick="document.getElementById('modal-fechamento').classList.remove('open')" class="btn-outline flex-1">Cancelar</button>
-                <button onclick="confirmarFechamento()" class="btn-primary flex-1">Confirmar Acerto</button>
+                <button id="btn-fch-confirm" onclick="confirmarFechamento()" class="btn-primary flex-1">Confirmar Acerto</button>
             </div>
         </div>
     </div>
@@ -485,13 +493,19 @@ function render() {
     } else {
         document.getElementById('vendas-pendentes-empty').style.display = 'none';
         tbodyPendentes.innerHTML = pendentes.map(v => `
-            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
-                <div>
-                    <p class="font-bold text-slate-200 text-sm leading-tight">${v.nome_produto}</p>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-200 text-sm leading-tight truncate">${v.nome_produto}</p>
                     <p class="text-[11px] text-slate-500 mt-1">${new Date(v.created_at).toLocaleDateString('pt-BR')} • ${v.quantidade} unid.</p>
                 </div>
-                <div class="text-right">
-                    <p class="font-black text-emerald-400">${fmtR(v.valor_liquido)}</p>
+                <div class="flex items-center gap-2.5 flex-shrink-0">
+                    <div class="text-right">
+                        <p class="font-black text-emerald-400 text-sm">${fmtR(v.valor_liquido)}</p>
+                    </div>
+                    <button onclick="cancelarVendaPendente(${v.id})" title="Cancelar esta venda e devolver as unidades ao estoque" class="px-2 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-950/20 hover:bg-red-900/40 hover:text-red-300 transition-all flex items-center gap-1 text-xs font-semibold cursor-pointer">
+                        <span class="material-symbols-outlined" style="font-size:15px">undo</span>
+                        <span>Desfazer</span>
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -507,13 +521,19 @@ function render() {
             const m = f.forma_pagamento ? (f.forma_pagamento === 'pix' ? 'PIX' : 'Dinheiro') : '';
             const mBadge = m ? `<span class="px-1.5 py-0.5 rounded ${m === 'PIX' ? 'bg-purple-900/30 text-purple-400 border border-purple-500/30' : 'bg-slate-800 text-slate-300 border border-slate-600'} ml-2 font-bold" style="font-size:9px">${m}</span>` : '';
             return `
-            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
-                <div>
-                    <p class="font-bold text-slate-200 text-sm leading-tight flex items-center">Fechamento ${mBadge}</p>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-200 text-sm leading-tight flex items-center">${mBadge} Fechamento</p>
                     <p class="text-[11px] text-slate-500 mt-1">${new Date(f.created_at).toLocaleDateString('pt-BR')} • ${f.qtd_itens} unid.</p>
                 </div>
-                <div class="text-right">
-                    <p class="font-black text-emerald-400">+ ${fmtR(f.valor_recebido)}</p>
+                <div class="flex items-center gap-2.5 flex-shrink-0">
+                    <div class="text-right">
+                        <p class="font-black text-emerald-400 text-sm">+ ${fmtR(f.valor_recebido)}</p>
+                    </div>
+                    <button onclick="desfazerFechamento(${f.id})" title="Desfazer fechamento (as vendas voltarão para pendentes)" class="px-2 py-1.5 rounded-lg border border-amber-500/30 text-amber-400 bg-amber-950/20 hover:bg-amber-900/40 hover:text-amber-300 transition-all flex items-center gap-1 text-xs font-semibold cursor-pointer">
+                        <span class="material-symbols-outlined" style="font-size:15px">undo</span>
+                        <span>Desfazer</span>
+                    </button>
                 </div>
             </div>
         `}).join('');
@@ -719,16 +739,78 @@ async function confirmarVenda() {
 
 let fchTempValor = 0;
 let fchMetodo = 'pix';
+let fchSelectedIds = new Set();
 
 function realizarFechamento() {
     const pendentes = vendas.filter(v => !v.fechamento_id);
     if(pendentes.length === 0) return alert('Nenhuma venda pendente para acerto.');
     
-    fchTempValor = pendentes.reduce((acc, v) => acc + parseFloat(v.valor_liquido||0), 0);
-    document.getElementById('fch-total').textContent = fmtR(fchTempValor);
+    // Seleciona todos os itens pendentes por padrão
+    fchSelectedIds = new Set(pendentes.map(v => v.id));
+    
+    renderFchItensList(pendentes);
+    recalcFchTotal();
     
     setFchMetodo('pix');
     document.getElementById('modal-fechamento').classList.add('open');
+}
+
+function renderFchItensList(pendentes) {
+    const el = document.getElementById('fch-itens-list');
+    if (!el) return;
+    el.innerHTML = pendentes.map(v => {
+        const isChecked = fchSelectedIds.has(v.id);
+        return `
+        <label class="flex items-center justify-between p-2 rounded-lg border border-[#2A2A2A] bg-[#141414] hover:bg-[#1A1A1A] cursor-pointer text-xs transition-colors select-none">
+            <div class="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                <input type="checkbox" value="${v.id}" ${isChecked ? 'checked' : ''} onchange="toggleItemFch(${v.id}, this.checked)" class="rounded border-[#333] text-purple-600 focus:ring-purple-500 w-4 h-4 bg-[#1E1E1E]" />
+                <span class="truncate font-semibold text-slate-200">${v.nome_produto} (${v.quantidade} un)</span>
+            </div>
+            <span class="font-bold text-emerald-400 whitespace-nowrap">${fmtR(v.valor_liquido)}</span>
+        </label>`;
+    }).join('');
+}
+
+function toggleItemFch(id, checked) {
+    if (checked) {
+        fchSelectedIds.add(id);
+    } else {
+        fchSelectedIds.delete(id);
+    }
+    const pendentes = vendas.filter(v => !v.fechamento_id);
+    const btn = document.getElementById('btn-toggle-fch');
+    if (btn) {
+        btn.textContent = fchSelectedIds.size === pendentes.length ? 'Desmarcar Todos' : 'Marcar Todos';
+    }
+    recalcFchTotal();
+}
+
+function toggleTodosFch() {
+    const pendentes = vendas.filter(v => !v.fechamento_id);
+    const btn = document.getElementById('btn-toggle-fch');
+    if (fchSelectedIds.size === pendentes.length) {
+        fchSelectedIds.clear();
+        if (btn) btn.textContent = 'Marcar Todos';
+    } else {
+        fchSelectedIds = new Set(pendentes.map(v => v.id));
+        if (btn) btn.textContent = 'Desmarcar Todos';
+    }
+    renderFchItensList(pendentes);
+    recalcFchTotal();
+}
+
+function recalcFchTotal() {
+    const selecionados = vendas.filter(v => !v.fechamento_id && fchSelectedIds.has(v.id));
+    fchTempValor = selecionados.reduce((acc, v) => acc + parseFloat(v.valor_liquido||0), 0);
+    document.getElementById('fch-total').textContent = fmtR(fchTempValor);
+    
+    const btnConfirm = document.getElementById('btn-fch-confirm');
+    if (btnConfirm) {
+        btnConfirm.disabled = fchSelectedIds.size === 0;
+        btnConfirm.style.opacity = fchSelectedIds.size === 0 ? '0.4' : '1';
+        btnConfirm.style.cursor = fchSelectedIds.size === 0 ? 'not-allowed' : 'pointer';
+    }
+    calcFchTroco();
 }
 
 function setFchMetodo(m) {
@@ -757,15 +839,15 @@ function calcFchTroco() {
 }
 
 async function confirmarFechamento() {
-    const pendentes = vendas.filter(v => !v.fechamento_id);
-    if(pendentes.length === 0) return;
+    const selecionados = vendas.filter(v => !v.fechamento_id && fchSelectedIds.has(v.id));
+    if(selecionados.length === 0) return alert('Selecione pelo menos um item para realizar o acerto.');
 
     try {
         const user = await getUser();
-        const qtdItens = pendentes.reduce((acc, v) => acc + v.quantidade, 0);
+        const qtdItens = selecionados.reduce((acc, v) => acc + v.quantidade, 0);
         const valorRecebido = fchTempValor;
         
-        // Insere o fechamento
+        // 1. Insere o fechamento
         const { data: fechData, error: fechErr } = await sb.from('consignados_fechamentos').insert([{
             user_id: user.id,
             parceiro_id: parceiroId,
@@ -776,8 +858,8 @@ async function confirmarFechamento() {
 
         if (fechErr) throw fechErr;
 
-        // Atualiza as vendas com o fechamento_id
-        const vendasIds = pendentes.map(v => v.id);
+        // 2. Atualiza apenas as vendas selecionadas com o fechamento_id
+        const vendasIds = selecionados.map(v => v.id);
         const { error: updErr } = await sb.from('consignados_vendas').update({ fechamento_id: fechData.id }).in('id', vendasIds);
         
         if (updErr) throw updErr;
@@ -787,7 +869,60 @@ async function confirmarFechamento() {
         loadDados();
     } catch(e) {
         console.error(e);
-        alert('Erro ao realizar fechamento no Supabase');
+        alert('Erro ao realizar fechamento no Supabase: ' + (e.message || JSON.stringify(e)));
+    }
+}
+
+async function cancelarVendaPendente(vendaId) {
+    const v = vendas.find(x => x.id === vendaId);
+    if (!v) return;
+    if (v.fechamento_id) {
+        return alert('Esta venda já foi finalizada em um fechamento.');
+    }
+    const confirmMsg = `Deseja desfazer a venda de ${v.quantidade}x "${v.nome_produto}"?\n\nAs ${v.quantidade} unidades voltarão imediatamente para o estoque deste local.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        // 1. Devolve a quantidade para o estoque do parceiro
+        if (v.estoque_id) {
+            const itemEstoque = estoque.find(e => e.id === v.estoque_id);
+            const qtdAtual = itemEstoque ? (itemEstoque.quantidade_restante || 0) : 0;
+            const novaQtd = qtdAtual + v.quantidade;
+            const { error: updErr } = await sb.from('consignados_estoque').update({ quantidade_restante: novaQtd }).eq('id', v.estoque_id);
+            if (updErr) console.warn('Aviso ao devolver estoque:', updErr);
+        }
+        // 2. Exclui o registro de venda
+        const { error: delErr } = await sb.from('consignados_vendas').delete().eq('id', v.id);
+        if (delErr) throw delErr;
+
+        alert(`Venda cancelada com sucesso! ${v.quantidade}x "${v.nome_produto}" retornaram para o estoque.`);
+        loadDados();
+    } catch (err) {
+        console.error('Erro ao cancelar venda:', err);
+        alert('Erro ao cancelar venda: ' + (err.message || err));
+    }
+}
+
+async function desfazerFechamento(fechamentoId) {
+    const f = fechamentos.find(x => x.id === fechamentoId);
+    if (!f) return;
+    const confirmMsg = `Deseja desfazer este fechamento de ${fmtR(f.valor_recebido)}?\n\nAs vendas associadas voltarão para 'Vendas Pendentes' para que você possa acertá-las novamente ou cancelá-las.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        // 1. Desvincula as vendas
+        const { error: updErr } = await sb.from('consignados_vendas').update({ fechamento_id: null }).eq('fechamento_id', fechamentoId);
+        if (updErr) throw updErr;
+
+        // 2. Exclui o fechamento
+        const { error: delErr } = await sb.from('consignados_fechamentos').delete().eq('id', fechamentoId);
+        if (delErr) throw delErr;
+
+        alert('Fechamento desfeito com sucesso! As vendas retornaram para a lista de Vendas Pendentes.');
+        loadDados();
+    } catch (err) {
+        console.error('Erro ao desfazer fechamento:', err);
+        alert('Erro ao desfazer fechamento: ' + (err.message || err));
     }
 }
 

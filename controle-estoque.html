@@ -105,6 +105,15 @@
 
         <!-- ABA ESTOQUE -->
         <div id="tab-estoque">
+            <!-- Banner Explicativo Estoque -->
+            <div class="bg-[#181818] border border-[#2A2A2A] rounded-xl p-3.5 mb-4 text-xs text-slate-300 flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl mt-0.5" style="font-variation-settings:'FILL' 1">inventory_2</span>
+                <div class="flex-1">
+                    <p class="font-bold text-slate-100 text-sm">Saldo Atual das Receitas</p>
+                    <p class="text-slate-400 mt-1 leading-relaxed">Mostra quantas unidades prontas de cada receita você tem no estoque. Se a quantidade estiver errada por cliques anteriores, clique em <strong class="text-primary font-semibold">Ajustar Estoque</strong> para corrigir digitando o saldo real ou somando novas produções.</p>
+                </div>
+            </div>
+
             <div class="grid grid-cols-3 gap-3 mb-5">
                 <div class="bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl p-3 text-center">
                     <p class="text-xs text-slate-500 mb-1">Total</p>
@@ -136,6 +145,15 @@
 
         <!-- ABA ENTRADAS -->
         <div id="tab-entradas" style="display:none">
+            <!-- Banner Explicativo Entradas -->
+            <div class="bg-[#181818] border border-[#2A2A2A] rounded-xl p-3.5 mb-4 text-xs text-slate-300 flex items-start gap-3">
+                <span class="material-symbols-outlined text-emerald-400 text-xl mt-0.5" style="font-variation-settings:'FILL' 1">move_to_inbox</span>
+                <div class="flex-1">
+                    <p class="font-bold text-slate-100 text-sm">Histórico de Produção & Entradas</p>
+                    <p class="text-slate-400 mt-1 leading-relaxed">Aqui ficam registradas todas as fornadas/lotes produzidos ou ajustes adicionados ao estoque. Se você lançou algum registro errado por engano, basta clicar no ícone de <strong class="text-red-400 font-semibold">lixeira</strong> ao lado dele para excluí-lo e reverter o estoque.</p>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="lg:col-span-2 space-y-3">
                     <div class="search-wrap">
@@ -163,6 +181,15 @@
 
         <!-- ABA SAIDAS -->
         <div id="tab-relatorio" style="display:none">
+            <!-- Banner Explicativo Saídas -->
+            <div class="bg-[#181818] border border-[#2A2A2A] rounded-xl p-3.5 mb-4 text-xs text-slate-300 flex items-start gap-3">
+                <span class="material-symbols-outlined text-sky-400 text-xl mt-0.5" style="font-variation-settings:'FILL' 1">receipt_long</span>
+                <div class="flex-1">
+                    <p class="font-bold text-slate-100 text-sm">Relatório de Saídas do Estoque</p>
+                    <p class="text-slate-400 mt-1 leading-relaxed">Reúne tudo o que baixou do estoque da sua cozinha: tanto as <strong class="text-emerald-400 font-semibold">Vendas no Balcão/PDV</strong> (clientes finais) quanto os produtos despachados para <strong class="text-purple-400 font-semibold">Parceiros de Consignado</strong>.</p>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="lg:col-span-2 space-y-3">
                     <div class="search-wrap">
@@ -199,31 +226,53 @@
                 </div>
                 <button class="modal-close" onclick="closeModal()"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <div class="modal-body" style="gap:.5rem;display:flex;flex-direction:column;padding:.75rem 1rem;">
+            <div class="modal-body" style="gap:.65rem;display:flex;flex-direction:column;padding:.85rem 1rem;">
+                <!-- Seletor de Modo -->
+                <div class="flex rounded-lg bg-[#141414] p-1 border border-[#2A2A2A] gap-1">
+                    <button id="btn-modo-rel" type="button" onclick="setModoAjuste('rel')" class="flex-1 py-1.5 rounded-md text-xs font-bold transition-all bg-primary text-black">
+                        + / - Adicionar / Subtrair
+                    </button>
+                    <button id="btn-modo-abs" type="button" onclick="setModoAjuste('abs')" class="flex-1 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
+                        Definir Saldo Real
+                    </button>
+                </div>
+
                 <!-- Saldo atual -->
-                <div class="flex items-center justify-between p-2 bg-[#111] rounded-lg border border-[#2A2A2A]">
-                    <span class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Saldo Atual</span>
+                <div class="flex items-center justify-between p-2.5 bg-[#111] rounded-lg border border-[#2A2A2A]">
+                    <span class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Saldo Atual no Sistema</span>
                     <span class="font-bold text-sm text-slate-200" id="modal-prod-atual">0 unid</span>
                 </div>
-                <!-- Ajuste -->
-                <div class="my-1">
-                    <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Quantidade a Ajustar</label>
+
+                <!-- Modo 1: Relativo (+/-) -->
+                <div id="painel-modo-rel" class="my-1">
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Quantidade a Adicionar ou Remover</label>
                     <div class="flex gap-2 items-center">
-                        <button onclick="changeQtd(-1)" class="w-9 h-9 rounded-lg bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333] text-slate-300 flex-shrink-0 transition-colors">
+                        <button type="button" onclick="changeQtd(-1)" class="w-10 h-10 rounded-lg bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333] text-slate-300 flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1; font-size: 18px;">remove</span>
                         </button>
                         <input id="modal-qtd" type="number" class="flex-1 min-w-0 w-full text-center rounded-lg border-[#2A2A2A] bg-[#1A1A1A] text-white text-lg font-bold py-1.5" value="0" />
-                        <button onclick="changeQtd(1)" class="w-9 h-9 rounded-lg bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333] text-slate-300 flex-shrink-0 transition-colors">
+                        <button type="button" onclick="changeQtd(1)" class="w-10 h-10 rounded-lg bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center border border-[#333] text-slate-300 flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1; font-size: 18px;">add</span>
                         </button>
                     </div>
-                    <p class="text-[10px] text-slate-600 mt-1 leading-tight">Positivo (+) para produção, negativo (-) para perdas.</p>
+                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Use positivo (+) para produção e negativo (-) para quebras ou perdas.</p>
                 </div>
+
+                <!-- Modo 2: Absoluto (Saldo Real) -->
+                <div id="painel-modo-abs" class="my-1" style="display:none">
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Quantas unidades físicas você tem hoje?</label>
+                    <input id="modal-saldo-real" type="number" min="0" placeholder="Ex: 8" class="w-full text-center rounded-lg border-[#2A2A2A] bg-[#1A1A1A] text-white text-lg font-bold py-2" oninput="updateSaldoReal()" />
+                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Digite exatamente o que contou na prateleira. O sistema ajusta a diferença automaticamente.</p>
+                </div>
+
                 <!-- Novo saldo -->
-                <div class="p-2 bg-[#0d0d0d] rounded-lg border border-[#2A2A2A] flex items-center justify-between">
-                    <span class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Novo Saldo</span>
+                <div class="p-2.5 bg-[#0d0d0d] rounded-lg border border-[#2A2A2A] flex items-center justify-between">
                     <div>
-                        <span id="modal-novo-saldo" class="text-lg font-black text-white">0</span>
+                        <span class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider block">Novo Saldo Final</span>
+                        <span id="modal-diff-desc" class="text-[10px] text-slate-400">Sem alteração</span>
+                    </div>
+                    <div>
+                        <span id="modal-novo-saldo" class="text-xl font-black text-white">0</span>
                         <span class="text-xs text-slate-500 ml-1">unid</span>
                     </div>
                 </div>
@@ -231,7 +280,7 @@
             <div class="modal-footer">
                 <button class="btn-sec" onclick="closeModal()">Cancelar</button>
                 <button class="btn-primary" onclick="salvarEstoque()">
-                    <span class="material-symbols-outlined" style="font-size:17px">check</span> Salvar
+                    <span class="material-symbols-outlined" style="font-size:17px">check</span> Salvar Ajuste
                 </button>
             </div>
         </div>
@@ -363,17 +412,24 @@
                     const col = pos ? '#34d399' : '#f87171';
                     const ico = pos ? 'add_circle' : 'remove_circle';
                     const qtdTxt = pos ? `+${e.quantidade}` : `${e.quantidade}`;
-                    const tipo = pos ? 'Entrada / Producao' : 'Ajuste / Saida';
+                    const tipo = e.tipo === 'inventario_balanco' 
+                        ? 'Balanço / Saldo Real' 
+                        : (pos ? 'Entrada / Produção' : 'Ajuste / Saída');
                     const d = new Date(e.created_at);
-                    return `<div class="hist-card">
-                        <div class="hist-icon" style="background:${bg}">
+                    return `<div class="hist-card gap-3">
+                        <div class="hist-icon flex-shrink-0" style="background:${bg}">
                             <span class="material-symbols-outlined" style="color:${col};font-size:22px;font-variation-settings:'FILL' 1">${ico}</span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-sm text-slate-200 truncate">${e.receitas ? e.receitas.nome : 'Receita Excluida'}</p>
+                            <p class="font-semibold text-sm text-slate-200 truncate">${e.receitas ? e.receitas.nome : 'Receita Excluída'}</p>
                             <p class="text-xs text-slate-500">${tipo} &middot; ${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</p>
                         </div>
-                        <span class="font-black text-base flex-shrink-0" style="color:${col}">${qtdTxt}</span>
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            <span class="font-black text-base" style="color:${col}">${qtdTxt}</span>
+                            <button onclick="excluirMovimentacao(${e.id})" title="Excluir este lançamento e reverter o estoque" class="p-1.5 rounded-lg border border-red-500/20 text-red-400 bg-red-950/20 hover:bg-red-900/40 hover:text-red-300 transition-all flex items-center justify-center cursor-pointer">
+                                <span class="material-symbols-outlined" style="font-size:17px">delete</span>
+                            </button>
+                        </div>
                     </div>`;
                 }).join('');
             }
@@ -434,13 +490,43 @@
                 : topVend.map(([n,q],i) => `<li class="rank-item"><div class="rank-num" style="background:${cl[i]}22;color:${cl[i]}">${i+1}</div><span class="flex-1 text-sm text-slate-300 truncate">${n}</span><span class="font-bold text-sm text-sky-400">${q} un</span></li>`).join('');
         }
 
+        let modoAjuste = 'rel'; // 'rel' (+/-) ou 'abs' (saldo real)
+
+        function setModoAjuste(modo) {
+            modoAjuste = modo;
+            const btnRel = document.getElementById('btn-modo-rel');
+            const btnAbs = document.getElementById('btn-modo-abs');
+            const pRel = document.getElementById('painel-modo-rel');
+            const pAbs = document.getElementById('painel-modo-abs');
+
+            if (modo === 'rel') {
+                btnRel.className = "flex-1 py-1.5 rounded-md text-xs font-bold transition-all bg-primary text-black";
+                btnAbs.className = "flex-1 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200";
+                pRel.style.display = 'block';
+                pAbs.style.display = 'none';
+                updateSaldo();
+            } else {
+                btnAbs.className = "flex-1 py-1.5 rounded-md text-xs font-bold transition-all bg-primary text-black";
+                btnRel.className = "flex-1 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200";
+                pRel.style.display = 'none';
+                pAbs.style.display = 'block';
+                const inpAbs = document.getElementById('modal-saldo-real');
+                if (recSelected) {
+                    inpAbs.value = recSelected.estoque_atual || 0;
+                }
+                updateSaldoReal();
+                setTimeout(() => inpAbs.select(), 60);
+            }
+        }
+
         function openModal(id) {
             recSelected = receitas.find(r => r.id === id);
             if (!recSelected) return;
             document.getElementById('modal-prod-nome').textContent = recSelected.nome;
             document.getElementById('modal-prod-atual').textContent = (recSelected.estoque_atual||0) + ' unid';
             document.getElementById('modal-qtd').value = 0;
-            updateSaldo();
+            document.getElementById('modal-saldo-real').value = recSelected.estoque_atual || 0;
+            setModoAjuste('rel');
             document.getElementById('modal-estoque').classList.add('open');
         }
 
@@ -459,36 +545,135 @@
 
         function updateSaldo() {
             if (!recSelected) return;
-            const novo = (recSelected.estoque_atual||0) + (parseInt(document.getElementById('modal-qtd').value)||0);
+            const atual = recSelected.estoque_atual || 0;
+            const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
+            const novo = atual + ajuste;
             const d = document.getElementById('modal-novo-saldo');
+            const diffDesc = document.getElementById('modal-diff-desc');
+
             d.textContent = novo;
             d.style.color = novo < 0 ? '#f87171' : novo <= 3 ? '#fbbf24' : '#f1f5f9';
+
+            if (diffDesc) {
+                if (ajuste === 0) {
+                    diffDesc.textContent = 'Sem alteração';
+                    diffDesc.className = 'text-[10px] text-slate-400';
+                } else if (ajuste > 0) {
+                    diffDesc.textContent = `Aumentará +${ajuste} unid`;
+                    diffDesc.className = 'text-[10px] text-emerald-400 font-semibold';
+                } else {
+                    diffDesc.textContent = `Reduzirá ${ajuste} unid`;
+                    diffDesc.className = 'text-[10px] text-red-400 font-semibold';
+                }
+            }
+        }
+
+        function updateSaldoReal() {
+            if (!recSelected) return;
+            const atual = recSelected.estoque_atual || 0;
+            const val = document.getElementById('modal-saldo-real').value.trim();
+            const novo = val === '' ? atual : (parseInt(val) || 0);
+            const ajuste = novo - atual;
+            const d = document.getElementById('modal-novo-saldo');
+            const diffDesc = document.getElementById('modal-diff-desc');
+
+            d.textContent = novo;
+            d.style.color = novo < 0 ? '#f87171' : novo <= 3 ? '#fbbf24' : '#f1f5f9';
+
+            if (diffDesc) {
+                if (ajuste === 0) {
+                    diffDesc.textContent = 'Mesmo saldo atual';
+                    diffDesc.className = 'text-[10px] text-slate-400';
+                } else if (ajuste > 0) {
+                    diffDesc.textContent = `Diferença de +${ajuste} unid (Entrada)`;
+                    diffDesc.className = 'text-[10px] text-emerald-400 font-semibold';
+                } else {
+                    diffDesc.textContent = `Diferença de ${ajuste} unid (Baixa)`;
+                    diffDesc.className = 'text-[10px] text-red-400 font-semibold';
+                }
+            }
         }
 
         async function salvarEstoque() {
             if (!recSelected) return;
             const targetRec = recSelected;
-            const ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
-            if (ajuste === 0) { closeModal(); return; }
-            const novoEstoque = (targetRec.estoque_atual||0) + ajuste;
+            const atual = targetRec.estoque_atual || 0;
+            let ajuste = 0;
+            let novoEstoque = 0;
+            let tipo = 'entrada';
+
+            if (modoAjuste === 'rel') {
+                ajuste = parseInt(document.getElementById('modal-qtd').value) || 0;
+                if (ajuste === 0) { closeModal(); return; }
+                novoEstoque = atual + ajuste;
+                tipo = ajuste > 0 ? 'entrada' : 'ajuste_negativo';
+            } else {
+                const val = document.getElementById('modal-saldo-real').value.trim();
+                if (val === '') { showToast('Informe o saldo real', 'error'); return; }
+                novoEstoque = parseInt(val) || 0;
+                if (novoEstoque < 0) { showToast('O saldo não pode ser negativo', 'error'); return; }
+                ajuste = novoEstoque - atual;
+                if (ajuste === 0) { closeModal(); return; }
+                tipo = 'inventario_balanco';
+            }
+
             try {
                 const user = await getUser();
                 const { error } = await sb.from('receitas').update({ estoque_atual: novoEstoque }).eq('id', targetRec.id);
                 if (error) throw error;
+
                 await sb.from('estoque_movimentacoes').insert([{
-                    user_id: user.id, receita_id: targetRec.id, quantidade: ajuste,
-                    tipo: ajuste > 0 ? 'entrada' : 'ajuste_negativo'
+                    user_id: user.id,
+                    receita_id: targetRec.id,
+                    quantidade: ajuste,
+                    tipo: tipo
                 }]);
+
                 targetRec.estoque_atual = novoEstoque;
                 const { data: eData } = await sb.from('estoque_movimentacoes').select('*, receitas(nome)').eq('user_id', user.id).order('created_at', {ascending:false});
                 entradas = eData || [];
                 renderEstoque();
                 renderEntradas();
                 closeModal();
-                showToast(ajuste > 0 ? `+${ajuste} unid adicionado!` : `${ajuste} unid removido`, 'success');
+                showToast(`Estoque de "${targetRec.nome}" atualizado para ${novoEstoque} unid!`, 'success');
             } catch(e) {
                 console.error(e);
                 showToast('Erro ao atualizar estoque', 'error');
+            }
+        }
+
+        async function excluirMovimentacao(movId) {
+            const mov = entradas.find(x => x.id === movId);
+            if (!mov) return;
+            const nomeRec = mov.receitas?.nome || 'Receita';
+            const sinal = mov.quantidade > 0 ? `+${mov.quantidade}` : `${mov.quantidade}`;
+            const revertDelta = -mov.quantidade;
+            const revertTxt = revertDelta > 0 ? `+${revertDelta}` : `${revertDelta}`;
+            const confirmMsg = `Deseja excluir este lançamento de (${sinal} unid) de "${nomeRec}"?\n\nO saldo atual do estoque será revertido em (${revertTxt} unid).`;
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                // Reverte estoque na receita
+                if (mov.receita_id) {
+                    const rec = receitas.find(r => r.id === mov.receita_id);
+                    const atual = rec ? (rec.estoque_atual || 0) : 0;
+                    const novoSaldo = Math.max(0, atual - mov.quantidade);
+                    const { error: updErr } = await sb.from('receitas').update({ estoque_atual: novoSaldo }).eq('id', mov.receita_id);
+                    if (updErr) console.warn('Aviso ao reverter receita:', updErr);
+                    if (rec) rec.estoque_atual = novoSaldo;
+                }
+
+                // Exclui a movimentação
+                const { error: delErr } = await sb.from('estoque_movimentacoes').delete().eq('id', movId);
+                if (delErr) throw delErr;
+
+                entradas = entradas.filter(x => x.id !== movId);
+                renderEstoque();
+                renderEntradas();
+                showToast('Lançamento excluído e estoque corrigido!', 'success');
+            } catch(err) {
+                console.error('Erro ao excluir movimentação:', err);
+                showToast('Erro ao excluir movimentação', 'error');
             }
         }
 
