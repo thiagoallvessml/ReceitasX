@@ -555,13 +555,17 @@ function render() {
     } else {
         document.getElementById('recolhimentos-empty').style.display = 'none';
         tbodyR.innerHTML = recolhimentos.map(r => `
-            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-2">
-                <div>
-                    <p class="font-bold text-slate-200 text-sm leading-tight">${r.nome_produto}</p>
+            <div class="card bg-[#141414] border border-[#2A2A2A] p-3 flex justify-between items-center gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-slate-200 text-sm leading-tight truncate">${r.nome_produto}</p>
                     <p class="text-[11px] text-slate-500 mt-1">${new Date(r.created_at).toLocaleDateString('pt-BR')}</p>
                 </div>
-                <div class="text-right">
+                <div class="flex items-center gap-2.5 flex-shrink-0">
                     <span class="px-2 py-1 bg-[#1E1E1E] border border-[#2A2A2A] rounded text-red-400 font-bold text-sm">-${r.quantidade} unid.</span>
+                    <button onclick="desfazerRecolhimento(${r.id})" title="Desfazer este recolhimento e devolver as unidades ao estoque deste local" class="px-2 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-950/20 hover:bg-red-900/40 hover:text-red-300 transition-all flex items-center gap-1 text-xs font-semibold cursor-pointer">
+                        <span class="material-symbols-outlined" style="font-size:15px">undo</span>
+                        <span>Desfazer</span>
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -996,6 +1000,47 @@ async function confirmarRecolher() {
     } catch(e) {
         console.error(e);
         alert('Erro ao recolher no Supabase: ' + (e.message || JSON.stringify(e)));
+    }
+}
+
+async function desfazerRecolhimento(recolhimentoId) {
+    const r = recolhimentos.find(x => x.id === recolhimentoId);
+    if (!r) return;
+    const confirmMsg = `Deseja desfazer o recolhimento de ${r.quantidade} unid de "${r.nome_produto}"?\n\nAs ${r.quantidade} unidades voltarão imediatamente para o estoque deste local.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        const itemEstoque = estoque.find(e => e.id === r.estoque_id);
+
+        // 1. Devolve a quantidade para o estoque do parceiro
+        if (r.estoque_id) {
+            const qtdAtual = itemEstoque ? (itemEstoque.quantidade_restante || 0) : 0;
+            const novaQtd = qtdAtual + r.quantidade;
+            const { error: updErr } = await sb.from('consignados_estoque').update({ quantidade_restante: novaQtd }).eq('id', r.estoque_id);
+            if (updErr) console.warn('Aviso ao devolver estoque consignado:', updErr);
+        }
+
+        // 2. Se não era produto vencido e tinha produto vinculado, estorna do estoque principal (receitas)
+        const isVencido = (r.nome_produto || '').includes('(Vencido)');
+        if (!isVencido && itemEstoque && itemEstoque.produto_id) {
+            const prod = produtos.find(x => x.id == itemEstoque.produto_id);
+            if (prod && prod.receita_id) {
+                const estoqueAtual = prod.receitas?.estoque_atual || 0;
+                const estRevertido = Math.max(0, estoqueAtual - r.quantidade);
+                const { error: rErr } = await sb.from('receitas').update({ estoque_atual: estRevertido }).eq('id', prod.receita_id);
+                if (rErr) console.warn('Aviso ao estornar receita principal:', rErr);
+            }
+        }
+
+        // 3. Exclui o registro de recolhimento
+        const { error: delErr } = await sb.from('consignados_recolhimentos').delete().eq('id', r.id);
+        if (delErr) throw delErr;
+
+        alert(`Recolhimento desfeito com sucesso! ${r.quantidade} unid retornaram para o estoque deste local.`);
+        loadDados();
+    } catch(err) {
+        console.error('Erro ao desfazer recolhimento:', err);
+        alert('Erro ao desfazer recolhimento: ' + (err.message || err));
     }
 }
 
